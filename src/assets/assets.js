@@ -131,6 +131,7 @@ export const userDummyData = {
 export const hotelDummyData1 = {
     "_id": "67f76393197ac559e4089b72",
     "name": "Akinah 1",
+    "type": "Ocean View",
     "address": "Main Road  123 Street , 23 Colony",
     "contact": "+0123456789",
     "owner": userDummyData,
@@ -143,6 +144,7 @@ export const hotelDummyData1 = {
 export const hotelDummyData2 = {
     "_id": "67f76393197ac559e4089b72",
     "name": "Container Lodge",
+    "type": "Costal Retreat",
     "address": "Main Road  123 Street , 23 Colony",
     "contact": "+0123456789",
     "owner": userDummyData,
@@ -155,6 +157,7 @@ export const hotelDummyData2 = {
 export const hotelDummyData3 = {
     "_id": "67f76393197ac559e4089b72",
     "name": "Akinah 9",
+    "type": "Beachfront Bliss",
     "address": "Main Road  123 Street , 23 Colony",
     "contact": "+0123456789",
     "owner": userDummyData,
@@ -167,6 +170,7 @@ export const hotelDummyData3 = {
 export const hotelDummyData4 = {
     "_id": "67f76393197ac559e4089b72",
     "name": "Cabana",
+    "type": "Tropical Escape",
     "address": "Main Road  123 Street , 23 Colony",
     "contact": "+0123456789",
     "owner": userDummyData,
@@ -182,6 +186,7 @@ export const roomsDummyData = [
         "hotel": hotelDummyData1,
         "roomType": "Double Bed",
         "pricePerNight": 12000.00,
+        "description": "A refined and exhilarating escape awaits.",
         "amenities": ["Room Service", "Mountain View", "Pool Access"],
         "images": [roomImg1, roomImg2, roomImg3, roomImg4],
         "isAvailable": true,
@@ -194,6 +199,7 @@ export const roomsDummyData = [
         "hotel": hotelDummyData2,
         "roomType": "Double Bed",
         "pricePerNight": 7000.00,
+        "description": "Escape from the hustle and bustle of city life and plan your quick getaway to Netania de Laiya.",
         "amenities": ["Room Service", "Mountain View", "Pool Access"],
         "images": [roomImg2, roomImg3, roomImg4, roomImg1],
         "isAvailable": true,
@@ -206,6 +212,7 @@ export const roomsDummyData = [
         "hotel": hotelDummyData3,
         "roomType": "Double Bed",
         "pricePerNight": 12000.00,
+        "description": "Cherish the memories you have with us! Sit, relax and feel the breeze 🌊",
         "amenities": ["Free WiFi", "Free Breakfast", "Room Service"],
         "images": [roomImg3, roomImg4, roomImg1, roomImg2],
         "isAvailable": true,
@@ -218,6 +225,7 @@ export const roomsDummyData = [
         "hotel": hotelDummyData4,
         "roomType": "Single Bed",
         "pricePerNight": 800.00,
+        "description": "Imagine waking up with this view on your next beach trip.",
         "amenities": ["Free WiFi", "Room Service", "Pool Access"],
         "images": [roomImg4, roomImg1, roomImg2, roomImg3],
         "isAvailable": true,

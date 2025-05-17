@@ -4,6 +4,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import Homepage from './pages/Home';
 import Home from './pages/Home';
 import Footer from './components/Footer';
+import Rooms from './pages/Rooms';
 
 const App = () => {
 
@@ -16,6 +17,10 @@ const App = () => {
           <Route
             path='/'
             element={<Home />}
+          />
+          <Route
+            path='/rooms'
+            element={<Rooms />}
           />
         </Routes>
       </div>
