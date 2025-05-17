@@ -1,5 +1,5 @@
 import React from 'react'
-import BookingForm from './BookingForm'
+import BookingDateForm from './BookingDateForm'
 
 const Hero = () => {
     return (
@@ -7,7 +7,7 @@ const Hero = () => {
             <p className='bg-[#deb028]/50 px-3.5 py-1 rounded-full '>The Ultimate Beach Experience</p>
             <h1 className='font-playfair text-gray-900 text-2xl md:text-6xl md:text-[56x] md:leading[56px] font-bold md:font-extrabold max-w-xl mt-2'>Netania De Laiya</h1>
             <p className='max-w-130 mt-2 text-gray-900 text-sm md:text-base'>Unparalled luxury and comfort await at the Laiya's most exclusive resort. Start your journey today</p>
-            <BookingForm />
+            <BookingDateForm />
         </div>
     )
 }

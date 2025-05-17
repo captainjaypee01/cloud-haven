@@ -90,9 +90,9 @@ export const exclusiveOffers = [
 
 // Testimonials Dummy Data
 export const testimonials = [
-    { id: 1, name: "Emma Rodriguez", address: "Barcelona, Spain", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200", rating: 5, review: "I've used many booking platforms before, but none compare to the personalized experience and attention to detail that QuickStay provides." },
-    { id: 2, name: "Liam Johnson", address: "New York, USA", image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200", rating: 4, review: "QuickStay exceeded my expectations. The booking process was seamless, and the hotels were absolutely top-notch. Highly recommended!" },
-    { id: 3, name: "Sophia Lee", address: "Seoul, South Korea", image: "https://images.unsplash.com/photo-1701615004837-40d8573b6652?q=80&w=200", rating: 5, review: "Amazing service! I always find the best luxury accommodations through QuickStay. Their recommendations never disappoint!" }
+    { id: 1, name: "JP Dala", address: "Barcelona, Spain", image: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=200", rating: 5, review: "I've used many booking platforms before, but none compare to the personalized experience and attention to detail that Netania provides." },
+    { id: 2, name: "Felix Panganiban", address: "New York, USA", image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200", rating: 4, review: "Netania exceeded my expectations. The booking process was seamless, and the hotels were absolutely top-notch. Highly recommended!" },
+    { id: 3, name: "Kinah Panganiban", address: "Seoul, South Korea", image: "https://images.unsplash.com/photo-1701615004837-40d8573b6652?q=80&w=200", rating: 5, review: "Amazing service! I always find the best luxury accommodations through Netania. Their recommendations never disappoint!" }
 ];
 
 // Facility Icon
@@ -128,9 +128,9 @@ export const userDummyData = {
 }
 
 // Hotel Dummy Data
-export const hotelDummyData = {
+export const hotelDummyData1 = {
     "_id": "67f76393197ac559e4089b72",
-    "name": "Urbanza Suites",
+    "name": "Akinah 1",
     "address": "Main Road  123 Street , 23 Colony",
     "contact": "+0123456789",
     "owner": userDummyData,
@@ -140,13 +140,48 @@ export const hotelDummyData = {
     "__v": 0
 }
 
+export const hotelDummyData2 = {
+    "_id": "67f76393197ac559e4089b72",
+    "name": "Container Lodge",
+    "address": "Main Road  123 Street , 23 Colony",
+    "contact": "+0123456789",
+    "owner": userDummyData,
+    "city": "New York",
+    "createdAt": "2025-04-10T06:22:11.663Z",
+    "updatedAt": "2025-04-10T06:22:11.663Z",
+    "__v": 0
+}
+
+export const hotelDummyData3 = {
+    "_id": "67f76393197ac559e4089b72",
+    "name": "Akinah 9",
+    "address": "Main Road  123 Street , 23 Colony",
+    "contact": "+0123456789",
+    "owner": userDummyData,
+    "city": "New York",
+    "createdAt": "2025-04-10T06:22:11.663Z",
+    "updatedAt": "2025-04-10T06:22:11.663Z",
+    "__v": 0
+}
+
+export const hotelDummyData4 = {
+    "_id": "67f76393197ac559e4089b72",
+    "name": "Cabana",
+    "address": "Main Road  123 Street , 23 Colony",
+    "contact": "+0123456789",
+    "owner": userDummyData,
+    "city": "New York",
+    "createdAt": "2025-04-10T06:22:11.663Z",
+    "updatedAt": "2025-04-10T06:22:11.663Z",
+    "__v": 0
+}
 // Rooms Dummy Data
 export const roomsDummyData = [
     {
         "_id": "67f7647c197ac559e4089b96",
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData1,
         "roomType": "Double Bed",
-        "pricePerNight": 399,
+        "pricePerNight": 12000.00,
         "amenities": ["Room Service", "Mountain View", "Pool Access"],
         "images": [roomImg1, roomImg2, roomImg3, roomImg4],
         "isAvailable": true,
@@ -156,9 +191,9 @@ export const roomsDummyData = [
     },
     {
         "_id": "67f76452197ac559e4089b8e",
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData2,
         "roomType": "Double Bed",
-        "pricePerNight": 299,
+        "pricePerNight": 7000.00,
         "amenities": ["Room Service", "Mountain View", "Pool Access"],
         "images": [roomImg2, roomImg3, roomImg4, roomImg1],
         "isAvailable": true,
@@ -168,9 +203,9 @@ export const roomsDummyData = [
     },
     {
         "_id": "67f76406197ac559e4089b82",
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData3,
         "roomType": "Double Bed",
-        "pricePerNight": 249,
+        "pricePerNight": 12000.00,
         "amenities": ["Free WiFi", "Free Breakfast", "Room Service"],
         "images": [roomImg3, roomImg4, roomImg1, roomImg2],
         "isAvailable": true,
@@ -180,9 +215,9 @@ export const roomsDummyData = [
     },
     {
         "_id": "67f763d8197ac559e4089b7a",
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData4,
         "roomType": "Single Bed",
-        "pricePerNight": 199,
+        "pricePerNight": 800.00,
         "amenities": ["Free WiFi", "Room Service", "Pool Access"],
         "images": [roomImg4, roomImg1, roomImg2, roomImg3],
         "isAvailable": true,
@@ -200,10 +235,10 @@ export const userBookingsDummyData = [
         "_id": "67f76839994a731e97d3b8ce",
         "user": userDummyData,
         "room": roomsDummyData[1],
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData1,
         "checkInDate": "2025-04-30T00:00:00.000Z",
         "checkOutDate": "2025-05-01T00:00:00.000Z",
-        "totalPrice": 299,
+        "totalPrice": 12000.00,
         "guests": 1,
         "status": "pending",
         "paymentMethod": "Stripe",
@@ -216,10 +251,10 @@ export const userBookingsDummyData = [
         "_id": "67f76829994a731e97d3b8c3",
         "user": userDummyData,
         "room": roomsDummyData[0],
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData2,
         "checkInDate": "2025-04-27T00:00:00.000Z",
         "checkOutDate": "2025-04-28T00:00:00.000Z",
-        "totalPrice": 399,
+        "totalPrice": 12000.00,
         "guests": 1,
         "status": "pending",
         "paymentMethod": "Pay At Hotel",
@@ -232,10 +267,10 @@ export const userBookingsDummyData = [
         "_id": "67f76810994a731e97d3b8b4",
         "user": userDummyData,
         "room": roomsDummyData[3],
-        "hotel": hotelDummyData,
+        "hotel": hotelDummyData3,
         "checkInDate": "2025-04-11T00:00:00.000Z",
         "checkOutDate": "2025-04-12T00:00:00.000Z",
-        "totalPrice": 199,
+        "totalPrice": 7000.00,
         "guests": 1,
         "status": "pending",
         "paymentMethod": "Pay At Hotel",
