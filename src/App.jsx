@@ -5,6 +5,7 @@ import Homepage from './pages/Home';
 import Home from './pages/Home';
 import Footer from './components/Footer';
 import Rooms from './pages/Rooms';
+import RoomDetails from './pages/RoomDetails';
 
 const App = () => {
 
@@ -21,6 +22,10 @@ const App = () => {
           <Route
             path='/rooms'
             element={<Rooms />}
+          />
+          <Route
+            path='/rooms/:roomId'
+            element={<RoomDetails />}
           />
         </Routes>
       </div>

@@ -184,6 +184,7 @@ export const roomsDummyData = [
     {
         "_id": "67f7647c197ac559e4089b96",
         "hotel": hotelDummyData1,
+        "name": "Akinah 1",
         "roomType": "Double Bed",
         "pricePerNight": 12000.00,
         "description": "A refined and exhilarating escape awaits.",
@@ -197,6 +198,7 @@ export const roomsDummyData = [
     {
         "_id": "67f76452197ac559e4089b8e",
         "hotel": hotelDummyData2,
+        "name": "Container Lodge",
         "roomType": "Double Bed",
         "pricePerNight": 7000.00,
         "description": "Escape from the hustle and bustle of city life and plan your quick getaway to Netania de Laiya.",
@@ -210,6 +212,7 @@ export const roomsDummyData = [
     {
         "_id": "67f76406197ac559e4089b82",
         "hotel": hotelDummyData3,
+        "name": "Akinah 9",
         "roomType": "Double Bed",
         "pricePerNight": 12000.00,
         "description": "Cherish the memories you have with us! Sit, relax and feel the breeze 🌊",
@@ -223,6 +226,7 @@ export const roomsDummyData = [
     {
         "_id": "67f763d8197ac559e4089b7a",
         "hotel": hotelDummyData4,
+        "name": "Cabana",
         "roomType": "Single Bed",
         "pricePerNight": 800.00,
         "description": "Imagine waking up with this view on your next beach trip.",
