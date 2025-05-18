@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Footer from './components/Footer';
 import Rooms from './pages/Rooms';
 import RoomDetails from './pages/RoomDetails';
+import MyBookings from './pages/MyBookings';
 
 const App = () => {
 
@@ -26,6 +27,10 @@ const App = () => {
           <Route
             path='/rooms/:roomId'
             element={<RoomDetails />}
+          />
+          <Route
+            path='/my-bookings'
+            element={<MyBookings />}
           />
         </Routes>
       </div>
