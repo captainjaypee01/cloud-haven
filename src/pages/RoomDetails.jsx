@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { facilityIcons, roomsDummyData } from '../assets/assets'
+import { facilityIcons, roomCommonData, roomsDummyData } from '../assets/assets'
 import StarRating from '../components/StarRating'
 
 const RoomDetails = () => {
@@ -91,6 +91,37 @@ const RoomDetails = () => {
                 </button>
             </form>
 
+            {/* Common Specifications */}
+            <div className='mt-25 space-y-4'>
+                {roomCommonData.map((spec, index) => (
+                    <div key={index} className='flex items-start gap-2'>
+                        <img src={spec.icon} alt={`${spec.title}-icon`} className='w-6.5' />
+                        <div>
+                            <p className="text-base">{spec.title}</p>
+                            <p className="text-gray-500">{spec.description}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="max-w-3xl border-y border-gray-300 my-15 py-10 text-gray-500">
+                <p>{room.long_description}</p>
+            </div>
+
+            {/* Hosted By */}
+            <div className="flex flex-col items-start gap-4">
+                <div className='flex gap-4'>
+                    <img src="https://scontent.fsin10-1.fna.fbcdn.net/v/t39.30808-6/327553571_1561003271065719_7252180384481375840_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=olfKMfMTyPgQ7kNvwHPj8cV&_nc_oc=AdlrIHx4WWnGZMCaNuDw1mD5qumHpIKrOVzldHtO4pN4kyp9oX6cfJP0IsMFC9kkf4s&_nc_zt=23&_nc_ht=scontent.fsin10-1.fna&_nc_gid=hoxQkux5X-hdR5NHrX0Ijw&oh=00_AfLfZdotGCdHIwqjDuLbfUAaX6Q-XOwynGBaby5hSX892g&oe=682F727C" alt="Host" className='h-14 w-14 md:h-18 md:w-18 rounded-full'/>
+                    <div>
+                        <p className='text-lg md:text-xl'>{room.hotel.name}</p>
+                        <div className='flex items-center mt-1'>
+                            <StarRating />
+                            <p className="ml-2">200+ Reviews</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button className="px-6 py-2 5 mt-4 rounded text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer">Contact Now</button>
         </div>
     )
 }
