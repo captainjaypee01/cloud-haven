@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { assets, facilityIcons, roomsDummyData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import StarRating from '../components/StarRating';
+import { formatCurrency } from '../utils/currency';
 
 const CheckBox = ({ label, selected = false, onChange = () => { } }) => {
     return (
@@ -80,7 +81,7 @@ const Rooms = () => {
                                 ))}
                             </div>
                             {/* Room Price per Night */}
-                            <p className='text-xl font-medium text-gray-700'>₱{room.pricePerNight} /night</p>
+                            <p className='text-xl font-medium text-gray-700'>{formatCurrency(room.pricePerNight)} /night</p>
                         </div>
                     </div>
                 ))}

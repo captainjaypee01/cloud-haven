@@ -7,13 +7,17 @@ import Footer from './components/Footer';
 import Rooms from './pages/Rooms';
 import RoomDetails from './pages/RoomDetails';
 import MyBookings from './pages/MyBookings';
+import Layout from './pages/admin/Layout';
+import Dashboard from './pages/admin/Dashboard';
+import AddRoom from './pages/admin/rooms/AddRoom';
+import ListRoom from './pages/admin/rooms/ListRoom';
 
 const App = () => {
 
-  const isOwnerPath = useLocation().pathname.includes("owner");
+  const isAdminPath = useLocation().pathname.includes("admin");
   return (
     <div>
-      {!isOwnerPath && <Navbar />}
+      {!isAdminPath && <Navbar />}
       <div className='min-h-[70vh]'>
         <Routes>
           <Route
@@ -32,9 +36,17 @@ const App = () => {
             path='/my-bookings'
             element={<MyBookings />}
           />
+          <Route
+            path='/admin'
+            element={<Layout />}
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="rooms" element={<ListRoom />} />
+            <Route path="rooms/add" element={<AddRoom />} />
+          </Route>
         </Routes>
       </div>
-      <Footer />
+      {!isAdminPath && <Footer />}
     </div>
   )
 }

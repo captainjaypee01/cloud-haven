@@ -46,7 +46,7 @@ const Navbar = () => {
 
             {/* Logo */}
             <Link to="/" >
-                <img src={"https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoColored.svg"} alt="logo" className={`h-10`} />
+                <img src={assets.testLogo} alt="logo" className={`h-10`} />
             </Link>
 
             {/* Desktop Nav */}
@@ -57,7 +57,7 @@ const Navbar = () => {
                         <div className={`${isScrolled ? "bg-gray-700" : "bg-gray-700"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
                     </a>
                 ))}
-                <button className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? 'text-gray' : 'text-gray-700'} transition-all`} onClick={() => navigate('/owner')}>
+                <button className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? 'text-gray' : 'text-gray-700'} transition-all`} onClick={() => navigate('/admin')}>
                     Dashboard
                 </button>
             </div>
@@ -111,7 +111,7 @@ const Navbar = () => {
                 ))}
 
 
-                {user && <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={() => navigate('/owner')}>
+                {user && <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={() => navigate('/admin')}>
                     Dashboard
                 </button>
                 }
