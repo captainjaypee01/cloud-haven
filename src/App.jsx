@@ -11,43 +11,53 @@ import Layout from './pages/admin/Layout';
 import Dashboard from './pages/admin/Dashboard';
 import AddRoom from './pages/admin/rooms/AddRoom';
 import ListRoom from './pages/admin/rooms/ListRoom';
+import ComingSoon from './components/ComingSoon';
 
 const App = () => {
 
   const isAdminPath = useLocation().pathname.includes("admin");
+  const isComingSoon = import.meta.env.VITE_COMING_SOON_FLAG === 'true'
+  console.log('isComingSoon', isComingSoon, import.meta.env.VITE_COMING_SOON_FLAG)
   return (
-    <div>
-      {!isAdminPath && <Navbar />}
-      <div className='min-h-[70vh]'>
-        <Routes>
-          <Route
-            path='/'
-            element={<Home />}
-          />
-          <Route
-            path='/rooms'
-            element={<Rooms />}
-          />
-          <Route
-            path='/rooms/:roomId'
-            element={<RoomDetails />}
-          />
-          <Route
-            path='/my-bookings'
-            element={<MyBookings />}
-          />
-          <Route
-            path='/admin'
-            element={<Layout />}
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="rooms" element={<ListRoom />} />
-            <Route path="rooms/add" element={<AddRoom />} />
-          </Route>
-        </Routes>
-      </div>
-      {!isAdminPath && <Footer />}
-    </div>
+    <>
+      {isComingSoon ? (
+        <ComingSoon />
+      ) : (
+        <div>
+          {!isAdminPath && <Navbar />}
+          <div className='min-h-[70vh]'>
+            <Routes>
+              <Route
+                path='/'
+                element={<Home />}
+              />
+              <Route
+                path='/rooms'
+                element={<Rooms />}
+              />
+              <Route
+                path='/rooms/:roomId'
+                element={<RoomDetails />}
+              />
+              <Route
+                path='/my-bookings'
+                element={<MyBookings />}
+              />
+              <Route
+                path='/admin'
+                element={<Layout />}
+              >
+                <Route index element={<Dashboard />} />
+                <Route path="rooms" element={<ListRoom />} />
+                <Route path="rooms/add" element={<AddRoom />} />
+              </Route>
+            </Routes>
+          </div>
+          {!isAdminPath && <Footer />}
+        </div>
+      )
+      }
+    </>
   )
 }
 
