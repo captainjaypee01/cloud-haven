@@ -20,7 +20,7 @@ export default function Rooms() {
             {/* Listing */}
             <section className="max-w-6xl mx-auto px-4 py-32 grid gap-10 auto-rows-fr grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {rooms.map((room, i) => (
-                    <RoomCard key={room.id} room={room} index={i} />
+                    <RoomCard key={room._id} room={room} index={i} />
                 ))}
             </section>
         </div>

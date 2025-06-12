@@ -60,8 +60,8 @@ export default function RoomCard({ room, index }) {
                     </ul>
                     <div className="flex items-center justify-between">
                         <span className="text-lg font-semibold">${room.price}/night</span>
-                        <Link to={`/rooms/${room.id}`}>
-                            <Button size="sm">View Details</Button>
+                        <Link to={`/rooms/${room._id}`}>
+                            <Button size="sm" className="cursor-pointer">View Details</Button>
                         </Link>
                     </div>
                 </CardContent>
