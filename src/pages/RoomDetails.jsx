@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom'
 import { facilityIcons, roomCommonData, roomsDummyData } from '../assets/assets'
 import StarRating from '../components/StarRating'
 import { formatCurrency } from '../utils/currency'
+import { rooms } from '../data/rooms'
+import SearchForm from '../components/SearchForm'
 
 const RoomDetails = () => {
     const { roomId } = useParams()
@@ -10,11 +12,15 @@ const RoomDetails = () => {
     const [mainImage, setMainImage] = useState(null)
 
     useEffect(() => {
-        const room = roomsDummyData.find(room => room._id === roomId);
+
+        const room = rooms.find(room => room._id === roomId);
+        console.log(typeof roomId)
+        console.log(room);
+        console.log(room);
         room && setRoom(room)
-        room && setMainImage(room.images[0])
+        room && setMainImage(room.photos[0])
     }, [])
-    console.log('id', room)
+    console.log('id', roomId, room)
     return room && (
         <div className='py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32'>
             {/* Room Details */}
@@ -40,7 +46,7 @@ const RoomDetails = () => {
                     <img src={mainImage} alt="Room Image" className='w-full rounded-xl shadow-lg object-cover' />
                 </div>
                 <div className='grid grid-cols-2 gap-4 lg:w-1/2 w-full'>
-                    {room.images.length > 1 && room.images.map((image, index) => (
+                    {room.photos.length > 1 && room.photos.map((image, index) => (
                         <img onClick={() => setMainImage(image)} key={index} src={image} alt="Room Image" className={`w-full h-full rounded-xl shadow-md object-cover cursor-pointer ${mainImage === image && 'outline-3 outline-orange-500'}`} />
                     ))}
                 </div>
@@ -60,11 +66,14 @@ const RoomDetails = () => {
                     </div>
                 </div>
                 {/* Room Price */}
-                <p className='text-2xl font-medium'>{formatCurrency(room.pricePerNight)} /night</p>
+                <p className='text-2xl font-medium'>{formatCurrency(room.price)} /night</p>
             </div>
 
+            <div className='flex flex-col md:flex-row items-start md:items-center justify-between p-6 rounded-xl mx-auto mt-16 max-w-6xl'>
+                <SearchForm />
+            </div>
             {/* CheckIn CheckOut Form */}
-            <form className='flex flex-col md:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-6xl'>
+            {/* <form className='flex flex-col md:flex-row items-start md:items-center justify-between bg-white shadow-[0px_0px_20px_rgba(0,0,0,0.15)] p-6 rounded-xl mx-auto mt-16 max-w-6xl'>
                 <div className='flex flex-col flex-wrap md:flex-row items-start md:items-center gap-4 md:gap-10 text-gray-500'>
                     <div className='flex flex-col'>
                         <label htmlFor="checkInDate" className='font-medium'>Check-In</label>
@@ -90,7 +99,7 @@ const RoomDetails = () => {
                 <button type='submit' className='bg-primary hover:bg-primary-dull active:scale-95 transition-all text-white rounded-md max-wd:w-full max-md:mt-6 md:px-25 py-3 md:py-4 text-base cursor-pointer'>
                     Check Availability
                 </button>
-            </form>
+            </form> */}
 
             {/* Common Specifications */}
             <div className='mt-25 space-y-4'>
@@ -112,9 +121,9 @@ const RoomDetails = () => {
             {/* Hosted By */}
             <div className="flex flex-col items-start gap-4">
                 <div className='flex gap-4'>
-                    <img src="https://scontent.fsin10-1.fna.fbcdn.net/v/t39.30808-6/327553571_1561003271065719_7252180384481375840_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=olfKMfMTyPgQ7kNvwHPj8cV&_nc_oc=AdlrIHx4WWnGZMCaNuDw1mD5qumHpIKrOVzldHtO4pN4kyp9oX6cfJP0IsMFC9kkf4s&_nc_zt=23&_nc_ht=scontent.fsin10-1.fna&_nc_gid=hoxQkux5X-hdR5NHrX0Ijw&oh=00_AfLfZdotGCdHIwqjDuLbfUAaX6Q-XOwynGBaby5hSX892g&oe=682F727C" alt="Host" className='h-14 w-14 md:h-18 md:w-18 rounded-full' />
+                    <img src="/src/assets/netania-logo.jpg" alt="Host" className='h-14 w-14 md:h-18 md:w-18 rounded-full' />
                     <div>
-                        <p className='text-lg md:text-xl'>{room.hotel.name}</p>
+                        <p className='text-lg md:text-xl'>{room.name}</p>
                         <div className='flex items-center mt-1'>
                             <StarRating />
                             <p className="ml-2">200+ Reviews</p>

@@ -45,7 +45,7 @@ const Navbar = () => {
 
             {/* Logo */}
             <Link to="/" >
-                <img src={assets.testLogo} alt="logo" className={`h-10`} />
+                <img src={"/src/assets/netania-logo.jpg"} alt="logo" className={`h-10`} />
             </Link>
 
             {/* Desktop Nav */}
