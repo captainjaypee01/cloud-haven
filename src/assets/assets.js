@@ -37,6 +37,7 @@ import listIcon from "./listIcon.svg";
 import uploadArea from "./uploadArea.svg";
 import totalBookingIcon from "./totalBookingIcon.svg";
 import totalRevenueIcon from "./totalRevenueIcon.svg";
+import arrowLeftIcon from "./arrowLeftIcon.svg";
 
 const testLogo = "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoColored.svg";
 
@@ -49,6 +50,7 @@ export const assets = {
     locationIcon,
     starIconFilled,
     arrowIcon,
+    arrowLeftIcon,
     starIconOutlined,
     instagramIcon,
     facebookIcon,
