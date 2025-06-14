@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/carousel";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { roomPhotos } from "@/data/rooms";
+import { formatCurrency } from "../utils/currency";
 
 export default function RoomCard({ room, index }) {
+    const photos = roomPhotos.sort(() => Math.random() - 0.5);
     return (
         <motion.article
             initial={{ opacity: 0, y: 40 }}
@@ -30,7 +33,7 @@ export default function RoomCard({ room, index }) {
                     opts={{ loop: true, align: "center" }}
                     className="w-full h-64">
                     <CarouselContent>
-                        {room.photos.map((src, i) => (
+                        {photos.map((src, i) => (
                             <CarouselItem key={i} className="h-64">
                                 <img
                                     src={src}
@@ -53,14 +56,14 @@ export default function RoomCard({ room, index }) {
                     <p className="text-gray-700">{room.description}</p>
                     <ul className="flex flex-wrap gap-2 text-sm text-sky-700">
                         {room.amenities.map((a) => (
-                            <li key={a} className="after:content-[','] last:after:content-['']">
-                                {a}
+                            <li key={a?.name} className="after:content-[','] last:after:content-['']">
+                                {a?.name}
                             </li>
                         ))}
                     </ul>
                     <div className="flex items-center justify-between">
-                        <span className="text-lg font-semibold">${room.price}/night</span>
-                        <Link to={`/rooms/${room._id}`}>
+                        <span className="text-lg font-semibold">{formatCurrency(room.price)}/night</span>
+                        <Link to={`/rooms/${room.slug}`} onClick={() => scrollTo(0, 0)} key={room.slug}>
                             <Button size="sm" className="cursor-pointer">View Details</Button>
                         </Link>
                     </div>
