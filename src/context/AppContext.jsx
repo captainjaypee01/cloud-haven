@@ -1,9 +1,8 @@
 import { useUser, useAuth } from "@clerk/clerk-react";
-import axios from "axios";
+// import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+import { useApi } from "@/hooks/useApi";
 
 const AppContext = createContext();
 
@@ -15,19 +14,18 @@ export const AppProvider = ({ children }) => {
     const { getToken } = useAuth();
 
     const [isAdmin, setIsAdmin] = useState(false);
+    const api = useApi();
 
     const fetchUser = async () => {
         try {
-            const response = await axios.get('/api/v1/clerk/test', { headers: { Authorization: `Bearer ${await getToken()}` } })
-
-            console.log(response);
+            // const response = await api.get('/api/v1/rooms');
 
         } catch (error) {
             console.log('error', error);
         }
     }
     const value = {
-        navigate, user, getToken, isAdmin, axios
+        navigate, user, getToken, isAdmin
     }
 
     useEffect(() => {
