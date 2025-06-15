@@ -4,22 +4,37 @@ import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "./DateRangePicker";
+import { useCart } from "../context/CartContext";
+import { format } from "date-fns";
+import { useLocation } from "react-router-dom";
+import { useAppContext } from "../context/AppContext";
 
-const SearchForm = ({ onSearch }) => {
+const SearchForm = () => {
+
+    const location = useLocation()
+    const { navigate } = useAppContext();
+    console.log(location);
+    const { dispatch, state } = useCart();
 
     const { control, handleSubmit } = useForm({
-        defaultValues: { dateRange: { from: null, to: null }, adults: 2, children: 0 },
+        defaultValues: { dateRange: { from: state?.checkIn ?? null, to: state?.checkOut ?? null } },
     });
 
+    console.log(state);
+    const handleDateSelection = ({ dateRange }) => {
+        const { from, to } = dateRange;
+        dispatch({ type: 'SET_DATES', from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") });
+        if(location.pathname !== "/rooms") navigate("/rooms");
+    }
     return (
         <form
-            onSubmit={handleSubmit(onSearch)}
+            onSubmit={handleSubmit(handleDateSelection)}
             className="
                 grid
                 grid-cols-1
                 md:grid-cols-1
-                lg:grid-cols-2
-                xl:grid-cols-3
+                lg:grid-cols-1
+                xl:grid-cols-1
                 gap-4
                 items-end
                 bg-white p-6 rounded-lg shadow-lg max-w-full
@@ -40,7 +55,7 @@ const SearchForm = ({ onSearch }) => {
                 />
             </div>
 
-            {/* Adults Input */}
+            {/* Adults Input 
             <div className="col-span-1">
                 <label className="text-sm font-medium block mb-1">Adults</label>
                 <Controller
@@ -52,7 +67,7 @@ const SearchForm = ({ onSearch }) => {
                 />
             </div>
 
-            {/* Children Input */}
+            {/* Children Input 
             <div className="col-span-1">
                 <label className="text-sm font-medium block mb-1">Children</label>
                 <Controller
@@ -66,7 +81,7 @@ const SearchForm = ({ onSearch }) => {
 
             {/* Search Button spans single column */}
             <div className="col-span-1 md:col-span-1 lg:col-span-3 w-full">
-                <Button type="submit" size="lg" className="w-full">
+                <Button type="submit" size="lg" className="w-full cursor-pointer">
                     Search
                 </Button>
             </div>

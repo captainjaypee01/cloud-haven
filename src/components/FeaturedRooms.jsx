@@ -14,7 +14,7 @@ const FeaturedRooms = () => {
             />
             <div className="max-w-6xl mx-auto px-4 grid gap-6 mt-20 auto-rows-fr grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {rooms.slice(0, 4).map((room, index) => (
-                    <RoomCard key={room.id} room={room} index={index} />
+                    <RoomCard key={room._id} room={room} index={index} />
                 ))}
             </div>
             <button className='my-16 px-4 py-2 text-sm font-medium border border-gray-300 rounded bg-white hover:bg-gray-50 transition-all cursor-pointer'
