@@ -8,7 +8,6 @@ export function DateRangePicker({ range, onChange }) {
     const formatted = range.from && range.to
         ? `${format(range.from, "MMM d, yyyy")} – ${format(range.to, "MMM d, yyyy")}`
         : "Select dates";
-
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -17,7 +16,7 @@ export function DateRangePicker({ range, onChange }) {
                     <ChevronDownIcon />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0" align="center">
                 <Calendar
                     mode="range"
                     selected={range}

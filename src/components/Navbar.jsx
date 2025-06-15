@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
+import { CartPopup } from "./CartPopup";
 
 const BookIcon = () => (
     <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
@@ -70,6 +71,7 @@ const Navbar = () => {
                     <circle cx="11" cy="11" r="8" />
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg> */}
+                <CartPopup />
                 {user ?
                     (<UserButton>
                         <UserButton.MenuItems>
@@ -117,6 +119,7 @@ const Navbar = () => {
                 </button>
                 }
 
+                <CartPopup />
                 {!user && <button onClick={openSignIn} className="bg-black text-white px-8 py-2.5 rounded-full ml-4 transition-all duration-500">
                     Login
                 </button>
