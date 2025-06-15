@@ -4,18 +4,28 @@ import { facilityIcons, roomCommonData, roomsDummyData } from '../assets/assets'
 import StarRating from '../components/StarRating'
 import { formatCurrency } from '../utils/currency'
 import { roomPhotos, rooms } from '../data/rooms'
-import SearchForm from '../components/SearchForm'
 import { useRoom } from '../queries/rooms'
 import { useAppContext } from '../context/AppContext'
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircleIcon } from 'lucide-react'
+import { AlertCircleIcon, ChevronDownIcon } from 'lucide-react'
+import { Controller, useForm } from 'react-hook-form'
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useCart } from '../context/CartContext'
+import { GuestSelector } from '../components/GuestSelector'
+import { toast } from "sonner"
 
 const RoomDetails = () => {
     const { roomId } = useParams()
     const { navigate } = useAppContext();
-    const [mainImage, setMainImage] = useState(roomPhotos[0])
+    const { addItem } = useCart();
     const { data: room, isLoading, isError, error, status } = useRoom(roomId);
+    const { control, handleSubmit } = useForm({
+        defaultValues: { dateRange: { from: null, to: null }, accommodations: 1, adults: "1", children: "0" },
+    });
 
+    const [mainImage, setMainImage] = useState(roomPhotos[0])
     if (isLoading) {
         return (
             <div className="flex items-center space-x-4">
@@ -45,6 +55,36 @@ const RoomDetails = () => {
             </div>
         );
     }
+
+    const handleAddRoom = (data) => {
+        const bookRoomData = { ...data, roomId: roomId }
+        const { adults, children } = data;
+
+        const totalGuests = parseInt(adults) + parseInt(children);
+
+        if (totalGuests > room.guests) {
+            toast.error(
+                `Max ${room.guests} guests allowed (you have ${totalGuests}).`
+            );
+            return;
+        };
+
+        // if (total > item.maxGuests) {
+        //     toast.error(
+        //         `Max ${item.maxGuests} guests allowed (you have ${total}).`
+        //     );
+        //     return;
+        // }
+        addItem({
+            roomId: room.slug,
+            name: room.name,
+            price: room.price, // unit price from service/API
+            adults: parseInt(adults),
+            children: parseInt(children),
+            maxGuests: room.guests,
+        })
+    }
+
     return room && (
         <div className='py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32'>
 
@@ -80,7 +120,7 @@ const RoomDetails = () => {
             {/* Room Highlights */}
             <div className='flex flex-col md:flex-row md:justify-between mt-10'>
                 <div>
-                    <h1 className='text-3xl md:text-4xl font-playfair'>Experience Luxury Like Never Before</h1>
+                    <h1 className='text-3xl md:text-4xl font-playfair'>{room?.short_description}</h1>
                     <div className='flex flex-wrap items-center mt-3 mb-6 gap-4'>
                         {room?.amenities && room?.amenities.map((item, index) => (
                             <div key={index} className='flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100'>
@@ -94,8 +134,58 @@ const RoomDetails = () => {
                 <p className='text-2xl font-medium'>{formatCurrency(room.price)} /night</p>
             </div>
 
-            <div className='flex flex-col md:flex-row items-start md:items-center justify-between p-6 rounded-xl mx-auto mt-16 max-w-6xl'>
-                <SearchForm />
+            <div className='flex flex-col md:flex-row items-center md:items-center justify-between p-6 rounded-xl mx-auto mt-16 max-w-1xl md:max-w-2xl'>
+                {/* <SearchForm /> */}
+                <form
+                    onSubmit={handleSubmit(handleAddRoom)}
+                    className="
+                grid
+                grid-cols-1
+                md:grid-cols-2
+                lg:grid-cols-2
+                xl:grid-cols-2
+                gap-4
+                items-end
+                bg-white p-6 rounded-lg shadow-lg max-w-full
+            "
+                >
+
+                    <div className="col-span-1">
+                        <label className="text-sm font-medium block mb-1">Adults</label>
+                        <Controller
+                            name="adults"
+                            control={control}
+                            render={({ field }) => (
+
+                                <GuestSelector
+                                    maxGuests={room.guests}
+                                    {...field}
+                                />
+                                // <Input type="number" min={1} {...field} className="w-full" />
+                            )}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <label className="text-sm font-medium block mb-1">Children</label>
+                        <Controller
+                            name="children"
+                            control={control}
+                            render={({ field }) => (
+                                <GuestSelector
+                                    className="w-full justify-between text-left"
+                                    maxGuests={room.guests}
+                                    {...field}
+                                />
+                            )}
+                        />
+                    </div>
+
+                    <div className="col-span-1 md:col-span-3 lg:col-span-3 w-full">
+                        <Button type="submit" size="lg" className="w-full cursor-pointer">
+                            Book this room
+                        </Button>
+                    </div>
+                </form>
             </div>
 
             {/* Common Specifications */}

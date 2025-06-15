@@ -55,8 +55,8 @@ export default function RoomCard({ room, index }) {
                 <CardContent className="space-y-3">
                     <p className="text-gray-700">{room.description}</p>
                     <ul className="flex flex-wrap gap-2 text-sm text-sky-700">
-                        {room.amenities.map((a) => (
-                            <li key={a?.name} className="after:content-[','] last:after:content-['']">
+                        {room.amenities.map((a, _index) => (
+                            <li key={_index} className="after:content-[','] last:after:content-['']">
                                 {a?.name}
                             </li>
                         ))}

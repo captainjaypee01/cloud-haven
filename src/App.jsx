@@ -12,6 +12,7 @@ import Dashboard from './pages/admin/Dashboard';
 import AddRoom from './pages/admin/rooms/AddRoom';
 import ListRoom from './pages/admin/rooms/ListRoom';
 import ComingSoon from './components/ComingSoon';
+import { Toaster } from "@/components/ui/sonner";
 
 const App = () => {
 
@@ -57,6 +58,8 @@ const App = () => {
         </div>
       )
       }
+
+      <Toaster position="top-right" richColors closeButton/>
     </>
   )
 }
