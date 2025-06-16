@@ -13,6 +13,7 @@ import AddRoom from './pages/admin/rooms/AddRoom';
 import ListRoom from './pages/admin/rooms/ListRoom';
 import ComingSoon from './components/ComingSoon';
 import { Toaster } from "@/components/ui/sonner";
+import Cart from './pages/Cart';
 
 const App = () => {
 
@@ -39,6 +40,10 @@ const App = () => {
               <Route
                 path='/rooms/:roomId'
                 element={<RoomDetails />}
+              />
+              <Route
+                path='/cart'
+                element={<Cart />}
               />
               <Route
                 path='/my-bookings'

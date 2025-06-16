@@ -63,18 +63,11 @@ const RoomDetails = () => {
         const totalGuests = parseInt(adults) + parseInt(children);
 
         if (totalGuests > room.guests) {
-            toast.error(
-                `Max ${room.guests} guests allowed (you have ${totalGuests}).`
+            toast.warning(
+                `Max ${room.guests} guests allowed (you have ${totalGuests}). An extra fee will be applied for each extra guest`
             );
-            return;
         };
-
-        // if (total > item.maxGuests) {
-        //     toast.error(
-        //         `Max ${item.maxGuests} guests allowed (you have ${total}).`
-        //     );
-        //     return;
-        // }
+        
         addItem({
             roomId: room.slug,
             name: room.name,
