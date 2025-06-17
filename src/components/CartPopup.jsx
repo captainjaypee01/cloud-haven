@@ -102,7 +102,7 @@ export function CartPopup() {
                                                 render={({ field }) => (
                                                     <GuestSelector
                                                         name={field.name}
-                                                        maxGuests={item.maxGuests}
+                                                        maxGuests={item.maxGuests + item.extraGuests}
                                                         value={field.value}
                                                         onChange={v => handleChange(item, "adults", v)}
                                                         isPopover={true}
@@ -121,7 +121,7 @@ export function CartPopup() {
                                                 render={({ field }) => (
                                                     <GuestSelector
                                                         name={field.name}
-                                                        maxGuests={item.maxGuests}
+                                                        maxGuests={item.maxGuests + item.extraGuests}
                                                         value={field.value}
                                                         onChange={v => handleChange(item, "children", v)}
                                                         isPopover={true}

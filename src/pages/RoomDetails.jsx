@@ -62,19 +62,20 @@ const RoomDetails = () => {
 
         const totalGuests = parseInt(adults) + parseInt(children);
 
-        if (totalGuests > room.guests) {
+        if (totalGuests > room.max_guests) {
             toast.warning(
-                `Max ${room.guests} guests allowed (you have ${totalGuests}). An extra fee will be applied for each extra guest`
+                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). An extra fee will be applied for each extra guest`
             );
         };
-        
+
         addItem({
             roomId: room.slug,
             name: room.name,
             price: room.price, // unit price from service/API
-            adults: parseInt(adults),
-            children: parseInt(children),
-            maxGuests: room.guests,
+            adults: parseInt(adults), // number of adults
+            children: parseInt(children), // number of children
+            maxGuests: room.max_guests, // number of max guest in the room
+            extraGuests: room.extra_guests, // number of allowed extra guest
         })
     }
 
@@ -83,15 +84,26 @@ const RoomDetails = () => {
 
             {/* Room Details */}
             <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>
-                <h1 className='text-3xl md:text-4xl font-playfair'>{room.name} <span className='font-inter text-sm'>({room.roomType})</span></h1>
-                <p className='text-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full'>20% OFF</p>
+                <h1 className='text-3xl md:text-4xl font-playfair'>{room.name}
+                    {/* <span className='font-inter text-sm'>({room.roomType})</span> */}
+                </h1>
+                {/* <p className='text-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full'>20% OFF</p> */}
             </div>
 
-            {/* Room Rating */}
+            {/* Room Price */}
             <div className='flex items-center gap-1 mt-2'>
+                <p className='text-lg font-bold'>{formatCurrency(room.price)} /night</p>
+            </div>
+
+            {/* Max guests */}
+            <div className='flex items-center gap-1 mt-2'>
+                <p className=''>Max Guest: <span className='font-inter text-sm'>({room.max_guests})</span></p>
+            </div>
+            {/* Room Rating */}
+            {/* <div className='flex items-center gap-1 mt-2'>
                 <StarRating />
                 <p className='ml-2'>200+ reviews</p>
-            </div>
+            </div> */}
 
             {/* Room Short Description */}
             <div className='flex-items-center gap-1 text-gray-500 mt-2'>
@@ -123,8 +135,6 @@ const RoomDetails = () => {
                         ))}
                     </div>
                 </div>
-                {/* Room Price */}
-                <p className='text-2xl font-medium'>{formatCurrency(room.price)} /night</p>
             </div>
 
             <div className='flex flex-col md:flex-row items-center md:items-center justify-between p-6 rounded-xl mx-auto mt-16 max-w-1xl md:max-w-2xl'>
@@ -151,7 +161,7 @@ const RoomDetails = () => {
                             render={({ field }) => (
 
                                 <GuestSelector
-                                    maxGuests={room.guests}
+                                    maxGuests={room.max_guests + room.extra_guests}
                                     {...field}
                                 />
                                 // <Input type="number" min={1} {...field} className="w-full" />
@@ -166,7 +176,7 @@ const RoomDetails = () => {
                             render={({ field }) => (
                                 <GuestSelector
                                     className="w-full justify-between text-left"
-                                    maxGuests={room.guests}
+                                    maxGuests={room.max_guests + room.extra_guests}
                                     {...field}
                                 />
                             )}

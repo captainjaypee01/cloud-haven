@@ -2,7 +2,8 @@ import {
     Card,
     CardContent,
     CardHeader,
-    CardTitle
+    CardTitle,
+    CardDescription
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,14 +45,16 @@ export default function RoomCard({ room, index }) {
                             </CarouselItem>
                         ))}
                     </CarouselContent>
-                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2" />
-                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2" />
+                    <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 cursor-pointer" />
+                    <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer" />
                 </Carousel>
 
                 <CardHeader>
                     <CardTitle className="text-2xl">{room.name}</CardTitle>
+                    <CardDescription>
+                        {room.short_description}
+                    </CardDescription>
                 </CardHeader>
-
                 <CardContent className="space-y-3">
                     <p className="text-gray-700">{room.description}</p>
                     <ul className="flex flex-wrap gap-2 text-sm text-sky-700">
@@ -62,7 +65,8 @@ export default function RoomCard({ room, index }) {
                         ))}
                     </ul>
                     <div className="flex items-center justify-between">
-                        <span className="text-lg font-semibold">{formatCurrency(room.price)}/night</span>
+                        <p className="font-semibold">{formatCurrency(room.price)}/night <p className="text-sm text-gray-600 mt-0.5">Max {room.max_guests} guests</p></p>
+
                         <Link to={`/rooms/${room.slug}`} onClick={() => scrollTo(0, 0)} key={room.slug}>
                             <Button size="sm" className="cursor-pointer">View Details</Button>
                         </Link>
