@@ -43,7 +43,6 @@ const CartList = ({
                     View Room
                 </Button>
             </div>
-
             <div className="grid grid-cols-2 gap-4 mt-2">
                 <div>
                     <label htmlFor={`adults-${item.uniqueId}`} className="block text-sm font-medium mb-1">Adults</label>
