@@ -15,7 +15,7 @@ export default function Rooms() {
             <RoomsHero imageUrls={heroImages} />
             <div className="absolute inset-x-0 bottom-0 transform translate-y-1/2 px-4 z-10">
 
-                <div className="md:w-[70%] lg:w-[80%] w-[100%] max-w-full mx-auto">
+                <div className="md:w-[50%] lg:w-[30%] w-[100%] max-w-full mx-auto">
 
                     <SearchForm onSearch={(v) => console.log(v)} />
                 </div>
