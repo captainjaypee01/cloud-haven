@@ -64,7 +64,7 @@ const App = () => {
       )
       }
 
-      <Toaster position="top-right" richColors closeButton/>
+      <Toaster position="top-right" richColors closeButton expand={true}/>
     </>
   )
 }
