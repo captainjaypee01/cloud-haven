@@ -9,12 +9,15 @@ import { formatCurrency } from "../utils/currency";
 import { Trash } from "lucide-react";
 import CartList from "../components/CartList";
 import { RoomDetailModal } from "../components/RoomDetailModal";
+import { useAppContext } from "../context/AppContext";
+import { differenceInDays, parseISO } from "date-fns";
 
 const Cart = () => {
-    const { state: { items }, updateItem, removeItem, clear } = useCart();
+    const { state: { items, checkIn, checkOut }, updateItem, removeItem, clear } = useCart();
     const { control, reset, clearErrors } = useForm();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const { navigate } = useAppContext();
 
     // Keep form in sync with cart items
     useEffect(() => {
@@ -50,11 +53,18 @@ const Cart = () => {
         setSelectedRoomId(id);
         setModalOpen(true);
     };
+
+    // Calculate number of nights
+    const numNights =
+        checkIn && checkOut
+            ? Math.max(differenceInDays(parseISO(checkOut), parseISO(checkIn)), 1)
+            : 1;
+
     // Compute totals
     const summary = items.map(item => {
         const extraGuests = Math.max((item.adults + item.children) - item.maxGuests, 0);
-        const extraGuestFee = extraGuests * 1000;
-        const subtotal = item.price + extraGuestFee;
+        const extraGuestFee = extraGuests * 1000 * numNights;
+        const subtotal = (item.price * numNights) + extraGuestFee;
         return {
             ...item,
             subtotal,
@@ -85,8 +95,9 @@ const Cart = () => {
                                 summary={summary}
                                 removeItem={removeItem}
                                 handleChange={handleChange}
-                                control={control}
                                 handleView={handleView}
+                                numNights={numNights}
+                                control={control}
                             />
                             <RoomDetailModal
                                 open={modalOpen}
@@ -102,6 +113,20 @@ const Cart = () => {
                 {/* Right: Summary */}
                 <div className="sticky top-28 h-fit bg-gray-100/60 rounded-xl shadow-inner p-6 flex flex-col gap-6 min-w-[270px]">
                     <h2 className="text-xl font-bold mb-2">Summary</h2>
+                    <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                            <span>Check-in date</span>
+                            <span>{checkIn || "—"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Check-out date</span>
+                            <span>{checkOut || "—"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Number of nights</span>
+                            <span>{numNights}</span>
+                        </div>
+                    </div>
                     <div className="space-y-2">
                         {summary.map(item => (
                             <div key={item.uniqueId} className="mb-3 border-b pb-3 last:border-none last:pb-0">
@@ -110,8 +135,8 @@ const Cart = () => {
                                     <span>{formatCurrency(item.subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-gray-600">
-                                    <span>{item.totalGuests} guests</span>
-                                    <span>{item.adults}A {item.children > 0 && `/ ${item.children}C`}</span>
+                                    <span>{item.totalGuests} guests, {numNights} night{numNights > 1 ? "s" : ""}</span>
+                                    <span>{item.adults}A{item.children > 0 && ` / ${item.children}C`}</span>
                                 </div>
                             </div>
                         ))}
@@ -126,7 +151,7 @@ const Cart = () => {
                         <span>{formatCurrency(grandTotal)}</span>
                     </div>
                     <Button variant="destructive" className="mt-3" onClick={clear}>Clear Cart</Button>
-                    <Button variant="primary" size="lg" className="mt-1">Proceed to Checkout</Button>
+                    <Button variant="outline" size="lg" className="mt-1 cursor-pointer" onClick={() => { scrollTo(0, 0); navigate('/checkout') }}>Proceed to Checkout</Button>
                 </div>
             </div>
         </div>

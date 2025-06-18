@@ -13,14 +13,12 @@ const SearchForm = () => {
 
     const location = useLocation()
     const { navigate } = useAppContext();
-    console.log(location);
     const { dispatch, state } = useCart();
 
     const { control, handleSubmit } = useForm({
         defaultValues: { dateRange: { from: state?.checkIn ?? null, to: state?.checkOut ?? null } },
     });
 
-    console.log(state);
     const handleDateSelection = ({ dateRange }) => {
         const { from, to } = dateRange;
         dispatch({ type: 'SET_DATES', from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") });

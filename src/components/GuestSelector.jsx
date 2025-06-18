@@ -12,7 +12,11 @@ import { SelectGroup } from "./ui/select";
 // Reusable guest selector component
 export function GuestSelector({ name, maxGuests, value, defaultValue = "1", onChange, isPopover = false }) {
     return (
-        <Select name={name} defaultValue={defaultValue} value={value} onValueChange={onChange} className="w-full">
+        <Select name={name}
+            defaultValue={defaultValue}
+            value={value ?? ""}
+            onValueChange={onChange}
+            className="w-full">
             <SelectTrigger className={isPopover ? "w-[120px]" : "w-[100%] sm:w-[240px]"}>
 
                 <SelectValue placeholder={"Select number of guests"} />
