@@ -65,7 +65,7 @@ export default function RoomCard({ room, index }) {
                         ))}
                     </ul>
                     <div className="flex items-center justify-between">
-                        <p className="font-semibold">{formatCurrency(room.price)}/night <p className="text-sm text-gray-600 mt-0.5">Max {room.max_guests} guests</p></p>
+                        <span className="font-semibold">{formatCurrency(room.price)}/night <p className="text-sm text-gray-600 mt-0.5">Max {room.max_guests} guests</p></span>
 
                         <Link to={`/rooms/${room.slug}`} onClick={() => scrollTo(0, 0)} key={room.slug}>
                             <Button size="sm" className="cursor-pointer">View Details</Button>
