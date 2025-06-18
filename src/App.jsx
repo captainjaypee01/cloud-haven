@@ -14,12 +14,13 @@ import ListRoom from './pages/admin/rooms/ListRoom';
 import ComingSoon from './components/ComingSoon';
 import { Toaster } from "@/components/ui/sonner";
 import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 
 const App = () => {
 
   const isAdminPath = useLocation().pathname.includes("admin");
   const isComingSoon = import.meta.env.VITE_COMING_SOON_FLAG === 'true'
-  console.log('isComingSoon', isComingSoon, import.meta.env.VITE_COMING_SOON_FLAG)
+  // console.log('isComingSoon', isComingSoon, import.meta.env.VITE_COMING_SOON_FLAG)
   return (
     <>
       {isComingSoon ? (
@@ -44,6 +45,10 @@ const App = () => {
               <Route
                 path='/cart'
                 element={<Cart />}
+              />
+              <Route
+                path='/checkout'
+                element={<Checkout />}
               />
               <Route
                 path='/my-bookings'

@@ -10,7 +10,8 @@ const CartList = ({
     removeItem = () => { },
     handleChange = () => { },
     handleView = () => { },
-    control
+    control,
+    numNights = 1, // pass from parent
 }) => {
 
     return summary.map(item => (
@@ -21,7 +22,10 @@ const CartList = ({
             <div className="flex justify-between items-center">
                 <div>
                     <p className="font-bold text-lg">{item.name}</p>
-                    <p className="text-sm text-gray-600 mt-0.5">{formatCurrency(item.price)} / night • Max {item.maxGuests} guests</p>
+                    <p className="text-sm text-gray-600 mt-0.5">
+                        {formatCurrency(item.price)} / night • {numNights} night{numNights > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-xs text-gray-500">Max {item.maxGuests} guests</p>
                 </div>
                 <Button
                     size="icon"
@@ -39,7 +43,7 @@ const CartList = ({
                     View Room
                 </Button>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mt-2">
                 <div>
                     <label htmlFor={`adults-${item.uniqueId}`} className="block text-sm font-medium mb-1">Adults</label>
@@ -50,7 +54,7 @@ const CartList = ({
                             <GuestSelector
                                 name={field.name}
                                 maxGuests={item.maxGuests + item.extraGuests}
-                                value={field.value}
+                                value={field.value ?? ""}
                                 onChange={v => handleChange(item, "adults", v)}
                             />
                         )}
@@ -65,7 +69,7 @@ const CartList = ({
                             <GuestSelector
                                 name={field.name}
                                 maxGuests={item.maxGuests + item.extraGuests}
-                                value={field.value}
+                                value={field.value ?? ""}
                                 onChange={v => handleChange(item, "children", v)}
                             />
                         )}
@@ -74,11 +78,13 @@ const CartList = ({
             </div>
             <div className="flex justify-between text-sm mt-4">
                 <span>Room Price:</span>
-                <span>{formatCurrency(item.price)}</span>
+                <span>{formatCurrency(item.price)} x {numNights} night{numNights > 1 ? "s" : ""}</span>
             </div>
             <div className="flex justify-between text-sm">
                 <span>Extra Guest:</span>
-                <span>{item.extraGuests} x {formatCurrency(item.extraGuestFee)}</span>
+                <span>
+                    {item.extraGuests} x {formatCurrency(item.extraGuestFee / (numNights || 1))} x {numNights} night{numNights > 1 ? "s" : ""}
+                </span>
             </div>
             <div className="flex justify-between font-medium">
                 <span>Subtotal:</span>
