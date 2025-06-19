@@ -11,6 +11,8 @@ import CartList from "../components/CartList";
 import { RoomDetailModal } from "../components/RoomDetailModal";
 import { useAppContext } from "../context/AppContext";
 import { differenceInDays, parseISO } from "date-fns";
+import { useCartSummary } from "../hooks/cart/useCartSummary";
+import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
 
 const Cart = () => {
     const { state: { items, checkIn, checkOut }, updateItem, removeItem, clear } = useCart();
@@ -18,16 +20,10 @@ const Cart = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const { navigate } = useAppContext();
+    const { summary, grandTotal, totalGuests, numNights } = useCartSummary();
 
-    // Keep form in sync with cart items
-    useEffect(() => {
-        const values = {};
-        items.forEach(item => {
-            values[`adults-${item.uniqueId}`] = String(item.adults);
-            values[`children-${item.uniqueId}`] = String(item.children);
-        });
-        reset(values);
-    }, [items, reset]);
+    // Keep form in sync with cart summary
+    useSyncCartForm(items, reset);
 
     const handleChange = (item, type, val) => {
         const newCount = Number(val);
@@ -54,35 +50,13 @@ const Cart = () => {
         setModalOpen(true);
     };
 
-    // Calculate number of nights
-    const numNights =
-        checkIn && checkOut
-            ? Math.max(differenceInDays(parseISO(checkOut), parseISO(checkIn)), 1)
-            : 1;
-
-    // Compute totals
-    const summary = items.map(item => {
-        const extraGuests = Math.max((item.adults + item.children) - item.maxGuests, 0);
-        const extraGuestFee = extraGuests * 1000 * numNights;
-        const subtotal = (item.price * numNights) + extraGuestFee;
-        return {
-            ...item,
-            subtotal,
-            extraGuests,
-            extraGuestFee,
-            totalGuests: item.adults + item.children,
-        };
-    });
-
-    const grandTotal = summary.reduce((total, item) => total + item.subtotal, 0);
-    const totalGuests = summary.reduce((acc, item) => acc + item.totalGuests, 0);
     return (
         <div className="min-h-screen py-16 px-2 md:px-8 lg:px-32 bg-gray-50 mt-20">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 bg-white rounded-2xl shadow-lg p-6 md:p-10">
-                {/* Left: Detailed Items */}
+                {/* Left: Detailed summary */}
                 <div className="lg:col-span-2">
                     <h1 className="text-2xl md:text-3xl font-bold mb-8">Your Booking Cart</h1>
-                    {items.length === 0 ? (
+                    {summary.length === 0 ? (
                         <div className="text-center text-gray-500 py-12">
                             <p className="mb-6">Your cart is empty. Add some rooms!</p>
                             <Button asChild variant="outline" size="lg">
@@ -150,8 +124,10 @@ const Cart = () => {
                         <span>Grand Total</span>
                         <span>{formatCurrency(grandTotal)}</span>
                     </div>
-                    <Button variant="destructive" className="mt-3" onClick={clear}>Clear Cart</Button>
-                    <Button variant="outline" size="lg" className="mt-1 cursor-pointer" onClick={() => { scrollTo(0, 0); navigate('/checkout') }}>Proceed to Checkout</Button>
+                    <Button variant="destructive" className="mt-3 cursor-pointer" onClick={clear}>Clear Cart</Button>
+                    {summary.length > 0 && (
+                        <Button variant="outline" size="lg" className="mt-1 cursor-pointer" onClick={() => { scrollTo(0, 0); navigate('/checkout') }}>Proceed to Checkout</Button>
+                    )}
                 </div>
             </div>
         </div>
