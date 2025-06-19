@@ -25,6 +25,8 @@ import { useAppContext } from "../context/AppContext";
 import { differenceInDays, parseISO } from "date-fns";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCartSummary } from "../hooks/cart/useCartSummary";
+import { useApi } from "@/hooks/useApi";
 
 const FormSchema = z.object({
     fullName: z.string().min(1, { message: "Full name is required" }),
@@ -38,29 +40,8 @@ const CheckoutPage = () => {
     const { state: { items, checkIn, checkOut }, clear } = useCart();
     const { navigate } = useAppContext();
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Nights calculation
-    const numNights =
-        checkIn && checkOut
-            ? Math.max(differenceInDays(parseISO(checkOut), parseISO(checkIn)), 1)
-            : 1;
-
-    // Prepare summary (price per room, extra guest, subtotal)
-    const summary = items.map(item => {
-        const extraGuests = Math.max((item.adults + item.children) - item.maxGuests, 0);
-        const extraGuestFee = extraGuests * 1000 * numNights;
-        const subtotal = (item.price * numNights) + extraGuestFee;
-        return {
-            ...item,
-            subtotal,
-            extraGuests,
-            extraGuestFee,
-            totalGuests: item.adults + item.children,
-            numNights,
-        };
-    });
-    const grandTotal = summary.reduce((total, item) => total + item.subtotal, 0);
-    const totalGuests = summary.reduce((acc, item) => acc + item.totalGuests, 0);
+    const { summary, grandTotal, totalGuests, numNights } = useCartSummary();
+    const api = useApi();
 
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -103,24 +84,24 @@ const CheckoutPage = () => {
 
         // Booking
         try {
-            const bookingRes = await fetch("/api/bookings", {
-                method: "POST",
+            const payload = JSON.stringify({
+                checkIn,
+                checkOut,
+                rooms: summary.map(i => ({
+                    room_unique_id: i.uniqueId,
+                    room_id: i.roomId,
+                    adults: i.adults,
+                    children: i.children,
+                })),
+                guest_name: data.fullName,
+                guest_email: data.email,
+                guest_contact: data.contactNumber,
+                special_requests: data.specialRequests,
+                payment_method: data.paymentMethod,
+                payment_id: paymentResult?.payment_id ?? "payment_id",
+            });
+            const bookingRes = await api.post("/api/bookings", payload, {
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    checkIn,
-                    checkOut,
-                    rooms: items.map(i => ({
-                        room_id: i.roomId,
-                        adults: i.adults,
-                        children: i.children,
-                    })),
-                    guest_name: data.fullName,
-                    guest_email: data.email,
-                    guest_contact: data.contactNumber,
-                    special_requests: data.specialRequests,
-                    payment_method: data.paymentMethod,
-                    payment_id: paymentResult.payment_id,
-                }),
             }).then(r => r.json());
             if (bookingRes.success) {
                 toast.success("Booking confirmed!");
