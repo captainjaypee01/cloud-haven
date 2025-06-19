@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { Separator } from "@radix-ui/react-select";
 import { differenceInDays, parseISO } from "date-fns";
+import { useCartSummary } from "../hooks/cart/useCartSummary";
+import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
@@ -22,22 +24,9 @@ export function CartPopup() {
         removeItem,
     } = useCart();
     const { control, clearErrors, reset } = useForm();
+    const { summary, grandTotal, numNights } = useCartSummary();
+    useSyncCartForm(items, reset);
 
-    // Calculate number of nights
-    const numNights =
-        checkIn && checkOut
-            ? Math.max(differenceInDays(parseISO(checkOut), parseISO(checkIn)), 1)
-            : 1;
-
-    // Sync form values with cart
-    useEffect(() => {
-        const values = {};
-        items.forEach(item => {
-            values[`adults-${item.uniqueId}`] = String(item.adults);
-            values[`children-${item.uniqueId}`] = String(item.children);
-        });
-        reset(values);
-    }, [items, reset]);
 
     const handleChange = (item, type, val) => {
         const newCount = Number(val);
@@ -58,22 +47,6 @@ export function CartPopup() {
         clearErrors(`${item.uniqueId}`);
         updateItem(item.uniqueId, { adults, children, guests: total });
     };
-
-    // Per-item summary including nights
-    const summary = items.map(item => {
-        const extraGuests = Math.max((item.adults + item.children) - item.maxGuests, 0);
-        const extraGuestFee = extraGuests * 1000 * numNights;
-        const subtotal = (item.price * numNights) + extraGuestFee;
-        return {
-            ...item,
-            subtotal,
-            extraGuests,
-            extraGuestFee,
-            totalGuests: item.adults + item.children,
-            numNights,
-        };
-    });
-    const grandTotal = summary.reduce((total, item) => total + item.subtotal, 0);
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
