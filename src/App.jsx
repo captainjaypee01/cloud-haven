@@ -15,6 +15,8 @@ import ComingSoon from './components/ComingSoon';
 import { Toaster } from "@/components/ui/sonner";
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import RoomsPage from './pages/RoomsPage';
+import ResortPolicyDialog from './components/common/ResortPolicyDialog';
 
 const App = () => {
 
@@ -37,6 +39,10 @@ const App = () => {
               <Route
                 path='/rooms'
                 element={<Rooms />}
+              />
+              <Route
+                path='/rooms-page'
+                element={<RoomsPage />}
               />
               <Route
                 path='/rooms/:roomId'
@@ -69,7 +75,9 @@ const App = () => {
       )
       }
 
-      <Toaster position="top-right" richColors closeButton expand={true}/>
+      <ResortPolicyDialog
+      />
+      <Toaster position="top-right" richColors closeButton expand={true} />
     </>
   )
 }
