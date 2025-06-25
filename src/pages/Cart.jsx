@@ -50,6 +50,26 @@ const Cart = () => {
         setModalOpen(true);
     };
 
+    // Calculate number of nights
+    const numNights =
+        checkIn && checkOut
+            ? Math.max(differenceInDays(parseISO(checkOut), parseISO(checkIn)), 1)
+            : 1;
+
+    // Compute totals
+    const summary = items.map(item => {
+        const extraGuests = Math.max((item.adults + item.children) - item.maxGuests, 0);
+        const extraGuestFee = extraGuests * 1000 * numNights;
+        const subtotal = (item.price * numNights) + extraGuestFee;
+        return {
+            ...item,
+            subtotal,
+            extraGuests,
+            extraGuestFee,
+            totalGuests: item.adults + item.children,
+        };
+    });
+
     return (
         <div className="min-h-screen py-16 px-2 md:px-8 lg:px-32 bg-gray-50 mt-20">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 bg-white rounded-2xl shadow-lg p-6 md:p-10">
