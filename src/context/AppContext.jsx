@@ -3,6 +3,7 @@ import { useUser, useAuth } from "@clerk/clerk-react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
+import { useMealPrices } from "../queries/mealPrices";
 
 const AppContext = createContext();
 
@@ -15,6 +16,7 @@ export const AppProvider = ({ children }) => {
 
     const [isAdmin, setIsAdmin] = useState(false);
     const api = useApi();
+    const { data: mealPrices, isLoading } = useMealPrices();
 
     const fetchUser = async () => {
         try {
@@ -25,7 +27,7 @@ export const AppProvider = ({ children }) => {
         }
     }
     const value = {
-        navigate, user, getToken, isAdmin
+        navigate, user, getToken, isAdmin, mealPrices
     }
 
     useEffect(() => {

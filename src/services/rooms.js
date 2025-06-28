@@ -1,5 +1,4 @@
-// services/rooms.js
-const API_PREFIX = "/api/v1";
+import { API_PREFIX } from "@/constants/api";
 export const listRooms = (api) => api.get(`${API_PREFIX}/rooms?per_page=4`).then(r => r.data);
 export const showRoom = (api, id) => api.get(`${API_PREFIX}/rooms/${id}`).then(r => r.data);
 export const checkAvailability = (api, params) => api.get(`${API_PREFIX}/availability`, { params }).then((r) => r.data);

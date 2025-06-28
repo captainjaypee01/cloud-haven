@@ -20,7 +20,7 @@ const Cart = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
     const { navigate } = useAppContext();
-    const { summary, grandTotal, totalGuests, numNights } = useCartSummary();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice } = useCartSummary();
 
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
@@ -100,6 +100,10 @@ const Cart = () => {
                             <span>Number of nights</span>
                             <span>{numNights}</span>
                         </div>
+                        <div className="flex justify-between">
+                            <span>Number of guests</span>
+                            <span>{totalGuests}</span>
+                        </div>
                     </div>
                     <div className="space-y-2">
                         {summary.map(item => (
@@ -115,11 +119,15 @@ const Cart = () => {
                             </div>
                         ))}
                     </div>
-                    <Separator />
-                    <div className="flex justify-between text-lg font-semibold">
-                        <span>Total Guests</span>
-                        <span>{totalGuests}</span>
+                    <div className="flex justify-between text-sm font-medium">
+                        <span>Room Price:</span>
+                        <span>{formatCurrency(roomTotalPrice)}</span>
                     </div>
+                    <div className="flex justify-between text-sm font-medium">
+                        <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
+                        <span>{formatCurrency(mealCost)}</span>
+                    </div>
+                    <Separator />
                     <div className="flex justify-between text-lg font-bold">
                         <span>Grand Total</span>
                         <span>{formatCurrency(grandTotal)}</span>
