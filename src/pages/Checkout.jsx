@@ -27,6 +27,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCartSummary } from "../hooks/cart/useCartSummary";
 import { useApi } from "@/hooks/useApi";
+import { Separator } from "@radix-ui/react-select";
 
 const FormSchema = z.object({
     fullName: z.string().min(1, { message: "Full name is required" }),
@@ -40,7 +41,7 @@ const CheckoutPage = () => {
     const { state: { items, checkIn, checkOut }, clear } = useCart();
     const { navigate } = useAppContext();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { summary, grandTotal, totalGuests, numNights } = useCartSummary();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost } = useCartSummary();
     const api = useApi();
 
     const form = useForm({
@@ -155,22 +156,21 @@ const CheckoutPage = () => {
                                 <div className="text-xs text-gray-600">
                                     {item.totalGuests} guests (<span>{item.adults}A / {item.children}C</span>), {numNights} night{numNights > 1 ? "s" : ""}
                                 </div>
-                                <div className="text-xs text-gray-600">
-                                    Extra guests: {item.extraGuests}
-                                    {item.extraGuests > 0 && (
-                                        <> ({formatCurrency(item.extraGuestFee)})</>
-                                    )}
-                                </div>
                             </div>
                         ))}
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-sm font-medium border-t pt-4">
+                        <span>Total Room Price:</span>
+                        <span>{formatCurrency(roomTotalPrice)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm font-medium">
+                        <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
+                        <span>{formatCurrency(mealCost)}</span>
                     </div>
                     <div className="mt-4 flex justify-between border-t pt-4 font-bold text-lg">
                         <span>Grand Total</span>
                         <span>{formatCurrency(grandTotal)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-700">
-                        <span>Total Guests</span>
-                        <span>{totalGuests}</span>
                     </div>
                 </aside>
                 {/* -- Guest Info & Payment Section -- */}

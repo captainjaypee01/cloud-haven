@@ -62,11 +62,9 @@ const RoomDetails = () => {
 
         const totalGuests = parseInt(adults) + parseInt(children);
 
-        if (totalGuests > parseInt(room.max_guests) + parseInt(room.extra_guests)){
+        if (totalGuests > parseInt(room.max_guests) + parseInt(room.extra_guests)) {
 
-            toast.error(
-                `Only ${room.extra_guests} extra guests allowed in this room.`
-            );
+            toast.error(`Only up to ${room.max_guests + room.extra_guests} guests can stay in this room.`);
             return
         }
         if (totalGuests > room.max_guests) {
@@ -74,7 +72,6 @@ const RoomDetails = () => {
                 `Max ${room.max_guests} guests allowed (you have ${totalGuests}). An extra fee will be applied for each extra guest`
             );
         };
-
         addItem({
             roomId: room.slug,
             name: room.name,
@@ -83,7 +80,6 @@ const RoomDetails = () => {
             children: parseInt(children), // number of children
             maxGuests: room.max_guests, // number of max guest in the room
             extraGuests: room.extra_guests, // number of allowed extra guest
-            extraGuestFee: room.extra_guest_fee, // price for extra guest
         })
     }
 

@@ -24,7 +24,7 @@ export function CartPopup() {
         removeItem,
     } = useCart();
     const { control, clearErrors, reset } = useForm();
-    const { summary, grandTotal, numNights } = useCartSummary();
+    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests } = useCartSummary();
     useSyncCartForm(items, reset);
 
 
@@ -68,6 +68,10 @@ export function CartPopup() {
                     <div className="flex justify-between">
                         <span>Nights</span>
                         <span>{numNights}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span>Number of guests</span>
+                        <span>{totalGuests}</span>
                     </div>
                 </div>
                 {items.length === 0 ? (
@@ -135,16 +139,20 @@ export function CartPopup() {
                                     <span>Room Price:</span>
                                     <span>{formatCurrency(item.price)} x {numNights} night{numNights > 1 ? "s" : ""}</span>
                                 </div>
-                                <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Extra Guest:</span>
-                                    <span>{item.extraGuests} x {formatCurrency(item.extraGuestFee / (numNights || 1))} x {numNights} night{numNights > 1 ? "s" : ""}</span>
-                                </div>
                                 <div className="flex justify-between font-medium">
                                     <span>Subtotal:</span>
                                     <span>{formatCurrency(item.subtotal)}</span>
                                 </div>
                             </div>
                         ))}
+                        <div className="flex justify-between text-sm font-medium">
+                            <span>Total Room Price:</span>
+                            <span>{formatCurrency(roomTotalPrice)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-medium">
+                            <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
+                            <span>{formatCurrency(mealCost)}</span>
+                        </div>
                         <Separator />
                         <div className="flex justify-between items-center pt-2">
                             <span className="text-lg font-semibold">Total:</span>

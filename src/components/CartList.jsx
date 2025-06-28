@@ -80,12 +80,6 @@ const CartList = ({
                 <span>Room Price:</span>
                 <span>{formatCurrency(item.price)} x {numNights} night{numNights > 1 ? "s" : ""}</span>
             </div>
-            <div className="flex justify-between text-sm">
-                <span>Extra Guest:</span>
-                <span>
-                    {item.extraGuests} x {formatCurrency(item.extraGuestFee / (numNights || 1))} x {numNights} night{numNights > 1 ? "s" : ""}
-                </span>
-            </div>
             <div className="flex justify-between font-medium">
                 <span>Subtotal:</span>
                 <span>{formatCurrency(item.subtotal)}</span>
