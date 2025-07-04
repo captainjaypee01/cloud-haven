@@ -13,17 +13,52 @@ import { useAppContext } from "../context/AppContext";
 import { differenceInDays, parseISO } from "date-fns";
 import { useCartSummary } from "../hooks/cart/useCartSummary";
 import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
+import AvailabilityModal from "../components/common/AvailabilityModal";
+import { useApi } from "@/hooks/useApi";
+import { API_PREFIX } from "@/constants/api";
 
 const Cart = () => {
+    const api = useApi();
     const { state: { items, checkIn, checkOut }, updateItem, removeItem, clear } = useCart();
     const { control, reset, clearErrors } = useForm();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
+    const [checking, setChecking] = useState(false);
+    const [unavailable, setUnavailable] = useState([]);
     const { navigate } = useAppContext();
     const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice } = useCartSummary();
 
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
+    const handleProceedToCheckout = async () => {
+        setChecking(true);
+        try {
+            const res = await api.post(`${API_PREFIX}/rooms/availability`, {
+                items: summary.map(item => ({
+                    room_id: item.roomId,
+                    check_in: item.checkIn,
+                    check_out: item.checkOut,
+                    requested_count: 1,
+                })),
+                check_in: checkIn,
+                check_out: checkOut,
+            });
+            console.log(res);
+            const unavailableItems = res.data.filter(
+                x => !x.available || x.available_count < x.requested_count
+            );
+            if (unavailableItems.length > 0) {
+                setUnavailable(unavailableItems);
+            } else {
+                scrollTo(0, 0);
+                //  navigate('/checkout');
+            }
+        } catch (e) {
+            console.log(e)
+            toast.error("Error checking availability. Try again.");
+        }
+        setChecking(false);
+    };
 
     const handleChange = (item, type, val) => {
         const newCount = Number(val);
@@ -35,9 +70,14 @@ const Cart = () => {
             toast.error("At least one guest required.");
             return;
         }
+        if (total > parseInt(item.maxGuests) + parseInt(item.extraGuests)) {
+
+            toast.error(`Only up to ${item.maxGuests + item.extraGuests} guests can stay in this room.`);
+            return
+        }
         if (total > item.maxGuests) {
             toast.warning(
-                `Max ${item.maxGuests} guests allowed (you have ${total}). An extra fee will be applied for each extra guest`
+                `Max ${item.maxGuests} guests allowed (you have ${total}). We only allow for ${item.extraGuests} extra guest/s`
             );
         }
 
@@ -134,10 +174,15 @@ const Cart = () => {
                     </div>
                     <Button variant="destructive" className="mt-3 cursor-pointer" onClick={clear}>Clear Cart</Button>
                     {summary.length > 0 && (
-                        <Button variant="outline" size="lg" className="mt-1 cursor-pointer" onClick={() => { scrollTo(0, 0); navigate('/checkout') }}>Proceed to Checkout</Button>
+                        <Button variant="outline" size="lg" className="mt-1 cursor-pointer" disabled={checking} onClick={handleProceedToCheckout}>Proceed to Checkout</Button>
                     )}
                 </div>
             </div>
+            <AvailabilityModal
+                open={unavailable.length > 0}
+                items={unavailable}
+                onClose={() => setUnavailable([])}
+            />
         </div>
     );
 }

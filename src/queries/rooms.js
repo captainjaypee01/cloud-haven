@@ -1,13 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/hooks/useApi";
 import * as roomsSvc from "@/services/rooms";
+import { useCart } from "../context/CartContext";
+import { createGetParameters } from "../utils/urlParams";
 
 /*** public ***/
 export const useRooms = () => {
     const api = useApi();
+    const { state } = useCart();
+    const { checkIn, checkOut }  = state;
+    const params = createGetParameters({check_in: checkIn, check_out: checkOut});
     return useQuery({
         queryKey: ["rooms"],
-        queryFn: () => roomsSvc.listRooms(api),
+        queryFn: () => roomsSvc.listRooms(api, params),
         staleTime: 5 * 60_000, gcTime: 30 * 60_000,        // cache knobs
     });
 };
