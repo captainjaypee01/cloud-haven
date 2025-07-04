@@ -69,7 +69,7 @@ const RoomDetails = () => {
         }
         if (totalGuests > room.max_guests) {
             toast.warning(
-                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). An extra fee will be applied for each extra guest`
+                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). We only allow for ${room.extra_guests} extra guest/s`
             );
         };
         addItem({
