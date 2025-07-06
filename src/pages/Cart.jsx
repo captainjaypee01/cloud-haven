@@ -30,34 +30,37 @@ const Cart = () => {
 
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
-    const handleProceedToCheckout = async () => {
+    const checkAvailability = async () => {
         setChecking(true);
         try {
             const res = await api.post(`${API_PREFIX}/rooms/availability`, {
                 items: summary.map(item => ({
                     room_id: item.roomId,
-                    check_in: item.checkIn,
-                    check_out: item.checkOut,
                     requested_count: 1,
                 })),
                 check_in: checkIn,
                 check_out: checkOut,
             });
-            console.log(res);
+
             const unavailableItems = res.data.filter(
                 x => !x.available || x.available_count < x.requested_count
             );
-            if (unavailableItems.length > 0) {
-                setUnavailable(unavailableItems);
-            } else {
-                scrollTo(0, 0);
-                //  navigate('/checkout');
-            }
+            setUnavailable(unavailableItems);
+            return unavailableItems.length === 0;
         } catch (e) {
-            console.log(e)
             toast.error("Error checking availability. Try again.");
+            return false;
+        } finally {
+            setChecking(false);
         }
-        setChecking(false);
+    };
+
+    const handleProceedToCheckout = async () => {
+        const ok = await checkAvailability();
+        if (ok) {
+            scrollTo(0, 0);
+            navigate('/checkout');
+        }
     };
 
     const handleChange = (item, type, val) => {
@@ -182,6 +185,8 @@ const Cart = () => {
                 open={unavailable.length > 0}
                 items={unavailable}
                 onClose={() => setUnavailable([])}
+                onRefresh={checkAvailability}
+                checking={checking}
             />
         </div>
     );
