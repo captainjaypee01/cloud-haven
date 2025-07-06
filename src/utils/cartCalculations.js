@@ -7,7 +7,6 @@ import { FOOD_PRICE_DEFAULT_ADULT, FOOD_PRICE_DEFAULT_CHILDREN } from "../consta
 export function calculateCartSummary({ items = [], checkIn, checkOut, mealPrices }) {
     const foodPriceAdult = mealPrices?.adult?.price ?? FOOD_PRICE_DEFAULT_ADULT;
     const foodPriceChildren = mealPrices?.children?.price ?? FOOD_PRICE_DEFAULT_CHILDREN;
-    console.log(foodPriceAdult, foodPriceChildren);
     const numNights =
         checkIn && checkOut
             ? Math.max(differenceInDays(parseISO(checkOut), parseISO(checkIn)), 1)
