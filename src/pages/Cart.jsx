@@ -16,10 +16,12 @@ import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
 import AvailabilityModal from "../components/common/AvailabilityModal";
 import { useApi } from "@/hooks/useApi";
 import { API_PREFIX } from "@/constants/api";
+import { useLoader } from "@/context/LoaderContext";
 
 const Cart = () => {
     const api = useApi();
     const { state: { items, checkIn, checkOut }, updateItem, removeItem, clear } = useCart();
+    const { show, hide } = useLoader();
     const { control, reset, clearErrors } = useForm();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
@@ -31,7 +33,8 @@ const Cart = () => {
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
     const checkAvailability = async () => {
-        setChecking(true);
+        show();
+        await new Promise(resolve => setTimeout(resolve, 2000));
         try {
             const res = await api.post(`${API_PREFIX}/rooms/availability`, {
                 items: summary.map(item => ({
@@ -52,6 +55,7 @@ const Cart = () => {
             return false;
         } finally {
             setChecking(false);
+            hide();
         }
     };
 
