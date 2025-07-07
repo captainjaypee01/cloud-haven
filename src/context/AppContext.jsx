@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
 import { useMealPrices } from "../queries/mealPrices";
+import { LoaderProvider } from "./LoaderContext";
 
 const AppContext = createContext();
 
@@ -37,7 +38,9 @@ export const AppProvider = ({ children }) => {
     }, [user])
     return (
         <AppContext.Provider value={value}>
-            {children}
+            <LoaderProvider>
+                {children}
+            </LoaderProvider>
         </AppContext.Provider>
     )
 }

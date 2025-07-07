@@ -7,7 +7,7 @@ import RoomCardSkeleton from "../components/RoomCardSkeleton";
 import { AlertCircle } from "lucide-react";
 export default function Rooms() {
     const { data: rooms, isLoading, isError, error, refetch, status } = useRooms();
-    
+
     const heroImages = roomPhotos;
 
     return (
