@@ -18,6 +18,7 @@ import Checkout from './pages/Checkout';
 import RoomsPage from './pages/RoomsPage';
 import ResortPolicyDialog from './components/common/ResortPolicyDialog';
 import PaymentPage from './pages/PaymentPage';
+import BookingDetailsPage from './pages/BookingDetailPage';
 
 const App = () => {
 
@@ -56,6 +57,10 @@ const App = () => {
               <Route
                 path='/checkout'
                 element={<Checkout />}
+              />
+              <Route
+                path='/booking/:refNo'
+                element={<BookingDetailsPage />}
               />
               <Route
                 path='/booking/:refNo/payment'

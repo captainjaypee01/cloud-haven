@@ -22,6 +22,7 @@ import { useCartSummary } from "../hooks/cart/useCartSummary";
 import { useApi } from "@/hooks/useApi";
 import { Separator } from "@radix-ui/react-select";
 import { API_PREFIX } from "@/constants/api";
+import SeaWaveBg from "../components/common/SeaWaveBg";
 
 const FormSchema = z.object({
     fullName: z.string().min(1, { message: "Full name is required" }),
@@ -92,8 +93,8 @@ const CheckoutPage = () => {
         }
     }, [items, navigate]);
     return (
-        <div className="min-h-screen py-16 px-2 md:px-8 lg:px-32 mt-20 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="relative min-h-screen pb-[200px] py-16 px-2 md:px-8 lg:px-32 mt-10 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
                 {/* -- Summary Section -- */}
                 <aside className="md:col-span-1 bg-gray-50 rounded-xl shadow-lg p-6 flex flex-col gap-6 static top-auto h-auto md:sticky md:top-24 md:h-fit">
                     <h2 className="text-xl font-semibold mb-2">Booking Summary</h2>
@@ -166,6 +167,7 @@ const CheckoutPage = () => {
                     </Form>
                 </div>
             </div>
+            <SeaWaveBg />
         </div>
     );
 };

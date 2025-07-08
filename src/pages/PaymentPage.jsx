@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useLoader } from "@/context/LoaderContext";
 import { toast } from "sonner";
 import { API_PREFIX } from "@/constants/api";
+import SeaWaveBg from "../components/common/SeaWaveBg";
 
 /**
  * PaymentPage: /booking/:refNo/payment
@@ -46,15 +47,19 @@ const PaymentPage = () => {
         try {
             const paymentPayload = {
                 amount: option.amount,
-                payment_option: option.type // 'downpayment' or 'full'
+                payment_option: option.type, // 'downpayment' or 'full'
+                provider: 'netania',
+                outcome: 'success',
             };
             // Simulate vendor by POST to /api/bookings/:refNo/pay
-            const res = await api.post(`/api/bookings/ref/${refNo}/pay`, paymentPayload, {
+            const res = await api.post(`${API_PREFIX}/bookings/ref/${refNo}/pay`, paymentPayload, {
                 headers: { "Content-Type": "application/json" },
             });
+            console.log(res);
             if (res.data?.success) {
                 toast.success("Payment successful!");
-                navigate(`/booking/${refNo}/success`);
+                navigate(`/booking/${refNo}`);
+
             } else {
                 toast.error(res.data?.errorMessage || res.data?.message || "Payment failed");
             }
@@ -72,7 +77,8 @@ const PaymentPage = () => {
         return (
             <div className="max-w-xl mx-auto py-24">
                 <h2 className="text-2xl font-bold mb-4">This booking is already paid!</h2>
-                <Button onClick={() => navigate(`/booking/${refNo}`)}>View Booking Details</Button>
+                <Button onClick={() => navigate(`/booking/${refNo}`)} className="cursor-pointer">View Booking Details</Button>
+
             </div>
         );
     }
@@ -80,18 +86,19 @@ const PaymentPage = () => {
         return (
             <div className="max-w-xl mx-auto py-24">
                 <h2 className="text-2xl font-bold mb-4">This booking is no longer available.</h2>
-                <Button onClick={() => navigate(`/`)}>Back to Home</Button>
+                <Button onClick={() => navigate(`/`)} className="cursor-pointer">Back to Home</Button>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50">
-            <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-10">
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <div className="relative z-10 w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-20">
                 <h2 className="text-xl font-semibold mb-4">Booking Payment</h2>
                 <div className="mb-3">
                     <div className="text-sm text-gray-500">Reference No:</div>
-                    <div className="font-bold text-cyan-700 text-lg">{booking.reference_no}</div>
+                    <div className="font-bold text-cyan-700 text-lg">{booking.reference_number}</div>
+
                 </div>
                 <div className="mb-4 flex flex-col gap-1 text-sm">
                     <div className="flex justify-between"><span>Guest</span><span>{booking.guest_name}</span></div>
@@ -103,20 +110,31 @@ const PaymentPage = () => {
                 <h3 className="text-lg font-medium mb-2">How would you like to pay?</h3>
                 <div className="space-y-3">
                     {booking.pay_now_options?.map(opt => (
-                        <div key={opt.type} className={`border p-4 rounded-lg flex items-center justify-between mb-2 ${selectedOption && selectedOption.type === opt.type ? 'border-cyan-600 bg-cyan-50' : 'border-gray-300'}`}>
+                        <div
+                            key={opt.type}
+                            className={`border p-4 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 bg-white/70
+                            ${selectedOption && selectedOption.type === opt.type ? 'border-cyan-600 bg-cyan-50' : 'border-gray-300'}`}
+                        >
                             <div>
-                                <div className="font-semibold">{opt.label}</div>
+                                <div className="font-semibold text-base">{opt.label}</div>
                                 <div className="text-cyan-700 text-lg">{formatCurrency(opt.amount)}</div>
                                 <div className="text-gray-500 text-xs mt-1">{opt.type === 'downpayment' ? `Pay now, remaining balance due at check-in.` : `Settle everything now, skip the counter later!`}</div>
                             </div>
-                            <Button disabled={paying} onClick={() => handlePay(opt)}>
+                            <Button disabled={paying} onClick={() => handlePay(opt)} className="w-full sm:w-48 mt-4 sm:mt-0 ml-0 sm:ml-4 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-medium rounded transition disabled:opacity-60 cursor-pointer">
+
                                 {paying && selectedOption?.type === opt.type ? 'Processing...' : (opt.type === 'downpayment' ? 'Pay Downpayment' : 'Pay Full')}
                             </Button>
                         </div>
                     ))}
                 </div>
+                <div className="mt-8 flex justify-end">
+                    <Button variant="outline" onClick={() => navigate(`/booking/${refNo}`)} className="cursor-pointer">
+                        Back to Booking Details
+                    </Button>
+                </div>
             </div>
-        </div>
+            <SeaWaveBg />
+        </div >
     );
 };
 
