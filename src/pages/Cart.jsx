@@ -17,6 +17,7 @@ import AvailabilityModal from "../components/common/AvailabilityModal";
 import { useApi } from "@/hooks/useApi";
 import { API_PREFIX } from "@/constants/api";
 import { useLoader } from "@/context/LoaderContext";
+import SeaWaveBg from "../components/common/SeaWaveBg";
 
 const Cart = () => {
     const api = useApi();
@@ -98,8 +99,8 @@ const Cart = () => {
     };
 
     return (
-        <div className="min-h-screen py-16 px-2 md:px-8 lg:px-32 bg-gray-50 mt-20">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 bg-white rounded-2xl shadow-lg p-6 md:p-10">
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center mt-10 py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 bg-white rounded-2xl shadow-lg p-6 md:p-10 mt-10">
                 {/* Left: Detailed summary */}
                 <div className="lg:col-span-2">
                     <h1 className="text-2xl md:text-3xl font-bold mb-8">Your Booking Cart</h1>
@@ -192,6 +193,7 @@ const Cart = () => {
                 onRefresh={checkAvailability}
                 checking={checking}
             />
+            <SeaWaveBg />
         </div>
     );
 }
