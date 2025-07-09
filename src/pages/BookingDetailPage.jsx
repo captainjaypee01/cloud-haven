@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useLoader } from "@/context/LoaderContext";
 import { API_PREFIX } from "@/constants/api";
 import SeaWaveBg from "@/components/common/SeaWaveBg";
+import { BadgeAlertIcon, BadgeCheckIcon } from "lucide-react";
 
 const statusColor = status => {
     switch (status) {
@@ -52,7 +53,7 @@ const UnifiedBookingResultPage = () => {
     const paidAmount = getPaidAmount(booking.payments || []);
     const remainingBalance = Math.max(0, (booking.final_price || 0) - paidAmount);
     return (
-        <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 overflow-x-hidden">
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
             <SeaWaveBg />
             <div className="relative z-10 w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-20">
                 {/* Error banner */}
@@ -63,7 +64,7 @@ const UnifiedBookingResultPage = () => {
                 )}
                 {/* Badge + ref # + status */}
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                    <Badge variant={statusColor(booking.status)} className="text-base px-3 py-1">
+                    <Badge variant={statusColor(booking.status)} className="text-base px-3 py-1 capitalize">
                         {booking.status === 'completed' ? 'Completed (Checked Out)' : booking.status.replace("_", " ")}
                     </Badge>
                 </div>
@@ -90,6 +91,36 @@ const UnifiedBookingResultPage = () => {
                             </li>
                         ))}
                     </ul>
+                </div>
+                {/* Payment History */}
+                <div className="mt-8 mb-4">
+                    <h3 className="font-semibold text-lg mb-2">Payment History</h3>
+                    <div className="rounded bg-gray-50 border border-gray-200 p-3">
+                        {(!booking.payments || booking.payments.length === 0) ? (
+                            <div className="text-gray-500 text-sm">No payments yet.</div>
+                        ) : (
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr>
+                                        <th className="text-left py-1 px-2">Date</th>
+                                        <th className="text-left py-1 px-2">Amount</th>
+                                        <th className="text-left py-1 px-2">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {booking.payments.map((payment, i) => (
+                                        <tr key={payment.id || i}>
+                                            <td className="py-1 px-2">{payment.paid_at}</td>
+                                            <td className="py-1 px-2">{formatCurrency(payment.amount)}</td>
+                                            <td className="py-1 px-2">
+                                                <Badge variant={payment.status === "paid" ? "success" : (payment.status === "failed" ? "destructive" : "secondary")}>{payment.status === "paid" ? <BadgeCheckIcon /> : <BadgeAlertIcon />} {payment.status}</Badge>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </div>
                 {/* Status-specific UI and actions */}
                 {booking.status === "pending" && (
