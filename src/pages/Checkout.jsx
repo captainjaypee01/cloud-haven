@@ -80,6 +80,12 @@ const CheckoutPage = () => {
             console.log(`/booking/${booking.reference_number}/payment`)
             navigate(`/booking/${booking.reference_number}/payment`);
         } catch (err) {
+            console.log(err);
+            if(err.status === 409){
+
+                toast.error(err.response.data.error);
+                return
+            }
             toast.error("Something went wrong. Try again.");
         } finally {
             hide();
