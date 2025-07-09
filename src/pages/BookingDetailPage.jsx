@@ -47,6 +47,7 @@ const UnifiedBookingResultPage = () => {
     }, [refNo]);
     const getPaidAmount = (payments = []) => {
         return payments
+            .filter(p => p.status === "paid")
             .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
     }
     if (!booking) return null;

@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import { useCart } from "../context/CartContext";
 import { formatCurrency } from "../utils/currency";
 import { useForm } from "react-hook-form";
@@ -76,12 +75,12 @@ const CheckoutPage = () => {
                 hide();
                 return;
             }
-            clear();
             console.log(`/booking/${booking.reference_number}/payment`)
+            clear();
             navigate(`/booking/${booking.reference_number}/payment`);
         } catch (err) {
             console.log(err);
-            if(err.status === 409){
+            if (err.status === 409) {
 
                 toast.error(err.response.data.error);
                 return
@@ -92,12 +91,6 @@ const CheckoutPage = () => {
         }
     };
 
-
-    useEffect(() => {
-        if (!items || !Array.isArray(items) || items.length === 0) {
-            navigate("/cart", { replace: true });
-        }
-    }, [items, navigate]);
     return (
         <div className="relative min-h-screen pb-[200px] py-16 px-2 md:px-8 lg:px-32 mt-10 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
             <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
@@ -150,28 +143,30 @@ const CheckoutPage = () => {
                     </div>
                 </aside>
                 {/* -- Guest Info -- */}
-                <div className="md:col-span-1 bg-white rounded-xl shadow-lg p-8 flex flex-col gap-6">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <h2 className="text-xl font-semibold mb-2">Guest Information</h2>
-                            <FormField name="fullName" control={form.control} render={({ field }) => (
-                                <FormItem><FormLabel>Full name</FormLabel><FormControl><Input type="text" {...field} className="w-full" /></FormControl><FormMessage /></FormItem>
-                            )} />
-                            <FormField name="email" control={form.control} render={({ field }) => (
-                                <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} className="w-full" /></FormControl><FormMessage /></FormItem>
-                            )} />
-                            <FormField name="contactNumber" control={form.control} render={({ field }) => (
-                                <FormItem><FormLabel>Contact Number</FormLabel><FormControl><Input type="text" {...field} className="w-full" /></FormControl><FormMessage /></FormItem>
-                            )} />
-                            <FormField name="specialRequests" control={form.control} render={({ field }) => (
-                                <FormItem><FormLabel>Special Requests</FormLabel><FormControl><Textarea placeholder="Tell us if you need some assistance" className="resize-none" {...field} /></FormControl><FormMessage /></FormItem>
-                            )} />
-                            <Button className="w-full mt-4 cursor-pointer" type="submit">
-                                Reserve Now
-                            </Button>
-                        </form>
-                    </Form>
-                </div>
+                {!(!items || !Array.isArray(items) || items.length === 0) && (
+                    <div className="md:col-span-1 bg-white rounded-xl shadow-lg p-8 flex flex-col gap-6">
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                <h2 className="text-xl font-semibold mb-2">Guest Information</h2>
+                                <FormField name="fullName" control={form.control} render={({ field }) => (
+                                    <FormItem><FormLabel>Full name</FormLabel><FormControl><Input type="text" {...field} className="w-full" /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField name="email" control={form.control} render={({ field }) => (
+                                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} className="w-full" /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField name="contactNumber" control={form.control} render={({ field }) => (
+                                    <FormItem><FormLabel>Contact Number</FormLabel><FormControl><Input type="text" {...field} className="w-full" /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField name="specialRequests" control={form.control} render={({ field }) => (
+                                    <FormItem><FormLabel>Special Requests</FormLabel><FormControl><Textarea placeholder="Tell us if you need some assistance" className="resize-none" {...field} /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <Button className="w-full mt-4 cursor-pointer" type="submit">
+                                    Reserve Now
+                                </Button>
+                            </form>
+                        </Form>
+                    </div>
+                )}
             </div>
             <SeaWaveBg />
         </div>
