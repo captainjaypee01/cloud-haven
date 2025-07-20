@@ -21,6 +21,7 @@ import PaymentPage from './pages/PaymentPage';
 import BookingDetailsPage from './pages/BookingDetailPage';
 import ListBooking from './pages/admin/bookings/ListBooking';
 import BookingDetails from './pages/admin/bookings/BookingDetails';
+import ListAmenity from './pages/admin/amenities/ListAmenity';
 
 const App = () => {
 
@@ -81,7 +82,7 @@ const App = () => {
                 <Route path="rooms/add" element={<AddRoom />} />
                 <Route path="bookings" element={<ListBooking />} />
                 <Route path="bookings/:id" element={<BookingDetails />} />
-                <Route path="amenities" element={<ListRoom />} />
+                <Route path="amenities" element={<ListAmenity />} />
                 <Route path="users" element={<ListRoom />} />
                 <Route path="reports" element={<ListRoom />} />
                 <Route path="images" element={<ListRoom />} />

@@ -83,7 +83,6 @@ const ListRoom = () => {
 
   // Fetch rooms from API
   const fetchRooms = async (params = {}) => {
-    console.log('fetching rooms')
     setLoading(true);
     const merged = {
       ...params,

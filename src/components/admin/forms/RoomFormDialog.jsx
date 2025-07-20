@@ -20,6 +20,7 @@ import FormSelectField from "@/components/common/form/FormSelectField";
 import { useApi } from "@/hooks/useApi";
 import { API_PREFIX } from "@/constants/api";
 import { toast } from "sonner";
+import Loader from "../../common/Loader";
 
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -51,7 +52,16 @@ const YES_NO_OPTIONS = [
     { value: 0, label: "No" }
 ];
 
-const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSuccess, roomId }) => {
+const RoomFormDialog = ({
+    open,
+    onOpenChange,
+    initialData,
+    loading,
+    isEdit,
+    onSuccess,
+    roomId,
+    loading: parentLoading = false,
+}) => {
     const api = useApi();
     const [submitting, setSubmitting] = useState(false);
     const form = useForm({
@@ -109,12 +119,19 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
         }
     };
 
+    const showLoader = parentLoading || submitting;
+    
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-xl">
                 <DialogHeader>
                     <DialogTitle>{isEdit ? 'Edit Room' : 'Add Room'}</DialogTitle>
                 </DialogHeader>
+                {showLoader && (
+                    <div className="flex justify-center items-center py-8">
+                        <Loader />
+                    </div>
+                )}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3 mt-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
