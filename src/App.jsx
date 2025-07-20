@@ -19,6 +19,8 @@ import RoomsPage from './pages/RoomsPage';
 import ResortPolicyDialog from './components/common/ResortPolicyDialog';
 import PaymentPage from './pages/PaymentPage';
 import BookingDetailsPage from './pages/BookingDetailPage';
+import ListBooking from './pages/admin/bookings/ListBooking';
+import BookingDetails from './pages/admin/bookings/BookingDetails';
 
 const App = () => {
 
@@ -77,7 +79,8 @@ const App = () => {
                 <Route index element={<Dashboard />} />
                 <Route path="rooms" element={<ListRoom />} />
                 <Route path="rooms/add" element={<AddRoom />} />
-                <Route path="bookings" element={<ListRoom />} />
+                <Route path="bookings" element={<ListBooking />} />
+                <Route path="bookings/:id" element={<BookingDetails />} />
                 <Route path="amenities" element={<ListRoom />} />
                 <Route path="users" element={<ListRoom />} />
                 <Route path="reports" element={<ListRoom />} />

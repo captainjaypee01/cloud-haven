@@ -39,12 +39,20 @@ const ListRoom = () => {
     setDeleteDialogOpen(false);
     if (!deleteRoom) return;
     setLoading(true);
-    await api.delete(`${API_PREFIX}/admin/rooms/${deleteRoom.id}`, {
-      requiresAuth: true,
-    });
-    fetchRooms({ search, status });
-    setDeleteRoom(null);
-    setLoading(false);
+
+    try {
+      await api.delete(`${API_PREFIX}/admin/rooms/${deleteRoom.id}`, {
+        requiresAuth: true,
+      });
+      toast.success("Room archived successfully!");
+      fetchRooms({ search, status });
+      setDeleteRoom(null);
+    } catch (error) {
+      toast.error("Something went wrong. Please try again.");
+    }
+    finally {
+      setLoading(false);
+    }
   };
 
   // Actions column

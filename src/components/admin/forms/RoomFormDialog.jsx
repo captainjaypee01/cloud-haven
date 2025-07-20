@@ -28,11 +28,11 @@ const formSchema = z.object({
     max_guests: z.coerce.number().min(1, "Required"),
     extra_guests: z.coerce.number().default(2),
     quantity: z.coerce.number().default(1),
-    allows_day_use: z.coerce.boolean().default(false),
+    allows_day_use: z.coerce.boolean().default(0),
     base_weekday_rate: z.coerce.number().min(0),
     base_weekend_rate: z.coerce.number().min(0),
     price_per_night: z.coerce.number().min(0),
-    is_featured: z.coerce.boolean().default(false),
+    is_featured: z.coerce.boolean().default(0),
     status: z.union([
         z.literal("available"),
         z.literal("unavailable"),

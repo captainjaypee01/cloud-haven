@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const AvailabilityModal = ({ open, items, onClose, onRefresh, checking }) => {
+const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isActions = true }) => {
     return (
         <AnimatePresence>
             {open && (
@@ -49,19 +49,21 @@ const AvailabilityModal = ({ open, items, onClose, onRefresh, checking }) => {
                                 ))}
                             </ul>
                         </motion.div>
-                        <DialogFooter className="flex gap-2">
-                            <Button variant="secondary" onClick={onClose} className="cursor-pointer">
-                                Back to Cart
-                            </Button>
-                            {onRefresh && (
-                                <Button onClick={onRefresh} variant="outline" disabled={checking} className="cursor-pointer">
-                                    Retry
+                        {isActions && (
+                            <DialogFooter className="flex gap-2">
+                                <Button variant="secondary" onClick={onClose} className="cursor-pointer">
+                                    Back to Cart
                                 </Button>
-                            )}
-                            <Button variant="ghost" onClick={() => window.location.href = '/rooms'} className="cursor-pointer">
-                                View All Rooms
-                            </Button>
-                        </DialogFooter>
+                                {onRefresh && (
+                                    <Button onClick={onRefresh} variant="outline" disabled={checking} className="cursor-pointer">
+                                        Retry
+                                    </Button>
+                                )}
+                                <Button variant="ghost" onClick={() => window.location.href = '/rooms'} className="cursor-pointer">
+                                    View All Rooms
+                                </Button>
+                            </DialogFooter>
+                        )}
                     </DialogContent>
                 </Dialog>
             )}
