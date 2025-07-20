@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export function useApi() {
     const { getToken, signOut } = useAuth();             // ← now legal
-
+    
     return useMemo(() => {
         const instance = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL });
 
@@ -22,7 +22,7 @@ export function useApi() {
         instance.interceptors.response.use(
             r => r,
             err => {
-                if (err.response?.status === 401) signOut();
+                // if (err.response?.status === 401) signOut();
                 return Promise.reject(err);
             },
         );
