@@ -109,22 +109,13 @@ const ListRoom = () => {
 
   return (
     <div>
-      <DeleteDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        onConfirm={handleDeleteConfirmed}
-        title="Delete Room"
-        description={`Are you sure you want to delete "${deleteRoom?.name}"? This action cannot be undone.`}
-      />
       <Title
         align='left'
         font='outfit'
         title='Room Listings'
         subTitle='View, edit, or manage all listed rooms.'
       />
-      <p className='text-gray-500 mt-8'>All Rooms</p>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Rooms</h2>
+      <div className="flex justify-between items-center mb-4 mt-4">
         <Button onClick={handleAdd} className="cursor-pointer">+ Add Room</Button>
       </div>
       <ControlsToolbar
@@ -164,6 +155,13 @@ const ListRoom = () => {
         }
         manualPagination={true}
         loading={loading}
+      />
+      <DeleteDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteConfirmed}
+        title="Delete Room"
+        description={`Are you sure you want to delete "${deleteRoom?.name}"? This action cannot be undone.`}
       />
     </div>
   );

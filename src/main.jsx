@@ -7,6 +7,8 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { AppProvider } from './context/AppContext.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './context/CartContext.jsx'
+import { ThemeProvider } from './context/ThemeContext.jsx'
+import { SidebarProvider } from './context/SidebarContext.jsx'
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -33,11 +35,16 @@ createRoot(document.getElementById('root')).render(
     }}>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
-        <CartProvider>
-          <AppProvider>
-            <App />
-          </AppProvider>
-        </CartProvider>
+        <ThemeProvider>
+          <CartProvider>
+
+            <SidebarProvider>
+              <AppProvider>
+                <App />
+              </AppProvider>
+            </SidebarProvider>
+          </CartProvider>
+        </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>
   </ClerkProvider>,
