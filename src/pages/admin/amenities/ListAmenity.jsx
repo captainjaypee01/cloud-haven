@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import Title from '../../../components/Title';
 import { Button } from '@/components/ui/button';
 import ControlsToolbar from '@/components/admin/common/ControlsToolbar';
 import DataTable from '@/components/admin/Table/DataTable';
@@ -107,15 +108,13 @@ const ListAmenities = () => {
 
     return (
         <div>
-            <DeleteDialog
-                open={deleteDialogOpen}
-                onOpenChange={setDeleteDialogOpen}
-                onConfirm={handleDeleteConfirmed}
-                title="Delete Amenity"
-                description={`Are you sure you want to delete "${deleteAmenity?.name}"? This action cannot be undone.`}
+            <Title
+                align='left'
+                font='outfit'
+                title='Amenities'
+                subTitle='View, edit, or manage all listed amenities.'
             />
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Amenities</h2>
+            <div className="flex justify-between items-center mt-4 mb-4">
                 <Button onClick={handleAdd} className="cursor-pointer">+ Add Amenity</Button>
             </div>
             <ControlsToolbar
@@ -129,15 +128,6 @@ const ListAmenities = () => {
                         { value: "inactive", label: "Inactive" },
                     ]
                 }]}
-            />
-            <AmenityFormDialog
-                open={openDialog}
-                onOpenChange={setOpenDialog}
-                initialData={editAmenity}
-                loading={loading}
-                isEdit={!!editAmenity}
-                onSuccess={handleFormSuccess}
-                amenityId={editAmenity?.id}
             />
             <DataTable
                 columns={amenityColumns.map(col =>
@@ -170,6 +160,22 @@ const ListAmenities = () => {
                 }
                 manualPagination={true}
                 loading={loading}
+            />
+            <AmenityFormDialog
+                open={openDialog}
+                onOpenChange={setOpenDialog}
+                initialData={editAmenity}
+                loading={loading}
+                isEdit={!!editAmenity}
+                onSuccess={handleFormSuccess}
+                amenityId={editAmenity?.id}
+            />
+            <DeleteDialog
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={handleDeleteConfirmed}
+                title="Delete Amenity"
+                description={`Are you sure you want to delete "${deleteAmenity?.name}"? This action cannot be undone.`}
             />
         </div>
     );
