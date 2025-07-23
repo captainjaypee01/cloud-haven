@@ -11,6 +11,6 @@ export const useAmenitiesApi = () => {
         update: (id, data) => api.put(`${API_PREFIX}/admin/amenities/${id}`, data, { requiresAuth: true }),
         remove: (id) => api.delete(`${API_PREFIX}/admin/amenities/${id}`, { requiresAuth: true }),
         updateStatus: (id, status) =>
-            api.patch(`${API_PREFIX}/admin/amenities/${id}/status`, { status }, { requiresAuth: true }),
+            api.patch(`${API_PREFIX}/admin/amenities/${id}/update-status`, { status }, { requiresAuth: true }),
     };
 };

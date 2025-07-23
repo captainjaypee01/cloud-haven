@@ -1,9 +1,18 @@
-// components/admin/Table/amenitiesColumns.js
+// components/admin/Table/amenitiesColumns.jsx
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 
 // Accepts handlers for actions from parent
-export const amenityColumns = ({ onEdit, onDelete, onStatusChange }) => [
+// components/admin/Table/amenitiesColumns.jsx
+export const amenityColumns = ({ onEdit, onDelete, onStatusChange, iconsModule }) => [
+    {
+        id: "icon",
+        header: "Icon",
+        cell: ({ row }) => {
+            const Icon = iconsModule[row.original.icon] || iconsModule.HelpCircle;
+            return <Icon className="h-5 w-5" />;
+        },
+    },
     {
         accessorKey: "name",
         header: "Name",

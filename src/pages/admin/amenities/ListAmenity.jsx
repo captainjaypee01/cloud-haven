@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import * as lucideIcons from "lucide-react";
 import Title from '../../../components/Title';
 import { Button } from '@/components/ui/button';
 import ControlsToolbar from '@/components/admin/common/ControlsToolbar';
@@ -9,6 +10,9 @@ import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { toast } from "sonner";
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAmenitiesApi } from '@/hooks/useAmenitiesApi';
+
+const iconsModule = lucideIcons.default || lucideIcons;
+const ICON_OPTIONS = Object.keys(iconsModule).sort();
 
 const ListAmenities = () => {
     const amenitiesApi = useAmenitiesApi();
@@ -69,6 +73,7 @@ const ListAmenities = () => {
             onEdit: handleEdit,
             onDelete: handleDeletePrompt,
             onStatusChange: handleStatusToggle,
+            iconsModule, // Pass it here!
         }),
         [data, handleEdit, handleDeletePrompt, handleStatusToggle]
     );
@@ -169,6 +174,8 @@ const ListAmenities = () => {
                 isEdit={!!editAmenity}
                 onSuccess={handleFormSuccess}
                 amenityId={editAmenity?.id}
+                lucideIcons={iconsModule}
+                ICON_OPTIONS={ICON_OPTIONS}
             />
             <DeleteDialog
                 open={deleteDialogOpen}
