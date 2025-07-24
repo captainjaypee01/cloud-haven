@@ -9,7 +9,8 @@ import {
     BedDouble,
     Book,
     Salad,
-    Image
+    Image,
+    TicketIcon
 } from "lucide-react";
 import NavMain from "@/components/admin/NavMain"
 import NavSecondary from "@/components/admin/NavSecondary"
@@ -31,6 +32,7 @@ const data = {
         { title: "Rooms", url: "/admin/rooms", icon: BedDouble },
         { title: "Bookings", url: "/admin/bookings", icon: Book },
         { title: "Amenities", url: "/admin/amenities", icon: Salad },
+        { title: "Promos", url: "/admin/promos", icon: TicketIcon },
     ],
     navManagement: [
         { title: "Users", url: "/admin/users", icon: UsersIcon },

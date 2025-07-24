@@ -22,6 +22,7 @@ import BookingDetailsPage from './pages/BookingDetailPage';
 import ListBooking from './pages/admin/bookings/ListBooking';
 import BookingDetails from './pages/admin/bookings/BookingDetails';
 import ListAmenity from './pages/admin/amenities/ListAmenity';
+import ListPromos from './pages/admin/promos/ListPromos';
 
 const App = () => {
 
@@ -87,6 +88,7 @@ const App = () => {
                 <Route path="reports" element={<ListRoom />} />
                 <Route path="images" element={<ListRoom />} />
                 <Route path="meal-prices" element={<ListRoom />} />
+                <Route path="promos" element={<ListPromos />} />
               </Route>
             </Routes>
           </div>
@@ -95,8 +97,8 @@ const App = () => {
       )
       }
 
-      <ResortPolicyDialog
-      />
+        {!isAdminPath && <ResortPolicyDialog />}
+      {/* <ResortPolicyDialog /> */}
       <Toaster position="top-right" richColors closeButton expand={true} />
     </>
   )
