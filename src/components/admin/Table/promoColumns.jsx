@@ -2,6 +2,7 @@
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/currency";
+import { formatDate } from '@/lib/format';
 
 // Accept handler functions as parameters
 export const promoColumns = ({ onEdit, onDelete, onStatusChange, selectedIds, toggleSelect, toggleSelectAll }) => {
@@ -43,10 +44,7 @@ export const promoColumns = ({ onEdit, onDelete, onStatusChange, selectedIds, to
         {
             accessorKey: "expires_at",
             header: "Expires At",
-            cell: ({ row }) => {
-                const exp = row.original.expires_at;
-                return exp ? new Date(exp).toLocaleDateString() : "Never";
-            },
+            cell: ({ row }) => row.original.expires_at ? formatDate(row.original.expires_at) : "Never"
         },
         {
             accessorKey: "max_uses",
