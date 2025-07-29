@@ -1,5 +1,5 @@
 // src/components/admin/forms/MealPriceFormDialog.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { useMealsApi } from '@/hooks/api/useMealsApi';
 import { toast } from 'sonner';
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Loader from "@/components/common/Loader";
 
 const formSchema = z.object({
     category: z.string().min(1, "Category is required"),
@@ -21,6 +22,7 @@ export default function MealPriceFormDialog({
     open, onOpenChange, onSuccess, initialData, isEdit, mealPriceId, loading: parentLoading = false
 }) {
     const api = useMealsApi();
+    const [submitting, setSubmitting] = useState(false);
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: initialData || {
@@ -52,6 +54,7 @@ export default function MealPriceFormDialog({
     }, [initialData, open]);
 
     const onSubmit = async (values) => {
+        setSubmitting(true);
         const payload = {
             ...values,
         };
@@ -69,10 +72,12 @@ export default function MealPriceFormDialog({
             // If validation fails or API error, show error message from response or generic
             const msg = error.response?.data?.message || "Failed to save meal price.";
             toast.error(msg);
+        } finally {
+            setSubmitting(false);
         }
     };
 
-    const submitting = parentLoading; // we can also track local submitting state if needed
+    const showLoader = submitting || parentLoading; // we can also track local submitting state if needed
     const formTitle = isEdit ? "Edit Meal Price" : "Add Meal Price";
     const formDescription = isEdit
         ? "Update the meal price details below."
@@ -85,7 +90,11 @@ export default function MealPriceFormDialog({
                     <DialogTitle>{formTitle}</DialogTitle>
                     <DialogDescription>{formDescription}</DialogDescription>
                 </DialogHeader>
-                {submitting && <div className="py-4">Saving...</div>}
+                {showLoader && (
+                    <div className="flex justify-center items-center py-8">
+                        <Loader />
+                    </div>
+                )}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
                         <FormField
