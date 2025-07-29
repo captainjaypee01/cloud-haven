@@ -24,6 +24,7 @@ import BookingDetails from './pages/admin/bookings/BookingDetails';
 import ListAmenity from './pages/admin/amenities/ListAmenity';
 import ListPromos from './pages/admin/promos/ListPromos';
 import ListMeals from './pages/admin/meals/ListMeals';
+import ListUsers from './pages/admin/users/ListUsers';
 
 const App = () => {
 
@@ -85,7 +86,7 @@ const App = () => {
                 <Route path="bookings" element={<ListBooking />} />
                 <Route path="bookings/:id" element={<BookingDetails />} />
                 <Route path="amenities" element={<ListAmenity />} />
-                <Route path="users" element={<ListRoom />} />
+                <Route path="users" element={<ListUsers />} />
                 <Route path="reports" element={<ListRoom />} />
                 <Route path="images" element={<ListRoom />} />
                 <Route path="meal-prices" element={<ListMeals />} />

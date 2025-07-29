@@ -1,5 +1,5 @@
 // src/components/admin/forms/PromoFormDialog.jsx
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import FormSelectField from '@/components/common/form/FormSelectField';
 import { useForm } from 'react-hook-form';
 import { usePromosApi } from '@/hooks/api/usePromosApi';
 import { toast } from 'sonner';
+import Loader from "@/components/common/Loader";
 
 const discountTypeOptions = [
     { value: 'fixed', label: 'Fixed Amount' },
@@ -22,6 +23,7 @@ export default function PromoFormDialog({
     open, onOpenChange, onSuccess, initialData, isEdit, promoId, loading: parentLoading = false
 }) {
     const api = usePromosApi();
+    const [submitting, setSubmitting] = useState(false);
     const form = useForm({
         defaultValues: initialData || {
             code: "",
@@ -58,7 +60,7 @@ export default function PromoFormDialog({
     }, [initialData, open]);
 
     const onSubmit = async (values) => {
-        console.log('values', values)
+        setSubmitting(true);
         const payload = {
             ...values,
             discount_value: parseFloat(values.discount_value),  // ensure numeric
@@ -77,10 +79,13 @@ export default function PromoFormDialog({
             // If validation fails or API error, show error message from response or generic
             const msg = error.response?.data?.message || "Failed to save promo code.";
             toast.error(msg);
+        } finally {
+
+            setSubmitting(false);
         }
     };
 
-    const submitting = parentLoading; // we can also track local submitting state if needed
+    const showLoader = submitting || parentLoading; // we can also track local submitting state if needed
     const formTitle = isEdit ? "Edit Promo Code" : "Add Promo Code";
     const formDescription = isEdit
         ? "Update the promo code details below."
@@ -93,7 +98,11 @@ export default function PromoFormDialog({
                     <DialogTitle>{formTitle}</DialogTitle>
                     <DialogDescription>{formDescription}</DialogDescription>
                 </DialogHeader>
-                {submitting && <div className="py-4">Saving...</div>}
+                {submitting && (
+                    <div className="flex justify-center items-center py-8">
+                        <Loader />
+                    </div>
+                )}
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
                         <FormField
