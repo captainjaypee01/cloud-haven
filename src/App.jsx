@@ -25,6 +25,7 @@ import ListAmenity from './pages/admin/amenities/ListAmenity';
 import ListPromos from './pages/admin/promos/ListPromos';
 import ListMeals from './pages/admin/meals/ListMeals';
 import ListUsers from './pages/admin/users/ListUsers';
+import ManageImages from './pages/admin/images/ManageImages';
 
 const App = () => {
 
@@ -88,7 +89,7 @@ const App = () => {
                 <Route path="amenities" element={<ListAmenity />} />
                 <Route path="users" element={<ListUsers />} />
                 <Route path="reports" element={<ListRoom />} />
-                <Route path="images" element={<ListRoom />} />
+                <Route path="images" element={<ManageImages />} />
                 <Route path="meal-prices" element={<ListMeals />} />
                 <Route path="promos" element={<ListPromos />} />
               </Route>
