@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 /**
  * Ocean wave loader: The wave moves from left to right, and each point moves up/down with a phase shift.
  */
-const Loader = ({ variant = "wave" }) => {
+const Loader = ({ variant = "wave", container }) => {
     const [tick, setTick] = useState(0);
 
     useEffect(() => {
@@ -46,16 +46,18 @@ const Loader = ({ variant = "wave" }) => {
     let d2 = `M0 ${height} L`;
     d2 += points2.map(pt => `${pt.x} ${pt.y.toFixed(1)}`).join(" ");
     d2 += ` L${width} ${height} Z`;
-
+    const classes = container === "dialog"
+        ? "absolute inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm bg-cyan-100/60"
+        : "fixed inset-0 z-[1000] flex flex-col items-center justify-center backdrop-blur-sm bg-cyan-100/60";
     return (
-        <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center backdrop-blur-sm bg-cyan-100/60">
+        <div className={classes}>
             <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="mb-2">
                 <path d={d2} fill="#0ea5e9" opacity="0.7" />
                 <path d={d} fill="#06b6d4" opacity="0.9" />
             </svg>
             <div className="text-cyan-900 text-lg font-bold tracking-wide drop-shadow">Just a moment... Catching a wave!</div>
         </div>
-    );
+    )
 };
 
 export default Loader;

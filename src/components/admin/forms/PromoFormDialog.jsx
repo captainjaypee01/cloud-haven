@@ -98,7 +98,7 @@ export default function PromoFormDialog({
                     <DialogTitle>{formTitle}</DialogTitle>
                     <DialogDescription>{formDescription}</DialogDescription>
                 </DialogHeader>
-                {submitting && (
+                {showLoader && (
                     <div className="flex justify-center items-center py-8">
                         <Loader />
                     </div>

@@ -1,4 +1,3 @@
-// src/pages/admin/images/ManageImages.jsx (Admin Images upload/management page)
 import React, { useRef, useState, useEffect } from "react";
 import Title from "@/components/Title";
 import { Button } from "@/components/ui/button";
@@ -8,167 +7,203 @@ import { useImagesApi } from "@/hooks/api/useImagesApi";
 import { useForm, useFieldArray } from "react-hook-form";
 import { toast } from "sonner";
 import { assets } from "@/assets/assets";
+import { useDebounce } from "@/hooks/useDebounce";
+import DeleteDialog from '@/components/common/form/DeleteDialog';
+import Loader from "@/components/common/Loader";
 
-const MAX_BATCH = 20;  // maximum images per upload batch
-const MAX_DIMENSION = 1920;  // max width/height for resizing (pixels)
+const MAX_BATCH = 20;
+const MAX_DIMENSION = 1920;
 
 const ManageImages = () => {
     const imagesApi = useImagesApi();
     const fileInputRef = useRef(null);
 
-    // React Hook Form setup for image names
-    const form = useForm({
-        defaultValues: { images: [] },
-    });
+    // State for listing existing images and search term
+    const [imagesList, setImagesList] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [confirmDeleteImageId, setConfirmDeleteImageId] = useState(null);
+    const debouncedSearch = useDebounce(searchTerm, 400);
+
+    // Form state for new image uploads (names)
+    const form = useForm({ defaultValues: { images: [] } });
     const { fields, append, remove } = useFieldArray({ name: "images", control: form.control });
+    const [files, setFiles] = useState([]);  // store File objects for new images
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // We keep the actual File objects in a separate state array (aligned by index with form.fields)
-    const [files, setFiles] = useState([]);
+    // Fetch existing images whenever search term changes (debounced)
+    useEffect(() => {
+        const fetchImages = async () => {
+            setIsSubmitting(true);
+            try {
+                const res = await imagesApi.list({ search: debouncedSearch });
+                setImagesList(res.data || []);
+            } catch {
+                toast.error("Failed to load images.");
+            } finally {
 
-    // Handle adding files (from input or drop)
+                setIsSubmitting(false);
+            }
+        };
+        fetchImages();
+    }, [debouncedSearch]);
+
+    // Handle selecting new image files (via file input or drag-drop)
     const handleAddFiles = (fileList) => {
         const newFiles = Array.from(fileList);
-        // Filter out non-image files
-        const imageFiles = newFiles.filter((file) => file.type.startsWith("image/"));
+        const imageFiles = newFiles.filter(file => file.type.startsWith("image/"));
         if (imageFiles.length + files.length > MAX_BATCH) {
             toast.error(`You can only upload up to ${MAX_BATCH} images at a time.`);
             return;
         }
-        // Append each new file and add a corresponding form field for its name
-        imageFiles.forEach((file) => {
-            setFiles((prev) => [...prev, file]);
-            // Optionally, use file name (without extension) as initial name value
-            const defaultName = file.name.replace(/\.[^/.]+$/, "");
-            append({ name: defaultName });
-        });
-        // If some files were not images, show a warning
         if (imageFiles.length < newFiles.length) {
             toast.error("Some files were skipped because they are not image files.");
         }
+        imageFiles.forEach(file => {
+            setFiles(prev => [...prev, file]);
+            const defaultName = file.name.replace(/\.[^/.]+$/, ""); // strip extension
+            append({ name: defaultName });
+        });
     };
 
-    // Drag & drop handlers
-    const handleDragOver = (e) => {
-        e.preventDefault();
-    };
+    // Drag & drop handlers for upload area
+    const handleDragOver = (e) => e.preventDefault();
     const handleDrop = (e) => {
         e.preventDefault();
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        if (e.dataTransfer.files?.length) {
             handleAddFiles(e.dataTransfer.files);
             e.dataTransfer.clearData();
         }
     };
 
-    // Function to resize an image file if it's too large (to MAX_DIMENSION)
+    // Resize an image file (if larger than MAX_DIMENSION) before upload
     const resizeImageFile = (file) => {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const img = new Image();
             const url = URL.createObjectURL(file);
             img.onload = () => {
-                // Determine new dimensions
                 let { width, height } = img;
                 if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                    // Scale down preserving aspect ratio
                     const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
                     width = Math.floor(width * scale);
                     height = Math.floor(height * scale);
                 }
-                // Draw image onto canvas at new size
                 const canvas = document.createElement("canvas");
                 canvas.width = width;
                 canvas.height = height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, width, height);
-                // Convert canvas back to blob (JPEG for photos, PNG for others to preserve transparency)
-                canvas.toBlob(
-                    (blob) => {
-                        if (blob) {
-                            // Create a new File from the blob to mimic original file
-                            const ext = file.type.includes("png") ? "png" : "jpg";
-                            const newFile = new File([blob], file.name, { type: `image/${ext}` });
-                            resolve(newFile);
-                        } else {
-                            // If conversion fails, fallback to original file
-                            resolve(file);
-                        }
-                        URL.revokeObjectURL(url);
-                    },
-                    file.type.includes("png") ? "image/png" : "image/jpeg",
-                    0.8  // use 80% quality for JPEG to reduce size
-                );
+                canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        const ext = file.type.includes("png") ? "png" : "jpg";
+                        const resizedFile = new File([blob], file.name, { type: `image/${ext}` });
+                        resolve(resizedFile);
+                    } else {
+                        resolve(file);
+                    }
+                    URL.revokeObjectURL(url);
+                }, file.type.includes("png") ? "image/png" : "image/jpeg", 0.8);
             };
             img.onerror = () => {
                 URL.revokeObjectURL(url);
                 resolve(file);
             };
-            // Start loading the image
             img.src = url;
         });
     };
 
-    // Form submission handler: uploads all images
+    // Submit handler to upload selected new images to Cloudinary (via API)
     const onSubmit = async (values) => {
         if (!files.length) {
             toast.error("Please select at least one image to upload.");
             return;
         }
+        setIsSubmitting(true);
         try {
-            // Resize images if necessary and prepare FormData
             const formData = new FormData();
             for (let i = 0; i < files.length; i++) {
-                const originalFile = files[i];
-                const name = values.images[i]?.name || "";  // image name from form
-                // If name is missing, we can enforce required validation via react-hook-form
-                // (We added required rule below in the JSX for name input)
-                const fileToUpload = await resizeImageFile(originalFile);
+                const file = files[i];
+                const name = values.images[i]?.name || "";
+                const fileToUpload = await resizeImageFile(file);
                 formData.append("files[]", fileToUpload);
                 formData.append("names[]", name);
             }
-            // Send request to upload images
             await imagesApi.create(formData);
             toast.success("Images uploaded successfully!");
-            // Reset form and state
+            // Reset form and refresh image list
             setFiles([]);
             form.reset({ images: [] });
-            // TODO: optionally, refresh the image list if displaying existing images on this page
+            const res = await imagesApi.list({ search: debouncedSearch });
+            setImagesList(res.data || []);
         } catch (err) {
-            // Handle validation errors from backend (e.g., missing name) or other errors
             if (err.response?.status === 422 && err.response.data?.errors) {
-                const errors = err.response.data.errors;
-                // Map backend validation errors to form fields
-                Object.entries(errors).forEach(([field, messages]) => {
-                    // Example backend field names: "names.0", "names.1", "files.0" etc.
+                // Map validation errors to form fields
+                for (const [field, messages] of Object.entries(err.response.data.errors)) {
                     if (field.startsWith("names") && messages.length) {
-                        // Extract index from "names.X"
                         const index = field.split(".")[1];
-                        form.setError(`images.${index}.name`, {
-                            type: "manual", message: messages.join(", ")
-                        });
+                        form.setError(`images.${index}.name`, { type: "manual", message: messages.join(", ") });
                     }
-                    // If there are file errors (like invalid file type/size), show a general error:
                     if (field.startsWith("files") && messages.length) {
                         toast.error(messages.join(", "));
                     }
-                });
+                }
                 toast.error("Please fix the highlighted errors and try again.");
             } else {
-                // General error handling
                 toast.error(err.response?.data?.message || "Failed to upload images. Please try again.");
             }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Delete an existing image (calls API then updates state)
+    const handleDeleteImage = async (id) => {
+
+        setIsSubmitting(true);
+        try {
+            await imagesApi.remove(id);
+            toast.success("Image deleted.");
+            setImagesList(prev => prev.filter(img => img.id !== id));
+        } catch {
+            toast.error("Failed to delete image.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
         <div className="p-6">
-            {/* Page Title */}
-            <Title
-                align="left"
-                font="outfit"
-                title="Images"
-                subTitle="Upload and manage images for rooms."
-            />
+            <Title align="left" font="outfit" title="Images" subTitle="Upload and manage images for rooms." />
 
-            {/* Drag & Drop Upload Area */}
+            {/* Search bar for filtering images */}
+            <div className="mt-4 max-w-xs">
+                <Input
+                    placeholder="Search images..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+
+            {/* Grid of existing images with delete overlay */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
+                {imagesList.map(image => (
+                    <div key={image.id} className="relative group">
+                        <img
+                            src={image.secure_image_url}
+                            alt={image.name || "Image"}
+                            className="w-full h-32 object-cover rounded"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs py-1 px-2 truncate">
+                            {image.name}
+                        </div>
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-60 transition group-hover:flex hidden">
+                            <Button variant="destructive" size="sm" onClick={() => setConfirmDeleteImageId(image.id)}>
+                                Delete
+                            </Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Drag & drop upload area for new images */}
             <div
                 className="mt-6 p-6 border border-dashed border-gray-300 rounded-lg text-center cursor-pointer"
                 onClick={() => fileInputRef.current?.click()}
@@ -185,14 +220,10 @@ const ManageImages = () => {
                 accept="image/*"
                 ref={fileInputRef}
                 className="hidden"
-                onChange={(e) => {
-                    if (e.target.files) handleAddFiles(e.target.files);
-                    // reset the input value so onChange will fire even if same file is re-selected
-                    e.target.value = null;
-                }}
+                onChange={(e) => { if (e.target.files) handleAddFiles(e.target.files); e.target.value = null; }}
             />
 
-            {/* Selected Files List with Name Inputs */}
+            {/* List of selected files (with name inputs) and upload button */}
             {fields.length > 0 && (
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
@@ -204,7 +235,7 @@ const ManageImages = () => {
                                 rules={{ required: "Image name is required" }}
                                 render={({ field: nameField }) => (
                                     <FormItem className="border rounded-md p-3 flex items-center justify-between">
-                                        {/* Image preview and name input */}
+                                        {/* Preview and name input */}
                                         <div className="flex items-center space-x-3 flex-1">
                                             <img
                                                 src={URL.createObjectURL(files[index])}
@@ -219,7 +250,7 @@ const ManageImages = () => {
                                                 />
                                             </FormControl>
                                         </div>
-                                        {/* Remove button for this image */}
+                                        {/* Remove file button */}
                                         <Button
                                             type="button"
                                             variant="destructive"
@@ -236,13 +267,23 @@ const ManageImages = () => {
                                 )}
                             />
                         ))}
-                        {/* Submit Button */}
                         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                             {form.formState.isSubmitting ? "Uploading..." : "Upload Images"}
                         </Button>
                     </form>
                 </Form>
             )}
+            <DeleteDialog
+                open={!!confirmDeleteImageId}
+                onOpenChange={open => !open && setConfirmDeleteImageId(null)}
+                onConfirm={async () => {
+                    await handleDeleteImage(confirmDeleteImageId);
+                    setConfirmDeleteImageId(null);
+                }}
+                title="Delete Image"
+                description="Are you sure you want to delete this image? This action cannot be undone."
+            />
+            {isSubmitting && <Loader />}
         </div>
     );
 };
