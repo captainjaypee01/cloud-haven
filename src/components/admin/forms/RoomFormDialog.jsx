@@ -15,6 +15,8 @@ import Loader from "../../common/Loader";
 import { useImagesApi } from "@/hooks/api/useImagesApi";
 import { useDebounce } from "@/hooks/useDebounce";
 import { assets } from "@/assets/assets";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAmenitiesApi } from "@/hooks/useAmenitiesApi"
 
 const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -29,6 +31,7 @@ const formSchema = z.object({
     price_per_night: z.coerce.number().min(0),
     is_featured: z.coerce.boolean().default(0),
     status: z.union([z.literal("available"), z.literal("unavailable"), z.literal("archived")]).default("available"),
+    amenity_ids: z.array(z.number()).optional(),
 });
 
 const STATUS_OPTIONS = [
@@ -45,9 +48,28 @@ const MAX_DIMENSION = 1920;
 
 const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSuccess, roomId, loading: parentLoading = false }) => {
     const api = useApi();
+    const amenitiesApi = useAmenitiesApi();
     const imagesApi = useImagesApi();
     const [submitting, setSubmitting] = useState(false);
-
+    const [amenities, setAmenities] = useState([]);
+    const [fetchingAmenities, setFetchingAmenities] = useState(false);
+    const [amenitiesSearch, setAmenitiesSearch] = useState("");
+    const debouncedAmenitiesSearch = useDebounce(amenitiesSearch, 350);
+    // Fetch amenities (with search)
+    useEffect(() => {
+        if (!open) return;
+        setFetchingAmenities(true);
+        amenitiesApi
+            .list({ search: debouncedAmenitiesSearch })
+            .then((res) => {
+                setAmenities(Array.isArray(res.data) ? res.data : (res.data.data || []));
+            })
+            .catch(() => {
+                setAmenities([]);
+                toast.error("Failed to load amenities.");
+            })
+            .finally(() => setFetchingAmenities(false));
+    }, [open, debouncedAmenitiesSearch]);
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: initialData || {
@@ -63,6 +85,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
             price_per_night: 0,
             is_featured: 0,
             status: "available",
+            amenity_ids: [],
         },
     });
     const { setError } = form;
@@ -79,7 +102,10 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
     // Reset form fields and initialize selected images when dialog opens
     useEffect(() => {
         if (open && initialData) {
-            form.reset(initialData);
+            form.reset({
+                ...initialData,
+                amenity_ids: (initialData.amenities || []).map((a) => a.id),
+            });
             if (initialData.images) {
                 const initialSelected = initialData.images.map(img => ({
                     type: "existing",
@@ -103,6 +129,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                 price_per_night: 0,
                 is_featured: 0,
                 status: "available",
+                amenity_ids: [],
             });
             setSelectedImages([]);
         }
@@ -222,6 +249,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
         try {
             // Prepare payload and upload any new images first
             const payload = { ...values };
+            payload.amenity_ids = values.amenity_ids || [];
             if (selectedImages.length) {
                 const newItems = selectedImages.filter(i => i.type === "new");
                 const existingIds = selectedImages.filter(i => i.type === "existing").map(i => i.id);
@@ -440,7 +468,59 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                                 <FormSelectField name="is_featured" control={form.control} label="Featured?" options={YES_NO_OPTIONS} />
                                 <FormSelectField name="status" control={form.control} label="Status" options={STATUS_OPTIONS} />
                             </div>
-
+                            {/* Amenities Search and Selection */}
+                            <FormItem>
+                                <FormLabel>Amenities</FormLabel>
+                                <Input
+                                    value={amenitiesSearch}
+                                    onChange={e => setAmenitiesSearch(e.target.value)}
+                                    placeholder="Search amenities..."
+                                    className="mb-2 w-full"
+                                />
+                                <FormField
+                                    name="amenity_ids"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                        <div className="flex flex-wrap gap-2 max-h-52 overflow-y-auto border rounded-md p-2 bg-muted/20">
+                                            {fetchingAmenities && (
+                                                <span className="text-xs text-muted-foreground">Loading amenities...</span>
+                                            )}
+                                            {!fetchingAmenities && amenities.length === 0 && (
+                                                <span className="text-xs text-muted-foreground">No amenities found.</span>
+                                            )}
+                                            {!fetchingAmenities && amenities.map((amenity) => (
+                                                <label
+                                                    key={amenity.id}
+                                                    className="flex items-center gap-2 rounded px-2 py-1 cursor-pointer hover:bg-muted/30 transition text-sm"
+                                                >
+                                                    <Checkbox
+                                                        checked={field.value?.includes(amenity.id) || false}
+                                                        onCheckedChange={checked => {
+                                                            let updated = Array.isArray(field.value) ? [...field.value] : [];
+                                                            if (checked) {
+                                                                updated.push(amenity.id);
+                                                            } else {
+                                                                updated = updated.filter(id => id !== amenity.id);
+                                                            }
+                                                            field.onChange(updated);
+                                                        }}
+                                                        className="cursor-pointer"
+                                                        id={`amenity-${amenity.id}`}
+                                                    />
+                                                    {/* Lucide Icon (if provided) */}
+                                                    {amenity.icon && (
+                                                        <span className="text-muted-foreground">
+                                                            <i className={`lucide lucide-${amenity.icon.toLowerCase()}`}></i>
+                                                        </span>
+                                                    )}
+                                                    <span>{amenity.name}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                />
+                                <FormMessage />
+                            </FormItem>
                             <DialogFooter>
                                 <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
                                     Cancel
