@@ -11,6 +11,11 @@ import { formatCurrency } from "../utils/currency";
 import { Link } from "react-router-dom";
 import RoomBlock from "../components/common/RoomBlock";
 import ResortPolicyDialog from "../components/common/ResortPolicyDialog";
+import * as lucideIcons from "lucide-react";
+
+const iconsModule = lucideIcons.default || lucideIcons;
+const ICON_OPTIONS = Object.keys(iconsModule).sort();
+
 export default function Rooms() {
     const { data: rooms, isLoading, isError, error, refetch, status } = useRooms();
 
@@ -60,7 +65,7 @@ export default function Rooms() {
                 {!isLoading && !isError && (
                     <div className="mt-20 space-y-16">
                         {rooms?.data.map((room, i) => (
-                            <RoomBlock key={room.slug} room={room} reverse={i % 2 === 1} />
+                            <RoomBlock key={room.slug} room={room} reverse={i % 2 === 1} iconsModule={iconsModule} />
                         ))}
                     </div>
                 )}

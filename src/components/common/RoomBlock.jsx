@@ -16,7 +16,7 @@ import { roomPhotos } from "@/data/rooms";
 import { formatCurrency } from "../../utils/currency";
 import { facilityIcons } from "../../assets/assets";
 
-export default function RoomBlock({ room, index, reverse }) {
+export default function RoomBlock({ room, index, reverse, iconsModule }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
     return (
         <motion.article
@@ -35,6 +35,15 @@ export default function RoomBlock({ room, index, reverse }) {
                 <div className="lg:w-1/2 w-full h-100 lg:h-auto">
                     <Carousel className="w-full h-full">
                         <CarouselContent>
+                            {room?.images?.map((img, idx) => (
+                                <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
+                                    <img
+                                        src={img?.secure_image_url}
+                                        alt={`${img?.name}-${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </CarouselItem>
+                            ))}
                             {photos.map((src, idx) => (
                                 <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
                                     <img
@@ -63,12 +72,18 @@ export default function RoomBlock({ room, index, reverse }) {
                     {/* Amenities */}
                     {room.amenities?.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
-                            {room.amenities.slice(0, 6).map((am, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-sm">
-                                    <img src={facilityIcons[am?.name]} alt={am?.name} className='w-5 h-5' />
-                                    {am.name}
-                                </Badge>
-                            ))}
+                            {room.amenities.slice(0, 6)
+                                .map((am, idx) => {
+                                    const Icon = iconsModule[am.icon] || iconsModule.HelpCircle;
+                                    return (
+                                        <Badge key={idx} variant="secondary" className="text-sm">
+                                            <Icon className="w-5 h-5" />
+                                            {/* <img src={facilityIcons[am?.name]} alt={am?.name} className='w-5 h-5' /> */}
+                                            {am.name}
+                                        </Badge>
+                                    )
+                                }
+                                )}
                             {room.amenities.length > 6 && (
                                 <Badge variant="outline" className="text-xs">+{room.amenities.length - 6}</Badge>
                             )}
@@ -95,16 +110,16 @@ export default function RoomBlock({ room, index, reverse }) {
                     <div className="mt-auto flex space-x-3">
                         <Link
                             to={`/rooms/${room.slug}`}
-                            onClick={() => scrollTo(0, 0)} 
+                            onClick={() => scrollTo(0, 0)}
                             className="inline-block px-6 py-2 font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700"
                         >
                             View Details
                         </Link>
-                        <Button variant="outline" asChild>
+                        {/* <Button variant="outline" asChild>
                             <a href="#" onClick={(e) => e.preventDefault()}>
                                 Book Now
                             </a>
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
             </div>
