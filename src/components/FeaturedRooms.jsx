@@ -37,7 +37,7 @@ const FeaturedRooms = () => {
                 <div className="max-w-6xl mx-auto px-4 grid gap-6 mt-20 auto-rows-fr 
                         grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                     {featuredRooms?.map((room, index) => (
-                        <RoomCard key={room.id} room={room} index={index} />
+                        <RoomCard key={index} room={room} index={index} />
                     ))}
                     
                     {!isLoading && featuredRooms?.length === 0 && (

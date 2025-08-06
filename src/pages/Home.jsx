@@ -2,9 +2,8 @@ import React from 'react'
 import Hero from '../components/Hero'
 import FeaturedRooms from '../components/FeaturedRooms'
 import ExclusiveOffers from '@/components/exclusive-offer/ExclusiveOffers'
-import Testimonial from '../components/Testimonial'
 import NewsLetter from '../components/NewsLetter'
-import Footer from '../components/Footer'
+import { TestimonialsSection } from '@/components/testimonials'
 
 const Home = () => {
     return (
@@ -12,7 +11,7 @@ const Home = () => {
             <Hero />
             <FeaturedRooms />
             <ExclusiveOffers />
-            <Testimonial />
+            <TestimonialsSection />
             <NewsLetter />
         </>
     )

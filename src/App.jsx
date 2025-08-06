@@ -26,6 +26,7 @@ import ListPromos from './pages/admin/promos/ListPromos';
 import ListMeals from './pages/admin/meals/ListMeals';
 import ListUsers from './pages/admin/users/ListUsers';
 import ManageImages from './pages/admin/images/ManageImages';
+import LeaveReview from './pages/LeaveReview';
 
 const App = () => {
 
@@ -70,6 +71,10 @@ const App = () => {
                 element={<BookingDetailsPage />}
               />
               <Route
+                path='/booking/:refNo/review'
+                element={<LeaveReview />}
+              />
+              <Route
                 path='/booking/:refNo/payment'
                 element={<PaymentPage />}
               />
@@ -100,7 +105,7 @@ const App = () => {
       )
       }
 
-        {!isAdminPath && <ResortPolicyDialog />}
+      {!isAdminPath && <ResortPolicyDialog />}
       {/* <ResortPolicyDialog /> */}
       <Toaster position="top-right" richColors closeButton expand={true} />
     </>
