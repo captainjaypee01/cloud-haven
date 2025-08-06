@@ -22,6 +22,7 @@ import { useApi } from "@/hooks/useApi";
 import { Separator } from "@radix-ui/react-select";
 import { API_PREFIX } from "@/constants/api";
 import SeaWaveBg from "../components/common/SeaWaveBg";
+import { useState } from "react";
 
 const FormSchema = z.object({
     fullName: z.string().min(1, { message: "Full name is required" }),
@@ -35,6 +36,9 @@ const CheckoutPage = () => {
     const { navigate } = useAppContext();
     const { show, hide } = useLoader();
     const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost } = useCartSummary();
+    const [promoCode, setPromoCode] = useState("");
+    const [promoInfo, setPromoInfo] = useState(null);  // store applied promo details
+    const [promoError, setPromoError] = useState("");
     const api = useApi();
 
     const form = useForm({
@@ -65,6 +69,10 @@ const CheckoutPage = () => {
             total_adults: totalAdults,
             total_children: totalChildren
         };
+        if (promoInfo) {
+            bookingPayload.promo_id = promoInfo.id;
+        }
+        
         try {
             const bookingRes = await api.post(`${API_PREFIX}/bookings`, bookingPayload, {
                 headers: { "Content-Type": "application/json" },
@@ -91,12 +99,69 @@ const CheckoutPage = () => {
         }
     };
 
+    const handleApplyPromo = async () => {
+        setPromoError("");
+        if (!promoCode) return;
+        try {
+            const res = await api.get(`${API_PREFIX}/promos/${promoCode}`);
+            const promo = res.data;
+            // Compute discount based on promo.scope
+            let discountAmount = 0;
+            if (promo.discount_type === 'percentage') {
+                if (promo.scope === 'room') {
+                    discountAmount = roomTotalPrice * (promo.discount_value / 100);
+                } else if (promo.scope === 'meal') {
+                    discountAmount = mealCost * (promo.discount_value / 100);
+                } else { // 'total'
+                    discountAmount = grandTotal * (promo.discount_value / 100);
+                }
+            } else if (promo.discount_type === 'fixed') {
+                if (promo.scope === 'room') {
+                    discountAmount = Math.min(promo.discount_value, roomTotalPrice);
+                } else if (promo.scope === 'meal') {
+                    discountAmount = Math.min(promo.discount_value, mealCost);
+                } else {
+                    discountAmount = Math.min(promo.discount_value, grandTotal);
+                }
+            }
+            discountAmount = Math.round(discountAmount * 100) / 100; // round to 2 decimals
+            setPromoInfo({ ...promo, discountAmount });
+        } catch (err) {
+            console.error(err);
+            setPromoInfo(null);
+            if (err.response?.status === 404) {
+                setPromoError("Promo code not found.");
+            } else {
+                setPromoError(err.response?.data?.message || "Promo code invalid.");
+            }
+        }
+    };
     return (
         <div className="relative min-h-screen pb-[200px] py-16 px-2 md:px-8 lg:px-32 mt-10 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
             <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
                 {/* -- Summary Section -- */}
                 <aside className="md:col-span-1 bg-gray-50 rounded-xl shadow-lg p-6 flex flex-col gap-6 static top-auto h-auto md:sticky md:top-24 md:h-fit">
                     <h2 className="text-xl font-semibold mb-2">Booking Summary</h2>
+
+                    {/* Promo code field */}
+                    <div className="flex items-center gap-2 mt-2">
+                        <Input
+                            type="text"
+                            placeholder="Promo code"
+                            value={promoCode}
+                            onChange={e => setPromoCode(e.target.value)}
+                            className="w-40"
+                        />
+                        <Button type="button" onClick={handleApplyPromo}>Apply</Button>
+                    </div>
+                    {promoError && <p className="text-xs text-red-600 mt-1">{promoError}</p>}
+                    {promoInfo && (
+                        <p className="text-sm text-green-600 mt-1">
+                            Promo "{promoInfo.code}" applied – {promoInfo.discount_type === 'percentage'
+                                ? `${promoInfo.discount_value}% off`
+                                : `${formatCurrency(promoInfo.discount_value)} off`}!
+                        </p>
+                    )}
                     <div className="space-y-1 text-sm">
                         <div className="flex justify-between">
                             <span>Check-in date</span>
@@ -137,9 +202,21 @@ const CheckoutPage = () => {
                         <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
                         <span>{formatCurrency(mealCost)}</span>
                     </div>
+                    {/* ... previous total room price and meal price lines ... */}
+                    {promoInfo && promoInfo.discountAmount > 0 && (
+                        <div className="flex justify-between text-sm font-medium text-green-600">
+                            <span>Promo Discount ({promoInfo.code}):</span>
+                            <span>-{formatCurrency(promoInfo.discountAmount)}</span>
+                        </div>
+                    )}
                     <div className="mt-4 flex justify-between border-t pt-4 font-bold text-lg">
-                        <span>Grand Total</span>
-                        <span>{formatCurrency(grandTotal)}</span>
+                        <span>Grand Total</span><span>
+                            {formatCurrency(
+                                promoInfo
+                                    ? Math.max(0, grandTotal - (promoInfo.discountAmount || 0))
+                                    : grandTotal
+                            )}
+                        </span>
                     </div>
                 </aside>
                 {/* -- Guest Info -- */}
