@@ -39,6 +39,12 @@ const FeaturedRooms = () => {
                     {featuredRooms?.map((room, index) => (
                         <RoomCard key={room.id} room={room} index={index} />
                     ))}
+                    
+                    {!isLoading && featuredRooms?.length === 0 && (
+                        <p className="text-gray-600 text-sm italic mt-6">
+                            No featured rooms available at the moment.
+                        </p>
+                    )}
                 </div>
             )}
 
