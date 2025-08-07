@@ -9,9 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import SeaWaveBg from '../components/common/SeaWaveBg';
 import { useLoader } from "@/context/LoaderContext";
+import { AlertCircleIcon } from 'lucide-react';
+import { useAppContext } from '@/context/AppContext'
 
 const LeaveReview = () => {
     const { refNo } = useParams();
+    const { navigate, user } = useAppContext();
     const api = useApi();
     const { show, hide } = useLoader();
     const [booking, setBooking] = useState(null);
@@ -20,9 +23,9 @@ const LeaveReview = () => {
     const [resortComment, setResortComment] = useState('');
     const [roomRatings, setRoomRatings] = useState({});   // { roomId: rating }
     const [roomComments, setRoomComments] = useState({}); // { roomId: comment }
-
     useEffect(() => {
         // Fetch booking details to know which rooms were booked
+        show();
         api.get(`${API_PREFIX}/bookings/ref/${refNo}`)
             .then(res => {
                 setBooking(res.data);
@@ -43,7 +46,7 @@ const LeaveReview = () => {
                 console.error('Failed to load booking info', err);
                 toast.error("Failed to load booking information.");
             })
-            .finally(() => setLoading(false));
+            .finally(() => { setLoading(false); hide(); });
     }, [refNo]);
 
     const handleSubmit = async (e) => {
@@ -63,15 +66,74 @@ const LeaveReview = () => {
             // Optionally redirect or clear form
         } catch (err) {
             console.error(err);
-            toast.error(err.response?.data?.message || "Failed to submit review.");
+            toast.error(err.response?.data?.error || "Failed to submit review.");
         } finally {
             hide();
         }
 
     };
+    if (loading) return (
 
-    if (loading) return <p>Loading...</p>;
-    if (!booking) return <p className="text-red-600">Booking not found or inaccessible.</p>;
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SeaWaveBg />
+            <p>Loading...</p>
+        </div >
+    );
+
+    if (!user) return (
+
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SeaWaveBg />
+            <AlertCircleIcon className="h-8 w-8 text-red-500" />
+            <p className="text-red-600 text-lg font-medium">
+                {"You are not authorized to make a review"}
+            </p>
+            <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+                className=""
+            >
+                Go back to Home
+            </Button>
+        </div>
+    );
+
+    if (!booking) return (
+
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SeaWaveBg />
+            <AlertCircleIcon className="h-8 w-8 text-red-500" />
+            <p className="text-red-600 text-lg font-medium">
+                {"Booking not found or inaccessible."}
+            </p>
+            <Button
+                variant="outline"
+                onClick={() => navigate('/')}
+                className=""
+            >
+                Go back to Home
+            </Button>
+        </div>
+    );
+
+
+    if (booking?.is_reviewed) return (
+
+        <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SeaWaveBg />
+            <AlertCircleIcon className="h-8 w-8 text-amber-500" />
+            <p className="text-amber-300 text-lg font-medium">
+                {"The booking has already been reviewed."}
+            </p>
+            <Button
+                variant="outline"
+                onClick={() => navigate(`/booking/${refNo}`)}
+                className=""
+            >
+                Go back to Home
+            </Button>
+        </div >
+    )
 
     // Assuming booking data has a guest_name and booking_rooms with room details
     const uniqueRooms = [];
@@ -84,6 +146,7 @@ const LeaveReview = () => {
     return (
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
             <SeaWaveBg />
+
 
             <div className="relative z-10 w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-20">
                 <h1 className="text-2xl font-semibold mb-4">Leave a Review for Booking #{booking.reference_number}</h1>
