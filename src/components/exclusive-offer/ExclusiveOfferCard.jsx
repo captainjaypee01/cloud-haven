@@ -61,7 +61,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
                 type="button"
             >
                 View Offer
-                <ArrowRightIcon className={hasImage ? "text-white" : "text-gray-600"} size={18} />
+                <ArrowRightIcon className={!hasImage ? "text-white" : "text-gray-600"} size={18} />
             </Button>
         </div>
     );
