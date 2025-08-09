@@ -27,6 +27,9 @@ import ListMeals from './pages/admin/meals/ListMeals';
 import ListUsers from './pages/admin/users/ListUsers';
 import ManageImages from './pages/admin/images/ManageImages';
 import LeaveReview from './pages/LeaveReview';
+import ContactUsPage from './pages/ContactUs';
+import AboutUs from './pages/AboutUs';
+import Policies from './pages/Policies';
 
 const App = () => {
 
@@ -51,8 +54,16 @@ const App = () => {
                 element={<RoomsPage />}
               />
               <Route
-                path='/rooms-page'
-                element={<RoomsPage />}
+                path='/about-us'
+                element={<AboutUs />}
+              />
+              <Route
+                path='/contact-us'
+                element={<ContactUsPage />}
+              />
+              <Route
+                path='/policy'
+                element={<Policies />}
               />
               <Route
                 path='/rooms/:roomId'
