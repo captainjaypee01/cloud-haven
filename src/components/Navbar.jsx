@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { assets } from "../assets/assets";
+// import { assets } from "../assets/assets"; // deprecated: migrating to Lucide icons
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import { CartPopup } from "./CartPopup";
+import { Menu, X } from "lucide-react";
 
 const BookIcon = () => (
     <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
@@ -57,6 +58,12 @@ const Navbar = () => {
                         <div className={`${isScrolled ? "bg-gray-700" : "bg-gray-700"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
                     </a>
                 ))}
+                {user && (
+                    <a href="/my-bookings" className={`group flex flex-col gap-0.5 ${isScrolled ? "text-gray-700" : "text-white"}`}>
+                        My Bookings
+                        <div className={`${isScrolled ? "bg-gray-700" : "bg-gray-700"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
+                    </a>
+                )}
                 {user &&
                     <button className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? "text-gray-700" : "text-white"} transition-all`} onClick={() => navigate('/admin')}>
                         Dashboard
@@ -97,14 +104,20 @@ const Navbar = () => {
                         </UserButton.MenuItems>
                     </UserButton>
                 }
-                <img src={assets.menuIcon} alt="" className={`${isScrolled && 'invert'} h-4 cursor-pointer`} onClick={() => setIsMenuOpen(!isMenuOpen)} />
+                <button onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label="Toggle Menu">
+                    {isMenuOpen ? (
+                        <X className={`${isScrolled ? 'text-gray-700' : ''} h-6 w-6`} />
+                    ) : (
+                        <Menu className={`${isScrolled ? 'text-gray-700' : ''} h-6 w-6`} />
+                    )}
+                </button>
             </div>
 
             {/* Mobile Menu */}
             <div className={`fixed top-0 left-0 w-full h-screen bg-white text-base flex flex-col md:hidden items-center justify-center gap-6 font-medium text-gray-800 transition-all duration-500 ${isMenuOpen ? "translate-x-0" : "-translate-x-full"}`}>
 
-                <button className="absolute top-4 right-4" onClick={() => setIsMenuOpen(false)}>
-                    <img src={assets.closeIcon} alt="close-menu" className="h-6.5" />
+                <button className="absolute top-4 right-4" onClick={() => setIsMenuOpen(false)} aria-label="Close Menu">
+                    <X className="h-7 w-7" />
                 </button>
 
                 {navLinks.map((link, i) => (
@@ -112,6 +125,12 @@ const Navbar = () => {
                         {link.name}
                     </a>
                 ))}
+
+                {user && (
+                    <a href="/my-bookings" onClick={() => setIsMenuOpen(false)}>
+                        My Bookings
+                    </a>
+                )}
 
 
                 {user && <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={() => navigate('/admin')}>
