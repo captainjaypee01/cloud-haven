@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 // import { assets } from "../assets/assets"; // deprecated: migrating to Lucide icons
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import { CartPopup } from "./CartPopup";
-import { Menu, X } from "lucide-react";
+import { Book, BookAIcon, BookDownIcon, LayoutDashboard, Menu, X } from "lucide-react";
 
 const BookIcon = () => (
     <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
@@ -14,7 +14,9 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Accommodations', path: '/rooms' },
-        { name: 'About', path: '/' },
+        { name: 'About Us', path: '/about-us' },
+        { name: 'Policy', path: '/policy' },
+        { name: 'Contact Us', path: '/contact-us' },
     ];
 
     const [isScrolled, setIsScrolled] = useState(false);
@@ -58,17 +60,6 @@ const Navbar = () => {
                         <div className={`${isScrolled ? "bg-gray-700" : "bg-gray-700"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
                     </a>
                 ))}
-                {user && (
-                    <a href="/my-bookings" className={`group flex flex-col gap-0.5 ${isScrolled ? "text-gray-700" : "text-white"}`}>
-                        My Bookings
-                        <div className={`${isScrolled ? "bg-gray-700" : "bg-gray-700"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
-                    </a>
-                )}
-                {user &&
-                    <button className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? "text-gray-700" : "text-white"} transition-all`} onClick={() => navigate('/admin')}>
-                        Dashboard
-                    </button>
-                }
             </div>
 
             {/* Desktop Right */}
@@ -82,7 +73,8 @@ const Navbar = () => {
                 {user ?
                     (<UserButton>
                         <UserButton.MenuItems>
-                            <UserButton.Action label="My Bookings" labelIcon={<BookIcon />} onClick={() => navigate('my-bookings')}></UserButton.Action>
+                            <UserButton.Action label="Dashboard" labelIcon={<LayoutDashboard />} onClick={() => navigate('/admin')}></UserButton.Action>
+                            <UserButton.Action label="My Bookings" labelIcon={<Book />} onClick={() => navigate('my-bookings')}></UserButton.Action>
                         </UserButton.MenuItems>
                     </UserButton>)
                     :
@@ -100,7 +92,8 @@ const Navbar = () => {
                 {user &&
                     <UserButton>
                         <UserButton.MenuItems>
-                            <UserButton.Action label="My Bookings" labelIcon={<BookIcon />} onClick={() => navigate('my-bookings')}></UserButton.Action>
+                            <UserButton.Action label="Dashboard" labelIcon={<LayoutDashboard />} onClick={() => navigate('/admin')}></UserButton.Action>
+                            <UserButton.Action label="My Bookings" labelIcon={<Book />} onClick={() => navigate('my-bookings')}></UserButton.Action>
                         </UserButton.MenuItems>
                     </UserButton>
                 }
@@ -125,18 +118,6 @@ const Navbar = () => {
                         {link.name}
                     </a>
                 ))}
-
-                {user && (
-                    <a href="/my-bookings" onClick={() => setIsMenuOpen(false)}>
-                        My Bookings
-                    </a>
-                )}
-
-
-                {user && <button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={() => navigate('/admin')}>
-                    Dashboard
-                </button>
-                }
 
                 <a href="/cart" className="">
                     🛒 View Cart
