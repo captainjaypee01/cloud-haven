@@ -49,7 +49,7 @@ export function RoomDetailModal({ roomId, open, onOpenChange }) {
 
                         <Carousel opts={{ loop: true, align: "center" }} className="my-4 h-64">
                             <CarouselContent>
-                                {roomPhotos.map((src, i) => (
+                                {(room?.images?.length ? room.images.map((img) => img?.secure_image_url || img?.url || img) : roomPhotos).map((src, i) => (
                                     <CarouselItem key={i} className="h-64">
                                         <img
                                             src={src}
