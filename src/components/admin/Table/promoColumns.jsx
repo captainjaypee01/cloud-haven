@@ -5,7 +5,7 @@ import { formatCurrency } from "@/utils/currency";
 import { formatDate } from '@/lib/format';
 
 // Accept handler functions as parameters
-export const promoColumns = ({ onEdit, onDelete, onStatusChange, selectedIds, toggleSelect, toggleSelectAll }) => {
+export const promoColumns = ({ onEdit, onDelete, onStatusChange, onExclusiveChange, selectedIds, toggleSelect, toggleSelectAll }) => {
     const allSelected = selectedIds.length > 0 && selectedIds.length === /** total rows on current page **/ selectedIds.length;
     return [
         {
@@ -29,6 +29,16 @@ export const promoColumns = ({ onEdit, onDelete, onStatusChange, selectedIds, to
             accessorKey: "code",
             header: "Code",
             cell: ({ row }) => row.original.code,
+        },
+        {
+          accessorKey: 'title',
+          header: 'Title',
+          cell: ({ row }) => row.original.title || '—',
+        },
+        {
+          accessorKey: 'scope',
+          header: 'Scope',
+          cell: ({ row }) => row.original.scope || '—',
         },
         {
             id: "discount",
@@ -55,6 +65,17 @@ export const promoColumns = ({ onEdit, onDelete, onStatusChange, selectedIds, to
             accessorKey: "uses_count",
             header: "Used",
             cell: ({ row }) => row.original.uses_count ?? 0,
+        },
+        {
+            id: 'exclusive',
+            header: 'Exclusive',
+            cell: ({ row }) => (
+                <Switch
+                    checked={!!row.original.exclusive}
+                    onCheckedChange={() => onExclusiveChange(row.original)}
+                    className="cursor-pointer"
+                />
+            ),
         },
         {
             id: "active",
