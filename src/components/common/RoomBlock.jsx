@@ -15,9 +15,21 @@ import { Link } from "react-router-dom";
 import { roomPhotos } from "@/data/rooms";
 import { formatCurrency } from "../../utils/currency";
 import { facilityIcons } from "../../assets/assets";
+import { useState, useCallback } from "react";
+import { useCart } from "@/context/CartContext";
+import RequireDatesDialog from "@/components/common/RequireDatesDialog";
 
 export default function RoomBlock({ room, index, reverse, iconsModule }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
+    const { state } = useCart();
+    const [showDatesDialog, setShowDatesDialog] = useState(false);
+
+    const handleViewDetailsClick = useCallback((e) => {
+        if (!state.checkIn || !state.checkOut) {
+            e.preventDefault();
+            setShowDatesDialog(true);
+        }
+    }, [state.checkIn, state.checkOut]);
     return (
         <motion.article
             initial={{ opacity: 0, y: 40 }}
@@ -110,7 +122,7 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                     <div className="mt-auto flex space-x-3">
                         <Link
                             to={`/rooms/${room.slug}`}
-                            onClick={() => scrollTo(0, 0)}
+                            onClick={handleViewDetailsClick}
                             className="inline-block px-6 py-2 font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700"
                         >
                             View Details
@@ -123,6 +135,11 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                     </div>
                 </div>
             </div>
+            <RequireDatesDialog
+                open={showDatesDialog}
+                onOpenChange={setShowDatesDialog}
+                targetHref={`/rooms/${room.slug}`}
+            />
         </motion.article>
     );
 }

@@ -14,9 +14,11 @@ export function ThemeProvider({ children }) {
             setTheme(stored);
             document.documentElement.classList.toggle("dark", stored === "dark");
         } else {
-            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            setTheme(prefersDark ? "dark" : "light");
-            document.documentElement.classList.toggle("dark", prefersDark);
+            setTheme("light");
+            document.documentElement.classList.remove("dark");
+            // const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            // setTheme(prefersDark ? "dark" : "light");
+            // document.documentElement.classList.toggle("dark", prefersDark);
         }
     }, []);
 

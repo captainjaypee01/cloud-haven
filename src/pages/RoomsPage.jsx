@@ -16,7 +16,7 @@ import * as lucideIcons from "lucide-react";
 const iconsModule = lucideIcons.default || lucideIcons;
 const ICON_OPTIONS = Object.keys(iconsModule).sort();
 
-export default function Rooms() {
+export default function RoomsPage() {
     const { data: rooms, isLoading, isError, error, refetch, status } = useRooms();
 
     const heroImages = roomPhotos;

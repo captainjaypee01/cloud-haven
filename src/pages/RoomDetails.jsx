@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { facilityIcons, roomCommonData, roomsDummyData } from '../assets/assets'
 import StarRating from '../components/StarRating'
 import { formatCurrency } from '../utils/currency'
 import { roomPhotos, rooms } from '../data/rooms'
-import { useRoom } from '../queries/rooms'
+import { useRoom, useAvailability } from '../queries/rooms'
 import { useAppContext } from '../context/AppContext'
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircleIcon, ChevronDownIcon } from 'lucide-react'
@@ -15,17 +15,60 @@ import { Input } from "@/components/ui/input";
 import { useCart } from '../context/CartContext'
 import { GuestSelector } from '../components/GuestSelector'
 import { toast } from "sonner"
+import RequireDatesDialog from '@/components/common/RequireDatesDialog'
 
 const RoomDetails = () => {
     const { roomId } = useParams()
     const { navigate } = useAppContext();
-    const { addItem } = useCart();
+    const { addItem, state } = useCart();
     const { data: room, isLoading, isError, error, status } = useRoom(roomId);
     const { control, handleSubmit } = useForm({
         defaultValues: { dateRange: { from: null, to: null }, accommodations: 1, adults: "1", children: "0" },
     });
 
     const [mainImage, setMainImage] = useState(roomPhotos[0])
+    const [requireDatesOpen, setRequireDatesOpen] = useState(false);
+
+    // If no dates selected (direct navigation), prompt user to select
+    useEffect(() => {
+        if (!state?.checkIn || !state?.checkOut) {
+            setRequireDatesOpen(true);
+        }
+    }, [state?.checkIn, state?.checkOut]);
+
+    // Check availability for selected dates
+    const { data: availabilityData } = useAvailability({
+        check_in: state?.checkIn,
+        check_out: state?.checkOut,
+        room_slug: roomId,
+    });
+
+    const availableCount = useMemo(() => {
+        const data = availabilityData;
+        if (!data) return undefined;
+        // Support different shapes defensively
+        if (Array.isArray(data)) {
+            const item = data.find((it) => it.room_slug === roomId || it.roomId === roomId || it.slug === roomId);
+            if (!item) return undefined;
+            return item.available_count ?? (item.available ? 1 : 0);
+        }
+        if (typeof data === 'object') {
+            if (data.available_count != null) return data.available_count;
+            if (data.data) {
+                const inner = data.data;
+                if (Array.isArray(inner)) {
+                    const item = inner.find((it) => it.room_slug === roomId || it.roomId === roomId || it.slug === roomId);
+                    return item ? (item.available_count ?? (item.available ? 1 : 0)) : undefined;
+                }
+                if (typeof inner === 'object' && inner.available_count != null) return inner.available_count;
+            }
+            if (data.available != null) return data.available ? 1 : 0;
+        }
+        return undefined;
+    }, [availabilityData, roomId]);
+
+    const isUnavailable = (availableCount !== undefined && availableCount <= 0);
+
     if (isLoading) {
         return (
             <div className="flex items-center space-x-4">
@@ -72,6 +115,15 @@ const RoomDetails = () => {
                 `Max ${room.max_guests} guests allowed (you have ${totalGuests}). We only allow for ${room.extra_guests} extra guest/s`
             );
         };
+        if (!state?.checkIn || !state?.checkOut) {
+            toast.error('Please select dates first.');
+            setRequireDatesOpen(true);
+            return;
+        }
+        if (isUnavailable) {
+            toast.error('This room is not available for your selected dates.');
+            return;
+        }
         addItem({
             roomId: room.slug,
             name: room.name,
@@ -93,6 +145,17 @@ const RoomDetails = () => {
                 </h1>
                 {/* <p className='text-xs font-inter py-1.5 px-3 text-white bg-orange-500 rounded-full'>20% OFF</p> */}
             </div>
+
+            {/* Availability notice */}
+            {state?.checkIn && state?.checkOut && isUnavailable && (
+                <div className="mt-4 mb-2 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700">
+                    <AlertCircleIcon className="mt-0.5 h-5 w-5 text-red-500" />
+                    <div>
+                        <p className="font-medium">Not available for your selected dates</p>
+                        <p className="text-sm">Please adjust your dates to book this room. Featured rooms are shown even when unavailable.</p>
+                    </div>
+                </div>
+            )}
 
             {/* Room Price */}
             <div className='flex items-center gap-1 mt-2'>
@@ -188,9 +251,17 @@ const RoomDetails = () => {
                     </div>
 
                     <div className="col-span-1 md:col-span-3 lg:col-span-3 w-full">
-                        <Button type="submit" size="lg" className="w-full cursor-pointer">
-                            Book this room
-                        </Button>
+                        {isUnavailable ? (
+                            <div className="flex gap-2 w-full">
+                                <Button type="button" variant="outline" className="w-full cursor-pointer" onClick={() => setRequireDatesOpen(true)}>
+                                    Change dates
+                                </Button>
+                            </div>
+                        ) : (
+                            <Button type="submit" size="lg" className="w-full cursor-pointer">
+                                Book this room
+                            </Button>
+                        )}
                     </div>
                 </form>
             </div>
@@ -226,6 +297,8 @@ const RoomDetails = () => {
                 </div>
             </div>
             <button className="px-6 py-2 5 mt-4 rounded text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer">Contact Now</button>
+
+            <RequireDatesDialog open={requireDatesOpen} onOpenChange={setRequireDatesOpen} />
         </div>
     )
 }
