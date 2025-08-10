@@ -17,9 +17,22 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { roomPhotos } from "@/data/rooms";
 import { formatCurrency } from "../utils/currency";
+import { useState, useCallback } from "react";
+import { useCart } from "@/context/CartContext";
+import RequireDatesDialog from "@/components/common/RequireDatesDialog";
 
 export default function RoomCard({ room, index }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
+    const { state } = useCart();
+    const [showDatesDialog, setShowDatesDialog] = useState(false);
+
+    const handleViewDetailsClick = useCallback((e) => {
+        if (!state.checkIn || !state.checkOut) {
+            e.preventDefault();
+            setShowDatesDialog(true);
+        }
+    }, [state.checkIn, state.checkOut]);
+
     return (
         <motion.article
             initial={{ opacity: 0, y: 40 }}
@@ -67,12 +80,17 @@ export default function RoomCard({ room, index }) {
                     <div className="flex items-center justify-between">
                         <span className="font-semibold">{formatCurrency(room.price)}/night <p className="text-sm text-gray-600 mt-0.5">Max {room.max_guests} guests</p></span>
 
-                        <Link to={`/rooms/${room.slug}`} onClick={() => scrollTo(0, 0)} key={room.slug}>
+                        <Link to={`/rooms/${room.slug}`} onClick={handleViewDetailsClick} key={room.slug}>
                             <Button size="sm" className="cursor-pointer">View Details</Button>
                         </Link>
                     </div>
                 </CardContent>
             </Card>
+            <RequireDatesDialog
+                open={showDatesDialog}
+                onOpenChange={setShowDatesDialog}
+                targetHref={`/rooms/${room.slug}`}
+            />
         </motion.article>
     );
 }

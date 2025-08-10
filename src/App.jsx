@@ -1,10 +1,8 @@
 import React from 'react'
 import Navbar from './components/Navbar'
 import { Route, Routes, useLocation } from 'react-router-dom'
-import Homepage from './pages/Home';
 import Home from './pages/Home';
 import Footer from './components/Footer';
-import Rooms from './pages/Rooms';
 import RoomDetails from './pages/RoomDetails';
 import MyBookings from './pages/MyBookings';
 import Layout from './pages/admin/Layout';

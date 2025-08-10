@@ -44,17 +44,18 @@ const ContactUsPage = () => {
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             {/* Hero Section */}
             <div className="relative w-full">
-                <Carousel className="h-[60vh] md:h-[75vh] w-full" opts={{ loop: true, align: "center" }} plugins={[Autoplay({ delay: 3000, playOnInit: true })]}>
+                <Carousel className="h-screen w-full" opts={{ loop: true, align: "center" }} plugins={[Autoplay({ delay: 3000, playOnInit: true })]}>
                     <CarouselContent>
                         {images.map((url, idx) => (
                             <CarouselItem key={idx}>
-                                <div className="h-[60vh] md:h-[75vh] w-full bg-cover bg-center" style={{ backgroundImage: `url('${url}')` }} />
+                                <div className="h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url('${url}')` }} />
                             </CarouselItem>
                         ))}
                     </CarouselContent>
                 </Carousel>
+                {/* Hero Title Overlay */}
                 <div className="absolute top-1/2 w-full text-center px-4 -translate-y-1/2">
-                    <h1 className="text-4xl md:text-6xl font-bold text-white drop-shadow-lg">Contact Us</h1>
+                    <h1 className="text-4xl md:text-7xl font-bold text-white drop-shadow-lg">Contact Us</h1>
                 </div>
             </div>
 
@@ -119,6 +120,13 @@ const ContactUsPage = () => {
                         We’d love to hear from you! Whether you have a question about our rooms, want to inquire about availability, or need help with anything else, feel free to reach out. You can also connect with us on our social media pages for the latest updates and promotions.
                     </p>
                 </div>
+            </div>
+            <div className="max-w-6xl mx-auto py-16 px-8 md:px-8 lg:px-0 h-96 gap-12">
+                <iframe src="https://storage.googleapis.com/maps-solutions-8l3748yx2v/locator-plus/29gp/locator-plus.html"
+                    width="100%" height="100%"
+                    style={{ border: 0 }}
+                    loading="lazy">
+                </iframe>
             </div>
         </div>
     );
