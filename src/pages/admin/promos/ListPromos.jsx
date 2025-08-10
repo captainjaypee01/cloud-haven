@@ -10,6 +10,8 @@ import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { toast } from 'sonner';
 import { usePromosApi } from '@/hooks/api/usePromosApi';
 
+const MAX_EXCLUSIVE_PROMOS = parseInt(import.meta.env.VITE_MAX_EXCLUSIVE_PROMOS ?? 3, 10) || 3;
+
 const ListPromos = () => {
     const promosApi = usePromosApi();
 
@@ -57,7 +59,8 @@ const ListPromos = () => {
     const handleStatusToggle = async (promo) => {
         setLoading(true);
         try {
-            const newStatus = promo.status === "active" ? "inactive" : "active";
+            const newStatus = promo.active === "active" ? "inactive" : "active";
+            console.log('newStatus', newStatus)
             await promosApi.updateStatus(promo.id, newStatus);
             toast.success(`Promo code "${promo.code}" ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully.`);
             fetchPromos();
@@ -68,6 +71,32 @@ const ListPromos = () => {
         }
     };
 
+    // Exclusive toggle handler
+    const handleExclusiveToggle = async (promo) => {
+        setLoading(true);
+        try {
+            const currentExclusiveCount = data.filter((p) => p.exclusive).length;
+            const willBeExclusive = !promo.exclusive;
+            // If enabling exclusive, ensure we don't exceed the limit
+            if (willBeExclusive && currentExclusiveCount >= MAX_EXCLUSIVE_PROMOS) {
+                toast.error(
+                    `Only ${MAX_EXCLUSIVE_PROMOS} promos can be exclusive at a time.`
+                );
+                return;
+            }
+            await promosApi.updateExclusive(promo.id, willBeExclusive);
+            toast.success(
+                `Promo code "${promo.code}" ${willBeExclusive ? 'marked as exclusive' : 'removed from exclusives'}.`
+            );
+            fetchPromos();
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message || "Could not update exclusive status."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
     // Bulk activation
     const handleBulkActivate = async () => {
         if (selectedIds.length === 0) return;
@@ -122,6 +151,7 @@ const ListPromos = () => {
             onEdit: handleEdit,
             onDelete: handleDeletePrompt,
             onStatusChange: handleStatusToggle,
+            onExclusiveChange: handleExclusiveToggle,
             selectedIds,
             toggleSelect,
             toggleSelectAll

@@ -15,7 +15,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
         expiryText = dt.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     }
 
-    const hasImage = !!offer.image_url;
+    const hasImage = offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg';
     const cardClass = hasImage
         ? "group relative flex flex-col items-start justify-between gap-3 p-6 rounded-xl text-white bg-no-repeat bg-cover bg-center min-h-[260px] cursor-pointer"
         : "group relative flex flex-col items-start justify-between gap-3 p-6 rounded-xl text-gray-800 bg-gray-100 border min-h-[260px] cursor-pointer";
@@ -25,7 +25,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
 
     return (
         <div className={cardClass}
-            style={hasImage ? { backgroundImage: `url(${offer.image_url})` } : {}}
+            style={hasImage ? { backgroundImage: `url(${offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'})` } : { backgroundImage: `url(https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg)` }}
             onClick={onClick}
             tabIndex={0}
             aria-label={`View details for ${offer.title}`}

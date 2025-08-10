@@ -13,5 +13,22 @@ export const usePromosApi = () => {
             api.patch(`${API_PREFIX}/admin/promos/${id}/update-status`, { status }, { requiresAuth: true }),
         bulkUpdateStatus: (ids, status) =>
             api.patch(`${API_PREFIX}/admin/promos/bulk-update-status`, { ids, status }, { requiresAuth: true }),
+        /**
+     * Set or unset a promo as exclusive.  Passing `exclusive=true` will
+     * attempt to mark the promo as one of the exclusive homepage offers.
+     * The backend enforces a limit on the number of exclusive promos
+     * configured via environment variables.  When the limit is reached
+     * additional promos cannot be marked exclusive and an error will be
+     * returned.
+     *
+     * @param {number} id The id of the promo to update
+     * @param {boolean} exclusive Whether the promo should be exclusive
+     */
+        updateExclusive: (id, exclusive) =>
+            api.patch(
+                `${API_PREFIX}/admin/promos/${id}/update-exclusive`,
+                { exclusive },
+                { requiresAuth: true }
+            ),
     };
 };
