@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import RoomBlock from "../components/common/RoomBlock";
 import ResortPolicyDialog from "../components/common/ResortPolicyDialog";
 import * as lucideIcons from "lucide-react";
+import SEO from "@/components/SEO";
 
 const iconsModule = lucideIcons.default || lucideIcons;
 const ICON_OPTIONS = Object.keys(iconsModule).sort();
@@ -23,6 +24,42 @@ export default function RoomsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <SEO
+                title="Rooms and Accommodations in Laiya, Batangas"
+                description="Browse beachfront rooms in Laiya: family rooms, barkada suites, pool-view and oceanfront accommodations at Netania De Laiya."
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/rooms' : 'https://netaniadelaiya.com/rooms'}
+                og={{
+                  title: 'Rooms and Accommodations in Laiya, Batangas',
+                  description: 'Browse beach resort rooms in Laiya: family rooms, barkada suites, and pool-view accommodations at Netania De Laiya.',
+                  url: 'https://netaniadelaiya.com/rooms',
+                }}
+                jsonLd={(function(){
+                  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://netaniadelaiya.com';
+                  const list = Array.isArray(rooms) ? rooms : (rooms?.data || []);
+                  const items = list.slice(0, 20).map((r, i) => ({
+                    '@type': 'ListItem',
+                    position: i + 1,
+                    url: `${origin}/rooms/${r.slug || r.id}`,
+                    name: r.name
+                  }));
+                  return [
+                    {
+                      '@context': 'https://schema.org',
+                      '@type': 'BreadcrumbList',
+                      itemListElement: [
+                        { '@type': 'ListItem', position: 1, name: 'Home', item: origin },
+                        { '@type': 'ListItem', position: 2, name: 'Rooms', item: `${origin}/rooms` },
+                      ]
+                    },
+                    {
+                      '@context': 'https://schema.org',
+                      '@type': 'ItemList',
+                      name: 'Rooms and Accommodations',
+                      itemListElement: items
+                    }
+                  ];
+                })()}
+            />
             <RoomsHero imageUrls={heroImages} />
             <div className="absolute inset-x-0 bottom-0 transform translate-y-1/2 px-4 z-10">
 

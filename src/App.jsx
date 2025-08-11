@@ -28,6 +28,7 @@ import LeaveReview from './pages/LeaveReview';
 import ContactUsPage from './pages/ContactUs';
 import AboutUs from './pages/AboutUs';
 import Policies from './pages/Policies';
+import SEO from './components/SEO';
 
 const App = () => {
 
@@ -36,6 +37,8 @@ const App = () => {
   // console.log('isComingSoon', isComingSoon, import.meta.env.VITE_COMING_SOON_FLAG)
   return (
     <>
+      {/* Default sitewide SEO fallbacks (no twitter) */}
+      <SEO />
       {isComingSoon ? (
         <ComingSoon />
       ) : (

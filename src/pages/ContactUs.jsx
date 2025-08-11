@@ -1,5 +1,6 @@
 // src/pages/ContactUsPage.jsx
 import React from "react";
+import SEO from "@/components/SEO";
 import {
     Carousel,
     CarouselContent,
@@ -42,6 +43,31 @@ const ContactUsPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <SEO
+                title="Contact Netania De Laiya"
+                description="Contact our Laiya beachfront resort for bookings, inquiries, group reservations, and event venue availability. Call +63 949 798 9831 or email info@netaniadelaiya.com."
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://netaniadelaiya.com/contact-us'}
+                og={{ url: 'https://netaniadelaiya.com/contact-us' }}
+                jsonLd={{
+                  '@context': 'https://schema.org',
+                  '@type': 'LodgingBusiness',
+                  name: 'Netania De Laiya',
+                  url: 'https://netaniadelaiya.com/contact-us',
+                  telephone: '+63 949 798 9831',
+                  email: 'info@netaniadelaiya.com',
+                  address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                    addressLocality: 'San Juan',
+                    addressRegion: 'Batangas',
+                    addressCountry: 'PH'
+                  },
+                  sameAs: [
+                    'https://www.facebook.com/profile.php?id=100064182843841',
+                    'https://www.instagram.com/netaniadelaiya/'
+                  ]
+                }}
+            />
             {/* Hero Section */}
             <div className="relative w-full">
                 <Carousel className="h-screen w-full" opts={{ loop: true, align: "center" }} plugins={[Autoplay({ delay: 3000, playOnInit: true })]}>

@@ -11,6 +11,7 @@ import SeaWaveBg from '../components/common/SeaWaveBg';
 import { useLoader } from "@/context/LoaderContext";
 import { AlertCircleIcon } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext'
+import SEO from '@/components/SEO'
 
 const LeaveReview = () => {
     const { refNo } = useParams();
@@ -75,6 +76,7 @@ const LeaveReview = () => {
     if (loading) return (
 
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SEO title="Leave a Review" description="Share your experience at Netania De Laiya." noindex={true} />
             <SeaWaveBg />
             <p>Loading...</p>
         </div >
@@ -83,6 +85,7 @@ const LeaveReview = () => {
     if (!user) return (
 
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SEO title="Leave a Review" description="Share your experience at Netania De Laiya." noindex={true} />
             <SeaWaveBg />
             <AlertCircleIcon className="h-8 w-8 text-red-500" />
             <p className="text-red-600 text-lg font-medium">
@@ -101,6 +104,7 @@ const LeaveReview = () => {
     if (!booking) return (
 
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
+            <SEO title="Leave a Review" description="Share your experience at Netania De Laiya." noindex={true} />
             <SeaWaveBg />
             <AlertCircleIcon className="h-8 w-8 text-red-500" />
             <p className="text-red-600 text-lg font-medium">
