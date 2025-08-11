@@ -1,5 +1,6 @@
 // src/pages/AboutUs.jsx
 import React from "react";
+import SEO from "@/components/SEO";
 import {
     Carousel,
     CarouselContent,
@@ -13,6 +14,34 @@ const AboutUs = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <SEO
+                title="About Netania De Laiya Resort"
+                description="Learn about Netania De Laiya, a beachfront resort in Laiya, San Juan, Batangas with beach access, a swimming pool, and hotel-style rooms for families, couples, and groups."
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/about-us' : 'https://netaniadelaiya.com/about-us'}
+                og={{ url: 'https://netaniadelaiya.com/about-us' }}
+                jsonLd={{
+                  '@context': 'https://schema.org',
+                  '@type': 'Resort',
+                  name: 'Netania De Laiya',
+                  url: 'https://netaniadelaiya.com/about-us',
+                  sameAs: [
+                    'https://www.facebook.com/profile.php?id=100064182843841',
+                    'https://www.instagram.com/netaniadelaiya/'
+                  ],
+                  address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                    addressLocality: 'San Juan',
+                    addressRegion: 'Batangas',
+                    addressCountry: 'PH'
+                  },
+                  hasAmenityFeature: [
+                    { '@type': 'LocationFeatureSpecification', name: 'Beachfront access' },
+                    { '@type': 'LocationFeatureSpecification', name: 'Swimming pool' },
+                    { '@type': 'LocationFeatureSpecification', name: 'Hotel-style rooms' }
+                  ]
+                }}
+            />
             {/* Hero Section */}
             <div className="relative w-full">
                 <Carousel className="h-screen w-full" opts={{ loop: true, align: "center" }} plugins={[Autoplay({ delay: 3000, playOnInit: true })]}>

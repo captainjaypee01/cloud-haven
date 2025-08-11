@@ -16,6 +16,7 @@ import { useCart } from '../context/CartContext'
 import { GuestSelector } from '../components/GuestSelector'
 import { toast } from "sonner"
 import RequireDatesDialog from '@/components/common/RequireDatesDialog'
+import SEO from '@/components/SEO'
 
 const RoomDetails = () => {
     const { roomId } = useParams()
@@ -137,6 +138,54 @@ const RoomDetails = () => {
 
     return room && (
         <div className='py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32'>
+            <SEO
+                title={`${room.name} in Laiya, Batangas`}
+                description={room.short_description || room.description}
+                canonical={typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : undefined}
+                og={{
+                  title: room.name,
+                  description: room.short_description || room.description,
+                  image: mainImage,
+                  type: 'product',
+                  url: typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : `https://netaniadelaiya.com/rooms/${room.slug || roomId}`
+                }}
+                jsonLd={[
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://netaniadelaiya.com/' },
+                      { '@type': 'ListItem', position: 2, name: 'Rooms', item: 'https://netaniadelaiya.com/rooms' },
+                      { '@type': 'ListItem', position: 3, name: room.name, item: `https://netaniadelaiya.com/rooms/${room.slug || roomId}` }
+                    ]
+                  },
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'HotelRoom',
+                    name: room.name,
+                    description: room.short_description || room.description,
+                    image: mainImage,
+                    url: `https://netaniadelaiya.com/rooms/${room.slug || roomId}`,
+                    offers: {
+                      '@type': 'Offer',
+                      priceCurrency: 'PHP',
+                      price: room.price,
+                      availability: isUnavailable ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'
+                    },
+                    containedInPlace: {
+                      '@type': 'Resort',
+                      name: 'Netania De Laiya',
+                      address: {
+                        '@type': 'PostalAddress',
+                        streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                        addressLocality: 'San Juan',
+                        addressRegion: 'Batangas',
+                        addressCountry: 'PH'
+                      }
+                    }
+                  }
+                ]}
+            />
 
             {/* Room Details */}
             <div className='flex flex-col md:flex-row items-start md:items-center gap-2'>

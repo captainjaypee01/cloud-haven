@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import SEO from "@/components/SEO";
 import { useCart } from "../context/CartContext";
 import { GuestSelector } from "../components/GuestSelector";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ const Cart = () => {
 
     return (
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center mt-10 py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <SEO title="Cart" description="Your selected rooms and booking details." noindex={true} />
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 bg-white rounded-2xl shadow-lg p-6 md:p-10 mt-10">
                 {/* Left: Detailed summary */}
                 <div className="lg:col-span-2">

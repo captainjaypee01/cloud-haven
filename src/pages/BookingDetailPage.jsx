@@ -15,6 +15,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import * as bookingsSvc from "@/services/bookings";
 import { toast } from "sonner";
 import { Separator } from "@radix-ui/react-select";
+import SEO from "@/components/SEO";
 
 const statusColor = status => {
     switch (status) {
@@ -88,6 +89,7 @@ const UnifiedBookingResultPage = () => {
 
     return (
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden ">
+            <SEO title="Booking Details" description="View your Netania De Laiya booking details." noindex={true} />
             <SeaWaveBg />
             <div className="relative z-10 w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-20">
                 {user && (

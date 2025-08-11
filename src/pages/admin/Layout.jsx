@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import AppSidebar from "@/components/admin/AppSidebar";
+import SEO from "@/components/SEO";
 import {
     SidebarInset,
     SidebarProvider,
@@ -13,6 +14,8 @@ import DynamicBreadcrumb from "@/components/admin/DynamicBreadcrumb";
 export default function Layout() {
     return (
         <SidebarProvider>
+            {/* Prevent indexing of admin routes */}
+            <SEO title="Admin" noindex={true} />
             <AppSidebar />
             <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">

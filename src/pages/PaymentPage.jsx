@@ -7,6 +7,7 @@ import { useLoader } from "@/context/LoaderContext";
 import { toast } from "sonner";
 import { API_PREFIX } from "@/constants/api";
 import SeaWaveBg from "../components/common/SeaWaveBg";
+import SEO from "@/components/SEO";
 
 /**
  * PaymentPage: /booking/:refNo/payment
@@ -80,6 +81,7 @@ const PaymentPage = () => {
     if (booking.status === "paid" || booking.status === "completed") {
         return (
             <div className="max-w-xl mx-auto py-24 mt-20">
+                <SEO title="Booking Payment" description="Pay for your Netania De Laiya booking." noindex={true} />
                 <h2 className="text-2xl font-bold mb-4 text-cyan-700">This booking is already fully paid!</h2>
                 <Button onClick={() => navigate(`/booking/${refNo}`)} className="cursor-pointer">View Booking Details</Button>
             </div>
@@ -88,6 +90,7 @@ const PaymentPage = () => {
     if (["cancelled", "expired"].includes(booking.status)) {
         return (
             <div className="max-w-xl mx-auto py-24 mt-20">
+                <SEO title="Booking Payment" description="Pay for your Netania De Laiya booking." noindex={true} />
                 <h2 className="text-2xl font-bold mb-4 text-red-700">This booking is no longer available.</h2>
                 <Button onClick={() => navigate(`/`)} className="cursor-pointer">Back to Home</Button>
             </div>
@@ -96,6 +99,7 @@ const PaymentPage = () => {
 
     return (
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <SEO title="Booking Payment" description="Pay for your Netania De Laiya booking." noindex={true} />
             <div className="relative z-10 w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-20">
                 <h2 className="text-xl font-semibold mb-4">Booking Payment</h2>
                 <div className="mb-3">

@@ -1,5 +1,6 @@
 // src/pages/Policies.jsx
 import React from "react";
+import SEO from "@/components/SEO";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -18,6 +19,33 @@ const Policies = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
+            <SEO
+                title="Resort Policies"
+                description="Read Netania De Laiya's policies: child policy, room and accommodation rules, pet policy, and resort reminders for a safe and enjoyable stay in Laiya."
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://netaniadelaiya.com/policy'}
+                og={{ url: 'https://netaniadelaiya.com/policy' }}
+                jsonLd={{
+                  '@context': 'https://schema.org',
+                  '@type': 'FAQPage',
+                  mainEntity: [
+                    {
+                      '@type': 'Question',
+                      name: 'What is the child policy?',
+                      acceptedAnswer: { '@type': 'Answer', text: 'Children aged 7 and below are free of charge when sharing beds with parents. No extra beds or cribs provided.' }
+                    },
+                    {
+                      '@type': 'Question',
+                      name: 'What are the check-in and check-out times?',
+                      acceptedAnswer: { '@type': 'Answer', text: 'Check-in is at 3:00 PM and check-out is at 12:00 PM. Early check-in or late check-out depends on availability and may incur fees.' }
+                    },
+                    {
+                      '@type': 'Question',
+                      name: 'Are pets allowed?',
+                      acceptedAnswer: { '@type': 'Answer', text: 'Small pets (up to 10 kg) are allowed in designated rooms only and may incur a cleaning fee. Pets must be leashed in common areas.' }
+                    }
+                  ]
+                }}
+            />
             {/* Hero Section */}
             <div className="relative w-full">
                 <Carousel className="h-screen w-full" opts={{ loop: true, align: "center" }} plugins={[Autoplay({ delay: 3000, playOnInit: true })]}>

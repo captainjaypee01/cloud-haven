@@ -26,7 +26,6 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById('root')).render(
-
   <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/"
     appearance={{
       elements: {
@@ -37,7 +36,6 @@ createRoot(document.getElementById('root')).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <CartProvider>
-
             <SidebarProvider>
               <AppProvider>
                 <App />
@@ -48,5 +46,4 @@ createRoot(document.getElementById('root')).render(
       </QueryClientProvider>
     </BrowserRouter>
   </ClerkProvider>,
-
 )
