@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import { CartPopup } from "./CartPopup";
 import { Book, BookAIcon, BookDownIcon, LayoutDashboard, Menu, X } from "lucide-react";
+import logo from '@/assets/logo.jpg';
 
 const BookIcon = () => (
     <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
@@ -49,7 +50,7 @@ const Navbar = () => {
 
             {/* Logo */}
             <Link to="/" >
-                <img src={"/src/assets/netania-logo.jpg"} alt="logo" className={`h-10`} />
+                <img src={logo} alt="logo" className={`h-10`} />
             </Link>
 
             {/* Desktop Nav */}
