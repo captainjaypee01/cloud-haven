@@ -6,28 +6,18 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-COPY .env.production .env
 
-# Backend URL and other VITE_* provided at build-time if needed
-# ARG VITE_BACKEND_URL
-# ENV VITE_BACKEND_URL=${VITE_BACKEND_URL}
+# <-- IMPORTANT -->
+# We will tell Vite which .env.* to load via --mode.
+# Default to production if not provided by docker-compose.
+ARG VITE_BUILD_MODE=production
+ENV VITE_BUILD_MODE=${VITE_BUILD_MODE}
 
-# ARG VITE_CLERK_PUBLISHABLE_KEY
-# ENV VITE_CLERK_PUBLISHABLE_KEY=${VITE_CLERK_PUBLISHABLE_KEY}
-
-# ARG VITE_COMING_SOON_FLAG
-# ENV VITE_COMING_SOON_FLAG=${VITE_COMING_SOON_FLAG}
-
-# ARG VITE_DEFAULT_ADULT_PRICE
-# ENV VITE_DEFAULT_ADULT_PRICE=${VITE_DEFAULT_ADULT_PRICE}
-
-# ARG VITE_DEFAULT_CHILDREN_PRICE
-# ENV VITE_DEFAULT_CHILDREN_PRICE=${VITE_DEFAULT_CHILDREN_PRICE}
-
-# ARG VITE_MAX_EXCLUSIVE_PROMOS
-# ENV VITE_MAX_EXCLUSIVE_PROMOS=${VITE_MAX_EXCLUSIVE_PROMOS}
-
-RUN npm run build
+# This causes Vite to load:
+#   .env            (always, if present)
+#   .env.${mode}    (here: .env.uat or .env.production)
+# And it sets import.meta.env.MODE to that mode.
+RUN npm run build -- --mode ${VITE_BUILD_MODE}
 
 # ---- Serve (Nginx 1.28) ----
 FROM nginx:1.28-alpine
