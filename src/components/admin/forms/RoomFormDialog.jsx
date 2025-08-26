@@ -281,6 +281,8 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                     setError(field, { type: "manual", message: messages.join(", ") });
                 }
                 toast.error("Please fix the errors in the form.");
+            } else if (err.response?.data?.error) {
+                toast.error(err.response.data.error);
             } else if (err.response?.data?.message) {
                 toast.error(err.response.data.message);
             } else {

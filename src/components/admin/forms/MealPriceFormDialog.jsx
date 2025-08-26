@@ -70,7 +70,7 @@ export default function MealPriceFormDialog({
             onSuccess && onSuccess();
         } catch (error) {
             // If validation fails or API error, show error message from response or generic
-            const msg = error.response?.data?.message || "Failed to save meal price.";
+            const msg = error.response?.data?.message || error.response?.data?.error || "Failed to save meal price.";
             toast.error(msg);
         } finally {
             setSubmitting(false);

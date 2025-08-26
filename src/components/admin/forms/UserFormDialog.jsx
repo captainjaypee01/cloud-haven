@@ -72,7 +72,7 @@ const UserFormDialog = ({ open, onOpenChange, onSuccess, initialData, isEdit, us
         } catch (error) {
             console.error("User form submit error:", error);
             // The API might return validation errors or a failure message
-            toast.error(error.response?.data?.error || "Failed to save user. Please try again.");
+            toast.error(error.response?.data?.error || error.response?.data?.message || "Failed to save user. Please try again.");
         } finally {
 
             setSubmitting(false);

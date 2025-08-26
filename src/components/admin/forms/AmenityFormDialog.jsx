@@ -120,7 +120,10 @@ export default function AmenityFormDialog({
             }
             if (onSuccess) onSuccess();
         } catch (e) {
-            toast.error("Something went wrong. Please try again.");
+            // If validation fails or API error, show error message from response or generic
+            console.log(e)
+            const msg = error.response?.data?.message || error.response?.data?.error || "Something went wrong. Please try again.";
+            toast.error(msg);
         } finally {
             setSubmitting(false);
         }
