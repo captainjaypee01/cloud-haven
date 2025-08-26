@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 // import { assets } from "../assets/assets"; // deprecated: migrating to Lucide icons
 import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
@@ -45,6 +45,13 @@ const Navbar = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, [location.pathname]);
 
+    const isShowDashboardRoute = useMemo(() => {
+        const dashboardRoles = ['admin', 'staff', 'superadmin'];
+
+        return dashboardRoles?.includes(user?.publicMetadata?.role);
+    }, [user]);
+
+    console.log('user', user)
     return (
         <nav className={`fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 transition-all duration-500 z-50 ${isScrolled ? "bg-white/80 shadow-md text-gray-700 backdrop-blur-lg py-3 md:py-4" : "py-4 md:py-6"}`}>
 
@@ -74,7 +81,9 @@ const Navbar = () => {
                 {user ?
                     (<UserButton>
                         <UserButton.MenuItems>
-                            <UserButton.Action label="Dashboard" labelIcon={<LayoutDashboard />} onClick={() => navigate('/admin')}></UserButton.Action>
+                            {isShowDashboardRoute && (
+                                <UserButton.Action label="Dashboard" labelIcon={<LayoutDashboard />} onClick={() => navigate('/admin')}></UserButton.Action>
+                            )}
                             <UserButton.Action label="My Bookings" labelIcon={<Book />} onClick={() => navigate('my-bookings')}></UserButton.Action>
                         </UserButton.MenuItems>
                     </UserButton>)
