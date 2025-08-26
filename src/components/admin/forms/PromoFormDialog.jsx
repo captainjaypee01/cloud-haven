@@ -167,7 +167,7 @@ export default function PromoFormDialog({
             onSuccess && onSuccess();
         } catch (error) {
             // If validation fails or API error, show error message from response or generic
-            const msg = error.response?.data?.message || "Failed to save promo code.";
+            const msg = error.response?.data?.message || error.response?.data?.error || "Failed to save promo code.";
             toast.error(msg);
         } finally {
 

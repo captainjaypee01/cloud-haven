@@ -7,7 +7,6 @@ import RoomDetails from './pages/RoomDetails';
 import MyBookings from './pages/MyBookings';
 import Layout from './pages/admin/Layout';
 import Dashboard from './pages/admin/Dashboard';
-import AddRoom from './pages/admin/rooms/AddRoom';
 import ListRoom from './pages/admin/rooms/ListRoom';
 import ComingSoon from './components/ComingSoon';
 import { Toaster } from "@/components/ui/sonner";
@@ -100,7 +99,6 @@ const App = () => {
               >
                 <Route index element={<Dashboard />} />
                 <Route path="rooms" element={<ListRoom />} />
-                <Route path="rooms/add" element={<AddRoom />} />
                 <Route path="bookings" element={<ListBooking />} />
                 <Route path="bookings/:id" element={<BookingDetails />} />
                 <Route path="amenities" element={<ListAmenity />} />
