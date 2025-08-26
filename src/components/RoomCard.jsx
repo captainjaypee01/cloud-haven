@@ -41,7 +41,7 @@ export default function RoomCard({ room, index }) {
             transition={{ duration: 0.6, delay: index * 0.1 }}
             className="w-full"
         >
-            <Card className="overflow-hidden shadow-lg">
+            <Card className="overflow-hidden shadow-lg py-0">
                 <Carousel
 
                     opts={{ loop: true, align: "center" }}
@@ -68,7 +68,7 @@ export default function RoomCard({ room, index }) {
                         {room.short_description}
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pb-6">
                     <p className="text-gray-700">{room.description}</p>
                     <ul className="flex flex-wrap gap-2 text-sm text-sky-700">
                         {room.amenities.map((a, _index) => (

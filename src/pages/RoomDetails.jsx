@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import { facilityIcons, roomCommonData, roomsDummyData } from '../assets/assets'
-import StarRating from '../components/StarRating'
+import { roomCommonData } from '../assets/assets'
 import { formatCurrency } from '../utils/currency'
-import { roomPhotos, rooms } from '../data/rooms'
+import { roomPhotos } from '../data/rooms'
 import { useRoom, useAvailability } from '../queries/rooms'
 import { useAppContext } from '../context/AppContext'
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircleIcon, ChevronDownIcon } from 'lucide-react'
+import { AlertCircleIcon } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
+import * as lucideIcons from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,8 @@ import { GuestSelector } from '../components/GuestSelector'
 import { toast } from "sonner"
 import RequireDatesDialog from '@/components/common/RequireDatesDialog'
 import SEO from '@/components/SEO'
+
+const iconsModule = lucideIcons.default || lucideIcons;
 
 const RoomDetails = () => {
     const { roomId } = useParams()
@@ -143,47 +146,47 @@ const RoomDetails = () => {
                 description={room.short_description || room.description}
                 canonical={typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : undefined}
                 og={{
-                  title: room.name,
-                  description: room.short_description || room.description,
-                  image: mainImage,
-                  type: 'product',
-                  url: typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : `https://netaniadelaiya.com/rooms/${room.slug || roomId}`
-                }}
-                jsonLd={[
-                  {
-                    '@context': 'https://schema.org',
-                    '@type': 'BreadcrumbList',
-                    itemListElement: [
-                      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://netaniadelaiya.com/' },
-                      { '@type': 'ListItem', position: 2, name: 'Rooms', item: 'https://netaniadelaiya.com/rooms' },
-                      { '@type': 'ListItem', position: 3, name: room.name, item: `https://netaniadelaiya.com/rooms/${room.slug || roomId}` }
-                    ]
-                  },
-                  {
-                    '@context': 'https://schema.org',
-                    '@type': 'HotelRoom',
-                    name: room.name,
+                    title: room.name,
                     description: room.short_description || room.description,
                     image: mainImage,
-                    url: `https://netaniadelaiya.com/rooms/${room.slug || roomId}`,
-                    offers: {
-                      '@type': 'Offer',
-                      priceCurrency: 'PHP',
-                      price: room.price,
-                      availability: isUnavailable ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'
+                    type: 'product',
+                    url: typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`
+                }}
+                jsonLd={[
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'BreadcrumbList',
+                        itemListElement: [
+                            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.netaniadelaiya.com/' },
+                            { '@type': 'ListItem', position: 2, name: 'Rooms', item: 'https://www.netaniadelaiya.com/rooms' },
+                            { '@type': 'ListItem', position: 3, name: room.name, item: `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}` }
+                        ]
                     },
-                    containedInPlace: {
-                      '@type': 'Resort',
-                      name: 'Netania De Laiya',
-                      address: {
-                        '@type': 'PostalAddress',
-                        streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
-                        addressLocality: 'San Juan',
-                        addressRegion: 'Batangas',
-                        addressCountry: 'PH'
-                      }
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'HotelRoom',
+                        name: room.name,
+                        description: room.short_description || room.description,
+                        image: mainImage,
+                        url: `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`,
+                        offers: {
+                            '@type': 'Offer',
+                            priceCurrency: 'PHP',
+                            price: room.price,
+                            availability: isUnavailable ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'
+                        },
+                        containedInPlace: {
+                            '@type': 'Resort',
+                            name: 'Netania De Laiya',
+                            address: {
+                                '@type': 'PostalAddress',
+                                streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                                addressLocality: 'San Juan',
+                                addressRegion: 'Batangas',
+                                addressCountry: 'PH'
+                            }
+                        }
                     }
-                  }
                 ]}
             />
 
@@ -243,12 +246,23 @@ const RoomDetails = () => {
                 <div>
                     <h1 className='text-3xl md:text-4xl font-playfair'>{room?.short_description}</h1>
                     <div className='flex flex-wrap items-center mt-3 mb-6 gap-4'>
-                        {room?.amenities && room?.amenities.map((item, index) => (
-                            <div key={index} className='flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100'>
-                                <img src={facilityIcons[item?.name]} alt={item?.name} className='w-5 h-5' />
-                                <p className="text-xs">{item?.name}</p>
-                            </div>
-                        ))}
+                        {room?.amenities && room?.amenities.map((item, index) => {
+
+                            const Icon = iconsModule[item.icon] || iconsModule.HelpCircle;
+                            return (
+                                <div key={index} className='flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100'>
+
+                                    <Badge key={index} variant="secondary" className="text-sm">
+                                        <Icon className="w-5 h-5" />
+                                        {/* <img src={facilityIcons[am?.name]} alt={am?.name} className='w-5 h-5' /> */}
+                                        {item.name}
+                                    </Badge>
+                                    {/* <img src={facilityIcons[item?.name]} alt={item?.name} className='w-5 h-5' />
+                                <p className="text-xs">{item?.name}</p> */}
+                                </div>
+                            )
+                        }
+                        )}
                     </div>
                 </div>
             </div>
@@ -331,21 +345,6 @@ const RoomDetails = () => {
             <div className="max-w-3xl border-y border-gray-300 my-15 py-10 text-gray-500">
                 <p>{room.long_description}</p>
             </div>
-
-            {/* Hosted By */}
-            <div className="flex flex-col items-start gap-4">
-                <div className='flex gap-4'>
-                    <img src="/src/assets/netania-logo.jpg" alt="Host" className='h-14 w-14 md:h-18 md:w-18 rounded-full' />
-                    <div>
-                        <p className='text-lg md:text-xl'>{room.name}</p>
-                        <div className='flex items-center mt-1'>
-                            <StarRating />
-                            <p className="ml-2">200+ Reviews</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button className="px-6 py-2 5 mt-4 rounded text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer">Contact Now</button>
 
             <RequireDatesDialog open={requireDatesOpen} onOpenChange={setRequireDatesOpen} />
         </div>

@@ -14,7 +14,6 @@ import { AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { roomPhotos } from "@/data/rooms";
 import { formatCurrency } from "../../utils/currency";
-import { facilityIcons } from "../../assets/assets";
 import { useState, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import RequireDatesDialog from "@/components/common/RequireDatesDialog";

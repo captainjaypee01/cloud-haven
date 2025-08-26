@@ -142,6 +142,7 @@ const ContactUsPage = () => {
                     <p className="mb-2"><strong>Email:</strong> info@netaniadelaiya.com</p>
                     <p className="mb-2"><strong>Address:</strong> Laiya-Aplaya,San Juan,Batangas, Batangas City, Philippines</p>
                     <p className="mb-2"><strong>Facebook:</strong> <a href="https://www.facebook.com/profile.php?id=100064182843841" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Netania De Laiya</a></p>
+                    <p className="mb-2"><strong>Instagram:</strong> <a href="https://www.instagram.com/netaniadelaiya" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Netania De Laiya</a></p>
                     <p className="mt-6 text-sm text-gray-600">
                         We’d love to hear from you! Whether you have a question about our rooms, want to inquire about availability, or need help with anything else, feel free to reach out. You can also connect with us on our social media pages for the latest updates and promotions.
                     </p>
