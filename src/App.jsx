@@ -1,33 +1,39 @@
-import React from 'react'
+import React, { Suspense } from 'react'
 import Navbar from './components/Navbar'
 import { Route, Routes, useLocation } from 'react-router-dom'
-import Home from './pages/Home';
 import Footer from './components/Footer';
-import RoomDetails from './pages/RoomDetails';
-import MyBookings from './pages/MyBookings';
-import Layout from './pages/admin/Layout';
-import Dashboard from './pages/admin/Dashboard';
-import ListRoom from './pages/admin/rooms/ListRoom';
 import ComingSoon from './components/ComingSoon';
 import { Toaster } from "@/components/ui/sonner";
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import RoomsPage from './pages/RoomsPage';
 import ResortPolicyDialog from './components/common/ResortPolicyDialog';
-import PaymentPage from './pages/PaymentPage';
-import BookingDetailsPage from './pages/BookingDetailPage';
-import ListBooking from './pages/admin/bookings/ListBooking';
-import BookingDetails from './pages/admin/bookings/BookingDetails';
-import ListAmenity from './pages/admin/amenities/ListAmenity';
-import ListPromos from './pages/admin/promos/ListPromos';
-import ListMeals from './pages/admin/meals/ListMeals';
-import ListUsers from './pages/admin/users/ListUsers';
-import ManageImages from './pages/admin/images/ManageImages';
-import LeaveReview from './pages/LeaveReview';
-import ContactUsPage from './pages/ContactUs';
-import AboutUs from './pages/AboutUs';
-import Policies from './pages/Policies';
 import SEO from './components/SEO';
+import Loader from './components/common/Loader';
+
+// Lazy load pages for better performance
+const Home = React.lazy(() => import('./pages/Home'));
+const RoomDetails = React.lazy(() => import('./pages/RoomDetails'));
+const MyBookings = React.lazy(() => import('./pages/MyBookings'));
+const Cart = React.lazy(() => import('./pages/Cart'));
+const Checkout = React.lazy(() => import('./pages/Checkout'));
+const RoomsPage = React.lazy(() => import('./pages/RoomsPage'));
+const PaymentPage = React.lazy(() => import('./pages/PaymentPage'));
+const BookingDetailsPage = React.lazy(() => import('./pages/BookingDetailPage'));
+const LeaveReview = React.lazy(() => import('./pages/LeaveReview'));
+const ContactUsPage = React.lazy(() => import('./pages/ContactUs'));
+const AboutUs = React.lazy(() => import('./pages/AboutUs'));
+const Policies = React.lazy(() => import('./pages/Policies'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
+
+// Admin pages - loaded separately
+const Layout = React.lazy(() => import('./pages/admin/Layout'));
+const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
+const ListRoom = React.lazy(() => import('./pages/admin/rooms/ListRoom'));
+const ListBooking = React.lazy(() => import('./pages/admin/bookings/ListBooking'));
+const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
+const ListAmenity = React.lazy(() => import('./pages/admin/amenities/ListAmenity'));
+const ListPromos = React.lazy(() => import('./pages/admin/promos/ListPromos'));
+const ListMeals = React.lazy(() => import('./pages/admin/meals/ListMeals'));
+const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
+const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
 
 const App = () => {
 
@@ -44,7 +50,8 @@ const App = () => {
         <div>
           {!isAdminPath && <Navbar />}
           <div className='min-h-[70vh]'>
-            <Routes>
+            <Suspense fallback={<Loader />}>
+              <Routes>
               <Route
                 path='/'
                 element={<Home />}
@@ -108,7 +115,10 @@ const App = () => {
                 <Route path="meal-prices" element={<ListMeals />} />
                 <Route path="promos" element={<ListPromos />} />
               </Route>
-            </Routes>
+              {/* 404 Route - Must be last */}
+              <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </div>
           {!isAdminPath && <Footer />}
         </div>

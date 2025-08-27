@@ -36,7 +36,7 @@ const PaymentPage = () => {
                 const res = await api.get(`${API_PREFIX}/bookings/ref/${refNo}`);
                 const data = res.data?.data || res.data?.booking || res.data;
                 setBooking(data);
-            } catch (err) {
+            } catch {
                 toast.error("Booking not found");
                 navigate("/");
             } finally {
@@ -65,7 +65,7 @@ const PaymentPage = () => {
             } else {
                 toast.error(res.data?.errorMessage || res.data?.message || "Payment failed");
             }
-        } catch (err) {
+        } catch {
             toast.error("Payment error. Try again.");
         } finally {
             setPaying(false);

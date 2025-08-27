@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isActions = true }) => {
     return (
@@ -25,13 +25,7 @@ const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isAction
                                 One or more rooms are no longer available in the quantity you selected.
                             </DialogDescription>
                         </DialogHeader>
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 30 }}
-                            transition={{ duration: 0.25 }}
-                            className="py-2"
-                        >
+                        <div className="py-2">
                             <ul className="space-y-2">
                                 {items.map(item => (
                                     <li
@@ -48,7 +42,7 @@ const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isAction
                                     </li>
                                 ))}
                             </ul>
-                        </motion.div>
+                        </div>
                         {isActions && (
                             <DialogFooter className="flex gap-2">
                                 <Button variant="secondary" onClick={onClose} className="cursor-pointer">

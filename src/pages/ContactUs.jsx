@@ -46,13 +46,13 @@ const ContactUsPage = () => {
             <SEO
                 title="Contact Netania De Laiya"
                 description="Contact our Laiya beachfront resort for bookings, inquiries, group reservations, and event venue availability. Call +63 949 798 9831 or email info@netaniadelaiya.com."
-                canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://netaniadelaiya.com/contact-us'}
-                og={{ url: 'https://netaniadelaiya.com/contact-us' }}
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://www.netaniadelaiya.com/contact-us'}
+                og={{ url: 'https://www.netaniadelaiya.com/contact-us' }}
                 jsonLd={{
                   '@context': 'https://schema.org',
                   '@type': 'LodgingBusiness',
                   name: 'Netania De Laiya',
-                  url: 'https://netaniadelaiya.com/contact-us',
+                  url: 'https://www.netaniadelaiya.com/contact-us',
                   telephone: '+63 949 798 9831',
                   email: 'info@netaniadelaiya.com',
                   address: {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
     Popover,
     PopoverTrigger,
@@ -12,7 +12,7 @@ import { GuestSelector } from "./GuestSelector";
 import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { Separator } from "@radix-ui/react-select";
-import { differenceInDays, parseISO } from "date-fns";
+// import { differenceInDays, parseISO } from "date-fns";
 import { useCartSummary } from "../hooks/cart/useCartSummary";
 import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
 

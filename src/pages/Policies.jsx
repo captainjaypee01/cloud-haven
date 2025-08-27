@@ -22,8 +22,8 @@ const Policies = () => {
             <SEO
                 title="Resort Policies"
                 description="Read Netania De Laiya's policies: child policy, room and accommodation rules, pet policy, and resort reminders for a safe and enjoyable stay in Laiya."
-                canonical={typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://netaniadelaiya.com/policy'}
-                og={{ url: 'https://netaniadelaiya.com/policy' }}
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://www.netaniadelaiya.com/policy'}
+                og={{ url: 'https://www.netaniadelaiya.com/policy' }}
                 jsonLd={{
                   '@context': 'https://schema.org',
                   '@type': 'FAQPage',

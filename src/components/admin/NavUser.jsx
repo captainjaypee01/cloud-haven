@@ -6,8 +6,7 @@ import {
 } from "@/components/ui/sidebar"
 import { UserButton, useUser } from "@clerk/clerk-react"
 
-export default function NavUser({
-}) {
+export default function NavUser() {
     const { isMobile, open } = useSidebar()
     const { user } = useUser();
     return (

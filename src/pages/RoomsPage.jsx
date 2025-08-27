@@ -1,24 +1,18 @@
-
-import { useMemo, useState } from "react";
-import RoomCard from "@/components/RoomCard";
 import RoomsHero from "../components/RoomsHero";
 import SearchForm from "../components/SearchForm";
 import { useRooms } from "../queries/rooms";
 import { roomPhotos } from "../data/rooms";
 import RoomCardSkeleton from "../components/RoomCardSkeleton";
 import { AlertCircle } from "lucide-react";
-import { formatCurrency } from "../utils/currency";
-import { Link } from "react-router-dom";
 import RoomBlock from "../components/common/RoomBlock";
-import ResortPolicyDialog from "../components/common/ResortPolicyDialog";
 import * as lucideIcons from "lucide-react";
 import SEO from "@/components/SEO";
 
-const iconsModule = lucideIcons.default || lucideIcons;
+const iconsModule = lucideIcons;
 const ICON_OPTIONS = Object.keys(iconsModule).sort();
 
 export default function RoomsPage() {
-    const { data: rooms, isLoading, isError, error, refetch, status } = useRooms();
+    const { data: rooms, isLoading, isError, refetch, status } = useRooms();
 
     const heroImages = roomPhotos;
 
@@ -27,14 +21,14 @@ export default function RoomsPage() {
             <SEO
                 title="Rooms and Accommodations in Laiya, Batangas"
                 description="Browse beachfront rooms in Laiya: family rooms, barkada suites, pool-view and oceanfront accommodations at Netania De Laiya."
-                canonical={typeof window !== 'undefined' ? window.location.origin + '/rooms' : 'https://netaniadelaiya.com/rooms'}
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/rooms' : 'https://www.netaniadelaiya.com/rooms'}
                 og={{
                   title: 'Rooms and Accommodations in Laiya, Batangas',
                   description: 'Browse beach resort rooms in Laiya: family rooms, barkada suites, and pool-view accommodations at Netania De Laiya.',
-                  url: 'https://netaniadelaiya.com/rooms',
+                  url: 'https://www.netaniadelaiya.com/rooms',
                 }}
                 jsonLd={(function(){
-                  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://netaniadelaiya.com';
+                  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.netaniadelaiya.com';
                   const list = Array.isArray(rooms) ? rooms : (rooms?.data || []);
                   const items = list.slice(0, 20).map((r, i) => ({
                     '@type': 'ListItem',

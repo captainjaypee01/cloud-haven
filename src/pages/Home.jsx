@@ -12,12 +12,12 @@ const Home = () => {
       <SEO
         title="Beachfront Resort in Laiya, San Juan, Batangas"
         description="Beachfront resort in Laiya with pool and hotel-style rooms. Book Netania De Laiya for family vacations, barkada trips, and romantic getaways."
-        canonical={typeof window !== 'undefined' ? window.location.origin + '/' : 'https://netaniadelaiya.com/'}
+        canonical={typeof window !== 'undefined' ? window.location.origin + '/' : 'https://www.netaniadelaiya.com/'}
         og={{
           title: 'Netania De Laiya – Beachfront Resort in Laiya, Batangas',
           description: 'Beachfront resort in Laiya with pool and hotel rooms. Family-friendly accommodations in San Juan, Batangas.',
-          image: typeof window !== 'undefined' ? window.location.origin + '/og-home.jpg' : 'https://netaniadelaiya.com/og-home.jpg',
-          url: 'https://netaniadelaiya.com/',
+          image: typeof window !== 'undefined' ? window.location.origin + '/og-home.jpg' : 'https://www.netaniadelaiya.com/og-home.jpg',
+          url: 'https://www.netaniadelaiya.com/',
           type: 'website',
           locale: 'en_PH',
           siteName: 'Netania De Laiya'
@@ -26,8 +26,8 @@ const Home = () => {
           '@context': 'https://schema.org',
           '@type': 'Resort',
           name: 'Netania De Laiya',
-          url: 'https://netaniadelaiya.com/',
-          image: 'https://netaniadelaiya.com/og-home.jpg',
+          url: 'https://www.netaniadelaiya.com/',
+          image: 'https://www.netaniadelaiya.com/og-home.jpg',
           telephone: '+63 949 798 9831',
           address: {
             '@type': 'PostalAddress',

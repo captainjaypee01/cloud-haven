@@ -39,31 +39,38 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
         >
 
             <div
-                className={`flex flex-col overflow-hidden rounded-2xl shadow-lg bg-white/80 backdrop-blur-lg ring-1 ring-black/5 lg:flex-row ${reverse ? "lg:flex-row-reverse" : ""
-                    }`}
+                className={`flex flex-col overflow-hidden rounded-2xl shadow-lg bg-white/80 backdrop-blur-lg ring-1 ring-black/5 lg:flex-row ${reverse ? "lg:flex-row-reverse" : ""}`}
             >
                 {/* Carousel with room photos */}
                 <div className="lg:w-1/2 w-full h-100 lg:h-auto">
                     <Carousel className="w-full h-full">
                         <CarouselContent>
-                            {room?.images?.map((img, idx) => (
-                                <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
-                                    <img
-                                        src={img?.secure_image_url}
-                                        alt={`${img?.name}-${idx + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </CarouselItem>
-                            ))}
-                            {photos.map((src, idx) => (
-                                <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
-                                    <img
-                                        src={src}
-                                        alt={`${room.name} image ${idx + 1}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </CarouselItem>
-                            ))}
+                            {room?.images?.length > 0 ? (
+                                <>
+                                    {room?.images?.map((img, idx) => (
+                                        <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
+                                            <img
+                                                src={img?.secure_image_url}
+                                                alt={`${img?.name}-${idx + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </CarouselItem>
+                                    ))}
+                                </>
+                            ) : (
+                                <>
+                                    {photos.map((src, idx) => (
+                                        <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
+                                            <img
+                                                src={src}
+                                                alt={`${room.name} image ${idx + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </CarouselItem>
+                                    ))}
+                                </>
+                            )
+                            }
                         </CarouselContent>
                         <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 cursor-pointer" />
                         <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer" />

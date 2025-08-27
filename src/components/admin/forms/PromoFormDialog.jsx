@@ -54,7 +54,7 @@ export default function PromoFormDialog({
             exclusive: false,
         },
     });
-    const { watch, reset } = form;
+    const { reset } = form;
     // If editing, populate form with initialData
     useEffect(() => {
         if (initialData) {
