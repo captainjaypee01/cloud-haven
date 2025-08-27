@@ -18,6 +18,7 @@ import {
     FormControl,
     FormMessage,
 } from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 import FormSelectField from '@/components/common/form/FormSelectField';
 
 const paymentProviders = [
@@ -39,6 +40,7 @@ const formSchema = z.object({
     status: z.string().min(1, 'Status is required'),
     transaction_id: z.string().optional(),
     remarks: z.string().optional(),
+    notify_guest: z.boolean().default(true),
 });
 
 const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSuccess, payment, isEdit }) => {
@@ -52,6 +54,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
             status: 'paid',
             transaction_id: '',
             remarks: '',
+            notify_guest: true,
         },
         values: payment ? {
             amount: payment.amount || '',
@@ -59,6 +62,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
             status: payment.status || 'paid',
             transaction_id: payment.transaction_id || '',
             remarks: payment.remarks || '',
+            notify_guest: true,
         } : undefined,
     });
     const { setError, reset } = form;
@@ -70,6 +74,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
             status: payment.status || 'paid',
             transaction_id: payment.transaction_id || '',
             remarks: payment.remarks || '',
+            notify_guest: true,
         } : undefined);
         // eslint-disable-next-line
     }, [open, payment]);
@@ -77,7 +82,6 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
     const handleSubmit = async (values) => {
         try {
             if (isEdit && payment?.id) {
-                values = {...values, notify_guest: false};
                 await api.put(`${API_PREFIX}/admin/payments/${payment.id}`, values, { requiresAuth: true });
                 toast.success('Payment updated');
             } else {
@@ -144,6 +148,28 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                             control={form.control}
                             label="Status"
                             options={paymentStatusOptions}
+                        />
+                        <FormField
+                            name="notify_guest"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                        <Checkbox
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                        <FormLabel>
+                                            Notify guest via email
+                                        </FormLabel>
+                                        <p className="text-xs text-muted-foreground">
+                                            Send confirmation/problem notification email when status changes
+                                        </p>
+                                    </div>
+                                </FormItem>
+                            )}
                         />
                         <DialogFooter>
                             <Button

@@ -4,4 +4,4 @@ Allow: /
 # Disallow admin dashboard from indexing
 Disallow: /admin
 
-Sitemap: https://netaniadelaiya.com/sitemap.xml
+Sitemap: https://www.netaniadelaiya.com/sitemap.xml
