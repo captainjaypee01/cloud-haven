@@ -18,8 +18,9 @@ import { GuestSelector } from '../components/GuestSelector'
 import { toast } from "sonner"
 import RequireDatesDialog from '@/components/common/RequireDatesDialog'
 import SEO from '@/components/SEO'
+import SocialShare from '@/components/SocialShare'
 
-const iconsModule = lucideIcons.default || lucideIcons;
+const iconsModule = lucideIcons;
 
 const RoomDetails = () => {
     const { roomId } = useParams()
@@ -104,7 +105,7 @@ const RoomDetails = () => {
     }
 
     const handleAddRoom = (data) => {
-        const bookRoomData = { ...data, roomId: roomId }
+        // const bookRoomData = { ...data, roomId: roomId }
         const { adults, children } = data;
 
         const totalGuests = parseInt(adults) + parseInt(children);
@@ -214,6 +215,16 @@ const RoomDetails = () => {
                 <p className='text-lg font-bold'>{formatCurrency(room.price)} /night</p>
             </div>
 
+            {/* Share */}
+            <div className='mt-2'>
+                <SocialShare
+                    url={typeof window !== 'undefined' ? window.location.href : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`}
+                    title={room.name}
+                    description={room.short_description || room.description}
+                    image={mainImage}
+                />
+            </div>
+
             {/* Max guests */}
             <div className='flex items-center gap-1 mt-2'>
                 <p className=''>Max Guest: <span className='font-inter text-sm'>({room.max_guests})</span></p>
@@ -232,11 +243,11 @@ const RoomDetails = () => {
             {/* Room Short Description */}
             <div className='flex flex-col lg:flex-row mt-6 gap-6'>
                 <div className='lg:w-1/2 w-full'>
-                    <img src={mainImage} alt="Room Image" className='w-full rounded-xl shadow-lg object-cover' />
+                    <img src={mainImage} alt="Room Image" className='w-full rounded-xl shadow-lg object-cover' decoding="async" fetchpriority="high" />
                 </div>
                 <div className='grid grid-cols-2 gap-4 lg:w-1/2 w-full'>
                     {roomPhotos.length > 1 && roomPhotos.map((image, index) => (
-                        <img onClick={() => setMainImage(image)} key={index} src={image} alt="Room Image" className={`w-full h-full rounded-xl shadow-md object-cover cursor-pointer ${mainImage === image && 'outline-3 outline-orange-500'}`} />
+                        <img onClick={() => setMainImage(image)} key={index} src={image} alt="Room Image" loading="lazy" decoding="async" className={`w-full h-full rounded-xl shadow-md object-cover cursor-pointer ${mainImage === image && 'outline-3 outline-orange-500'}`} />
                     ))}
                 </div>
             </div>

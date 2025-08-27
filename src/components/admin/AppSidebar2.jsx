@@ -77,7 +77,7 @@ export default function AppSidebar2() {
                                         asChild
                                         isActive={location.pathname === item.url}
                                     >
-                                        <NavLink to={item.url} className={({ isActive }) =>
+                                        <NavLink to={item.url} className={() =>
                                             `flex items-center w-full ${collapsed ? "justify-center px-0" : "gap-2 px-4"}`
                                         }>
                                             <item.icon className="h-5 w-5 shrink-0" />
@@ -102,7 +102,7 @@ export default function AppSidebar2() {
                                         asChild
                                         isActive={location.pathname === item.url}
                                     >
-                                        <NavLink to={item.url} className={({ isActive }) =>
+                                        <NavLink to={item.url} className={() =>
                                             `flex items-center w-full ${collapsed ? "justify-center px-0" : "gap-2 px-4"}`
                                         }>
                                             <item.icon className="h-5 w-5 shrink-0" />

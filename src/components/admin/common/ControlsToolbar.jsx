@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 export default function ControlsToolbar({
     search, setSearch,
     filters = [], // [{ key, label, options: [{value, label}], value, onChange }]
-    sorts = [],   // [{ value, label }]
+    // sorts = [],   // [{ value, label }]
     onExport
 }) {
     return (

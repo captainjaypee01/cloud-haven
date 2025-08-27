@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from '@/lib/format';
 
 // Accept handler functions as parameters
-export const mealPriceColumns = ({ onEdit, onDelete, onStatusChange, selectedIds, toggleSelect, toggleSelectAll }) => {
+export const mealPriceColumns = ({ onEdit, onDelete }) => {
     return [
         {
             accessorKey: "category",

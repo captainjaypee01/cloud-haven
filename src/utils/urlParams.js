@@ -13,7 +13,7 @@ export const convertObjectToQueryString = (obj, prefix = "") => {
   let queryString = "";
 
   for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       let value = obj[key];
       let paramName = prefix ? prefix + "[" + key + "]" : key;
       if (value === undefined) continue;

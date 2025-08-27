@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAmenitiesApi } from '@/hooks/useAmenitiesApi';
 
-const iconsModule = lucideIcons.default || lucideIcons;
+const iconsModule = lucideIcons;
 const ICON_OPTIONS = Object.keys(iconsModule).sort();
 
 const ListAmenities = () => {
@@ -94,7 +94,7 @@ const ListAmenities = () => {
             const res = await amenitiesApi.list(params);
             setData(res?.data?.data || []);
             setTotal(res?.data?.meta?.total || 0);
-        } catch (e) {
+        } catch {
             toast.error("Could not fetch amenities.");
         }
         setLoading(false);

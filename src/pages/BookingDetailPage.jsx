@@ -47,7 +47,7 @@ const UnifiedBookingResultPage = () => {
                 const data = res.data?.data || res.data?.booking || res.data;
                 setBooking(data);
                 if (data?.last_payment_failed) setLastPaymentError(data.last_payment_failed_message || "Payment attempt failed. Please try again.");
-            } catch (err) {
+            } catch {
                 navigate("/");
             } finally {
                 hide();

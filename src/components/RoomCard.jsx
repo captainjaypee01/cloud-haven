@@ -13,7 +13,7 @@ import {
     CarouselPrevious,
     CarouselNext,
 } from "@/components/ui/carousel";
-import { motion } from "framer-motion";
+// import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { roomPhotos } from "@/data/rooms";
 import { formatCurrency } from "../utils/currency";
@@ -21,7 +21,7 @@ import { useState, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import RequireDatesDialog from "@/components/common/RequireDatesDialog";
 
-export default function RoomCard({ room, index }) {
+export default function RoomCard({ room }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
     const { state } = useCart();
     const [showDatesDialog, setShowDatesDialog] = useState(false);
@@ -34,13 +34,7 @@ export default function RoomCard({ room, index }) {
     }, [state.checkIn, state.checkOut]);
 
     return (
-        <motion.article
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            className="w-full"
-        >
+        <article className="w-full">
             <Card className="overflow-hidden shadow-lg py-0">
                 <Carousel
 
@@ -54,6 +48,7 @@ export default function RoomCard({ room, index }) {
                                     alt={`${room.name} photo ${i + 1}`}
                                     className="w-full h-64 object-cover"
                                     loading="lazy"
+                                    decoding="async"
                                 />
                             </CarouselItem>
                         ))}
@@ -91,7 +86,7 @@ export default function RoomCard({ room, index }) {
                 onOpenChange={setShowDatesDialog}
                 targetHref={`/rooms/${room.slug}`}
             />
-        </motion.article>
+        </article>
     );
 }
 

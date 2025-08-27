@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 /**
  * Ocean wave loader: The wave moves from left to right, and each point moves up/down with a phase shift.

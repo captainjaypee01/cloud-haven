@@ -34,7 +34,7 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             check_out_date: booking?.check_out_date || '',
         },
     });
-    const { setError, reset, getValues, watch } = form;
+    const { setError, reset, watch } = form;
     const [checking, setChecking] = useState(false);
     const [unavailable, setUnavailable] = useState([]);
     const [availabilityModalOpen, setAvailabilityModalOpen] = useState(false);
@@ -85,7 +85,7 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             setUnavailable(unavailableItems);
             setAvailabilityModalOpen(unavailableItems.length > 0);
             return unavailableItems.length === 0;
-        } catch (e) {
+        } catch {
             toast.error('Error checking availability. Try again.');
             return false;
         } finally {

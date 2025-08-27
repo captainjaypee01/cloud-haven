@@ -78,7 +78,7 @@ export default function AmenityFormDialog({
             filtered = ICON_OPTIONS.slice(0, 30); // only show first 30 when blank
         }
         return filtered;
-    }, [debouncedIconSearch]);
+    }, [debouncedIconSearch, ICON_OPTIONS]);
 
     useEffect(() => {
         const fallbackIcon = "BedDouble";
@@ -122,7 +122,7 @@ export default function AmenityFormDialog({
         } catch (e) {
             // If validation fails or API error, show error message from response or generic
             console.log(e)
-            const msg = error.response?.data?.message || error.response?.data?.error || "Something went wrong. Please try again.";
+            const msg = e.response?.data?.message || e.response?.data?.error || "Something went wrong. Please try again.";
             toast.error(msg);
         } finally {
             setSubmitting(false);

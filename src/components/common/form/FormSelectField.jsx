@@ -39,7 +39,7 @@ const FormSelectField = ({
         control={control}
         render={({ field }) => (
             <FormItem>
-                <FormLabel>{label}</FormLabel>
+                <FormLabel aria-required={required}>{label}</FormLabel>
                 <FormControl>
                     <Select
                         value={
@@ -58,7 +58,7 @@ const FormSelectField = ({
                             );
                         }}
                     >
-                        <SelectTrigger>
+                        <SelectTrigger aria-required={required}>
                             <SelectValue placeholder={placeholder || label} />
                         </SelectTrigger>
                         <SelectContent>

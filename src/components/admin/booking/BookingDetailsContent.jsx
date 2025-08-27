@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/admin/common/StatusBadge';
-import { formatCurrency, formatDate, formatTime, formatDateTime } from '@/lib/format';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import AddPaymentDialog from './AddPaymentDialog';
 import AddOtherChargeDialog from './AddOtherChargeDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';

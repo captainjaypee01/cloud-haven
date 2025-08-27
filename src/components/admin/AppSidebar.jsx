@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar"
 import NavManagement from "./NavManagement";
 
+import logo from '@/assets/logo.jpg';
 const data = {
     navMain: [
         { title: "Dashboard", url: "/admin", icon: LayoutDashboardIcon },
@@ -68,7 +69,7 @@ export default function AppSidebar({ ...props }) {
                         <SidebarMenuButton
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <img src="/src/assets/netania-logo.jpg" alt="Logo" className="h-6 w-6" />
+                            <img src={logo} alt="Logo" className="h-6 w-6" />
                             <span className="font-bold text-lg tracking-tight">Netania De Laiya</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

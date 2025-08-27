@@ -77,11 +77,9 @@ const ListMeals = () => {
         baseMealPriceColumns({
             onEdit: handleEdit,
             onDelete: handleDeletePrompt,
-            selectedIds,
-            toggleSelect,
-            toggleSelectAll
+            // selection controls not used by columns currently
         }),
-        [selectedIds, data]
+        [data]
     );
 
     // Fetch meal prices from API
@@ -132,8 +130,8 @@ const ListMeals = () => {
                 <Button onClick={handleAdd} className="cursor-pointer">+ Add Meal Price</Button>
                 {selectedIds.length > 0 && (
                     <div className="flex gap-2">
-                        <Button onClick={handleBulkActivate} className="cursor-pointer">Activate Selected</Button>
-                        <Button variant="destructive" onClick={handleBulkDeactivate} className="cursor-pointer">
+                        <Button onClick={() => { /* TODO: implement bulk activate */ }} className="cursor-pointer">Activate Selected</Button>
+                        <Button variant="destructive" onClick={() => { /* TODO: implement bulk deactivate */ }} className="cursor-pointer">
                             Deactivate Selected
                         </Button>
                     </div>

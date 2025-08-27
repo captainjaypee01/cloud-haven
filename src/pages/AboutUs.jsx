@@ -17,13 +17,13 @@ const AboutUs = () => {
             <SEO
                 title="About Netania De Laiya Resort"
                 description="Learn about Netania De Laiya, a beachfront resort in Laiya, San Juan, Batangas with beach access, a swimming pool, and hotel-style rooms for families, couples, and groups."
-                canonical={typeof window !== 'undefined' ? window.location.origin + '/about-us' : 'https://netaniadelaiya.com/about-us'}
-                og={{ url: 'https://netaniadelaiya.com/about-us' }}
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/about-us' : 'https://www.netaniadelaiya.com/about-us'}
+                og={{ url: 'https://www.netaniadelaiya.com/about-us' }}
                 jsonLd={{
                   '@context': 'https://schema.org',
                   '@type': 'Resort',
                   name: 'Netania De Laiya',
-                  url: 'https://netaniadelaiya.com/about-us',
+                  url: 'https://www.netaniadelaiya.com/about-us',
                   sameAs: [
                     'https://www.facebook.com/profile.php?id=100064182843841',
                     'https://www.instagram.com/netaniadelaiya/'
@@ -63,20 +63,20 @@ const AboutUs = () => {
             <div className="relative z-10 max-w-4xl mx-auto py-16 px-4 md:px-8 lg:px-0 text-gray-800">
                 <h2 className="text-3xl font-semibold mb-6">Who We Are</h2>
                 <p className="mb-4 text-lg">
-                    **Cloud Haven Staycation** is a family-friendly resort dedicated to providing a serene and memorable getaway experience. Located in the scenic hills of Rizal, our staycation offers a tranquil escape from the city’s hustle, complete with breathtaking mountain views and a cozy, inviting atmosphere. We pride ourselves on being one of the most affordable staycation destinations in the area, without compromising on comfort or quality.
+                    **Netania De Laiya** is a family-friendly resort dedicated to providing a serene and memorable getaway experience. Located in the scenic hills of Rizal, our offers a tranquil escape from the city’s hustle, complete with breathtaking mountain views and a cozy, inviting atmosphere. We pride ourselves on being one of the most affordable destinations in the area, without compromising on comfort or quality.
                 </p>
                 <p className="mb-4 text-lg">
-                    Since our inception, we’ve focused on creating an oasis where guests can relax and make lasting memories. Our facilities include modern transient rooms, a swimming pool with panoramic views, and an on-site restaurant offering local cuisine. Whether you’re seeking a quiet retreat or an adventure with nearby tourist attractions, Cloud Haven has something for everyone.
+                    Since our inception, we’ve focused on creating an oasis where guests can relax and make lasting memories. Our facilities include modern transient rooms, a swimming pool with panoramic views, and an on-site restaurant offering local cuisine. Whether you’re seeking a quiet retreat or an adventure with nearby tourist attractions, Netania De Laiya has something for everyone.
                 </p>
                 <p className="mb-4 text-lg">
-                    In fact, we offer staycation packages of up to 22 hours for as low as ₱1,599 – an unbeatable deal that has made us popular among budget-conscious travelers. From couples looking for a romantic escape to families and friends planning a fun-filled outing, our resort is designed to be your <em>“haven above the clouds”</em>, where enjoyment and relaxation meet.
+                    In fact, we offer packages of up to 22 hours for as low as ₱1,599 – an unbeatable deal that has made us popular among budget-conscious travelers. From couples looking for a romantic escape to families and friends planning a fun-filled outing, our resort is designed to be your <em>“haven above the clouds”</em>, where enjoyment and relaxation meet.
                 </p>
                 <h2 className="text-3xl font-semibold mt-10 mb-6">Our Mission & Vision</h2>
                 <p className="mb-4 text-lg">
-                    Our mission is simple: to deliver a <strong>cloud-nine experience</strong> to every guest. We believe that a great vacation doesn’t have to be expensive, so we strive to offer exceptional value – comfortable accommodations, friendly service, and beautiful surroundings – at a price that everyone can afford. We aim to be <span className="italic">“Tanay’s cheapest staycation”</span> that leaves you feeling rich in memories and experiences.
+                    Our mission is simple: to deliver a <strong>cloud-nine experience</strong> to every guest. We believe that a great vacation doesn’t have to be expensive, so we strive to offer exceptional value – comfortable accommodations, friendly service, and beautiful surroundings – at a price that everyone can afford. We aim to be <span className="italic">“Boracay’s cheapest”</span> that leaves you feeling rich in memories and experiences.
                 </p>
                 <p className="mb-4 text-lg">
-                    As we grow, our vision is to become a top choice for staycations in Rizal, known for our hospitality and the unique personal touches we provide. We continuously improve our amenities and services based on guest feedback, ensuring that Cloud Haven Staycation remains your go-to haven whenever you need a break above the clouds.
+                    As we grow, our vision is to become a top choice for in Rizal, known for our hospitality and the unique personal touches we provide. We continuously improve our amenities and services based on guest feedback, ensuring that Netania De Laiya remains your go-to haven whenever you need a break above the clouds.
                 </p>
             </div>
         </div>
