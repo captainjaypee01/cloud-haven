@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { API_PREFIX } from "@/constants/api";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import SEO from "@/components/SEO";
+import ProofOfPaymentDialog from "../components/payment/ProofOfPaymentDialog";
 
 /**
  * PaymentPage: /booking/:refNo/payment
@@ -27,7 +28,7 @@ const PaymentPage = () => {
     const { show, hide } = useLoader();
     const [booking, setBooking] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
-    const [paying, setPaying] = useState(false);
+    const [showProofDialog, setShowProofDialog] = useState(false);
 
     useEffect(() => {
         const fetchBooking = async () => {
@@ -46,30 +47,15 @@ const PaymentPage = () => {
         fetchBooking();
     }, [refNo]);
 
-    const handlePay = async (option) => {
+    const handlePaymentClick = (option) => {
         setSelectedOption(option);
-        setPaying(true);
-        try {
-            const paymentPayload = {
-                amount: option.amount,
-                payment_option: option.type,
-                provider: 'netania',
-                outcome: 'success',
-            };
-            const res = await api.post(`${API_PREFIX}/bookings/ref/${refNo}/pay`, paymentPayload, {
-                headers: { "Content-Type": "application/json" },
-            });
-            if (res.data?.success) {
-                toast.success("Payment successful!");
-                navigate(`/booking/${refNo}`);
-            } else {
-                toast.error(res.data?.errorMessage || res.data?.message || "Payment failed");
-            }
-        } catch {
-            toast.error("Payment error. Try again.");
-        } finally {
-            setPaying(false);
-        }
+        setShowProofDialog(true);
+    };
+
+    const handleProofSuccess = () => {
+        setShowProofDialog(false);
+        toast.success("Proof submitted. We'll verify shortly.");
+        navigate(`/booking/${refNo}`);
     };
 
     if (!booking) return null;
@@ -120,7 +106,7 @@ const PaymentPage = () => {
                         <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
                             You have already paid the downpayment. You can now pay the remaining balance online or at the resort.
                         </div>
-                        <div className={`border p-4 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 bg-white/70 border-cyan-600 bg-cyan-50`}>
+                        <div className="border border-cyan-600 bg-cyan-50 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
                             <div>
                                 <div className="font-semibold text-base">Pay Remaining Balance</div>
                                 <div className="text-cyan-700 text-lg">{formatCurrency(remainingBalance)}</div>
@@ -129,11 +115,10 @@ const PaymentPage = () => {
                                 </div>
                             </div>
                             <Button
-                                disabled={paying}
-                                onClick={() => handlePay({ amount: remainingBalance, type: "full" })}
+                                onClick={() => handlePaymentClick({ amount: remainingBalance, type: "full" })}
                                 className="w-full sm:w-48 mt-4 sm:mt-0 ml-0 sm:ml-4 cursor-pointer"
                             >
-                                {paying ? "Processing..." : "Pay Remaining Balance"}
+                                Pay Remaining Balance
                             </Button>
                         </div>
                     </>
@@ -150,8 +135,8 @@ const PaymentPage = () => {
                                     <div className="text-cyan-700 text-lg">{formatCurrency(opt.amount)}</div>
                                     <div className="text-gray-500 text-xs mt-1">{opt.type === 'downpayment' ? `Pay now, remaining balance due at check-in.` : `Settle everything now, skip the counter later!`}</div>
                                 </div>
-                                <Button disabled={paying} onClick={() => handlePay(opt)} className="w-full sm:w-48 mt-4 sm:mt-0 ml-0 sm:ml-4 cursor-pointer">
-                                    {paying && selectedOption?.type === opt.type ? 'Processing...' : (opt.type === 'downpayment' ? 'Pay Downpayment' : 'Pay Full')}
+                                <Button onClick={() => handlePaymentClick(opt)} className="w-full sm:w-48 mt-4 sm:mt-0 ml-0 sm:ml-4 cursor-pointer">
+                                    {opt.type === 'downpayment' ? 'Pay Downpayment' : 'Pay Full'}
                                 </Button>
                             </div>
                         ))}
@@ -163,6 +148,16 @@ const PaymentPage = () => {
                     </Button>
                 </div>
             </div>
+            
+            {/* Proof of Payment Dialog */}
+            <ProofOfPaymentDialog
+                open={showProofDialog}
+                onOpenChange={setShowProofDialog}
+                booking={booking}
+                paymentOption={selectedOption}
+                onSuccess={handleProofSuccess}
+            />
+            
             <SeaWaveBg />
         </div >
     );

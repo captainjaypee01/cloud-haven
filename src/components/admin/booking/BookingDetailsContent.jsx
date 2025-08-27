@@ -7,6 +7,7 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import AddPaymentDialog from './AddPaymentDialog';
 import AddOtherChargeDialog from './AddOtherChargeDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
+import ProofImageDialog from './ProofImageDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { X } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
@@ -19,6 +20,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [deleteOtherCharge, setDeleteOtherCharge] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [showReschedule, setShowReschedule] = useState(false);
+    const [showProofDialog, setShowProofDialog] = useState(false);
+    const [selectedPaymentProof, setSelectedPaymentProof] = useState(null);
     const api = useApi();
 
     if (!booking) return <div className="p-6">Booking not found.</div>;
@@ -30,6 +33,11 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const totalPayable = Number(booking.final_price) + Number(otherCharges);
     // Remaining balance = final price - total paid (never negative)
     const remainingBalance = Math.max(totalPayable - totalPaid, 0);
+
+    const handleViewProof = (payment) => {
+        setSelectedPaymentProof(payment);
+        setShowProofDialog(true);
+    };
 
     const handleDeleteOtherChargePrompt = (charge) => {
         setDeleteOtherCharge(charge);
@@ -216,6 +224,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <th className="py-2 pr-4 font-medium">Transaction ID</th>
                                     <th className="py-2 pr-4 font-medium">Error Code</th>
                                     <th className="py-2 pr-4 font-medium">Error Message</th>
+                                    <th className="py-2 pr-4 font-medium">Proof</th>
                                     <th className="py-2 pr-4 font-medium">Actions</th>
                                 </tr>
                             </thead>
@@ -234,6 +243,20 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                         <td className="py-2 pr-4">{p.transaction_id || '-'}</td>
                                         <td className="py-2 pr-4">{p.error_code || '-'}</td>
                                         <td className="py-2 pr-4">{p.error_message || '-'}</td>
+                                        <td className="py-2 pr-4">
+                                            {p.proof_image_url ? (
+                                                <Button
+                                                    variant="link"
+                                                    size="sm"
+                                                    onClick={() => handleViewProof(p)}
+                                                    className="text-cyan-700 p-0 h-auto"
+                                                >
+                                                    View
+                                                </Button>
+                                            ) : (
+                                                '-' 
+                                            )}
+                                        </td>
                                         <td className="py-2 pr-4 text-center">
                                             <Button
                                                 size="sm"
@@ -297,6 +320,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     setShowReschedule(false);
                     fetchBooking && fetchBooking();
                 }}
+            />
+            <ProofImageDialog
+                open={showProofDialog}
+                onOpenChange={setShowProofDialog}
+                imageUrl={selectedPaymentProof?.proof_image_url}
+                paymentInfo={selectedPaymentProof}
             />
         </div>
     );
