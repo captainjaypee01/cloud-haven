@@ -11,8 +11,10 @@ import RoomFormDialog from '@/components/admin/forms/RoomFormDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { toast } from "sonner";
 import { useDebounce } from '@/hooks/useDebounce';
+import { useNavigate } from 'react-router-dom';
 
 const ListRoom = () => {
+  const navigate = useNavigate()
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
@@ -63,6 +65,14 @@ const ListRoom = () => {
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => navigate(`/admin/room-units/${row.original.id}`)}
+          >
+            Units
+          </Button>
           <Button
             size="sm"
             variant="secondary"
