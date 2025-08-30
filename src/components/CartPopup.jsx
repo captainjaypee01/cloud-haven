@@ -40,7 +40,7 @@ export function CartPopup() {
         }
         if (total > item.maxGuests) {
             toast.warning(
-                `Max ${item.maxGuests} guests allowed (you have ${total}). An extra fee will be applied for each extra guest`
+                `Max ${item.maxGuests} guests allowed (you have ${total}). We allow for ${item.extraGuests} extra guest/s`
             );
         }
 

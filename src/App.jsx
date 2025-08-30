@@ -27,6 +27,7 @@ const NotFound = React.lazy(() => import('./pages/NotFound'));
 const Layout = React.lazy(() => import('./pages/admin/Layout'));
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const ListRoom = React.lazy(() => import('./pages/admin/rooms/ListRoom'));
+const ListRoomUnits = React.lazy(() => import('./pages/admin/room-units/ListRoomUnits'));
 const ListBooking = React.lazy(() => import('./pages/admin/bookings/ListBooking'));
 const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
 const ListAmenity = React.lazy(() => import('./pages/admin/amenities/ListAmenity'));
@@ -106,6 +107,7 @@ const App = () => {
               >
                 <Route index element={<Dashboard />} />
                 <Route path="rooms" element={<ListRoom />} />
+                <Route path="room-units/:roomId" element={<ListRoomUnits />} />
                 <Route path="bookings" element={<ListBooking />} />
                 <Route path="bookings/:id" element={<BookingDetails />} />
                 <Route path="amenities" element={<ListAmenity />} />

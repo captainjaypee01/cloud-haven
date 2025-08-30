@@ -117,7 +117,7 @@ const RoomDetails = () => {
         
         if (totalGuests > room.max_guests) {
             toast.warning(
-                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). We allow for ${room.extra_guests} extra guest/s with additional fees.`
+                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). We allow for ${room.extra_guests} extra guest/s.`
             );
         }
         if (!state?.checkIn || !state?.checkOut) {
@@ -397,7 +397,6 @@ const RoomDetails = () => {
                             <div className="flex items-start gap-2 rounded-md border border-orange-200 bg-orange-50 p-3 text-orange-700">
                                 <AlertCircleIcon className="mt-0.5 h-5 w-5 text-orange-500" />
                                 <div>
-                                    <p className="font-medium">Extra guest fee may apply</p>
                                     <p className="text-sm">You have {totalGuests} guests (over {room.max_guests} standard capacity).</p>
                                 </div>
                             </div>
