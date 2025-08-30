@@ -4,7 +4,7 @@ import { API_PREFIX } from '@/constants/api';
 import Title from '@/components/Title';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/admin/common/StatusBadge';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { Users, CalendarCheck, DollarSign, Star } from 'lucide-react';  // example icons
 // Recharts components
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
@@ -122,7 +122,7 @@ const Dashboard = () => {
                             <XAxis dataKey="month" tickLine={false} />
                             <YAxis tickLine={false} />
                             <Tooltip formatter={(value) => formatCurrency(value)} />
-                            <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#ffc658" strokeWidth={2} dot={{ r: 3 }} />
+                            <Line type="monotone" dataKey="revenue" name="Revenue" stroke="#ffc658" strokeWidth={2} dot={{ r: 2 }} />
                         </LineChart>
                     </ResponsiveContainer>
                 </Card>
@@ -149,25 +149,41 @@ const Dashboard = () => {
                     <thead className="bg-gray-50 text-gray-800 font-medium">
                         <tr>
                             <th className="py-2 px-4 text-left">Guest Name</th>
+                            <th className="py-2 px-4 text-left">Check-in</th>
+                            <th className="py-2 px-4 text-left">Check-out</th>
                             <th className="py-2 px-4 text-left">Room(s)</th>
                             <th className="py-2 px-4 text-center">Total Amount</th>
+                            <th className="py-2 px-4 text-center">Remaining Balance</th>
                             <th className="py-2 px-4 text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
-                        {bookings_today_tomorrow.map((booking) => (
-                            <tr key={booking.id} className="border-t border-gray-300">
-                                <td className="py-2 px-4">{booking.guest_name}</td>
-                                <td className="py-2 px-4 max-sm:hidden">{formatRooms(booking.rooms)}</td>
-                                <td className="py-2 px-4 text-center">{formatCurrency(booking.final_price)}</td>
-                                <td className="py-2 px-4 text-center">
-                                    <StatusBadge status={booking.status} />
-                                </td>
-                            </tr>
-                        ))}
+                        {bookings_today_tomorrow.map((booking) => {
+                            
+                            const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
+                            
+                            // Remaining balance = (final price + other charges) - total paid (never negative)
+                            const otherCharges = booking?.other_charges || 0;
+                            const totalPayable = Number(booking.final_price) + Number(booking.other_charges);
+                            const remainingBalance = Math.max(booking.final_price - totalPaid, 0);
+                            return (
+                                <tr key={booking.id} className="border-t border-gray-300">
+                                    <td className="py-2 px-4">{booking.guest_name}</td>
+                                    <td className="py-2 px-4">{formatDate(booking.check_in_date)}</td>
+                                    <td className="py-2 px-4">{formatDate(booking.check_out_date)}</td>
+                                    <td className="py-2 px-4 max-sm:hidden">{formatRooms(booking.rooms)}</td>
+                                    <td className="py-2 px-4 text-center">{formatCurrency(totalPayable)}</td>
+                                    <td className="py-2 px-4 text-center">{formatCurrency(remainingBalance)}</td>
+                                    <td className="py-2 px-4 text-center">
+                                        <StatusBadge status={booking.status} />
+                                    </td>
+                                </tr>
+                            )
+                        }
+                        )}
                         {bookings_today_tomorrow.length === 0 && (
                             <tr>
-                                <td className="py-2 px-4 text-center text-gray-500" colSpan="4">
+                                <td className="py-2 px-4 text-center text-gray-500" colSpan="7">
                                     No bookings for the next two days.
                                 </td>
                             </tr>

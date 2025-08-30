@@ -26,6 +26,10 @@ export const roomColumns = [
         header: "Guests",
     },
     {
+        accessorKey: "quantity",
+        header: "No of Units",
+    },
+    {
         accessorKey: "price",
         header: ({ column }) => {
             return (
