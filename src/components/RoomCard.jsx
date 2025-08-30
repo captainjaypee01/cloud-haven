@@ -20,17 +20,43 @@ import { formatCurrency } from "../utils/currency";
 import { useState, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import RequireDatesDialog from "@/components/common/RequireDatesDialog";
+import { useRoomAvailability } from "@/hooks/useRoomAvailability";
+import { RoomAvailabilityBadge } from "@/components/common/RoomAvailabilityBadge";
+import { QuickBookingDialog } from "@/components/common/QuickBookingDialog";
 
 export default function RoomCard({ room }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
     const { state } = useCart();
     const [showDatesDialog, setShowDatesDialog] = useState(false);
+    const [showBookingDialog, setShowBookingDialog] = useState(false);
+
+    // Get availability data for this room
+    const {
+        availableUnits,
+        isLoading: availabilityLoading,
+        isError: availabilityError,
+        isDebouncing,
+        isUnavailable,
+    } = useRoomAvailability(room.slug, state.checkIn, state.checkOut);
 
     const handleViewDetailsClick = useCallback((e) => {
         if (!state.checkIn || !state.checkOut) {
             e.preventDefault();
             setShowDatesDialog(true);
         }
+    }, [state.checkIn, state.checkOut]);
+
+    const handleBookNow = useCallback((e) => {
+        e.preventDefault();
+        
+        // Check if dates are selected first
+        if (!state?.checkIn || !state?.checkOut) {
+            setShowDatesDialog(true);
+            return;
+        }
+
+        // Open the booking dialog to let user specify guest numbers
+        setShowBookingDialog(true);
     }, [state.checkIn, state.checkOut]);
 
     return (
@@ -72,12 +98,39 @@ export default function RoomCard({ room }) {
                             </li>
                         ))}
                     </ul>
+                    
+                    {/* Availability Badge */}
+                    {state.checkIn && state.checkOut && (
+                        <div className="flex justify-start">
+                            <RoomAvailabilityBadge
+                                availableUnits={availableUnits}
+                                isLoading={availabilityLoading}
+                                isError={availabilityError}
+                                isDebouncing={isDebouncing}
+                                size="sm"
+                            />
+                        </div>
+                    )}
+                    
                     <div className="flex items-center justify-between">
                         <span className="font-semibold">{formatCurrency(room.price)}/night <p className="text-sm text-gray-600 mt-0.5">Max {room.max_guests} guests</p></span>
 
-                        <Link to={`/rooms/${room.slug}`} onClick={handleViewDetailsClick} key={room.slug}>
-                            <Button size="sm" className="cursor-pointer">View Details</Button>
-                        </Link>
+                        <div className="flex gap-2">
+                            <Link to={`/rooms/${room.slug}`} onClick={handleViewDetailsClick} key={room.slug}>
+                                <Button size="sm" variant="outline" className="cursor-pointer">View Details</Button>
+                            </Link>
+                            {state.checkIn && state.checkOut && (
+                                <Button 
+                                    size="sm" 
+                                    variant={isUnavailable ? "secondary" : "default"}
+                                    disabled={isUnavailable || availabilityLoading}
+                                    className="cursor-pointer"
+                                    onClick={handleBookNow}
+                                >
+                                    {isUnavailable ? "Sold Out" : "Book Now"}
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -85,6 +138,14 @@ export default function RoomCard({ room }) {
                 open={showDatesDialog}
                 onOpenChange={setShowDatesDialog}
                 targetHref={`/rooms/${room.slug}`}
+            />
+            <QuickBookingDialog
+                open={showBookingDialog}
+                onOpenChange={setShowBookingDialog}
+                room={room}
+                availableUnits={availableUnits}
+                isUnavailable={isUnavailable}
+                availabilityLoading={availabilityLoading}
             />
         </article>
     );

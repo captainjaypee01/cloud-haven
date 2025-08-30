@@ -3,7 +3,10 @@ import { useParams } from 'react-router-dom'
 import { roomCommonData } from '../assets/assets'
 import { formatCurrency } from '../utils/currency'
 import { roomPhotos } from '../data/rooms'
-import { useRoom, useAvailability } from '../queries/rooms'
+import { useRoom } from '../queries/rooms'
+import { useRoomAvailability } from '../hooks/useRoomAvailability'
+import { RoomAvailabilityBadge } from '../components/common/RoomAvailabilityBadge'
+import { RoomGallerySlider } from '../components/common/RoomGallerySlider'
 import { useAppContext } from '../context/AppContext'
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircleIcon } from 'lucide-react'
@@ -27,11 +30,11 @@ const RoomDetails = () => {
     const { navigate } = useAppContext();
     const { addItem, state } = useCart();
     const { data: room, isLoading, isError, error, status } = useRoom(roomId);
-    const { control, handleSubmit } = useForm({
+    const { control, handleSubmit, watch } = useForm({
         defaultValues: { dateRange: { from: null, to: null }, accommodations: 1, adults: "1", children: "0" },
     });
 
-    const [mainImage, setMainImage] = useState(roomPhotos[0])
+    const mainImage = room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0];
     const [requireDatesOpen, setRequireDatesOpen] = useState(false);
 
     // If no dates selected (direct navigation), prompt user to select
@@ -41,38 +44,29 @@ const RoomDetails = () => {
         }
     }, [state?.checkIn, state?.checkOut]);
 
-    // Check availability for selected dates
-    const { data: availabilityData } = useAvailability({
-        check_in: state?.checkIn,
-        check_out: state?.checkOut,
-        room_slug: roomId,
-    });
+    // Check availability for selected dates using new hook with debouncing
+    const {
+        availableUnits,
+        isLoading: availabilityLoading,
+        isError: availabilityError,
+        isDebouncing,
+        isUnavailable,
+    } = useRoomAvailability(roomId, state?.checkIn, state?.checkOut);
 
-    const availableCount = useMemo(() => {
-        const data = availabilityData;
-        if (!data) return undefined;
-        // Support different shapes defensively
-        if (Array.isArray(data)) {
-            const item = data.find((it) => it.room_slug === roomId || it.roomId === roomId || it.slug === roomId);
-            if (!item) return undefined;
-            return item.available_count ?? (item.available ? 1 : 0);
-        }
-        if (typeof data === 'object') {
-            if (data.available_count != null) return data.available_count;
-            if (data.data) {
-                const inner = data.data;
-                if (Array.isArray(inner)) {
-                    const item = inner.find((it) => it.room_slug === roomId || it.roomId === roomId || it.slug === roomId);
-                    return item ? (item.available_count ?? (item.available ? 1 : 0)) : undefined;
-                }
-                if (typeof inner === 'object' && inner.available_count != null) return inner.available_count;
-            }
-            if (data.available != null) return data.available ? 1 : 0;
-        }
-        return undefined;
-    }, [availabilityData, roomId]);
+    // Calculate remaining availability considering cart items
+    const roomsInCart = state.items.filter(item => item.roomId === room?.slug).length;
+    const remainingUnits = availableUnits !== undefined ? Math.max(0, availableUnits - roomsInCart) : undefined;
+    const isCartFull = availableUnits !== undefined && roomsInCart >= availableUnits;
 
-    const isUnavailable = (availableCount !== undefined && availableCount <= 0);
+    // Watch form values for real-time guest validation
+    const watchedAdults = watch("adults");
+    const watchedChildren = watch("children");
+    const totalGuests = parseInt(watchedAdults || "0") + parseInt(watchedChildren || "0");
+
+    // Guest validation logic
+    const exceedsCapacity = room && totalGuests > (parseInt(room.max_guests) + parseInt(room.extra_guests));
+    const exceedsMaxGuests = room && totalGuests > parseInt(room.max_guests);
+    const hasNoGuests = totalGuests === 0;
 
     if (isLoading) {
         return (
@@ -110,16 +104,22 @@ const RoomDetails = () => {
 
         const totalGuests = parseInt(adults) + parseInt(children);
 
-        if (totalGuests > parseInt(room.max_guests) + parseInt(room.extra_guests)) {
-
-            toast.error(`Only up to ${room.max_guests + room.extra_guests} guests can stay in this room.`);
-            return
+        // Guest validation with improved messaging
+        if (totalGuests === 0) {
+            toast.error('Please select at least 1 guest.');
+            return;
         }
+
+        if (totalGuests > parseInt(room.max_guests) + parseInt(room.extra_guests)) {
+            toast.error(`Only up to ${room.max_guests + room.extra_guests} guests can stay in this room.`);
+            return;
+        }
+        
         if (totalGuests > room.max_guests) {
             toast.warning(
-                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). We only allow for ${room.extra_guests} extra guest/s`
+                `Max ${room.max_guests} guests allowed (you have ${totalGuests}). We allow for ${room.extra_guests} extra guest/s with additional fees.`
             );
-        };
+        }
         if (!state?.checkIn || !state?.checkOut) {
             toast.error('Please select dates first.');
             setRequireDatesOpen(true);
@@ -129,6 +129,20 @@ const RoomDetails = () => {
             toast.error('This room is not available for your selected dates.');
             return;
         }
+
+        // Check availability limits before adding to cart
+        const roomsInCart = state.items.filter(item => item.roomId === room.slug).length;
+        
+        if (availableUnits !== undefined && roomsInCart >= availableUnits) {
+            const remainingUnits = Math.max(0, availableUnits - roomsInCart);
+            if (remainingUnits === 0) {
+                toast.error(`No more ${room.name} rooms available for your selected dates.`);
+            } else {
+                toast.error(`Only ${remainingUnits} more ${room.name} room${remainingUnits === 1 ? '' : 's'} available for your selected dates.`);
+            }
+            return;
+        }
+
         addItem({
             roomId: room.slug,
             name: room.name,
@@ -149,7 +163,7 @@ const RoomDetails = () => {
                 og={{
                     title: room.name,
                     description: room.short_description || room.description,
-                    image: mainImage,
+                    image: room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0],
                     type: 'product',
                     url: typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`
                 }}
@@ -210,6 +224,24 @@ const RoomDetails = () => {
                 </div>
             )}
 
+            {/* Cart status notice */}
+            {state?.checkIn && state?.checkOut && roomsInCart > 0 && !isUnavailable && (
+                <div className="mt-4 mb-2 flex items-start gap-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-blue-700">
+                    <AlertCircleIcon className="mt-0.5 h-5 w-5 text-blue-500" />
+                    <div>
+                        <p className="font-medium">
+                            {roomsInCart} {room.name} {roomsInCart === 1 ? 'room' : 'rooms'} in your cart
+                        </p>
+                        <p className="text-sm">
+                            {isCartFull ? 
+                                'You have reached the maximum available rooms for these dates.' :
+                                `You can add ${remainingUnits} more room${remainingUnits === 1 ? '' : 's'} to your booking.`
+                            }
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Room Price */}
             <div className='flex items-center gap-1 mt-2'>
                 <p className='text-lg font-bold'>{formatCurrency(room.price)} /night</p>
@@ -221,7 +253,7 @@ const RoomDetails = () => {
                     url={typeof window !== 'undefined' ? window.location.href : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`}
                     title={room.name}
                     description={room.short_description || room.description}
-                    image={mainImage}
+                    image={room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0]}
                 />
             </div>
 
@@ -229,6 +261,25 @@ const RoomDetails = () => {
             <div className='flex items-center gap-1 mt-2'>
                 <p className=''>Max Guest: <span className='font-inter text-sm'>({room.max_guests})</span></p>
             </div>
+
+            {/* Availability Badge */}
+            {state?.checkIn && state?.checkOut && (
+                <div className='flex items-center gap-2 mt-2'>
+                    <span className='text-sm text-gray-600'>Availability:</span>
+                    <RoomAvailabilityBadge
+                        availableUnits={remainingUnits}
+                        isLoading={availabilityLoading}
+                        isError={availabilityError}
+                        isDebouncing={isDebouncing}
+                        size="default"
+                    />
+                    {roomsInCart > 0 && availableUnits !== undefined && (
+                        <span className='text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded'>
+                            {roomsInCart} in cart
+                        </span>
+                    )}
+                </div>
+            )}
             {/* Room Rating */}
             {/* <div className='flex items-center gap-1 mt-2'>
                 <StarRating />
@@ -240,16 +291,16 @@ const RoomDetails = () => {
                 <span>{room.description}</span>
             </div>
 
-            {/* Room Short Description */}
-            <div className='flex flex-col lg:flex-row mt-6 gap-6'>
-                <div className='lg:w-1/2 w-full'>
-                    <img src={mainImage} alt="Room Image" className='w-full rounded-xl shadow-lg object-cover' decoding="async" fetchpriority="high" />
-                </div>
-                <div className='grid grid-cols-2 gap-4 lg:w-1/2 w-full'>
-                    {roomPhotos.length > 1 && roomPhotos.map((image, index) => (
-                        <img onClick={() => setMainImage(image)} key={index} src={image} alt="Room Image" loading="lazy" decoding="async" className={`w-full h-full rounded-xl shadow-md object-cover cursor-pointer ${mainImage === image && 'outline-3 outline-orange-500'}`} />
-                    ))}
-                </div>
+            {/* Room Gallery Slider */}
+            <div className='mt-6'>
+                <RoomGallerySlider
+                    images={room?.images?.length > 0 ? room.images.map(img => img.secure_image_url || img.url) : roomPhotos}
+                    roomName={room.name}
+                    className="w-full max-w-4xl mx-auto"
+                    aspectRatio={16/9}
+                    showThumbnails={true}
+                    loop={true}
+                />
             </div>
 
             {/* Room Highlights */}
@@ -324,6 +375,45 @@ const RoomDetails = () => {
                         />
                     </div>
 
+                    {/* Guest count feedback - similar to QuickBookingDialog */}
+                    <div className="col-span-1 md:col-span-3 lg:col-span-3 w-full space-y-2">
+                        <div className="text-sm text-gray-600">
+                            Total guests: <span className={`font-medium ${exceedsCapacity ? 'text-red-600' : 'text-gray-900'}`}>
+                                {totalGuests}
+                            </span>
+                        </div>
+                        
+                        {exceedsCapacity && (
+                            <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700">
+                                <AlertCircleIcon className="mt-0.5 h-5 w-5 text-red-500" />
+                                <div>
+                                    <p className="font-medium">Exceeds maximum capacity</p>
+                                    <p className="text-sm">Maximum {room.max_guests + room.extra_guests} guests allowed for this room.</p>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {exceedsMaxGuests && !exceedsCapacity && (
+                            <div className="flex items-start gap-2 rounded-md border border-orange-200 bg-orange-50 p-3 text-orange-700">
+                                <AlertCircleIcon className="mt-0.5 h-5 w-5 text-orange-500" />
+                                <div>
+                                    <p className="font-medium">Extra guest fee may apply</p>
+                                    <p className="text-sm">You have {totalGuests} guests (over {room.max_guests} standard capacity).</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {hasNoGuests && (
+                            <div className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3 text-red-700">
+                                <AlertCircleIcon className="mt-0.5 h-5 w-5 text-red-500" />
+                                <div>
+                                    <p className="font-medium">Please select guests</p>
+                                    <p className="text-sm">At least 1 guest is required to make a booking.</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="col-span-1 md:col-span-3 lg:col-span-3 w-full">
                         {isUnavailable ? (
                             <div className="flex gap-2 w-full">
@@ -331,9 +421,31 @@ const RoomDetails = () => {
                                     Change dates
                                 </Button>
                             </div>
+                        ) : isCartFull ? (
+                            <div className="flex gap-2 w-full">
+                                <Button type="button" variant="secondary" disabled className="w-full cursor-pointer">
+                                    Maximum rooms added to cart
+                                </Button>
+                                <Button type="button" variant="outline" className="cursor-pointer" onClick={() => setRequireDatesOpen(true)}>
+                                    Change dates
+                                </Button>
+                            </div>
                         ) : (
-                            <Button type="submit" size="lg" className="w-full cursor-pointer">
-                                Book this room
+                            <Button 
+                                type="submit" 
+                                size="lg" 
+                                className="w-full cursor-pointer"
+                                disabled={
+                                    availabilityLoading || 
+                                    isDebouncing || 
+                                    exceedsCapacity || 
+                                    hasNoGuests
+                                }
+                            >
+                                {availabilityLoading || isDebouncing ? 'Checking availability...' : 
+                                 exceedsCapacity ? 'Exceeds room capacity' :
+                                 hasNoGuests ? 'Select guests' :
+                                 'Book this room'}
                             </Button>
                         )}
                     </div>
