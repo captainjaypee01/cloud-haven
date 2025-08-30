@@ -17,17 +17,43 @@ import { formatCurrency } from "../../utils/currency";
 import { useState, useCallback } from "react";
 import { useCart } from "@/context/CartContext";
 import RequireDatesDialog from "@/components/common/RequireDatesDialog";
+import { useRoomAvailability } from "@/hooks/useRoomAvailability";
+import { RoomAvailabilityBadge } from "@/components/common/RoomAvailabilityBadge";
+import { QuickBookingDialog } from "@/components/common/QuickBookingDialog";
 
 export default function RoomBlock({ room, index, reverse, iconsModule }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
     const { state } = useCart();
     const [showDatesDialog, setShowDatesDialog] = useState(false);
+    const [showBookingDialog, setShowBookingDialog] = useState(false);
+
+    // Get availability data for this room
+    const {
+        availableUnits,
+        isLoading: availabilityLoading,
+        isError: availabilityError,
+        isDebouncing,
+        isUnavailable,
+    } = useRoomAvailability(room.slug, state.checkIn, state.checkOut);
 
     const handleViewDetailsClick = useCallback((e) => {
         if (!state.checkIn || !state.checkOut) {
             e.preventDefault();
             setShowDatesDialog(true);
         }
+    }, [state.checkIn, state.checkOut]);
+
+    const handleBookNow = useCallback((e) => {
+        e.preventDefault();
+        
+        // Check if dates are selected first
+        if (!state?.checkIn || !state?.checkOut) {
+            setShowDatesDialog(true);
+            return;
+        }
+
+        // Open the booking dialog to let user specify guest numbers
+        setShowBookingDialog(true);
     }, [state.checkIn, state.checkOut]);
     return (
         <motion.article
@@ -117,11 +143,17 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                         Maximum guests: <span className="font-medium">{room.max_guests}</span>
                     </p>
 
-                    {/* Availability */}
-                    {room.available_rooms !== undefined && (
-                        <p className="text-sm text-emerald-700 mb-4">
-                            {room.available_rooms} {room.available_rooms === 1 ? "room" : "rooms"} left for your selected dates
-                        </p>
+                    {/* Availability Badge */}
+                    {state.checkIn && state.checkOut && (
+                        <div className="mb-4">
+                            <RoomAvailabilityBadge
+                                availableUnits={availableUnits}
+                                isLoading={availabilityLoading}
+                                isError={availabilityError}
+                                isDebouncing={isDebouncing}
+                                size="default"
+                            />
+                        </div>
                     )}
 
                     {/* CTA */}
@@ -133,11 +165,16 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                         >
                             View Details
                         </Link>
-                        {/* <Button variant="outline" asChild>
-                            <a href="#" onClick={(e) => e.preventDefault()}>
-                                Book Now
-                            </a>
-                        </Button> */}
+                        {state.checkIn && state.checkOut && (
+                            <Button 
+                                variant={isUnavailable ? "secondary" : "outline"} 
+                                disabled={isUnavailable || availabilityLoading}
+                                className="cursor-pointer"
+                                onClick={handleBookNow}
+                            >
+                                {isUnavailable ? "Sold Out" : "Book Now"}
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -145,6 +182,14 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                 open={showDatesDialog}
                 onOpenChange={setShowDatesDialog}
                 targetHref={`/rooms/${room.slug}`}
+            />
+            <QuickBookingDialog
+                open={showBookingDialog}
+                onOpenChange={setShowBookingDialog}
+                room={room}
+                availableUnits={availableUnits}
+                isUnavailable={isUnavailable}
+                availabilityLoading={availabilityLoading}
             />
         </motion.article>
     );
