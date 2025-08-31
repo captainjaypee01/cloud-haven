@@ -42,7 +42,7 @@ const App = () => {
 
   const isAdminPath = useLocation().pathname.includes("admin");
   const isComingSoon = import.meta.env.VITE_COMING_SOON_FLAG === 'true'
-  // console.log('isComingSoon', isComingSoon, import.meta.env.VITE_COMING_SOON_FLAG)
+  
   return (
     <>
       {/* Default sitewide SEO fallbacks (no twitter) */}
