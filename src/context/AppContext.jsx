@@ -35,7 +35,7 @@ export const AppProvider = ({ children }) => {
     const fetchUser = async () => {
         try {
             // const response = await api.get('/api/v1/clerk/test');
-            // console.log('clerk test', response)
+    
 
         } catch (error) {
             console.log('error', error);

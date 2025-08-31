@@ -11,7 +11,7 @@ import { useLoader } from '@/context/LoaderContext';
 import { API_PREFIX } from '@/constants/api';
 import { formatCurrency } from '@/utils/currency';
 import { toast } from 'sonner';
-import { BadgeCheckIcon, BadgeAlertIcon, Upload, FileText, X, Eye, Download } from 'lucide-react';
+import { BadgeCheckIcon, BadgeAlertIcon, Upload, FileText, X, Eye } from 'lucide-react';
 import ProofImageDialog from '@/components/admin/booking/ProofImageDialog';
 
 const PaymentCard = ({ payment, onPaymentUpdate }) => {
