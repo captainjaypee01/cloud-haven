@@ -52,9 +52,19 @@ const PaymentPage = () => {
         setShowProofDialog(true);
     };
 
-    const handleProofSuccess = () => {
+    const handleProofSuccess = async () => {
         setShowProofDialog(false);
         toast.success("Proof submitted. We'll verify shortly.");
+        
+        // Refresh booking data before navigating
+        try {
+            const res = await api.get(`${API_PREFIX}/bookings/ref/${refNo}`);
+            const data = res.data?.data || res.data?.booking || res.data;
+            setBooking(data);
+        } catch (error) {
+            console.error("Failed to refresh booking data:", error);
+        }
+        
         navigate(`/booking/${refNo}`);
     };
 

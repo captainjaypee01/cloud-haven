@@ -40,13 +40,22 @@ const UnifiedBookingResultPage = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
 
-    const handlePaymentUpdate = (updatedPayment) => {
-        setBooking(prev => ({
-            ...prev,
-            payments: prev.payments.map(p => 
-                p.id === updatedPayment.id ? updatedPayment : p
-            )
-        }));
+    const handlePaymentUpdate = async (updatedPayment) => {
+        // Refresh the entire booking data to get the latest payment information
+        try {
+            const res = await api.get(`${API_PREFIX}/bookings/ref/${refNo}`);
+            const data = res.data?.data || res.data?.booking || res.data;
+            setBooking(data);
+        } catch (error) {
+            console.error("Failed to refresh booking data:", error);
+            // Fallback to just updating the payment if refresh fails
+            setBooking(prev => ({
+                ...prev,
+                payments: prev.payments.map(p => 
+                    p.id === updatedPayment.id ? updatedPayment : p
+                )
+            }));
+        }
     };
 
     useEffect(() => {
