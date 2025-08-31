@@ -44,7 +44,6 @@ const formSchema = z.object({
 });
 
 const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSuccess, payment, isEdit }) => {
-    console.log('payment', payment)
     const api = useApi();
     const form = useForm({
         resolver: zodResolver(formSchema),

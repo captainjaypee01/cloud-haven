@@ -18,7 +18,6 @@ const BookingDetails = () => {
         try {
 
             const res = await api.get(`${API_PREFIX}/admin/bookings/${id}`, { requiresAuth: true });
-            console.log(res.data);
             setBooking(res?.data);
         } catch (error) {
             console.log(error);
