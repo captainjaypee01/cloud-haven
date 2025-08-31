@@ -16,6 +16,7 @@ import * as bookingsSvc from "@/services/bookings";
 import { toast } from "sonner";
 import { Separator } from "@radix-ui/react-select";
 import SEO from "@/components/SEO";
+import PaymentCard from "@/components/PaymentCard";
 
 const statusColor = status => {
     switch (status) {
@@ -38,6 +39,15 @@ const UnifiedBookingResultPage = () => {
     const [lastPaymentError, setLastPaymentError] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedRoomId, setSelectedRoomId] = useState(null);
+
+    const handlePaymentUpdate = (updatedPayment) => {
+        setBooking(prev => ({
+            ...prev,
+            payments: prev.payments.map(p => 
+                p.id === updatedPayment.id ? updatedPayment : p
+            )
+        }));
+    };
 
     useEffect(() => {
         const fetchBooking = async () => {
@@ -172,33 +182,33 @@ const UnifiedBookingResultPage = () => {
                 </div>
                 {/* Payment History */}
                 <div className="mt-8 mb-4">
-                    <h3 className="font-semibold text-lg mb-2">Payment History</h3>
-                    <div className="rounded bg-gray-50 border border-gray-200 p-3">
-                        {(!booking.payments || booking.payments.length === 0) ? (
-                            <div className="text-gray-500 text-sm">No payments yet.</div>
-                        ) : (
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr>
-                                        <th className="text-left py-1 px-2">Date</th>
-                                        <th className="text-left py-1 px-2">Amount</th>
-                                        <th className="text-left py-1 px-2">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {booking.payments.map((payment, i) => (
-                                        <tr key={payment.id || i}>
-                                            <td className="py-1 px-2">{payment.paid_at}</td>
-                                            <td className="py-1 px-2">{formatCurrency(payment.amount)}</td>
-                                            <td className="py-1 px-2">
-                                                <Badge variant={payment.status === "paid" ? "success" : (payment.status === "failed" ? "destructive" : "secondary")}>{payment.status === "paid" ? <BadgeCheckIcon /> : <BadgeAlertIcon />} {payment.status}</Badge>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
+                    <h3 className="font-semibold text-lg mb-4">Payment History</h3>
+                    
+                    {/* Bank Details - Displayed once for all payments */}
+                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 className="font-medium text-blue-900 mb-2 text-sm">Bank Details for Payment</h4>
+                        <div className="text-xs text-blue-800 space-y-1">
+                            <div><span className="font-medium">Bank:</span> BDO Unibank</div>
+                            <div><span className="font-medium">Account Name:</span> NETANIA DE LAIYA INC.</div>
+                            <div><span className="font-medium">Account Number:</span> 004978007114</div>
+                        </div>
                     </div>
+                    
+                    {(!booking.payments || booking.payments.length === 0) ? (
+                        <div className="text-gray-500 text-sm bg-gray-50 rounded border p-4 text-center">
+                            No payments yet.
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {booking.payments.map((payment) => (
+                                <PaymentCard 
+                                    key={payment.id} 
+                                    payment={payment} 
+                                    onPaymentUpdate={handlePaymentUpdate}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
                 {/* Status-specific UI and actions */}
                 {booking.status === "pending" && (

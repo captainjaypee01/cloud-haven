@@ -99,6 +99,20 @@ const PaymentPage = () => {
                     <div className="flex justify-between font-medium text-base mt-2"><span>Total</span><span>{formatCurrency(booking.final_price)}</span></div>
                 </div>
                 <hr className="my-4" />
+                
+                {/* Bank Details */}
+                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">Bank Details for Payment</h4>
+                    <div className="text-sm text-blue-800 space-y-1">
+                        <div><span className="font-medium">Bank:</span> BDO Unibank</div>
+                        <div><span className="font-medium">Account Name:</span> NETANIA DE LAIYA INC.</div>
+                        <div><span className="font-medium">Account Number:</span> 004978007114</div>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">
+                        Transfer your payment to this account, then upload your proof of payment below.
+                    </p>
+                </div>
+                
                 <h3 className="text-lg font-medium mb-2">How would you like to pay?</h3>
                 {/* If already paid DP and remaining balance > 0, show only remaining balance payment option */}
                 {booking.status === "downpayment" && remainingBalance > 0 ? (

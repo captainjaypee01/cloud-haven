@@ -9,9 +9,15 @@ import AddOtherChargeDialog from './AddOtherChargeDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
 import ProofImageDialog from './ProofImageDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
+import { useForm } from 'react-hook-form';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showAddPayment, setShowAddPayment] = useState(false);
@@ -22,7 +28,26 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showReschedule, setShowReschedule] = useState(false);
     const [showProofDialog, setShowProofDialog] = useState(false);
     const [selectedPaymentProof, setSelectedPaymentProof] = useState(null);
+    const [resetProofDialog, setResetProofDialog] = useState(false);
+    const [statusProofDialog, setStatusProofDialog] = useState(false);
+    const [selectedProofPayment, setSelectedProofPayment] = useState(null);
+    const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const api = useApi();
+
+    const resetForm = useForm({
+        defaultValues: { reason: '' }
+    });
+
+    const statusForm = useForm({
+        defaultValues: { reason: '' },
+        resolver: (values) => {
+            const errors = {};
+            if (proofAction === 'rejected' && (!values.reason || values.reason.trim() === '')) {
+                errors.reason = { type: 'required', message: 'Rejection reason is required' };
+            }
+            return { values, errors };
+        }
+    });
 
     if (!booking) return <div className="p-6">Booking not found.</div>;
 
@@ -49,6 +74,82 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
         await api.delete(`${API_PREFIX}/admin/bookings/${booking.id}/other-charges/${deleteOtherCharge.id}`, { requiresAuth: true });
         setDeleteOtherCharge(null);
         if (fetchBooking) fetchBooking();
+    };
+
+    const handleResetProofUploads = (payment) => {
+        setSelectedProofPayment(payment);
+        resetForm.reset({ reason: '' });
+        setResetProofDialog(true);
+    };
+
+    const handleProofStatusAction = (payment, action) => {
+        setSelectedProofPayment(payment);
+        setProofAction(action);
+        statusForm.reset({ reason: '' });
+        setStatusProofDialog(true);
+    };
+
+    const confirmResetProofUploads = async (data) => {
+        if (!selectedProofPayment) return;
+        
+        try {
+            await api.patch(
+                `${API_PREFIX}/admin/payments/${selectedProofPayment.id}/proof-upload/reset`,
+                { reason: data.reason },
+                { requiresAuth: true }
+            );
+            toast.success('Proof uploads reset successfully');
+            setResetProofDialog(false);
+            setSelectedProofPayment(null);
+            if (fetchBooking) fetchBooking();
+        } catch (error) {
+            toast.error('Failed to reset proof uploads');
+        }
+    };
+
+    const confirmProofStatusUpdate = async (data) => {
+        if (!selectedProofPayment || !proofAction) return;
+        
+        // Additional validation for rejection reason
+        if (proofAction === 'rejected' && (!data.reason || data.reason.trim() === '')) {
+            toast.error('Rejection reason is required');
+            return; // Don't close dialog, don't proceed
+        }
+        
+        try {
+            await api.patch(
+                `${API_PREFIX}/admin/payments/${selectedProofPayment.id}/proof-status`,
+                { 
+                    status: proofAction,
+                    reason: proofAction === 'rejected' ? data.reason : undefined
+                },
+                { requiresAuth: true }
+            );
+            toast.success(`Proof ${proofAction} successfully`);
+            setStatusProofDialog(false);
+            setSelectedProofPayment(null);
+            setProofAction(null);
+            if (fetchBooking) fetchBooking();
+        } catch (error) {
+            toast.error(`Failed to ${proofAction} proof`);
+        }
+    };
+
+    const getProofStatusBadge = (proofStatus, uploadCount = 0) => {
+        if (!proofStatus || proofStatus === 'none') {
+            return <span className="text-xs text-gray-500">{uploadCount}/3</span>;
+        }
+        
+        switch (proofStatus) {
+            case 'pending':
+                return <Badge variant="warning" className="text-xs">Under Review ({uploadCount}/3)</Badge>;
+            case 'accepted':
+                return <Badge variant="success" className="text-xs">Accepted ({uploadCount}/3)</Badge>;
+            case 'rejected':
+                return <Badge variant="destructive" className="text-xs">Rejected ({uploadCount}/3)</Badge>;
+            default:
+                return <span className="text-xs text-gray-500">{uploadCount}/3</span>;
+        }
     };
 
     return (
@@ -224,7 +325,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <th className="py-2 pr-4 font-medium">Transaction ID</th>
                                     <th className="py-2 pr-4 font-medium">Error Code</th>
                                     <th className="py-2 pr-4 font-medium">Error Message</th>
-                                    <th className="py-2 pr-4 font-medium">Proof</th>
+                                    <th className="py-2 pr-4 font-medium">Proof Status</th>
+                                    <th className="py-2 pr-4 font-medium">Proof File</th>
                                     <th className="py-2 pr-4 font-medium">Actions</th>
                                 </tr>
                             </thead>
@@ -244,12 +346,23 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                         <td className="py-2 pr-4">{p.error_code || '-'}</td>
                                         <td className="py-2 pr-4">{p.error_message || '-'}</td>
                                         <td className="py-2 pr-4">
-                                            {p.proof_image_url ? (
+                                            {getProofStatusBadge(p.proof_status, p.proof_upload_count)}
+                                            {p.proof_rejected_reason && (
+                                                <div className="text-xs text-red-600 mt-1" title={p.proof_rejected_reason}>
+                                                    Reason: {p.proof_rejected_reason.length > 30 ? 
+                                                        `${p.proof_rejected_reason.substring(0, 30)}...` : 
+                                                        p.proof_rejected_reason
+                                                    }
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="py-2 pr-4">
+                                            {p.proof_last_file_path || p.proof_image_url ? (
                                                 <Button
                                                     variant="link"
                                                     size="sm"
                                                     onClick={() => handleViewProof(p)}
-                                                    className="text-cyan-700 p-0 h-auto"
+                                                    className="text-cyan-700 p-0 h-auto cursor-pointer"
                                                 >
                                                     View
                                                 </Button>
@@ -258,14 +371,51 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             )}
                                         </td>
                                         <td className="py-2 pr-4 text-center">
-                                            <Button
-                                                size="sm"
-                                                variant="secondary"
-                                                className="cursor-pointer"
-                                                onClick={() => { setEditPayment(p); setShowAddPayment(true) }}
-                                            >
-                                                Edit
-                                            </Button>
+                                            <div className="flex flex-col gap-1">
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    className="cursor-pointer text-xs"
+                                                    onClick={() => { setEditPayment(p); setShowAddPayment(true) }}
+                                                >
+                                                    Edit
+                                                </Button>
+                                                
+                                                {/* Proof management buttons */}
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="cursor-pointer text-xs"
+                                                    onClick={() => handleResetProofUploads(p)}
+                                                    title="Reset proof uploads"
+                                                >
+                                                    <RotateCcw className="h-3 w-3 mr-1" />
+                                                    Reset
+                                                </Button>
+                                                
+                                                {p.proof_status === 'pending' && (
+                                                    <div className="flex gap-1">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="cursor-pointer text-xs text-green-600 hover:text-green-700"
+                                                            onClick={() => handleProofStatusAction(p, 'accepted')}
+                                                            title="Accept proof"
+                                                        >
+                                                            <Check className="h-3 w-3" />
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="cursor-pointer text-xs text-red-600 hover:text-red-700"
+                                                            onClick={() => handleProofStatusAction(p, 'rejected')}
+                                                            title="Reject proof"
+                                                        >
+                                                            <XCircle className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -324,9 +474,101 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             <ProofImageDialog
                 open={showProofDialog}
                 onOpenChange={setShowProofDialog}
-                imageUrl={selectedPaymentProof?.proof_image_url}
+                imageUrl={selectedPaymentProof?.proof_image_url || selectedPaymentProof?.proof_last_file_path}
                 paymentInfo={selectedPaymentProof}
             />
+
+            {/* Reset Proof Uploads Dialog */}
+            <AlertDialog open={resetProofDialog} onOpenChange={setResetProofDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Reset Proof Uploads</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will reset the proof upload count to 0/3 for this payment, allowing the guest to upload new proof files. 
+                            If there's a pending proof, it will be marked as rejected.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <Form {...resetForm}>
+                        <form onSubmit={resetForm.handleSubmit(confirmResetProofUploads)}>
+                            <FormField
+                                control={resetForm.control}
+                                name="reason"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Reason (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Textarea 
+                                                placeholder="Enter reason for resetting proof uploads..."
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <AlertDialogFooter className="mt-4">
+                                <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                                <AlertDialogAction type="submit" className="cursor-pointer">
+                                    Reset Upload Count
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </form>
+                    </Form>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Proof Status Update Dialog */}
+            <AlertDialog open={statusProofDialog} onOpenChange={setStatusProofDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {proofAction === 'accepted' ? 'Accept' : 'Reject'} Proof of Payment
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {proofAction === 'accepted' 
+                                ? 'Mark this proof of payment as accepted and verified.'
+                                : 'Reject this proof of payment. Please provide a reason for rejection.'
+                            }
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                                         <Form {...statusForm}>
+                         <form onSubmit={(e) => e.preventDefault()}>
+                            {proofAction === 'rejected' && (
+                                <FormField
+                                    control={statusForm.control}
+                                    name="reason"
+                                    rules={{ 
+                                        required: 'Rejection reason is required',
+                                        validate: (value) => value.trim() !== '' || 'Rejection reason cannot be empty'
+                                    }}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Rejection Reason *</FormLabel>
+                                            <FormControl>
+                                                <Textarea 
+                                                    placeholder="Enter reason for rejecting this proof..."
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                                                         <AlertDialogFooter className="mt-4">
+                                 <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                                 <AlertDialogAction 
+                                     type="button"
+                                     onClick={statusForm.handleSubmit(confirmProofStatusUpdate)}
+                                     className={`cursor-pointer ${proofAction === 'rejected' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                                 >
+                                     {proofAction === 'accepted' ? 'Accept Proof' : 'Reject Proof'}
+                                 </AlertDialogAction>
+                             </AlertDialogFooter>
+                        </form>
+                    </Form>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 };
