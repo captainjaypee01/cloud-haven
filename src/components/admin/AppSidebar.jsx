@@ -32,6 +32,7 @@ const data = {
         { title: "Dashboard", url: "/admin", icon: LayoutDashboardIcon },
         { title: "Rooms", url: "/admin/rooms", icon: BedDouble },
         { title: "Bookings", url: "/admin/bookings", icon: Book },
+        { title: "Calendar", url: "/admin/bookings/calendar", icon: LayoutDashboardIcon },
         { title: "Amenities", url: "/admin/amenities", icon: Salad },
         { title: "Promos", url: "/admin/promos", icon: TicketIcon },
     ],

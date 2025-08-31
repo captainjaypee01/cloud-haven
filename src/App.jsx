@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import ResortPolicyDialog from './components/common/ResortPolicyDialog';
 import SEO from './components/SEO';
 import Loader from './components/common/Loader';
+import NoIndexEnvironments from './components/UATNoIndex';
 
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -29,6 +30,7 @@ const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const ListRoom = React.lazy(() => import('./pages/admin/rooms/ListRoom'));
 const ListRoomUnits = React.lazy(() => import('./pages/admin/room-units/ListRoomUnits'));
 const ListBooking = React.lazy(() => import('./pages/admin/bookings/ListBooking'));
+const BookingsCalendarPage = React.lazy(() => import('./pages/admin/bookings/BookingsCalendarPage'));
 const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
 const ListAmenity = React.lazy(() => import('./pages/admin/amenities/ListAmenity'));
 const ListPromos = React.lazy(() => import('./pages/admin/promos/ListPromos'));
@@ -45,6 +47,7 @@ const App = () => {
     <>
       {/* Default sitewide SEO fallbacks (no twitter) */}
       <SEO />
+      <NoIndexEnvironments />
       {isComingSoon ? (
         <ComingSoon />
       ) : (
@@ -109,6 +112,7 @@ const App = () => {
                 <Route path="rooms" element={<ListRoom />} />
                 <Route path="room-units/:roomId" element={<ListRoomUnits />} />
                 <Route path="bookings" element={<ListBooking />} />
+                <Route path="bookings/calendar" element={<BookingsCalendarPage />} />
                 <Route path="bookings/:id" element={<BookingDetails />} />
                 <Route path="amenities" element={<ListAmenity />} />
                 <Route path="users" element={<ListUsers />} />

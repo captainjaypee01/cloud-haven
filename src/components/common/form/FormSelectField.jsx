@@ -62,11 +62,18 @@ const FormSelectField = ({
                             <SelectValue placeholder={placeholder || label} />
                         </SelectTrigger>
                         <SelectContent>
-                            {options.map((opt) => (
-                                <SelectItem key={String(opt.value)} value={String(opt.value)}>
-                                    {opt.label}
-                                </SelectItem>
-                            ))}
+                            {options.map((opt, index) => {
+                                // Ensure we have valid values and labels
+                                const value = opt.value !== undefined && opt.value !== null ? String(opt.value) : '';
+                                const label = opt.label || `Option ${index + 1}`;
+                                const key = value || `option-${index}`;
+                                
+                                return (
+                                    <SelectItem key={key} value={value}>
+                                        {label}
+                                    </SelectItem>
+                                );
+                            })}
                         </SelectContent>
                     </Select>
                 </FormControl>
