@@ -32,7 +32,7 @@ const formSchema = z.object({
     provider: z.string().min(1, "Provider is required"),
     transaction_id: z.string().optional(),
     remarks: z.string().optional(),
-    proof: z.any().refine((file) => file && file instanceof File, "Proof of payment image is required")
+    proof_file: z.any().refine((file) => file && file instanceof File, "Proof of payment image is required")
         .refine((file) => file && file.type.startsWith("image/"), "Please upload an image file")
         .refine((file) => file && file.size <= 12 * 1024 * 1024, "Image must be less than 12MB"),
 });
@@ -51,12 +51,12 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
             provider: "bank_bdo",
             transaction_id: "",
             remarks: "",
-            proof: null,
+            proof_file: null,
         },
     });
 
     const { watch, setValue, reset } = form;
-    const proofFile = watch("proof");
+    const proofFile = watch("proof_file");
 
     // Check for existing payments when dialog opens
     useEffect(() => {
@@ -160,7 +160,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
             }
 
             // Set original file first for form validation
-            setValue("proof", file);
+            setValue("proof_file", file);
             
             // Create preview URL - use setTimeout to ensure proper rendering
             const url = URL.createObjectURL(file);
@@ -180,7 +180,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
         setSubmitting(true);
         try {
             // Optimize the image before upload
-            const optimizedFile = await resizeImageFile(values.proof);
+            const optimizedFile = await resizeImageFile(values.proof_file);
             
             const formData = new FormData();
             
@@ -207,7 +207,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                 formData.append("provider", values.provider);
                 if (values.transaction_id) formData.append("transaction_id", values.transaction_id);
                 if (values.remarks) formData.append("remarks", values.remarks);
-                formData.append("proof", optimizedFile);
+                formData.append("proof_file", optimizedFile);
 
                 const res = await api.post(
                     `${API_PREFIX}/bookings/ref/${booking.reference_number || booking.reference_no}/pay/upload-proof`,
@@ -326,7 +326,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                         />
 
                         <FormField
-                            name="proof"
+                            name="proof_file"
                             control={form.control}
                             render={() => (
                                 <FormItem>
