@@ -3,14 +3,17 @@ import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import Title from '@/components/Title';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/admin/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { Users, CalendarCheck, DollarSign, Star } from 'lucide-react';  // example icons
+import { Users, CalendarCheck, DollarSign, Star, Calendar, Eye } from 'lucide-react';  // example icons
+import { useNavigate } from 'react-router-dom';
 // Recharts components
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const Dashboard = () => {
     const api = useApi();
+    const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState({
         metrics: { totalBookings: 0, totalRevenue: 0, totalGuests: 0, averageRating: null },
         top_rooms: [],
@@ -45,6 +48,21 @@ const Dashboard = () => {
         if (roomsArr.length === 1) return roomsArr[0];
         // If multiple, show first room + "+X more"
         return `${roomsArr[0]} + ${roomsArr.length - 1} more`;
+    };
+
+    // Navigation handlers
+    const handleViewToday = () => {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        navigate(`/admin/bookings/calendar?date=${today}`);
+    };
+
+    const handleViewMonth = () => {
+        const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM format
+        navigate(`/admin/bookings/calendar?month=${currentMonth}`);
+    };
+
+    const handleViewBookingDetails = (bookingId) => {
+        navigate(`/admin/bookings/${bookingId}`);
     };
 
     return (
@@ -143,7 +161,29 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming Bookings Table */}
-            <h3 className="text-xl font-semibold text-blue-950/70 mb-3">Upcoming Bookings (Today &amp; Tomorrow)</h3>
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-semibold text-blue-950/70">Upcoming Bookings (Today &amp; Tomorrow)</h3>
+                <div className="flex gap-2">
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleViewToday}
+                        className="flex items-center gap-2"
+                    >
+                        <Calendar className="w-4 h-4" />
+                        View Today
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={handleViewMonth}
+                        className="flex items-center gap-2"
+                    >
+                        <CalendarCheck className="w-4 h-4" />
+                        View Month
+                    </Button>
+                </div>
+            </div>
             <div className="w-full text-left border border-gray-300 rounded-lg max-h-80 overflow-y-auto">
                 <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-gray-800 font-medium">
@@ -155,6 +195,7 @@ const Dashboard = () => {
                             <th className="py-2 px-4 text-center">Total Amount</th>
                             <th className="py-2 px-4 text-center">Remaining Balance</th>
                             <th className="py-2 px-4 text-center">Status</th>
+                            <th className="py-2 px-4 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
@@ -163,7 +204,6 @@ const Dashboard = () => {
                             const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
                             
                             // Remaining balance = (final price + other charges) - total paid (never negative)
-                            const otherCharges = booking?.other_charges || 0;
                             const totalPayable = Number(booking.final_price) + Number(booking.other_charges);
                             const remainingBalance = Math.max(booking.final_price - totalPaid, 0);
                             return (
@@ -177,13 +217,24 @@ const Dashboard = () => {
                                     <td className="py-2 px-4 text-center">
                                         <StatusBadge status={booking.status} />
                                     </td>
+                                    <td className="py-2 px-4 text-center">
+                                        <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            onClick={() => handleViewBookingDetails(booking.id)}
+                                            className="flex items-center gap-1"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View
+                                        </Button>
+                                    </td>
                                 </tr>
                             )
                         }
                         )}
                         {bookings_today_tomorrow.length === 0 && (
                             <tr>
-                                <td className="py-2 px-4 text-center text-gray-500" colSpan="7">
+                                <td className="py-2 px-4 text-center text-gray-500" colSpan="8">
                                     No bookings for the next two days.
                                 </td>
                             </tr>

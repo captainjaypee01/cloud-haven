@@ -1,7 +1,8 @@
 User-agent: *
 Allow: /
 
-# Disallow admin dashboard from indexing
+# Disallow admin dashboard from indexing 
 Disallow: /admin
 
+# Production sitemap
 Sitemap: https://www.netaniadelaiya.com/sitemap.xml

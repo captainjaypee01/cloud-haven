@@ -5,6 +5,7 @@ import { useClerk, useUser, UserButton } from "@clerk/clerk-react";
 import { CartPopup } from "./CartPopup";
 import { Book, BookAIcon, BookDownIcon, LayoutDashboard, Menu, X } from "lucide-react";
 import logo from '@/assets/logo.jpg';
+import { useAppContext } from "../context/AppContext";
 
 const BookIcon = () => (
     <svg className="w-4 h-4 text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
@@ -27,6 +28,7 @@ const Navbar = () => {
     const { user } = useUser()
     const navigate = useNavigate()
     const location = useLocation()
+    const { isAdmin } = useAppContext()
 
     useEffect(() => {
         if (location.pathname !== '/') {
@@ -46,10 +48,8 @@ const Navbar = () => {
     }, [location.pathname]);
 
     const isShowDashboardRoute = useMemo(() => {
-        const dashboardRoles = ['admin', 'staff', 'superadmin'];
-
-        return dashboardRoles?.includes(user?.publicMetadata?.role);
-    }, [user]);
+        return isAdmin;
+    }, [isAdmin]);
 
     return (
         <nav className={`fixed top-0 left-0 w-full flex items-center justify-between px-4 md:px-16 lg:px-24 xl:px-32 transition-all duration-500 z-50 ${isScrolled ? "bg-white/80 shadow-md text-gray-700 backdrop-blur-lg py-3 md:py-4" : "py-4 md:py-6"}`}>
@@ -101,7 +101,9 @@ const Navbar = () => {
                 {user &&
                     <UserButton>
                         <UserButton.MenuItems>
-                            <UserButton.Action label="Dashboard" labelIcon={<LayoutDashboard />} onClick={() => navigate('/admin')}></UserButton.Action>
+                            {isShowDashboardRoute && (
+                                <UserButton.Action label="Dashboard" labelIcon={<LayoutDashboard />} onClick={() => navigate('/admin')}></UserButton.Action>
+                            )}
                             <UserButton.Action label="My Bookings" labelIcon={<Book />} onClick={() => navigate('my-bookings')}></UserButton.Action>
                         </UserButton.MenuItems>
                     </UserButton>
