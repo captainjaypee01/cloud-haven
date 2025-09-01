@@ -8,8 +8,9 @@ import AddPaymentDialog from './AddPaymentDialog';
 import AddOtherChargeDialog from './AddOtherChargeDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
 import ProofImageDialog from './ProofImageDialog';
+import BookingCancellationDialog from './BookingCancellationDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X, RotateCcw, Check, XCircle } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle, AlertTriangle } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -31,6 +32,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [resetProofDialog, setResetProofDialog] = useState(false);
     const [statusProofDialog, setStatusProofDialog] = useState(false);
     const [selectedProofPayment, setSelectedProofPayment] = useState(null);
+    const [showCancellation, setShowCancellation] = useState(false);
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const api = useApi();
 
@@ -135,6 +137,11 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
         }
     };
 
+    const handleCancellationSuccess = () => {
+        if (fetchBooking) fetchBooking();
+        setShowCancellation(false);
+    };
+
     const getProofStatusBadge = (proofStatus, uploadCount = 0) => {
         if (!proofStatus || proofStatus === 'none') {
             return <span className="text-xs text-gray-500">{uploadCount}/3</span>;
@@ -173,6 +180,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     <StatusBadge status={booking.status} />
                 </div>
                 <div className="flex gap-2">
+                    {/* Cancellation Button - Only show if booking can be cancelled */}
+                    {['pending', 'failed'].includes(booking.status) && (
+                        <Button
+                            className="cursor-pointer"
+                            variant="outline"
+                            onClick={() => setShowCancellation(true)}
+                        >
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            Cancel Booking
+                        </Button>
+                    )}
                     <Button
                         className="cursor-pointer"
                         variant="destructive"
@@ -434,6 +452,32 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 </CardContent>
             </Card>
 
+            {/* Cancellation Information (if cancelled) */}
+            {booking.status === 'cancelled' && (
+                <Card className="border-destructive/50 bg-destructive/5">
+                    <CardContent className="p-6">
+                        <div className="text-lg font-semibold mb-3 text-destructive flex items-center gap-2">
+                            <XCircle className="h-5 w-5" />
+                            Cancellation Details
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div><span className="font-semibold">Cancelled At:</span> {booking.cancelled_at ? formatDateTime(booking.local_cancelled_at || booking.cancelled_at) : '-'}</div>
+                                <div><span className="font-semibold">Cancelled By:</span> {booking.cancelled_by_name || (booking.cancelled_by ? 'Admin Staff' : 'System')}</div>
+                            </div>
+                            {booking.cancellation_reason && (
+                                <div>
+                                    <div><span className="font-semibold">Reason:</span></div>
+                                    <div className="text-sm bg-muted p-3 rounded-md mt-1">
+                                        {booking.cancellation_reason}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Audit & Timestamps */}
             <Card>
                 <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -476,6 +520,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 onOpenChange={setShowProofDialog}
                 imageUrl={selectedPaymentProof?.proof_image_url || selectedPaymentProof?.proof_last_file_path}
                 paymentInfo={selectedPaymentProof}
+            />
+            <BookingCancellationDialog
+                open={showCancellation}
+                onOpenChange={setShowCancellation}
+                booking={booking}
+                onSuccess={handleCancellationSuccess}
             />
 
             {/* Reset Proof Uploads Dialog */}
