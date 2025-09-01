@@ -66,12 +66,21 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
     }, [open, booking, paymentOption]);
 
     const checkExistingPayments = () => {
+        // For remaining balance payments, always create a new payment
+        // because we're paying a different amount than what was already paid
+        if (paymentOption.type === 'full') {
+            setExistingPayment(null);
+            setShouldCreateNew(true);
+            return;
+        }
+
         // Look for existing payment with same amount
         const existingPaymentForAmount = booking.payments?.find(payment => 
             Math.abs(payment.amount - paymentOption.amount) < 0.01 // Allow for floating point differences
         );
 
         if (existingPaymentForAmount) {
+            // Same payment type and amount - check if we can add more proofs
             setExistingPayment(existingPaymentForAmount);
             const maxUploads = 3;
             const currentUploads = existingPaymentForAmount.proof_upload_count || 0;
@@ -279,6 +288,13 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                                     </div>
                                     <div className="text-xs text-blue-600 mt-1">
                                         Found existing payment - uploading additional proof
+                                    </div>
+                                </div>
+                            )}
+                            {!existingPayment && shouldCreateNew && (
+                                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                                    <div className="text-xs text-green-600">
+                                        Creating new payment for this amount
                                     </div>
                                 </div>
                             )}
