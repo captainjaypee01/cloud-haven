@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import { useStickyState } from '@/hooks/useStickyState';
 import { toast } from 'sonner';
+import { useAppContext } from './AppContext';
 
 const CartCtx = createContext();
 
@@ -36,6 +37,7 @@ export const CartProvider = ({ children }) => {
         { checkIn: '', checkOut: '' },
         'booking-dates'
     );
+    const { navigate } = useAppContext();
     const [state, dispatch] = useReducer(
         reducer,
         undefined,
@@ -64,7 +66,12 @@ export const CartProvider = ({ children }) => {
 
     const addItem = room => {
         dispatch({ type: 'ADD', room });
-        toast.success(`Added "${room.name}" to cart`);
+        toast.success(`Added "${room.name}" to cart`, {
+            action: {
+                label: 'View Cart',
+                onClick: () => navigate('/cart')
+            }
+        });
     }
 
     // Sync the date part back to localStorage

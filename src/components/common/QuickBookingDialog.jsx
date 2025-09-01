@@ -132,7 +132,7 @@ export const QuickBookingDialog = ({
                     <DialogTitle className="text-xl font-semibold">
                         Book {room.name}
                     </DialogTitle>
-                    <DialogDescription className="space-y-2">
+                    <div className="space-y-2 text-muted-foreground text-sm">
                         <div>
                             <span className="font-medium text-lg text-sky-700">
                                 {formatCurrency(room.price)}
@@ -150,7 +150,7 @@ export const QuickBookingDialog = ({
                                 {new Date(state.checkIn).toLocaleDateString()} - {new Date(state.checkOut).toLocaleDateString()}
                             </div>
                         )}
-                    </DialogDescription>
+                    </div>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(handleBooking)} className="space-y-6">
