@@ -35,13 +35,13 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <CartProvider>
-            <SidebarProvider>
-              <AppProvider>
+          <SidebarProvider>
+            <AppProvider>
+              <CartProvider>
                 <App />
-              </AppProvider>
-            </SidebarProvider>
-          </CartProvider>
+              </CartProvider>
+            </AppProvider>
+          </SidebarProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>
