@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Separator } from "@radix-ui/react-select";
 import SEO from "@/components/SEO";
 import PaymentCard from "@/components/PaymentCard";
+import { CreditCard, Building } from "lucide-react";
 
 const statusColor = status => {
     switch (status) {
@@ -73,6 +74,8 @@ const UnifiedBookingResultPage = () => {
             }
         };
         fetchBooking();
+        // Scroll to top when component mounts
+        window.scrollTo(0, 0);
     }, [refNo]);
     const getPaidAmount = (payments = []) => {
         return payments
@@ -191,24 +194,43 @@ const UnifiedBookingResultPage = () => {
                 </div>
                 {/* Payment History */}
                 <div className="mt-8 mb-4">
-                    <h3 className="font-semibold text-lg mb-4">Payment History</h3>
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-blue-100 rounded-full">
+                            <CreditCard className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <h3 className="font-semibold text-xl text-gray-900">Payment History</h3>
+                    </div>
                     
                     {/* Bank Details - Displayed once for all payments */}
-                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2 text-sm">Bank Details for Payment</h4>
-                        <div className="text-xs text-blue-800 space-y-1">
-                            <div><span className="font-medium">Bank:</span> BDO Unibank</div>
-                            <div><span className="font-medium">Account Name:</span> NETANIA DE LAIYA INC.</div>
-                            <div><span className="font-medium">Account Number:</span> 004978007114</div>
+                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Building className="h-4 w-4 text-blue-600" />
+                            <h4 className="font-medium text-blue-900 text-sm">Bank Details for Payment</h4>
+                        </div>
+                        <div className="space-y-3 text-sm">
+                            <div className="flex flex-col">
+                                <span className="font-medium text-blue-900 mb-1">Bank:</span>
+                                <span className="text-blue-800">BDO Unibank</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-medium text-blue-900 mb-1">Account Name:</span>
+                                <span className="text-blue-800">NETANIA DE LAIYA INC.</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-medium text-blue-900 mb-1">Account Number:</span>
+                                <span className="font-mono text-blue-800">004978007114</span>
+                            </div>
                         </div>
                     </div>
                     
                     {(!booking.payments || booking.payments.length === 0) ? (
-                        <div className="text-gray-500 text-sm bg-gray-50 rounded border p-4 text-center">
-                            No payments yet.
+                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                            <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                            <div className="text-gray-500 text-sm">No payments yet.</div>
+                            <div className="text-gray-400 text-xs mt-1">Payment history will appear here once payments are made.</div>
                         </div>
                     ) : (
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                             {booking.payments.map((payment) => (
                                 <PaymentCard 
                                     key={payment.id} 
