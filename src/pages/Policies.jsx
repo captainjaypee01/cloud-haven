@@ -1,12 +1,9 @@
 // src/pages/Policies.jsx
-import React, { useState, useMemo, lazy, Suspense } from "react";
+import React, { useState, useMemo } from "react";
 import SEO from "@/components/SEO";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RESORT_POLICIES, POLICY_ICONS, HERO_IMAGE } from "@/constants/policies";
-
-// Lazy load tab content for better performance
-const PolicyTabContent = lazy(() => import('@/components/PolicyTabContent'));
 
 const Policies = () => {
     const [activeTab, setActiveTab] = useState('child');
@@ -173,25 +170,18 @@ const Policies = () => {
                                 role="tabpanel"
                                 aria-labelledby={`tab-${key}`}
                             >
-                                <Suspense fallback={
-                                    <div className="text-center py-8">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-                                        <p className="mt-2 text-gray-600">Loading policy information...</p>
+                                <div className="space-y-6">
+                                    <div className="text-center mb-8">
+                                        <h3 className="text-3xl font-bold text-gray-800 mb-2">
+                                            {policy.title}
+                                        </h3>
+                                        <p className="text-gray-600 text-lg">
+                                            {policy.description}
+                                        </p>
                                     </div>
-                                }>
-                                    <div className="space-y-6">
-                                        <div className="text-center mb-8">
-                                            <h3 className="text-3xl font-bold text-gray-800 mb-2">
-                                                {policy.title}
-                                            </h3>
-                                            <p className="text-gray-600 text-lg">
-                                                {policy.description}
-                                            </p>
-                                        </div>
-                                        
-                                        {renderPolicyContent(policy)}
-                                    </div>
-                                </Suspense>
+                                    
+                                    {renderPolicyContent(policy)}
+                                </div>
                             </TabsContent>
                         ))}
                     </Tabs>
