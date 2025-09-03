@@ -22,7 +22,7 @@ import { API_PREFIX } from "@/constants/api";
 import { formatCurrency } from "@/utils/currency";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, X, Image } from "lucide-react";
+import { Upload, FileText, X, Image as ImageIcon } from "lucide-react";
 
 const paymentProviders = [
     { value: 'bank_bdo', label: 'Bank Transfer (BDO)' },
@@ -300,6 +300,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                 });
                 toast.error("Please fix the errors in the form.");
             } else {
+                console.log('err', err)
                 toast.error(err.response?.data?.message || err.response?.data?.error_message || "Upload error. Try again.");
             }
         } finally {
@@ -487,7 +488,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                                                             {previewUrl && (
                                                                 <div className="mt-3 relative">
                                                                     <div className="flex items-center gap-2 mb-2">
-                                                                        <Image className="h-4 w-4 text-muted-foreground" />
+                                                                        <ImageIcon className="h-4 w-4 text-muted-foreground" />
                                                                         <span className="text-xs text-muted-foreground">Preview</span>
                                                                     </div>
                                                                     <img
