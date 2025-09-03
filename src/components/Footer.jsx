@@ -1,13 +1,14 @@
 import React from 'react'
 import { assets } from '@/assets/assets'
 import { Link } from "react-router-dom";
+import { NETANIA_LOGO } from '@/constants/AppConstant';
 
 const Footer = () => {
     return (
         <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
             <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
                 <div className='max-w-80'>
-                    <img src={assets.logo} alt="logo" className='mb-4 h-8 md:h-9' />
+                    <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-8 md:h-9' />
                     <p className='text-sm'>
                         Discover the world's most extraordinary place to stay, from botique hotels to luxury villas and private islands.
                     </p>

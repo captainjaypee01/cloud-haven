@@ -13,6 +13,7 @@ import {
 import { useTheme } from "@/context/ThemeContext";
 import { useSidebar } from "@/context/SidebarContext";
 import { UserButton, useUser } from "@clerk/clerk-react";
+import { NETANIA_LOGO } from "@/constants/AppConstant";
 
 const mainMenu = [
     { title: "Dashboard", url: "/admin", icon: Home },
@@ -40,7 +41,7 @@ export default function AppSidebar2() {
         >
             <SidebarHeader>
                 <div className="flex items-center gap-2 px-3 py-2">
-                    <img src="/src/assets/netania-logo.jpg" alt="Logo" className="h-8 w-8" />
+                    <img src={NETANIA_LOGO} alt="Logo" className="h-8 w-8" />
                     {!collapsed && (
                         <span className="font-bold text-lg tracking-tight">Admin</span>
                     )}

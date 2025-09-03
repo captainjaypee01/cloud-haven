@@ -7,7 +7,7 @@ import {
     CarouselItem
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { roomPhotos } from "../data/rooms";
+import { HERO_CAROUSEL_IMAGES } from "@/constants/contact-us";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,7 +24,7 @@ const contactSchema = z.object({
 });
 
 const ContactUsPage = () => {
-    const images = roomPhotos;
+    const images = HERO_CAROUSEL_IMAGES;
     const form = useForm({
         resolver: zodResolver(contactSchema),
         defaultValues: {
@@ -44,8 +44,8 @@ const ContactUsPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Contact Netania De Laiya"
-                description="Contact our Laiya beachfront resort for bookings, inquiries, group reservations, and event venue availability. Call +63 949 798 9831 or email info@netaniadelaiya.com."
+                title="Contact Us - Netania De Laiya Resort"
+                description="Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Contact our beachfront resort in Laiya, Batangas at +63 949 798 9831. We're here to help plan your perfect beach getaway."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://www.netaniadelaiya.com/contact-us'}
                 og={{ url: 'https://www.netaniadelaiya.com/contact-us' }}
                 jsonLd={{

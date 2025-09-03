@@ -1,7 +1,7 @@
 import RoomsHero from "../components/RoomsHero";
 import SearchForm from "../components/SearchForm";
 import { useRooms } from "../queries/rooms";
-import { roomPhotos } from "../data/rooms";
+import { roomPhotos } from "@/data/rooms";
 import RoomCardSkeleton from "../components/RoomCardSkeleton";
 import { AlertCircle } from "lucide-react";
 import RoomBlock from "../components/common/RoomBlock";
@@ -19,12 +19,12 @@ export default function RoomsPage() {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Rooms and Accommodations in Laiya, Batangas"
-                description="Browse beachfront rooms in Laiya: family rooms, barkada suites, pool-view and oceanfront accommodations at Netania De Laiya."
+                title="Rooms & Accommodations - Laiya Beach Resort"
+                description="Discover our beachfront rooms in Laiya, Batangas. From family suites to barkada rooms, enjoy pool views and oceanfront accommodations at Netania De Laiya. Perfect for your beach getaway."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/rooms' : 'https://www.netaniadelaiya.com/rooms'}
                 og={{
-                  title: 'Rooms and Accommodations in Laiya, Batangas',
-                  description: 'Browse beach resort rooms in Laiya: family rooms, barkada suites, and pool-view accommodations at Netania De Laiya.',
+                  title: 'Rooms & Accommodations - Laiya Beach Resort',
+                  description: 'Discover our beachfront rooms in Laiya, Batangas. From family suites to barkada rooms, enjoy pool views and oceanfront accommodations at Netania De Laiya.',
                   url: 'https://www.netaniadelaiya.com/rooms',
                 }}
                 jsonLd={(function(){

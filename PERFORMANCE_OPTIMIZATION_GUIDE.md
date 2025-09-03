@@ -104,7 +104,6 @@ Create the following favicon files in the `public/` directory:
 Convert all JPEG/PNG images to WebP format:
 ```bash
 # Example: Convert hero image
-cwebp src/assets/netania-cover2.jpg -o src/assets/netania-cover2.webp -q 80
 ```
 
 ### 4. Build and Deploy
