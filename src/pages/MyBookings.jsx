@@ -6,7 +6,7 @@ import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { formatCurrency } from "../utils/currency";
 import Title from '../components/Title';
-import roomImgPlaceholder from '@/assets/roomImg1.png';  // fallback image if needed
+import { roomPhotos } from '@/data/rooms';  // fallback image if needed
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,7 +66,7 @@ const MyBookings = () => {
         const images = room?.images || [];
         const first = images[0];
         const url = first?.secure_image_url || first?.url || (typeof first === 'string' ? first : null);
-        return url || roomImgPlaceholder;
+        return url || roomPhotos[0];
     };
 
     const getRoomId = (room) => room?.slug || room?.id || room?.room_id || room?.name;

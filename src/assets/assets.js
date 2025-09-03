@@ -1,4 +1,3 @@
-import logo from './logo.jpg'
 import searchIcon from './searchIcon.svg'
 import userIcon from './userIcon.svg'
 import calenderIcon from './calenderIcon.svg'
@@ -31,11 +30,7 @@ import totalBookingIcon from "./totalBookingIcon.svg";
 import totalRevenueIcon from "./totalRevenueIcon.svg";
 import arrowLeftIcon from "./arrowLeftIcon.svg";
 
-const testLogo = "https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/dummyLogo/dummyLogoColored.svg";
-
 export const assets = {
-    logo,
-    testLogo,
     searchIcon,
     userIcon,
     calenderIcon,

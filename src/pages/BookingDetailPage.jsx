@@ -245,7 +245,7 @@ const UnifiedBookingResultPage = () => {
                 {booking.status === "pending" && (
                     <div className="my-5">
                         <div className="mb-2 text-yellow-700 font-medium">Payment required to confirm your booking.</div>
-                        <Link to={`/booking/${refNo}/payment`}>
+                        <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
                             <Button size="lg" className="w-full cursor-pointer">Proceed to Payment</Button>
                         </Link>
                     </div>
@@ -256,7 +256,7 @@ const UnifiedBookingResultPage = () => {
                         <div className="mb-2 text-base text-yellow-700">
                             Remaining: {formatCurrency(remainingBalance)}
                         </div>
-                        <Link to={`/booking/${refNo}/payment`}>
+                        <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
                             <Button variant="outline" size="lg" className="w-full cursor-pointer">Pay Remaining Balance Now</Button>
                         </Link>
                     </div>
@@ -277,7 +277,7 @@ const UnifiedBookingResultPage = () => {
                     </div>
                 )}
                 {booking.status === "completed" && (
-                    <Link to={`/booking/${refNo}/review`}>
+                    <Link to={`/booking/${refNo}/review`} onClick={() => { window.scrollTo(0, 0); }}>
                         <Button variant="secondary" size="lg" className="w-full mt-3 cursor-pointer">Leave a Review</Button>
                     </Link>
                 )}

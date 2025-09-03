@@ -1,137 +1,199 @@
 // src/pages/Policies.jsx
-import React from "react";
+import React, { useState, useMemo, lazy, Suspense } from "react";
 import SEO from "@/components/SEO";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem
-} from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
-import { roomPhotos } from "../data/rooms";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RESORT_POLICIES, POLICY_ICONS, HERO_IMAGE } from "@/constants/policies";
+
+// Lazy load tab content for better performance
+const PolicyTabContent = lazy(() => import('@/components/PolicyTabContent'));
 
 const Policies = () => {
-    // Handler for printing (prints the currently active tab content)
-    const handlePrint = () => window.print();
-    const images = roomPhotos;
+    const [activeTab, setActiveTab] = useState('child');
+
+    // Memoize policy data to prevent unnecessary re-renders
+    const policyEntries = useMemo(() => Object.entries(RESORT_POLICIES), []);
+
+    // Enhanced SEO data with complete policy information
+    const seoData = useMemo(() => ({
+        title: "Resort Policies - Child, Room & Buffet Rules",
+        description: "Complete resort policies for Netania De Laiya: child pricing (₱1,000 for 4-6 years), check-in/out times (3:00 PM/1:00 PM), buffet schedules, accommodation rules, and pet policies. Book with confidence knowing our comprehensive guidelines.",
+        canonical: typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://www.netaniadelaiya.com/policy',
+        og: { 
+            url: 'https://www.netaniadelaiya.com/policy',
+            image: HERO_IMAGE,
+            type: 'website'
+        },
+        jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+                {
+                    '@type': 'Question',
+                    name: 'What is the child policy for buffet?',
+                    acceptedAnswer: { 
+                        '@type': 'Answer', 
+                        text: 'Children aged 3 and below are free. Children 4-6 years old pay ₱1,000 for buffet. Children 7 and above pay adult rate of ₱1,700.' 
+                    }
+                },
+                {
+                    '@type': 'Question',
+                    name: 'What are the check-in and check-out times?',
+                    acceptedAnswer: { 
+                        '@type': 'Answer', 
+                        text: 'Check-in is at 3:00 PM and check-out is at 1:00 PM.' 
+                    }
+                },
+                {
+                    '@type': 'Question',
+                    name: 'What are the buffet timings?',
+                    acceptedAnswer: { 
+                        '@type': 'Answer', 
+                        text: 'Breakfast: 6:30 AM - 8:00 AM, Lunch: 11:30 AM - 1:00 PM, Dinner: 6:30 PM - 8:00 PM' 
+                    }
+                },
+                {
+                    '@type': 'Question',
+                    name: 'Can I bring food to the resort?',
+                    acceptedAnswer: { 
+                        '@type': 'Answer', 
+                        text: 'Outside food is not allowed in hotel rooms, but you can bring snacks, drinks, and fast food with no corkage fee. Lechon has a ₱2,500 corkage fee.' 
+                    }
+                },
+                {
+                    '@type': 'Question',
+                    name: 'Are pets allowed?',
+                    acceptedAnswer: { 
+                        '@type': 'Answer', 
+                        text: 'Small pets up to 10kg are allowed in designated rooms with a cleaning fee. Pets must be leashed in common areas.' 
+                    }
+                }
+            ]
+        }
+    }), []);
+
+    const renderPolicyContent = (policyData) => {
+        return (
+            <div className="space-y-6">
+                {policyData.policies.map((category, index) => (
+                    <Card key={`${policyData.title}-${index}`} className="border-l-4 border-l-blue-500">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-lg text-blue-700">
+                                {category.category}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-2">
+                                {category.rules.map((rule, ruleIndex) => (
+                                    <li key={`${category.category}-${ruleIndex}`} className="flex items-start gap-3">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" aria-hidden="true"></div>
+                                        <span className="text-gray-700">{rule}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        );
+    };
+
+    const handleTabChange = (value) => {
+        setActiveTab(value);
+        // Scroll to top of content for better UX
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
-            <SEO
-                title="Resort Policies"
-                description="Read Netania De Laiya's policies: child policy, room and accommodation rules, pet policy, and resort reminders for a safe and enjoyable stay in Laiya."
-                canonical={typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://www.netaniadelaiya.com/policy'}
-                og={{ url: 'https://www.netaniadelaiya.com/policy' }}
-                jsonLd={{
-                  '@context': 'https://schema.org',
-                  '@type': 'FAQPage',
-                  mainEntity: [
-                    {
-                      '@type': 'Question',
-                      name: 'What is the child policy?',
-                      acceptedAnswer: { '@type': 'Answer', text: 'Children aged 7 and below are free of charge when sharing beds with parents. No extra beds or cribs provided.' }
-                    },
-                    {
-                      '@type': 'Question',
-                      name: 'What are the check-in and check-out times?',
-                      acceptedAnswer: { '@type': 'Answer', text: 'Check-in is at 3:00 PM and check-out is at 12:00 PM. Early check-in or late check-out depends on availability and may incur fees.' }
-                    },
-                    {
-                      '@type': 'Question',
-                      name: 'Are pets allowed?',
-                      acceptedAnswer: { '@type': 'Answer', text: 'Small pets (up to 10 kg) are allowed in designated rooms only and may incur a cleaning fee. Pets must be leashed in common areas.' }
-                    }
-                  ]
-                }}
-            />
-            {/* Hero Section */}
+            <SEO {...seoData} />
+            
+            {/* Hero Section with optimized image loading */}
             <div className="relative w-full">
-                <Carousel className="h-screen w-full" opts={{ loop: true, align: "center" }} plugins={[Autoplay({ delay: 3000, playOnInit: true })]}>
-                    <CarouselContent>
-                        {images.map((url, idx) => (
-                            <CarouselItem key={idx}>
-                                <div className="h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url('${url}')` }} />
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
+                <div 
+                    className="h-screen w-full bg-cover bg-center bg-no-repeat" 
+                    style={{ 
+                        backgroundImage: `url('${HERO_IMAGE}')`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                    }}
+                    role="img"
+                    aria-label="Resort policies hero image"
+                />
                 {/* Hero Title Overlay */}
                 <div className="absolute top-1/2 w-full text-center px-4 -translate-y-1/2">
-                    <h1 className="text-4xl md:text-7xl font-bold text-white drop-shadow-lg">Resort Policies</h1>
+                    <h1 className="text-4xl md:text-7xl font-bold text-white drop-shadow-lg">
+                        Resort Policies
+                    </h1>
                 </div>
             </div>
 
-            <div className="relative z-10 max-w-4xl mx-auto py-16 px-4 md:px-8 lg:px-0 text-gray-800">
-                <h1 className="text-4xl font-bold text-center mb-2">Resort Policies</h1>
-                <p className="text-center text-gray-600 mb-8">
-                    Please review our policies before making a reservation.
-                </p>
-                <div className="max-w-4xl mx-auto">
-                    <Tabs defaultValue="child" className="w-full">
-                        <TabsList className="grid grid-cols-5 mb-6">
-                            <TabsTrigger value="child">Child</TabsTrigger>
-                            <TabsTrigger value="accommodation">Rooms</TabsTrigger>
-                            <TabsTrigger value="resort">Resort</TabsTrigger>
-                            <TabsTrigger value="reminders">Reminders</TabsTrigger>
-                            <TabsTrigger value="pet">Pet</TabsTrigger>
-                        </TabsList>
-                        {/* Child Policy Content */}
-                        <TabsContent value="child">
-                            <div className="text-right mb-4">
-                                <Button variant="secondary" onClick={handlePrint} className="cursor-pointer">
-                                    <Printer className="w-4 h-4 mr-2" /> Print
-                                </Button>
-                            </div>
-                            <p className="text-sm leading-relaxed">
-                                Children aged 7 and below are free of charge when sharing beds with parents. We do not provide extra beds or cribs.
-                            </p>
-                        </TabsContent>
-                        {/* Room/Accommodation Policy Content */}
-                        <TabsContent value="accommodation">
-                            <div className="text-right mb-4">
-                                <Button variant="secondary" onClick={handlePrint} className="cursor-pointer">
-                                    <Printer className="w-4 h-4 mr-2" /> Print
-                                </Button>
-                            </div>
-                            <p className="text-sm leading-relaxed">
-                                Check-in time is 3:00 PM and check-out time is 12:00 PM. Early check-in or late check-out is subject to availability and may incur charges.
-                            </p>
-                        </TabsContent>
-                        {/* Resort Policy Content */}
-                        <TabsContent value="resort">
-                            <div className="text-right mb-4">
-                                <Button variant="secondary" onClick={handlePrint} className="cursor-pointer">
-                                    <Printer className="w-4 h-4 mr-2" /> Print
-                                </Button>
-                            </div>
-                            <p className="text-sm leading-relaxed">
-                                Proper swimwear is required in the pool area. Outside food and beverages are not allowed within the resort premises.
-                            </p>
-                        </TabsContent>
-                        {/* Reminders Content */}
-                        <TabsContent value="reminders">
-                            <div className="text-right mb-4">
-                                <Button variant="secondary" onClick={handlePrint} className="cursor-pointer">
-                                    <Printer className="w-4 h-4 mr-2" /> Print
-                                </Button>
-                            </div>
-                            <p className="text-sm leading-relaxed">
-                                Quiet hours are from 10:00 PM to 7:00 AM. Please respect other guests by keeping noise to a minimum during these hours.
-                            </p>
-                        </TabsContent>
-                        {/* Pet Policy Content */}
-                        <TabsContent value="pet">
-                            <div className="text-right mb-4">
-                                <Button variant="secondary" onClick={handlePrint} className="cursor-pointer">
-                                    <Printer className="w-4 h-4 mr-2" /> Print
-                                </Button>
-                            </div>
-                            <p className="text-sm leading-relaxed">
-                                Small pets (up to 10 kg) are allowed in designated rooms only, with a cleaning fee per stay. Pets must be on a leash in common areas.
-                            </p>
-                        </TabsContent>
+            <div className="relative z-10 max-w-6xl mx-auto py-16 px-4 md:px-8 lg:px-0 text-gray-800">
+                <div className="text-center mb-12">
+                    <h2 className="text-4xl font-bold mb-4">Resort Policies</h2>
+                    <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                        Please review our comprehensive policies before making a reservation to ensure a smooth and enjoyable stay.
+                    </p>
+                </div>
+
+                <div className="max-w-6xl mx-auto">
+                    <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+                        <div className="flex justify-center mb-8">
+                            <TabsList 
+                                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 h-auto p-1 bg-gray-100 max-w-4xl w-full gap-2"
+                                role="tablist"
+                                aria-label="Resort policy categories"
+                            >
+                                {policyEntries.map(([key, policy]) => (
+                                    <TabsTrigger 
+                                        key={key} 
+                                        value={key}
+                                        className="flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 text-center min-h-[80px] md:min-h-[100px] cursor-pointer"
+                                        role="tab"
+                                        aria-selected={activeTab === key}
+                                        aria-controls={`tab-content-${key}`}
+                                    >
+                                        <span className="text-lg md:text-2xl" aria-hidden="true">
+                                            {POLICY_ICONS[key]}
+                                        </span>
+                                        <span className="text-xs font-medium leading-tight px-1">
+                                            {policy.title}
+                                        </span>
+                                    </TabsTrigger>
+                                ))}
+                            </TabsList>
+                        </div>
+
+                        {policyEntries.map(([key, policy]) => (
+                            <TabsContent 
+                                key={key} 
+                                value={key} 
+                                className="mt-8"
+                                id={`tab-content-${key}`}
+                                role="tabpanel"
+                                aria-labelledby={`tab-${key}`}
+                            >
+                                <Suspense fallback={
+                                    <div className="text-center py-8">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                                        <p className="mt-2 text-gray-600">Loading policy information...</p>
+                                    </div>
+                                }>
+                                    <div className="space-y-6">
+                                        <div className="text-center mb-8">
+                                            <h3 className="text-3xl font-bold text-gray-800 mb-2">
+                                                {policy.title}
+                                            </h3>
+                                            <p className="text-gray-600 text-lg">
+                                                {policy.description}
+                                            </p>
+                                        </div>
+                                        
+                                        {renderPolicyContent(policy)}
+                                    </div>
+                                </Suspense>
+                            </TabsContent>
+                        ))}
                     </Tabs>
                 </div>
             </div>

@@ -1,26 +1,19 @@
-
-import roomImg1 from '@/assets/roomImg1.png'
-import roomImg2 from '@/assets/roomImg2.png'
-import roomImg3 from '@/assets/roomImg3.png'
-import roomImg4 from '@/assets/roomImg4.png'
+import { randomSubset } from '@/lib/utils';
 
 export const roomPhotos = [
-    roomImg1,
-    roomImg2,
-    roomImg3,
-    roomImg4,
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756914612/room-4.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756910584/room-1.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756914610/room-5.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756910578/room-3.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756914611/room-6.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756910579/room-2.jpg'
 ];
 export const rooms = [
     {
         _id: "67f7647c197ac559e4089b96",
         name: "Akinah 1",
         roomType: "Double Bed",
-        photos: [
-            roomImg1,
-            roomImg2,
-            roomImg3,
-            roomImg4,
-        ],
+        photos: randomSubset(roomPhotos, { allowEmpty: false, rng: Math.random }),
         price: 320,
         guests: 4,
         amenities: ["Pool Access", "Free WiFi", "Free Breakfast", "Mountain View", "Room Service"],
@@ -31,12 +24,7 @@ export const rooms = [
         _id: "67f7647c197ac559e4089b97",
         name: "Container Lodge",
         roomType: "Double Bed",
-        photos: [
-            roomImg2,
-            roomImg3,
-            roomImg1,
-            roomImg4,
-        ],
+        photos: randomSubset(roomPhotos, { allowEmpty: false, rng: Math.random }),
         price: 320,
         guests: 4,
         amenities: ["Pool Access", "Free WiFi", "Free Breakfast", "Mountain View", "Room Service"],
@@ -47,12 +35,7 @@ export const rooms = [
         _id: "67f7647c197ac559e4089b98",
         name: "Akinah 9",
         roomType: "Double Bed",
-        photos: [
-            roomImg3,
-            roomImg1,
-            roomImg2,
-            roomImg4,
-        ],
+        photos: randomSubset(roomPhotos, { allowEmpty: false, rng: Math.random }),
         price: 320,
         guests: 4,
         amenities: ["Pool Access", "Free WiFi", "Free Breakfast", "Mountain View", "Room Service"],
@@ -64,12 +47,7 @@ export const rooms = [
         _id: "67f7647c197ac559e4089b99",
         name: "Cabana",
         roomType: "Single Bed",
-        photos: [
-            roomImg4,
-            roomImg1,
-            roomImg2,
-            roomImg3,
-        ],
+        photos: randomSubset(roomPhotos, { allowEmpty: false, rng: Math.random }),
         price: 320,
         guests: 4,
         amenities: ["Pool Access", "Free WiFi", "Free Breakfast", "Mountain View", "Room Service"],

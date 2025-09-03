@@ -1,11 +1,11 @@
 import React from 'react'
 import SearchForm from './SearchForm'
-import netaniaCoverImage from '../assets/netania-cover2.jpg'
+import { NETANIA_COVER_IMAGE } from '@/constants/AppConstant'
 
 const Hero = () => {
     
     return (
-        <div className="relative h-screen bg-cover bg-center" style={{ backgroundImage: `url(${netaniaCoverImage})` }}>
+        <div className="relative h-screen bg-cover bg-center" style={{ backgroundImage: `url(${NETANIA_COVER_IMAGE})` }}>
             <div className="absolute inset-0 bg-black/30"></div>
             <div className="relative flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 h-full">
                 <p className='bg-[#deb028]/50 px-3.5 py-1 rounded-full text-white '>The Ultimate Beach Experience</p>

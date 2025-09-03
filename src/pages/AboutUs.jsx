@@ -7,16 +7,16 @@ import {
     CarouselItem
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { roomPhotos } from "../data/rooms";
+import { ABOUT_US_CAROUSEL_IMAGES } from "@/constants/about-us";
 
 const AboutUs = () => {
-    const images = roomPhotos;  // using existing room images for the hero carousel
+    const images = ABOUT_US_CAROUSEL_IMAGES;  // using existing room images for the hero carousel
 
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="About Netania De Laiya Resort"
-                description="Learn about Netania De Laiya, a beachfront resort in Laiya, San Juan, Batangas with beach access, a swimming pool, and hotel-style rooms for families, couples, and groups."
+                title="About Netania De Laiya - Laiya Beach Resort"
+                description="Discover the story behind Netania De Laiya, a family-owned beachfront resort in Laiya, San Juan, Batangas. Experience our commitment to providing affordable luxury with beach access, swimming pool, and hotel-style accommodations for unforgettable family vacations."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/about-us' : 'https://www.netaniadelaiya.com/about-us'}
                 og={{ url: 'https://www.netaniadelaiya.com/about-us' }}
                 jsonLd={{
