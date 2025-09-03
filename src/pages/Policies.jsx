@@ -97,8 +97,6 @@ const Policies = () => {
 
     const handleTabChange = (value) => {
         setActiveTab(value);
-        // Scroll to top of content for better UX
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
