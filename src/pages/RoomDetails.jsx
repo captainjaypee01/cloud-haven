@@ -51,6 +51,10 @@ const RoomDetails = () => {
         isError: availabilityError,
         isDebouncing,
         isUnavailable,
+        pending,
+        confirmed,
+        maintenance,
+        totalUnits,
     } = useRoomAvailability(roomId, state?.checkIn, state?.checkOut);
 
     // Calculate remaining availability considering cart items
@@ -220,6 +224,26 @@ const RoomDetails = () => {
                     <div>
                         <p className="font-medium">Not available for your selected dates</p>
                         <p className="text-sm">Please adjust your dates to book this room. Featured rooms are shown even when unavailable.</p>
+                        {pending > 0 && (
+                            <div className="mt-2 text-sm">
+                                <p className="text-amber-700">
+                                    <strong>{pending}</strong> unit(s) are currently pending and may become available.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Pending notice */}
+            {state?.checkIn && state?.checkOut && !isUnavailable && pending > 0 && (
+                <div className="mt-4 mb-2 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-amber-700">
+                    <AlertCircleIcon className="mt-0.5 h-5 w-5 text-amber-500" />
+                    <div>
+                        <p className="font-medium">Limited availability</p>
+                        <p className="text-sm">
+                            {availableUnits} unit(s) available, {pending} unit(s) pending.
+                        </p>
                     </div>
                 </div>
             )}
@@ -268,6 +292,7 @@ const RoomDetails = () => {
                     <span className='text-sm text-gray-600'>Availability:</span>
                     <RoomAvailabilityBadge
                         availableUnits={remainingUnits}
+                        pending={pending}
                         isLoading={availabilityLoading}
                         isError={availabilityError}
                         isDebouncing={isDebouncing}

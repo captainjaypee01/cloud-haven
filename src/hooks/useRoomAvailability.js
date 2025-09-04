@@ -70,6 +70,11 @@ export const useRoomAvailability = (roomTypeId, checkIn, checkOut, options = {})
         availableUnits: query.data?.available_units ?? undefined,
         roomName: query.data?.room_name ?? undefined,
         isUnavailable: query.data?.available_units === 0,
+        // Simplified availability data
+        pending: query.data?.pending ?? 0,
+        confirmed: query.data?.confirmed ?? 0,
+        maintenance: query.data?.maintenance ?? 0,
+        totalUnits: query.data?.total_units ?? 0,
         datesValid,
         isDebouncing: checkIn !== debouncedCheckIn || checkOut !== debouncedCheckOut,
     };
