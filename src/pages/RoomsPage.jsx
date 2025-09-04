@@ -55,10 +55,8 @@ export default function RoomsPage() {
                 })()}
             />
             <RoomsHero imageUrls={heroImages} />
-            <div className="absolute inset-x-0 bottom-0 transform translate-y-1/2 px-4 z-10">
-
-                <div className="md:w-[50%] lg:w-[30%] w-[100%] max-w-full mx-auto">
-
+            <div className="absolute inset-x-0 bottom-1 transform translate-y-8/12 px-4 z-10">
+                <div className="w-[100%] md:w-[50%] lg:w-[30%] mx-auto">
                     <SearchForm onSearch={(v) => console.log(v)} />
                 </div>
             </div>

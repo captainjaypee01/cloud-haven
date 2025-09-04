@@ -2,13 +2,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApi } from "@/hooks/useApi";
 import { API_PREFIX } from "@/constants/api";
-import RoomCard from "./RoomCard";
+import RoomBlock from "./common/RoomBlock";
 import Title from "./Title";
 import { useNavigate } from "react-router-dom";
+import * as lucideIcons from "lucide-react";
 
 const FeaturedRooms = () => {
     const api = useApi();
     const navigate = useNavigate();
+    const iconsModule = lucideIcons;
+    
     // Fetch featured rooms from API
     const { data: featuredRooms, isLoading, error } = useQuery({
         queryKey: ["featuredRooms"],
@@ -35,10 +38,9 @@ const FeaturedRooms = () => {
             {isLoading ? (
                 <p>Loading featured rooms...</p>
             ) : (
-                <div className="max-w-6xl mx-auto px-4 grid gap-6 mt-20 auto-rows-fr 
-                        grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
+                <div className="max-w-6xl mt-20 space-y-16">
                     {featuredRooms?.map((room, index) => (
-                        <RoomCard key={index} room={room} index={index} />
+                        <RoomBlock key={room.slug || index} room={room} index={index} reverse={index % 2 === 1} iconsModule={iconsModule} />
                     ))}
                     
                     {!isLoading && featuredRooms?.length === 0 && (
