@@ -34,6 +34,7 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
         isError: availabilityError,
         isDebouncing,
         isUnavailable,
+        pending,
     } = useRoomAvailability(room.slug, state.checkIn, state.checkOut);
 
     const handleViewDetailsClick = useCallback((e) => {
@@ -148,6 +149,7 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                         <div className="mb-4">
                             <RoomAvailabilityBadge
                                 availableUnits={availableUnits}
+                                pending={pending}
                                 isLoading={availabilityLoading}
                                 isError={availabilityError}
                                 isDebouncing={isDebouncing}

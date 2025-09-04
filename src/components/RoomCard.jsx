@@ -37,6 +37,7 @@ export default function RoomCard({ room }) {
         isError: availabilityError,
         isDebouncing,
         isUnavailable,
+        pending,
     } = useRoomAvailability(room.slug, state.checkIn, state.checkOut);
 
     const handleViewDetailsClick = useCallback((e) => {
@@ -104,6 +105,7 @@ export default function RoomCard({ room }) {
                         <div className="flex justify-start">
                             <RoomAvailabilityBadge
                                 availableUnits={availableUnits}
+                                pending={pending}
                                 isLoading={availabilityLoading}
                                 isError={availabilityError}
                                 isDebouncing={isDebouncing}

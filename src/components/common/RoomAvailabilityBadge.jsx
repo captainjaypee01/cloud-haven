@@ -8,6 +8,7 @@ import { AlertCircle } from "lucide-react";
  * 
  * @param {Object} props - Component props
  * @param {number} props.availableUnits - Number of available units
+ * @param {number} props.pending - Number of units pending (locked + pending verification)
  * @param {boolean} props.isLoading - Whether availability is loading
  * @param {boolean} props.isError - Whether there was an error loading availability
  * @param {boolean} props.isDebouncing - Whether the input is being debounced
@@ -18,6 +19,7 @@ import { AlertCircle } from "lucide-react";
  */
 export const RoomAvailabilityBadge = ({
     availableUnits,
+    pending = 0,
     isLoading = false,
     isError = false,
     isDebouncing = false,
@@ -56,6 +58,13 @@ export const RoomAvailabilityBadge = ({
     // Determine badge content and variant based on availability
     const getBadgeProps = () => {
         if (availableUnits === 0) {
+            if (pending > 0) {
+                return {
+                    variant: "secondary",
+                    text: `${pending} pending`,
+                    ariaLabel: `${pending} units pending`
+                };
+            }
             return {
                 variant: "destructive",
                 text: "Sold out",
@@ -64,17 +73,23 @@ export const RoomAvailabilityBadge = ({
         }
         
         if (availableUnits <= 5) {
+            const text = pending > 0 
+                ? `${availableUnits} left, ${pending} pending`
+                : `${availableUnits} left`;
             return {
                 variant: "secondary",
-                text: `${availableUnits} left`,
-                ariaLabel: `${availableUnits} rooms available`
+                text: text,
+                ariaLabel: `${availableUnits} rooms available, ${pending} pending`
             };
         }
         
+        const text = pending > 0 
+            ? `${availableUnits} available, ${pending} pending`
+            : `${availableUnits} available`;
         return {
             variant: "default",
-            text: `${availableUnits} available`,
-            ariaLabel: `${availableUnits} rooms available`
+            text: text,
+            ariaLabel: `${availableUnits} rooms available, ${pending} pending`
         };
     };
 
