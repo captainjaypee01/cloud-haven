@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import { Route, Routes, useLocation } from 'react-router-dom'
 import Footer from './components/Footer';
@@ -39,9 +39,14 @@ const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
 const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
 
 const App = () => {
-
-  const isAdminPath = useLocation().pathname.includes("admin");
+  const location = useLocation();
+  const isAdminPath = location.pathname.includes("admin");
   const isComingSoon = import.meta.env.VITE_COMING_SOON_FLAG === 'true'
+
+  // Auto scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   
   return (
     <>

@@ -2,6 +2,7 @@ import React from 'react'
 import { assets } from '@/assets/assets'
 import { Link } from "react-router-dom";
 import { NETANIA_LOGO } from '@/constants/AppConstant';
+import { SUPPORT_ADDRESS, SUPPORT_EMAIL, SUPPORT_PHONE } from '@/constants/AppConstant';
 
 const Footer = () => {
     return (
@@ -51,13 +52,13 @@ const Footer = () => {
                 <div className='max-w-80'>
                     <p className='font-playfair text-lg text-gray-800'>GET IN TOUCH</p>
                     <p className='mt-3 text-sm'>
-                        Laiya-Aplaya,San Juan,Batangas, Batangas City, Philippines
+                        {SUPPORT_ADDRESS}
                     </p>
                     <p className='mt-3 text-sm'>
-                        Phone: +63 949 798 9831
+                        Phone: {SUPPORT_PHONE}
                     </p>
                     <p className='mt-3 text-sm'>
-                        Email: info@netaniadelaiya.com
+                        Email: {SUPPORT_EMAIL}
                     </p>
                 </div>
             </div>
