@@ -38,6 +38,13 @@ const ListMeals = React.lazy(() => import('./pages/admin/meals/ListMeals'));
 const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
 const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
 
+// Meal Programs
+const MealProgramList = React.lazy(() => import('./pages/admin/meal-programs/index'));
+const MealProgramNew = React.lazy(() => import('./pages/admin/meal-programs/new'));
+const MealProgramEdit = React.lazy(() => import('./pages/admin/meal-programs/edit'));
+const MealProgramShow = React.lazy(() => import('./pages/admin/meal-programs/show'));
+const MealProgramPreview = React.lazy(() => import('./pages/admin/meal-programs/preview'));
+
 const App = () => {
   const location = useLocation();
   const isAdminPath = location.pathname.includes("admin");
@@ -125,6 +132,13 @@ const App = () => {
                 <Route path="images" element={<ManageImages />} />
                 <Route path="meal-prices" element={<ListMeals />} />
                 <Route path="promos" element={<ListPromos />} />
+                
+                {/* Meal Programs */}
+                <Route path="meal-programs" element={<MealProgramList />} />
+                <Route path="meal-programs/new" element={<MealProgramNew />} />
+                <Route path="meal-programs/:id/edit" element={<MealProgramEdit />} />
+                <Route path="meal-programs/:id/preview" element={<MealProgramPreview />} />
+                <Route path="meal-programs/:id" element={<MealProgramShow />} />
               </Route>
               {/* 404 Route - Must be last */}
               <Route path="*" element={<NotFound />} />
