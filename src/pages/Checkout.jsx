@@ -1,5 +1,5 @@
 import { useCart } from "../context/CartContext";
-import { formatCurrency } from "../utils/currency";
+import { formatCurrency } from "@/lib/format";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,9 @@ import { useAppContext } from "../context/AppContext";
 import { useLoader } from "@/context/LoaderContext";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCartSummary } from "../hooks/cart/useCartSummary";
+import { useCartSummaryWithMealPrograms } from "../hooks/cart/useCartSummaryWithMealPrograms";
+import MealAvailabilityBadges from "../components/booking/MealAvailabilityBadges";
+import MealBreakdown from "../components/booking/MealBreakdown";
 import { useApi } from "@/hooks/useApi";
 import { Separator } from "@radix-ui/react-select";
 import { API_PREFIX } from "@/constants/api";
@@ -36,7 +38,7 @@ const CheckoutPage = () => {
     const { state: { items, checkIn, checkOut }, clear } = useCart();
     const { navigate } = useAppContext();
     const { show, hide } = useLoader();
-    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost } = useCartSummary();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
     const [promoCode, setPromoCode] = useState("");
     const [promoInfo, setPromoInfo] = useState(null);  // store applied promo details
     const [promoError, setPromoError] = useState("");
@@ -200,9 +202,10 @@ const CheckoutPage = () => {
                         <span>Total Room Price:</span>
                         <span>{formatCurrency(roomTotalPrice)}</span>
                     </div>
+                    <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="my-2" />
                     <div className="flex justify-between text-sm font-medium">
                         <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
-                        <span>{formatCurrency(mealCost)}</span>
+                        <span>{mealLoading ? "..." : formatCurrency(mealCost)}</span>
                     </div>
                     {/* ... previous total room price and meal price lines ... */}
                     {promoInfo && promoInfo.discountAmount > 0 && (
@@ -244,6 +247,18 @@ const CheckoutPage = () => {
                                 </Button>
                             </form>
                         </Form>
+                        
+                        {/* Meal Breakdown Section */}
+                        {mealQuote && mealQuote.nights && mealQuote.nights.length > 0 && (
+                            <div className="mt-6 pt-6 border-t">
+                                <MealBreakdown 
+                                    checkIn={checkIn} 
+                                    checkOut={checkOut} 
+                                    adults={totalAdults} 
+                                    children={totalChildren}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

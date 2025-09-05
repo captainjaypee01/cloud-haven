@@ -1,0 +1,77 @@
+import React, { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { useApi } from "@/hooks/useApi";
+import { API_PREFIX } from "@/constants/api";
+import { format } from "date-fns";
+import Loader from "@/components/common/Loader";
+import { Utensils, Coffee } from "lucide-react";
+
+export default function MealAvailabilityBadges({ checkIn, checkOut, className = "" }) {
+  const [availability, setAvailability] = useState({});
+  const [loading, setLoading] = useState(false);
+  const api = useApi();
+
+  useEffect(() => {
+    if (checkIn && checkOut) {
+      fetchAvailability();
+    }
+  }, [checkIn, checkOut]);
+
+  const fetchAvailability = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`${API_PREFIX}/public/meal-availability`, {
+        params: {
+          from: checkIn,
+          to: checkOut,
+        },
+      });
+
+      if (response.data.success) {
+        setAvailability(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching meal availability:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!checkIn || !checkOut) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className={`flex items-center gap-2 ${className}`}>
+        <Loader variant="wave" />
+      </div>
+    );
+  }
+
+  // Count buffet and free breakfast nights
+  const nights = Object.values(availability);
+  const buffetNights = nights.filter(n => n === "buffet").length;
+  const freeBreakfastNights = nights.filter(n => n === "free_breakfast").length;
+
+  if (nights.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={`flex flex-wrap gap-2 ${className}`}>
+      {buffetNights > 0 && (
+        <Badge variant="success" className="flex items-center gap-1">
+          <Utensils className="w-3 h-3" />
+          Buffet on {buffetNights} night{buffetNights > 1 ? "s" : ""}
+        </Badge>
+      )}
+      {freeBreakfastNights > 0 && (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <Coffee className="w-3 h-3" />
+          Free Breakfast on {freeBreakfastNights} night{freeBreakfastNights > 1 ? "s" : ""}
+        </Badge>
+      )}
+    </div>
+  );
+}

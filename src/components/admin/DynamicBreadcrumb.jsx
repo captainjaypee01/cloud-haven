@@ -18,6 +18,7 @@ const NAV = [
     { group: 'Management', title: 'Reports', url: '/admin/reports' },
     { group: 'Management', title: 'Images', url: '/admin/images' },
     { group: 'Management', title: 'Meal Prices', url: '/admin/meal-prices' },
+    { group: 'Management', title: 'Meal Programs', url: '/admin/meal-programs' },
 ];
 
 function getBreadcrumbParts(pathname) {
