@@ -60,7 +60,6 @@ const ListPromos = () => {
         setLoading(true);
         try {
             const newStatus = promo.active === "active" ? "inactive" : "active";
-            console.log('newStatus', newStatus)
             await promosApi.updateStatus(promo.id, newStatus);
             toast.success(`Promo code "${promo.code}" ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully.`);
             fetchPromos();

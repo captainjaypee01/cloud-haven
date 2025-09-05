@@ -38,7 +38,7 @@ export const AppProvider = ({ children }) => {
     
 
         } catch (error) {
-            console.log('error', error);
+            console.error('App context error:', error);
         }
     }
     

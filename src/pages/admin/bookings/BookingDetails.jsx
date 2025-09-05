@@ -20,7 +20,7 @@ const BookingDetails = () => {
             const res = await api.get(`${API_PREFIX}/admin/bookings/${id}`, { requiresAuth: true });
             setBooking(res?.data);
         } catch (error) {
-            console.log(error);
+            console.error('Booking details error:', error);
         }
         setLoading(false);
         hide();

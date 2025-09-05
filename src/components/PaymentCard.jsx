@@ -136,7 +136,6 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
                 if (authError.response?.status === 401 || authError.response?.status === 403) {
                     // Fallback to guest route - need booking reference number
                     if (payment.booking?.reference_number) {
-                        console.log('Falling back to guest route for booking:', payment.booking.reference_number);
                         response = await api.post(
                             `${API_PREFIX}/bookings/ref/${payment.booking.reference_number}/payments/${payment.id}/proof`,
                             formData,

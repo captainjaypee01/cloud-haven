@@ -58,7 +58,6 @@ export default function MealPriceFormDialog({
         const payload = {
             ...values,
         };
-        console.log('payload', payload)
         try {
             if (isEdit && mealPriceId) {
                 await api.update(mealPriceId, payload);

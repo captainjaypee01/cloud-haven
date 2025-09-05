@@ -28,7 +28,6 @@ const Dashboard = () => {
         const fetchDashboard = async () => {
             try {
                 const res = await api.get(`${API_PREFIX}/admin/dashboard`, { requiresAuth: true });
-                console.log('res', res)
                 if (res.data) {
                     setDashboardData(res.data);
                 }

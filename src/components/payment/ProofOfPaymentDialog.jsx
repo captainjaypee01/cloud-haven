@@ -300,7 +300,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                 });
                 toast.error("Please fix the errors in the form.");
             } else {
-                console.log('err', err)
+                console.error('Payment proof error:', err)
                 toast.error(err.response?.data?.message || err.response?.data?.error_message || "Upload error. Try again.");
             }
         } finally {
@@ -496,7 +496,6 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                                                                         alt="Payment proof preview"
                                                                         className="w-full max-h-32 object-contain border rounded-md bg-white"
                                                                         onLoad={() => {
-                                                                            console.log("Preview image loaded successfully");
                                                                         }}
                                                                         onError={(e) => {
                                                                             console.error("Preview image failed to load:", e);

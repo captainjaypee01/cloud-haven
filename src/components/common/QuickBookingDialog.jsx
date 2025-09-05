@@ -13,6 +13,7 @@ import { GuestSelector } from '../GuestSelector';
 import { formatCurrency } from '../../utils/currency';
 import { toast } from "sonner";
 import { useCart } from '@/context/CartContext';
+import { useRoomAvailability } from '../../hooks/useRoomAvailability';
 
 /**
  * Quick Booking Dialog Component
@@ -31,11 +32,28 @@ export const QuickBookingDialog = ({
     open,
     onOpenChange,
     room,
-    availableUnits,
-    isUnavailable,
-    availabilityLoading = false,
+    availableUnits: propAvailableUnits,
+    isUnavailable: propIsUnavailable,
+    availabilityLoading: propAvailabilityLoading = false,
 }) => {
     const { state, addItem } = useCart();
+    
+    // Use room availability hook if room and dates are available
+    const {
+        availableUnits: hookAvailableUnits,
+        isUnavailable: hookIsUnavailable,
+        isLoading: hookAvailabilityLoading,
+    } = useRoomAvailability(
+        room?.slug, 
+        state?.checkIn, 
+        state?.checkOut,
+        { enabled: !!room?.slug && !!state?.checkIn && !!state?.checkOut }
+    );
+    
+    // Use props if provided, otherwise use hook values
+    const availableUnits = propAvailableUnits !== undefined ? propAvailableUnits : hookAvailableUnits;
+    const isUnavailable = propIsUnavailable !== undefined ? propIsUnavailable : hookIsUnavailable;
+    const availabilityLoading = propAvailabilityLoading || hookAvailabilityLoading;
     const { control, handleSubmit, watch, reset } = useForm({
         defaultValues: {
             adults: "2",

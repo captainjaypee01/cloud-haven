@@ -14,12 +14,12 @@ export function calculateCartSummary({ items = [], checkIn, checkOut, mealPrices
 
     const summary = items.map(item => {
         const totalGuests = item.adults + item.children;
-        const extraGuests = Math.max(totalGuests - item.maxGuests, 0);
+        const calculatedExtraGuests = Math.max(totalGuests - parseInt(item.maxGuests), 0);
         const subtotal = item.price * numNights;  // just room cost
         return {
             ...item,
             subtotal,
-            extraGuests,
+            calculatedExtraGuests, // How many guests exceed the base limit
             totalGuests,
             numNights,
         };
