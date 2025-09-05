@@ -97,30 +97,19 @@ export default function MealProgramDetail() {
     if (!deleteItem || !deleteType) return;
 
     try {
-      const url = deleteType === "tier"
-        ? `${API_PREFIX}/admin/meal-programs/${id}/pricing-tiers/${deleteItem.id}`
-        : `${API_PREFIX}/admin/meal-programs/${id}/overrides/${deleteItem.id}`;
-      
-      const response = await api.delete(url, {
-        headers: { requiresAuth: true },
-      });
-
-      if (response.data.success) {
-        toast({
-          title: "Success",
-          description: `${deleteType === "tier" ? "Pricing tier" : "Calendar override"} deleted successfully`,
-        });
-        fetchProgram();
-        setDeleteDialogOpen(false);
-        setDeleteItem(null);
-        setDeleteType(null);
+      if (deleteType === "tier") {
+        await mealProgramsApi.removePricingTier(id, deleteItem.id);
+      } else {
+        await mealProgramsApi.removeCalendarOverride(id, deleteItem.id);
       }
+
+      toast.success(`${deleteType === "tier" ? "Pricing tier" : "Calendar override"} deleted successfully`);
+      fetchProgram();
+      setDeleteDialogOpen(false);
+      setDeleteItem(null);
+      setDeleteType(null);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: `Failed to delete ${deleteType === "tier" ? "pricing tier" : "calendar override"}`,
-        variant: "destructive",
-      });
+      toast.error(error.response?.data?.message || `Failed to delete ${deleteType === "tier" ? "pricing tier" : "calendar override"}`);
     }
   };
 
