@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Title from '../../../components/Title';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import ControlsToolbar from '@/components/admin/common/ControlsToolbar';
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
@@ -18,6 +19,7 @@ const ListBooking = () => {
     const debouncedSearch = useDebounce(search, 400);
     const [sorting, setSorting] = useState([]);
     const [status, setStatus] = useState("all");
+    const [dateFilter, setDateFilter] = useState("");
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
     const api = useApi();
@@ -62,10 +64,26 @@ const ListBooking = () => {
             cell: ({ row }) => row.original.booking_rooms?.length || 0,
         },
         {
-            id: "final_price",
-            header: "Final Price",
-            accessorKey: "final_price",
-            cell: ({ row }) => formatCurrency(row.original.final_price),
+            id: "total_payable",
+            header: "Total Amount",
+            accessorKey: "total_payable",
+            cell: ({ row }) => {
+                // Calculate the actual total amount including other charges
+                const actualFinalPrice = (row.original.final_price || 0) - (row.original.discount_amount || 0);
+                const otherCharges = row.original.other_charges || 0;
+                const totalAmount = actualFinalPrice + otherCharges;
+                return formatCurrency(totalAmount);
+            },
+        },
+        {
+            id: "remaining_balance",
+            header: "Remaining Balance",
+            accessorKey: "remaining_balance",
+            cell: ({ row }) => (
+                <span className={row.original.remaining_balance > 0 ? "text-red-600 font-semibold" : "text-green-600 font-semibold"}>
+                    {formatCurrency(row.original.remaining_balance || 0)}
+                </span>
+            ),
         },
         {
             id: "status",
@@ -101,6 +119,7 @@ const ListBooking = () => {
                 ? `${sorting[0].id}|${sorting[0].desc ? 'desc' : 'asc'}`
                 : 'created_at|desc',
             status: status === 'all' ? undefined : status,
+            date: dateFilter || undefined,
         };
         try {
             const res = await api.get(`${API_PREFIX}/admin/bookings`, {
@@ -116,9 +135,9 @@ const ListBooking = () => {
     };
 
     useEffect(() => {
-        fetchBookings({ search: debouncedSearch, status });
+        fetchBookings({ search: debouncedSearch, status, date: dateFilter });
         // eslint-disable-next-line
-    }, [debouncedSearch, sorting, status, pagination]);
+    }, [debouncedSearch, sorting, status, dateFilter, pagination]);
 
     return (
         <div>
@@ -147,6 +166,28 @@ const ListBooking = () => {
                     ]
                 }]}
             />
+            <div className="mb-4 flex gap-4 items-center">
+                <div className="flex flex-col">
+                    <label className="text-sm font-medium mb-1">Filter by Date</label>
+                    <Input
+                        type="date"
+                        value={dateFilter}
+                        onChange={(e) => setDateFilter(e.target.value)}
+                        className="w-48"
+                        placeholder="Select date to filter bookings"
+                    />
+                </div>
+                {dateFilter && (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDateFilter("")}
+                        className="mt-6"
+                    >
+                        Clear Date Filter
+                    </Button>
+                )}
+            </div>
             <DataTable
                 columns={bookingColumns}
                 data={data}
