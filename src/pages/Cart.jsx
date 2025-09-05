@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SEO from "@/components/SEO";
 import { useCart } from "../context/CartContext";
+import { usePromoCode } from "../context/PromoCodeContext";
 import { GuestSelector } from "../components/GuestSelector";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Controller, useForm } from "react-hook-form";
 import { Separator } from "@radix-ui/react-select";
 import { toast } from "sonner";
@@ -12,8 +14,9 @@ import CartList from "../components/CartList";
 import { RoomDetailModal } from "../components/RoomDetailModal";
 import { useAppContext } from "../context/AppContext";
 import { differenceInDays, parseISO } from "date-fns";
-import { useCartSummary } from "../hooks/cart/useCartSummary";
+import { useCartSummaryWithMealPrograms } from "../hooks/cart/useCartSummaryWithMealPrograms";
 import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
+import MealAvailabilityBadges from "../components/booking/MealAvailabilityBadges";
 import AvailabilityModal from "../components/common/AvailabilityModal";
 import { useApi } from "@/hooks/useApi";
 import { API_PREFIX } from "@/constants/api";
@@ -30,10 +33,20 @@ const Cart = () => {
     const [checking, setChecking] = useState(false);
     const [unavailable, setUnavailable] = useState([]);
     const { navigate } = useAppContext();
-    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice } = useCartSummary();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
 
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
+
+    const handleApplyPromo = async () => {
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal);
+    };
+
+    const handleRemovePromo = () => {
+        clearPromo();
+    };
+
     const checkAvailability = async () => {
         show();
         await new Promise(resolve => setTimeout(resolve, 2000));
@@ -64,6 +77,12 @@ const Cart = () => {
     const handleProceedToCheckout = async () => {
         const ok = await checkAvailability();
         if (ok) {
+            // Pass promo information to checkout page via localStorage
+            if (promoInfo) {
+                localStorage.setItem('checkout_promo_info', JSON.stringify(promoInfo));
+            } else {
+                localStorage.removeItem('checkout_promo_info');
+            }
             scrollTo(0, 0);
             navigate('/checkout');
         }
@@ -155,6 +174,8 @@ const Cart = () => {
                             <span>{totalGuests}</span>
                         </div>
                     </div>
+                    {/* Meal Availability Badges */}
+                    <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="mt-4" />
                     <div className="space-y-2">
                         {summary.map(item => (
                             <div key={item.uniqueId} className="mb-3 border-b pb-3 last:border-none last:pb-0">
@@ -174,13 +195,78 @@ const Cart = () => {
                         <span>{formatCurrency(roomTotalPrice)}</span>
                     </div>
                     <div className="flex justify-between text-sm font-medium">
-                        <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
-                        <span>{formatCurrency(mealCost)}</span>
+                        <span>
+                            {mealLoading ? (
+                                "Meals:"
+                            ) : mealQuote && mealQuote.nights ? (
+                                mealQuote.nights.some(night => night.type === 'buffet') ? (
+                                    `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})`
+                                ) : (
+                                    "Complimentary Breakfast Only"
+                                )
+                            ) : (
+                                "Meals:"
+                            )}
+                        </span>
+                        <span>
+                            {mealLoading ? (
+                                <span className="text-xs text-gray-500">Loading...</span>
+                            ) : (
+                                formatCurrency(mealCost)
+                            )}
+                        </span>
                     </div>
+                    
+                    {/* Promo Code Section */}
+                    <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Input
+                                type="text"
+                                placeholder="Promo code"
+                                value={promoCode}
+                                onChange={e => setPromoCode(e.target.value)}
+                                className="flex-1"
+                            />
+                            {promoInfo ? (
+                                <Button type="button" variant="outline" onClick={handleRemovePromo}>
+                                    Remove
+                                </Button>
+                            ) : (
+                                <Button type="button" onClick={handleApplyPromo}>
+                                    Apply
+                                </Button>
+                            )}
+                        </div>
+                        {promoError && <p className="text-xs text-red-600 mb-2">{promoError}</p>}
+                        {promoInfo && (
+                            <p className="text-sm text-green-600 mb-2">
+                                Promo "{promoInfo.code}" applied – {promoInfo.discount_type === 'percentage'
+                                    ? `${promoInfo.discount_value}% off`
+                                    : `${formatCurrency(promoInfo.discount_value)} off`}!
+                            </p>
+                        )}
+                    </div>
+                    
                     <Separator />
-                    <div className="flex justify-between text-lg font-bold">
-                        <span>Grand Total</span>
+                    <div className="flex justify-between text-sm font-medium">
+                        <span>Subtotal:</span>
                         <span>{formatCurrency(grandTotal)}</span>
+                    </div>
+                    {promoInfo && promoInfo.discountAmount > 0 && (
+                        <div className="flex justify-between text-sm text-green-600">
+                            <span>Promo Discount ({promoInfo.code}):</span>
+                            <span>-{formatCurrency(promoInfo.discountAmount)}</span>
+                        </div>
+                    )}
+                    <div className="flex justify-between text-lg font-bold border-t pt-2">
+                        <span>Grand Total</span>
+                        <span>
+                            {formatCurrency(
+                                promoInfo
+                                    ? Math.max(0, grandTotal - (promoInfo.discountAmount || 0))
+                                    : grandTotal
+                            )}
+                        </span>
                     </div>
                     <Button variant="destructive" className="mt-3 cursor-pointer" onClick={clear}>Clear Cart</Button>
                     {summary.length > 0 && (

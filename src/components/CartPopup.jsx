@@ -5,7 +5,9 @@ import {
     PopoverContent,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCart } from "../context/CartContext";
+import { usePromoCode } from "../context/PromoCodeContext";
 import { Trash } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
 import { GuestSelector } from "./GuestSelector";
@@ -13,8 +15,10 @@ import { toast } from "sonner";
 import { formatCurrency } from "../utils/currency";
 import { Separator } from "@radix-ui/react-select";
 // import { differenceInDays, parseISO } from "date-fns";
-import { useCartSummary } from "../hooks/cart/useCartSummary";
+import { useCartSummaryWithMealPrograms } from "../hooks/cart/useCartSummaryWithMealPrograms";
 import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
+import MealAvailabilityBadges from "./booking/MealAvailabilityBadges";
+import { useApi } from "@/hooks/useApi";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
@@ -24,9 +28,18 @@ export function CartPopup() {
         removeItem,
     } = useCart();
     const { control, clearErrors, reset } = useForm();
-    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests } = useCartSummary();
+    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
+    const api = useApi();
     useSyncCartForm(items, reset);
 
+    const handleApplyPromo = async () => {
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal);
+    };
+
+    const handleRemovePromo = () => {
+        clearPromo();
+    };
 
     const handleChange = (item, type, val) => {
         const newCount = Number(val);
@@ -74,6 +87,8 @@ export function CartPopup() {
                         <span>{totalGuests}</span>
                     </div>
                 </div>
+                {/* Meal Availability Badges */}
+                <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="mt-2" />
                 {items.length === 0 ? (
                     <p className="text-sm text-gray-500">No rooms added.</p>
                 ) : (
@@ -150,13 +165,78 @@ export function CartPopup() {
                             <span>{formatCurrency(roomTotalPrice)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-medium">
-                            <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
-                            <span>{formatCurrency(mealCost)}</span>
+                            <span>
+                                {mealLoading ? (
+                                    "Meals:"
+                                ) : mealQuote && mealQuote.nights ? (
+                                    mealQuote.nights.some(night => night.type === 'buffet') ? (
+                                        `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})`
+                                    ) : (
+                                        "Complimentary Breakfast Only"
+                                    )
+                                ) : (
+                                    "Meals:"
+                                )}
+                            </span>
+                            <span>
+                                {mealLoading ? (
+                                    <span className="text-xs text-gray-500">Loading...</span>
+                                ) : (
+                                    formatCurrency(mealCost)
+                                )}
+                            </span>
                         </div>
+                        
+                        {/* Promo Code Section */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="text"
+                                    placeholder="Promo code"
+                                    value={promoCode}
+                                    onChange={e => setPromoCode(e.target.value)}
+                                    className="flex-1 text-sm"
+                                />
+                                {promoInfo ? (
+                                    <Button type="button" variant="outline" size="sm" onClick={handleRemovePromo}>
+                                        Remove
+                                    </Button>
+                                ) : (
+                                    <Button type="button" size="sm" onClick={handleApplyPromo}>
+                                        Apply
+                                    </Button>
+                                )}
+                            </div>
+                            {promoError && <p className="text-xs text-red-600">{promoError}</p>}
+                            {promoInfo && (
+                                <p className="text-xs text-green-600">
+                                    Promo "{promoInfo.code}" applied – {promoInfo.discount_type === 'percentage'
+                                        ? `${promoInfo.discount_value}% off`
+                                        : `${formatCurrency(promoInfo.discount_value)} off`}!
+                                </p>
+                            )}
+                        </div>
+                        
                         <Separator />
-                        <div className="flex justify-between items-center pt-2">
+                        <div className="flex justify-between text-sm font-medium">
+                            <span>Subtotal:</span>
+                            <span>{formatCurrency(grandTotal)}</span>
+                        </div>
+                        {promoInfo && promoInfo.discountAmount > 0 && (
+                            <div className="flex justify-between text-sm text-green-600">
+                                <span>Promo Discount ({promoInfo.code}):</span>
+                                <span>-{formatCurrency(promoInfo.discountAmount)}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center pt-2 border-t">
                             <span className="text-lg font-semibold">Total:</span>
-                            <span className="text-lg font-bold">{formatCurrency(grandTotal)}</span>
+                            <span className="text-lg font-bold">
+                                {formatCurrency(
+                                    promoInfo
+                                        ? Math.max(0, grandTotal - (promoInfo.discountAmount || 0))
+                                        : grandTotal
+                                )}
+                            </span>
                         </div>
                     </div>
                 )}

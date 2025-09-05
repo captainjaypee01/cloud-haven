@@ -50,9 +50,10 @@ export function useCartSummaryWithMealPrograms() {
                 adults: totalAdults,
                 children: totalChildren,
             });
-
-            if (response.data.success) {
-                setMealQuote(response.data.data);
+            
+            // The API returns data directly without success wrapper
+            if (response.data) {
+                setMealQuote(response.data);
             }
         } catch (error) {
             console.error("Error fetching meal quote:", error);

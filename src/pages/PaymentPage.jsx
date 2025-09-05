@@ -82,13 +82,14 @@ const PaymentPage = () => {
     };
 
     const paidAmount = getPaidAmount(booking.payments || []);
-    const downpaymentAmount = booking.downpayment_amount || (booking.final_price * 0.5);
-    const remainingBalance = Math.max(0, booking.final_price - paidAmount);
+    const actualFinalPrice = booking.final_price - (booking.discount_amount || 0);
+    const downpaymentAmount = booking.downpayment_amount || (actualFinalPrice * 0.5);
+    const remainingBalance = Math.max(0, actualFinalPrice - paidAmount);
     
     // Check if downpayment has been paid (total paid amount >= downpayment amount)
     const downpaymentPaid = paidAmount >= downpaymentAmount;
     // Check if full payment has been made
-    const fullyPaid = paidAmount >= booking.final_price;
+    const fullyPaid = paidAmount >= actualFinalPrice;
 
     if (fullyPaid) {
         return (
@@ -174,9 +175,29 @@ const PaymentPage = () => {
                                 </div>
                                 
                                 <div className="pt-4 border-t border-gray-200">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-gray-600 mb-1">Total Amount:</span>
-                                        <span className="text-2xl font-bold text-cyan-700">{formatCurrency(booking.final_price)}</span>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between">
+                                            <span className="text-sm font-medium text-gray-600">Room Total:</span>
+                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.total_price)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm font-medium text-gray-600">Meal Total:</span>
+                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.meal_price)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-sm font-medium text-gray-600">Subtotal:</span>
+                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.total_price + booking.meal_price)}</span>
+                                        </div>
+                                        {booking.discount_amount > 0 && (
+                                            <div className="flex justify-between text-green-600">
+                                                <span className="text-sm font-medium">Promo Discount:</span>
+                                                <span className="text-sm font-medium">-{formatCurrency(booking.discount_amount)}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between pt-2 border-t border-gray-200">
+                                            <span className="text-lg font-bold text-gray-900">Total Amount:</span>
+                                            <span className="text-2xl font-bold text-cyan-700">{formatCurrency(booking.final_price - (booking.discount_amount || 0))}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

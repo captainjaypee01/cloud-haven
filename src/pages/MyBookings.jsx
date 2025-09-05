@@ -338,7 +338,7 @@ const MyBookings = () => {
                                                                 </div>
                                                             )}
                                                             <div className='text-sm mt-2'>
-                                                                Total: {booking.final_price ? formatCurrency(booking.final_price) : `₱${booking.totalPrice}`}
+                                                                Total: {booking.final_price ? formatCurrency(booking.final_price - (booking.discount_amount || 0)) : `₱${booking.totalPrice}`}
                                                             </div>
                                                         </div>
                                                     </div>

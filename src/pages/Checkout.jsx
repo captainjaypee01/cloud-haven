@@ -1,4 +1,5 @@
 import { useCart } from "../context/CartContext";
+import { usePromoCode } from "../context/PromoCodeContext";
 import { formatCurrency } from "@/lib/format";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCartSummaryWithMealPrograms } from "../hooks/cart/useCartSummaryWithMealPrograms";
 import MealAvailabilityBadges from "../components/booking/MealAvailabilityBadges";
-import MealBreakdown from "../components/booking/MealBreakdown";
 import { useApi } from "@/hooks/useApi";
 import { Separator } from "@radix-ui/react-select";
 import { API_PREFIX } from "@/constants/api";
@@ -39,9 +39,7 @@ const CheckoutPage = () => {
     const { navigate } = useAppContext();
     const { show, hide } = useLoader();
     const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
-    const [promoCode, setPromoCode] = useState("");
-    const [promoInfo, setPromoInfo] = useState(null);  // store applied promo details
-    const [promoError, setPromoError] = useState("");
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
     const api = useApi();
 
     const form = useForm({
@@ -103,41 +101,7 @@ const CheckoutPage = () => {
     };
 
     const handleApplyPromo = async () => {
-        setPromoError("");
-        if (!promoCode) return;
-        try {
-            const res = await api.get(`${API_PREFIX}/promos/${promoCode}`);
-            const promo = res.data;
-            // Compute discount based on promo.scope
-            let discountAmount = 0;
-            if (promo.discount_type === 'percentage') {
-                if (promo.scope === 'room') {
-                    discountAmount = roomTotalPrice * (promo.discount_value / 100);
-                } else if (promo.scope === 'meal') {
-                    discountAmount = mealCost * (promo.discount_value / 100);
-                } else { // 'total'
-                    discountAmount = grandTotal * (promo.discount_value / 100);
-                }
-            } else if (promo.discount_type === 'fixed') {
-                if (promo.scope === 'room') {
-                    discountAmount = Math.min(promo.discount_value, roomTotalPrice);
-                } else if (promo.scope === 'meal') {
-                    discountAmount = Math.min(promo.discount_value, mealCost);
-                } else {
-                    discountAmount = Math.min(promo.discount_value, grandTotal);
-                }
-            }
-            discountAmount = Math.round(discountAmount * 100) / 100; // round to 2 decimals
-            setPromoInfo({ ...promo, discountAmount });
-        } catch (err) {
-            console.error(err);
-            setPromoInfo(null);
-            if (err.response?.status === 404) {
-                setPromoError("Promo code not found.");
-            } else {
-                setPromoError(err.response?.data?.message || "Promo code invalid.");
-            }
-        }
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal);
     };
     return (
         <div className="relative min-h-screen pb-[200px] py-16 px-2 md:px-8 lg:px-32 mt-10 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
@@ -156,7 +120,11 @@ const CheckoutPage = () => {
                             onChange={e => setPromoCode(e.target.value)}
                             className="w-40"
                         />
-                        <Button type="button" onClick={handleApplyPromo}>Apply</Button>
+                        {promoInfo ? (
+                            <Button type="button" variant="outline" onClick={clearPromo}>Remove</Button>
+                        ) : (
+                            <Button type="button" onClick={handleApplyPromo}>Apply</Button>
+                        )}
                     </div>
                     {promoError && <p className="text-xs text-red-600 mt-1">{promoError}</p>}
                     {promoInfo && (
@@ -207,7 +175,10 @@ const CheckoutPage = () => {
                         <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
                         <span>{mealLoading ? "..." : formatCurrency(mealCost)}</span>
                     </div>
-                    {/* ... previous total room price and meal price lines ... */}
+                    <div className="flex justify-between text-sm font-medium">
+                        <span>Subtotal:</span>
+                        <span>{formatCurrency(grandTotal)}</span>
+                    </div>
                     {promoInfo && promoInfo.discountAmount > 0 && (
                         <div className="flex justify-between text-sm font-medium text-green-600">
                             <span>Promo Discount ({promoInfo.code}):</span>
@@ -227,6 +198,17 @@ const CheckoutPage = () => {
                 {/* -- Guest Info -- */}
                 {!(!items || !Array.isArray(items) || items.length === 0) && (
                     <div className="md:col-span-1 bg-white rounded-xl shadow-lg p-8 flex flex-col gap-6">
+                        {/* Back to Cart Button */}
+                        <div className="flex justify-start">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => navigate('/cart')}
+                                className="mb-4"
+                            >
+                                ← Back to Cart
+                            </Button>
+                        </div>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <h2 className="text-xl font-semibold mb-2">Guest Information</h2>
@@ -247,18 +229,6 @@ const CheckoutPage = () => {
                                 </Button>
                             </form>
                         </Form>
-                        
-                        {/* Meal Breakdown Section */}
-                        {mealQuote && mealQuote.nights && mealQuote.nights.length > 0 && (
-                            <div className="mt-6 pt-6 border-t">
-                                <MealBreakdown 
-                                    checkIn={checkIn} 
-                                    checkOut={checkOut} 
-                                    adults={totalAdults} 
-                                    children={totalChildren}
-                                />
-                            </div>
-                        )}
                     </div>
                 )}
             </div>
