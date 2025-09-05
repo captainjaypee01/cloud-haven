@@ -48,8 +48,6 @@ export default function AmenityFormDialog({
     const [submitting, setSubmitting] = useState(false);
     const [iconSearch, setIconSearch] = useState("");
     const debouncedIconSearch = useDebounce(iconSearch, 250);
-    console.log('iconSearch', iconSearch);
-    console.log('initialData', initialData);
     const form = useForm({
         defaultValues: initialData || {
             name: "",
@@ -121,7 +119,7 @@ export default function AmenityFormDialog({
             if (onSuccess) onSuccess();
         } catch (e) {
             // If validation fails or API error, show error message from response or generic
-            console.log(e)
+            console.error('Amenity form error:', e)
             const msg = e.response?.data?.message || e.response?.data?.error || "Something went wrong. Please try again.";
             toast.error(msg);
         } finally {

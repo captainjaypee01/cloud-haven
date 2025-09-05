@@ -35,7 +35,6 @@ const ContactUsPage = () => {
     });
 
     const onSubmit = (values) => {
-        console.log("Contact form submitted:", values);
         // Simulate successful submission (no backend yet)
         toast.success("Thank you! Your message has been sent.");
         form.reset();

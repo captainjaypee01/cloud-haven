@@ -84,11 +84,11 @@ const CheckoutPage = () => {
                 hide();
                 return;
             }
-            console.log(`/booking/${booking.reference_number}/payment`)
             clear();
+            clearPromo(); // Clear promo code after successful booking
             navigate(`/booking/${booking.reference_number}/payment`);
         } catch (err) {
-            console.log(err);
+            console.error('Checkout error:', err);
             if (err.status === 409) {
 
                 toast.error(err.response.data.error);

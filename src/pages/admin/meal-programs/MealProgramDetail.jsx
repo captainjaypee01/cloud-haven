@@ -28,7 +28,6 @@ export default function MealProgramDetail() {
   const [program, setProgram] = useState(null);
   const [loading, setLoading] = useState(true);
   
-  console.log('MealProgramDetail mounted with ID:', id);
   const [tierDialogOpen, setTierDialogOpen] = useState(false);
   const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
   const [selectedTier, setSelectedTier] = useState(null);
@@ -41,9 +40,7 @@ export default function MealProgramDetail() {
   const fetchProgram = async () => {
     try {
       setLoading(true);
-      console.log('Fetching meal program with ID:', id);
       const response = await mealProgramsApi.show(id);
-      console.log('Meal program response:', response);
       setProgram(response.data);
     } catch (error) {
       console.error('Error fetching meal program:', error);

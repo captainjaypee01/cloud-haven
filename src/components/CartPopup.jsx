@@ -19,6 +19,7 @@ import { useCartSummaryWithMealPrograms } from "../hooks/cart/useCartSummaryWith
 import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
 import MealAvailabilityBadges from "./booking/MealAvailabilityBadges";
 import { useApi } from "@/hooks/useApi";
+import { Link } from "react-router-dom";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
@@ -51,7 +52,11 @@ export function CartPopup() {
             toast.error("At least one guest required.");
             return;
         }
-        if (total > item.maxGuests) {
+        if (total > parseInt(item.maxGuests) + parseInt(item.extraGuests)) {
+            toast.error(`Only up to ${parseInt(item.maxGuests) + parseInt(item.extraGuests)} guests can stay in this room.`);
+            return;
+        }
+        if (total > parseInt(item.maxGuests)) {
             toast.warning(
                 `Max ${item.maxGuests} guests allowed (you have ${total}). We allow for ${item.extraGuests} extra guest/s`
             );
@@ -121,7 +126,7 @@ export function CartPopup() {
                                             render={({ field }) => (
                                                 <GuestSelector
                                                     name={field.name}
-                                                    maxGuests={item.maxGuests + item.extraGuests}
+                                                    maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                                     value={field.value}
                                                     onChange={v => handleChange(item, "adults", v)}
                                                     isPopover={true}
@@ -140,7 +145,7 @@ export function CartPopup() {
                                             render={({ field }) => (
                                                 <GuestSelector
                                                     name={field.name}
-                                                    maxGuests={item.maxGuests + item.extraGuests}
+                                                    maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                                     value={field.value}
                                                     onChange={v => handleChange(item, "children", v)}
                                                     isPopover={true}
@@ -242,7 +247,7 @@ export function CartPopup() {
                 )}
                 {items.length > 0 && (
                     <Button asChild variant="ghost" className="w-full">
-                        <a href="/cart">View Cart</a>
+                        <Link to="/cart">View Cart</Link>
                     </Button>
                 )}
             </PopoverContent>

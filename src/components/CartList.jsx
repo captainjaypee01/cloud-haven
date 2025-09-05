@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { formatCurrency } from '../utils/currency';
 import { Controller } from 'react-hook-form';
-import { Trash } from "lucide-react";
+import { Trash, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GuestSelector } from "../components/GuestSelector";
+import { QuickBookingDialog } from "./common/QuickBookingDialog";
+import { useCart } from "../context/CartContext";
 
 const CartList = ({
     summary = [],
@@ -13,8 +15,26 @@ const CartList = ({
     control,
     numNights = 1, // pass from parent
 }) => {
+    const { state } = useCart();
+    const [showBookingDialog, setShowBookingDialog] = useState(false);
+    const [selectedRoomForBooking, setSelectedRoomForBooking] = useState(null);
 
-    return summary.map(item => (
+    const handleAddAnotherRoom = (item) => {
+        // Create a room object that matches the structure expected by QuickBookingDialog
+        const roomForBooking = {
+            slug: item.roomId,
+            name: item.name,
+            price: item.price,
+            max_guests: parseInt(item.maxGuests),
+            extra_guests: parseInt(item.extraGuests),
+        };
+        setSelectedRoomForBooking(roomForBooking);
+        setShowBookingDialog(true);
+    };
+
+    return (
+        <>
+            {summary.map(item => (
         <div
             key={item.uniqueId}
             className="border rounded-xl p-4 md:p-6 flex flex-col gap-4 shadow-sm bg-gray-50"
@@ -37,8 +57,17 @@ const CartList = ({
                 </Button>
             </div>
 
-            {/* View Room Button */}
-            <div className="flex justify-end">
+            {/* Action Buttons */}
+            <div className="flex justify-between gap-2">
+                <Button 
+                    size="sm" 
+                    variant="default" 
+                    onClick={() => handleAddAnotherRoom(item)} 
+                    className="cursor-pointer flex items-center gap-2"
+                >
+                    <Plus size={16} />
+                    Add Another Room
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => handleView(item.roomId)} className="cursor-pointer">
                     View Room
                 </Button>
@@ -53,7 +82,7 @@ const CartList = ({
                         render={({ field }) => (
                             <GuestSelector
                                 name={field.name}
-                                maxGuests={item.maxGuests + item.extraGuests}
+                                maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                 value={field.value ?? ""}
                                 onChange={v => handleChange(item, "adults", v)}
                             />
@@ -68,7 +97,7 @@ const CartList = ({
                         render={({ field }) => (
                             <GuestSelector
                                 name={field.name}
-                                maxGuests={item.maxGuests + item.extraGuests}
+                                maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                 value={field.value ?? ""}
                                 onChange={v => handleChange(item, "children", v)}
                             />
@@ -89,7 +118,21 @@ const CartList = ({
                 <span>{item.totalGuests}</span>
             </div>
         </div>
-    ));
+            ))}
+            
+            {/* Quick Booking Dialog for adding another room */}
+            {selectedRoomForBooking && (
+                <QuickBookingDialog
+                    open={showBookingDialog}
+                    onOpenChange={setShowBookingDialog}
+                    room={selectedRoomForBooking}
+                    availableUnits={undefined} // We'll let the dialog handle availability checking
+                    isUnavailable={false}
+                    availabilityLoading={false}
+                />
+            )}
+        </>
+    );
 }
 
 export default CartList

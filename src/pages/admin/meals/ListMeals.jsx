@@ -96,7 +96,6 @@ const ListMeals = () => {
         };
         try {
             const res = await mealsApi.list(params);
-            console.log(res)
             setData(res.data.data || []);
             setTotal(res.data.meta?.total || 0);
         } catch (e) {

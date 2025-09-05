@@ -35,7 +35,6 @@ const Cart = () => {
     const { navigate } = useAppContext();
     const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
-
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
 
@@ -45,6 +44,11 @@ const Cart = () => {
 
     const handleRemovePromo = () => {
         clearPromo();
+    };
+
+    const handleClearCart = () => {
+        clear(); // Clear cart items
+        clearPromo(); // Clear promo code
     };
 
     const checkAvailability = async () => {
@@ -99,11 +103,10 @@ const Cart = () => {
             return;
         }
         if (total > parseInt(item.maxGuests) + parseInt(item.extraGuests)) {
-
-            toast.error(`Only up to ${item.maxGuests + item.extraGuests} guests can stay in this room.`);
-            return
+            toast.error(`Only up to ${parseInt(item.maxGuests) + parseInt(item.extraGuests)} guests can stay in this room.`);
+            return;
         }
-        if (total > item.maxGuests) {
+        if (total > parseInt(item.maxGuests)) {
             toast.warning(
                 `Max ${item.maxGuests} guests allowed (you have ${total}). We only allow for ${item.extraGuests} extra guest/s`
             );
@@ -268,7 +271,7 @@ const Cart = () => {
                             )}
                         </span>
                     </div>
-                    <Button variant="destructive" className="mt-3 cursor-pointer" onClick={clear}>Clear Cart</Button>
+                    <Button variant="destructive" className="mt-3 cursor-pointer" onClick={handleClearCart}>Clear Cart</Button>
                     {summary.length > 0 && (
                         <Button variant="outline" size="lg" className="mt-1 cursor-pointer" disabled={checking} onClick={handleProceedToCheckout}>Proceed to Checkout</Button>
                     )}
