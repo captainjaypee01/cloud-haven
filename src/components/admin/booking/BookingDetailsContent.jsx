@@ -55,10 +55,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
 
     // Total paid from payments with status 'paid'
     const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
-    // Remaining balance = (final price + other charges) - total paid (never negative)
+    // Calculate actual final price after discount
+    const actualFinalPrice = Number(booking.final_price) - Number(booking.discount_amount || 0);
+    // Remaining balance = (actual final price + other charges) - total paid (never negative)
     const otherCharges = booking.other_charges || 0;
-    const totalPayable = Number(booking.final_price) + Number(otherCharges);
-    // Remaining balance = final price - total paid (never negative)
+    const totalPayable = actualFinalPrice + Number(otherCharges);
+    // Remaining balance = actual final price - total paid (never negative)
     const remainingBalance = Math.max(totalPayable - totalPaid, 0);
 
     const handleViewProof = (payment) => {

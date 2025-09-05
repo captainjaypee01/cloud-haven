@@ -7,6 +7,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { AppProvider } from './context/AppContext.jsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CartProvider } from './context/CartContext.jsx'
+import { PromoCodeProvider } from './context/PromoCodeContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { SidebarProvider } from './context/SidebarContext.jsx'
 
@@ -38,7 +39,9 @@ createRoot(document.getElementById('root')).render(
           <SidebarProvider>
             <AppProvider>
               <CartProvider>
-                <App />
+                <PromoCodeProvider>
+                  <App />
+                </PromoCodeProvider>
               </CartProvider>
             </AppProvider>
           </SidebarProvider>

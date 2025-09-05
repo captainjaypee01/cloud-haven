@@ -36,10 +36,11 @@ export default function MealBreakdown({ checkIn, checkOut, adults, children, cla
         children: children || 0,
       });
 
-      if (response.data.success) {
-        setMealQuote(response.data.data);
+      // The API returns data directly without success wrapper
+      if (response.data) {
+        setMealQuote(response.data);
         if (onTotalChange) {
-          onTotalChange(response.data.data.meal_subtotal);
+          onTotalChange(response.data.meal_subtotal);
         }
       }
     } catch (error) {

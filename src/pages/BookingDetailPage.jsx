@@ -85,7 +85,8 @@ const UnifiedBookingResultPage = () => {
     const { user } = useUser();
     if (!booking) return null;
     const paidAmount = getPaidAmount(booking.payments || []);
-    const remainingBalance = Math.max(0, (booking.final_price || 0) - paidAmount);
+    const actualFinalPrice = (booking.final_price || 0) - (booking.discount_amount || 0);
+    const remainingBalance = Math.max(0, actualFinalPrice - paidAmount);
     const roomsInBookingRaw = (booking.booking_rooms || []).map((br) => br.room || br).filter(Boolean);
     const uniqueRooms = Array.from(new Map(roomsInBookingRaw.map(r => [(r?.slug || r?.id || r?.room_id || r?.name), r])).values());
     const firstRoom = roomsInBookingRaw[0];
@@ -148,8 +149,11 @@ const UnifiedBookingResultPage = () => {
                     <Separator />
                     <div className="flex justify-between"><span>Room Price</span><span>{formatCurrency(booking?.total_price)}</span></div>
                     <div className="flex justify-between"><span>Meal Price</span><span>{formatCurrency(booking?.meal_price)}</span></div>
-                    <div className="flex justify-between"><span>Promo Discount</span><span>-{formatCurrency(booking?.discount_amount)}</span></div>
-                    <div className="flex justify-between font-medium text-base mt-2"><span>Total</span><span>{formatCurrency(booking?.final_price - booking?.discount_amount)}</span></div>
+                    <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency((booking?.total_price || 0) + (booking?.meal_price || 0))}</span></div>
+                    {booking?.discount_amount > 0 && (
+                        <div className="flex justify-between text-green-600"><span>Promo Discount</span><span>-{formatCurrency(booking?.discount_amount)}</span></div>
+                    )}
+                    <div className="flex justify-between font-medium text-base mt-2"><span>Total</span><span>{formatCurrency(booking?.final_price - (booking?.discount_amount || 0))}</span></div>
                 </div>
                 <div className="mb-4">
                     <b>Rooms:</b>
