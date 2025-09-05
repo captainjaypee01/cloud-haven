@@ -10,7 +10,7 @@ import RescheduleBookingDialog from './RescheduleBookingDialog';
 import ProofImageDialog from './ProofImageDialog';
 import BookingCancellationDialog from './BookingCancellationDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X, RotateCcw, Check, XCircle, AlertTriangle } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showAddPayment, setShowAddPayment] = useState(false);
@@ -35,6 +36,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showCancellation, setShowCancellation] = useState(false);
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const api = useApi();
+    const navigate = useNavigate();
 
     const resetForm = useForm({
         defaultValues: { reason: '' }
@@ -182,6 +184,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     <StatusBadge status={booking.status} />
                 </div>
                 <div className="flex gap-2">
+                    {/* Calendar View Button */}
+                    <Button
+                        className="cursor-pointer"
+                        variant="outline"
+                        onClick={() => navigate(`/admin/bookings/calendar?date=${booking.check_in_date}`)}
+                    >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Calendar View
+                    </Button>
                     {/* Cancellation Button - Only show if booking can be cancelled */}
                     {['pending', 'failed'].includes(booking.status) && (
                         <Button
@@ -308,6 +319,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             <thead className="border-b">
                                 <tr>
                                     <th className="py-2 pr-4 font-medium">Room Name</th>
+                                    <th className="py-2 pr-4 font-medium">Room Unit</th>
                                     <th className="py-2 pr-4 font-medium">Price/Night</th>
                                     <th className="py-2 pr-4 font-medium">Adults</th>
                                     <th className="py-2 pr-4 font-medium">Children</th>
@@ -318,6 +330,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                 {booking.booking_rooms?.map((br, idx) => (
                                     <tr key={idx} className="border-b last:border-b-0">
                                         <td className="py-2 pr-4">{br.room?.name || ''}</td>
+                                        <td className="py-2 pr-4">
+                                            {br.room_unit ? (
+                                                <span className="font-medium text-blue-600">
+                                                    {br.room_unit.unit_number}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-500 italic">TBD</span>
+                                            )}
+                                        </td>
                                         <td className="py-2 pr-4">{formatCurrency(br.price_per_night)}</td>
                                         <td className="py-2 pr-4">{br.adults}</td>
                                         <td className="py-2 pr-4">{br.children}</td>
@@ -329,6 +350,81 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Meal Breakdown Section */}
+            {booking.meal_quote_data && booking.meal_quote_data.nights && (
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="text-lg font-semibold mb-3">Meal Breakdown</div>
+                        <div className="space-y-4">
+                            {/* Summary */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-blue-600">
+                                        {booking.meal_quote_data.buffet_nights || 0}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Buffet Nights</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-green-600">
+                                        {booking.meal_quote_data.free_breakfast_nights || 0}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Free Breakfast Nights</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-purple-600">
+                                        {formatCurrency(booking.meal_quote_data.meal_subtotal || 0)}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Total Meal Cost</div>
+                                </div>
+                            </div>
+
+                            {/* Daily Breakdown */}
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full text-left text-sm">
+                                    <thead className="border-b">
+                                        <tr>
+                                            <th className="py-2 pr-4 font-medium">Date</th>
+                                            <th className="py-2 pr-4 font-medium">Meal Type</th>
+                                            <th className="py-2 pr-4 font-medium">Adults</th>
+                                            <th className="py-2 pr-4 font-medium">Children</th>
+                                            <th className="py-2 pr-4 font-medium">Adult Price</th>
+                                            <th className="py-2 pr-4 font-medium">Child Price</th>
+                                            <th className="py-2 pr-4 font-medium">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {booking.meal_quote_data.nights.map((night, idx) => (
+                                            <tr key={idx} className="border-b last:border-b-0">
+                                                <td className="py-2 pr-4">{formatDate(night.date)}</td>
+                                                <td className="py-2 pr-4">
+                                                    <Badge 
+                                                        variant={night.type === 'buffet' ? 'default' : 'secondary'}
+                                                        className={night.type === 'buffet' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}
+                                                    >
+                                                        {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                                    </Badge>
+                                                </td>
+                                                <td className="py-2 pr-4">{night.adults}</td>
+                                                <td className="py-2 pr-4">{night.children}</td>
+                                                <td className="py-2 pr-4">
+                                                    {night.type === 'buffet' ? formatCurrency(night.adult_price || 0) : 'Free'}
+                                                </td>
+                                                <td className="py-2 pr-4">
+                                                    {night.type === 'buffet' ? formatCurrency(night.child_price || 0) : 'Free'}
+                                                </td>
+                                                <td className="py-2 pr-4 font-medium">
+                                                    {formatCurrency(night.night_total || 0)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
             {/* Payments Table */}
             <Card>
