@@ -2,15 +2,30 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, X } from "lucide-react";
+import { useState } from "react";
 
 export function DayTourDatePicker({ date, onChange }) {
+    const [open, setOpen] = useState(false);
+    
     const formatted = date
         ? format(date, "MMM d, yyyy")
         : "Select date";
 
+    const handleDateSelect = (selectedDate) => {
+        onChange(selectedDate);
+        // Auto-close when a date is selected
+        if (selectedDate) {
+            setOpen(false);
+        }
+    };
+
+    const handleClear = () => {
+        onChange(null);
+    };
+
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between text-left cursor-pointer">
                     {formatted}
@@ -21,11 +36,23 @@ export function DayTourDatePicker({ date, onChange }) {
                 <Calendar
                     mode="single"
                     selected={date}
-                    onSelect={onChange}
+                    onSelect={handleDateSelect}
                     className="w-full"
                     disabled={{
                         before: new Date(),
                     }}
+                    footer={
+                        date ? (
+                            <Button
+                                variant="ghost"
+                                className="w-full h-8 text-sm font-medium"
+                                onClick={handleClear}
+                            >
+                                <X className="mr-2 h-4 w-4" />
+                                Clear
+                            </Button>
+                        ) : null
+                    }
                 />
             </PopoverContent>
         </Popover>
