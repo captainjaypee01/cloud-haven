@@ -36,7 +36,6 @@ const BookingsCalendarPage = React.lazy(() => import('./pages/admin/bookings/Boo
 const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
 const ListAmenity = React.lazy(() => import('./pages/admin/amenities/ListAmenity'));
 const ListPromos = React.lazy(() => import('./pages/admin/promos/ListPromos'));
-const ListMeals = React.lazy(() => import('./pages/admin/meals/ListMeals'));
 const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
 const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
 const ListDayTourPricing = React.lazy(() => import('./pages/admin/day-tour-pricing/ListDayTourPricing'));
@@ -141,7 +140,6 @@ const App = () => {
                   <Route path="users" element={<ListUsers />} />
                   <Route path="reports" element={<ListRoom />} />
                   <Route path="images" element={<ManageImages />} />
-                  <Route path="meal-prices" element={<ListMeals />} />
                   <Route path="promos" element={<ListPromos />} />
                   <Route path="day-tour-pricing" element={<ListDayTourPricing />} />
 

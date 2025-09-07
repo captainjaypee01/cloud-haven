@@ -31,6 +31,7 @@ const formSchema = z.object({
     price_per_night: z.coerce.number().min(0),
     is_featured: z.coerce.boolean().default(0),
     status: z.union([z.literal("available"), z.literal("unavailable"), z.literal("archived")]).default("available"),
+    min_guests: z.coerce.number().min(1).optional(),
     amenity_ids: z.array(z.number()).optional(),
 });
 
@@ -91,6 +92,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
             price_per_night: 0,
             is_featured: 0,
             status: "available",
+            min_guests: null,
             amenity_ids: [],
         },
     });
@@ -136,6 +138,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                 price_per_night: 0,
                 is_featured: 0,
                 status: "available",
+                min_guests: null,
                 amenity_ids: [],
             });
             setSelectedImages([]);
@@ -393,7 +396,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                                                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-xs py-1 px-2 truncate">
                                                         {img.name}
                                                     </div>
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-60 transition group-hover:flex hidden">
+                                                    <div className="absolute inset-0 hidden items-center justify-center bg-black bg-opacity-0 group-hover:flex group-hover:bg-opacity-60 transition">
                                                         <span className="text-white text-xs">Add</span>
                                                     </div>
                                                 </div>
@@ -453,6 +456,17 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                                 <FormField name="price_per_night" control={form.control} render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Price per Night</FormLabel>
+                                        <FormControl><Input type="number" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                            </div>
+                            
+                            {/* Day Tour specific fields */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <FormField name="min_guests" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Min Guests (Day Tour)</FormLabel>
                                         <FormControl><Input type="number" {...field} /></FormControl>
                                         <FormMessage />
                                     </FormItem>
