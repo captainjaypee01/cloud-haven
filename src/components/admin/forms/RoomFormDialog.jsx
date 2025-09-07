@@ -107,6 +107,28 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
     const fileInputRef = useRef(null);
     const [dragIndex, setDragIndex] = useState(null);
 
+    // Cleanup blob URLs when component unmounts
+    useEffect(() => {
+        return () => {
+            selectedImages.forEach(item => {
+                if (item && item.type === "new" && item.preview && item.preview.startsWith('blob:')) {
+                    URL.revokeObjectURL(item.preview);
+                }
+            });
+        };
+    }, [selectedImages]);
+
+    // Handle dialog close with cleanup
+    const handleClose = () => {
+        // Clean up any blob URLs
+        selectedImages.forEach(item => {
+            if (item && item.type === "new" && item.preview && item.preview.startsWith('blob:')) {
+                URL.revokeObjectURL(item.preview);
+            }
+        });
+        onOpenChange(false);
+    };
+
     // Reset form fields and initialize selected images when dialog opens
     useEffect(() => {
         if (open && initialData) {
@@ -206,13 +228,25 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
         if (imageFiles.length < filesArray.length) {
             toast.error("Some files were skipped because they are not images.");
         }
-        const newItems = imageFiles.map(file => ({
-            type: "new",
-            file: file,
-            preview: URL.createObjectURL(file),
-            name: file.name.replace(/\.[^/.]+$/, ""),
-        }));
-        setSelectedImages(prev => [...prev, ...newItems]);
+        
+        // Process each image file with FileReader to avoid CSP issues
+        imageFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const newItem = {
+                    type: "new",
+                    file: file,
+                    preview: reader.result, // Use data URL instead of blob URL
+                    name: file.name.replace(/\.[^/.]+$/, ""),
+                };
+                setSelectedImages(prev => [...prev, newItem]);
+            };
+            reader.onerror = () => {
+                console.error("Error reading file:", reader.error);
+                toast.error("Error processing image file.");
+            };
+            reader.readAsDataURL(file);
+        });
     };
 
     // Drag-and-drop reordering handlers for selected images
@@ -232,7 +266,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
     const removeSelectedImage = (index) => {
         setSelectedImages(prev => {
             const item = prev[index];
-            if (item && item.type === "new") {
+            if (item && item.type === "new" && item.preview && item.preview.startsWith('blob:')) {
                 URL.revokeObjectURL(item.preview);
             }
             return prev.filter((_, i) => i !== index);
@@ -545,7 +579,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                                 <FormMessage />
                             </FormItem>
                             <DialogFooter>
-                                <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                                <Button variant="outline" type="button" onClick={handleClose}>
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={loading || submitting}>
