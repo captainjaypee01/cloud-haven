@@ -28,6 +28,7 @@ const ManageImages = () => {
     const form = useForm({ defaultValues: { images: [] } });
     const { fields, append, remove } = useFieldArray({ name: "images", control: form.control });
     const [files, setFiles] = useState([]);  // store File objects for new images
+    const [previewUrls, setPreviewUrls] = useState([]);  // store preview URLs for new images
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Fetch existing images whenever search term changes (debounced)
@@ -58,12 +59,36 @@ const ManageImages = () => {
         if (imageFiles.length < newFiles.length) {
             toast.error("Some files were skipped because they are not image files.");
         }
+        
+        // Process each image file
         imageFiles.forEach(file => {
-            setFiles(prev => [...prev, file]);
-            const defaultName = file.name.replace(/\.[^/.]+$/, ""); // strip extension
-            append({ name: defaultName });
+            // Create preview URL using FileReader to avoid CSP issues
+            const reader = new FileReader();
+            reader.onload = () => {
+                setFiles(prev => [...prev, file]);
+                setPreviewUrls(prev => [...prev, reader.result]);
+                const defaultName = file.name.replace(/\.[^/.]+$/, ""); // strip extension
+                append({ name: defaultName });
+            };
+            reader.onerror = () => {
+                console.error("Error reading file:", reader.error);
+                toast.error("Error processing image file.");
+            };
+            reader.readAsDataURL(file);
         });
     };
+
+    // Cleanup when component unmounts
+    useEffect(() => {
+        return () => {
+            // Clean up any blob URLs that might still be in memory
+            previewUrls.forEach(url => {
+                if (url && url.startsWith('blob:')) {
+                    URL.revokeObjectURL(url);
+                }
+            });
+        };
+    }, [previewUrls]);
 
     // Drag & drop handlers for upload area
     const handleDragOver = (e) => e.preventDefault();
@@ -130,6 +155,7 @@ const ManageImages = () => {
             toast.success("Images uploaded successfully!");
             // Reset form and refresh image list
             setFiles([]);
+            setPreviewUrls([]);
             form.reset({ images: [] });
             const res = await imagesApi.list({ search: debouncedSearch });
             setImagesList(res.data || []);
@@ -238,7 +264,7 @@ const ManageImages = () => {
                                         {/* Preview and name input */}
                                         <div className="flex items-center space-x-3 flex-1">
                                             <img
-                                                src={URL.createObjectURL(files[index])}
+                                                src={previewUrls[index]}
                                                 alt="Preview"
                                                 className="w-16 h-16 object-cover rounded-md border"
                                             />
@@ -256,8 +282,13 @@ const ManageImages = () => {
                                             variant="destructive"
                                             size="sm"
                                             onClick={() => {
+                                                // Clean up preview URL if it's a blob URL
+                                                if (previewUrls[index] && previewUrls[index].startsWith('blob:')) {
+                                                    URL.revokeObjectURL(previewUrls[index]);
+                                                }
                                                 remove(index);
                                                 setFiles(prev => prev.filter((_, i) => i !== index));
+                                                setPreviewUrls(prev => prev.filter((_, i) => i !== index));
                                             }}
                                         >
                                             Remove
