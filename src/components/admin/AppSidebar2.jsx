@@ -25,7 +25,6 @@ const managementMenu = [
     { title: "Users", url: "/admin/users", icon: Users },
     { title: "Reports", url: "/admin/reports", icon: BarChart2 },
     { title: "Images", url: "/admin/images", icon: Image },
-    { title: "Meal Prices", url: "/admin/meal-prices", icon: Salad },
 ];
 
 export default function AppSidebar2() {

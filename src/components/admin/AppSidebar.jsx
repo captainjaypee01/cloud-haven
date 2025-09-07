@@ -43,7 +43,6 @@ const data = {
         { title: "Users", url: "/admin/users", icon: UsersIcon },
         { title: "Reports", url: "/admin/reports", icon: ChartBarIcon },
         { title: "Images", url: "/admin/images", icon: Image },
-        { title: "Meal Prices", url: "/admin/meal-prices", icon: Salad },
         { title: "Day Tour Pricing", url: "/admin/day-tour-pricing", icon: DollarSign },
     ],
     navSecondary: [

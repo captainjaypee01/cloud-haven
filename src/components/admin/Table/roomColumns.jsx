@@ -23,7 +23,15 @@ export const roomColumns = [
     },
     {
         accessorKey: "max_guests",
-        header: "Guests",
+        header: "Max Guests",
+    },
+    {
+        accessorKey: "min_guests",
+        header: "Min Pax",
+        cell: info => {
+            const value = info.getValue();
+            return value ? value : "-";
+        },
     },
     {
         accessorKey: "quantity",
