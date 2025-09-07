@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import FormSelectField from '@/components/common/form/FormSelectField';
 import { useForm } from 'react-hook-form';
 import { usePromosApi } from '@/hooks/api/usePromosApi';
@@ -28,6 +29,28 @@ const scopeOptions = [
     { value: 'total', label: 'Total' },
 ];
 
+// Helper function to convert datetime from server (Asia/Singapore) to datetime-local format
+const convertToLocalDatetime = (serverDatetime) => {
+    if (!serverDatetime) return '';
+    
+    try {
+        // Parse the server datetime (which is in Asia/Singapore timezone)
+        const date = new Date(serverDatetime);
+        
+        // Convert to local timezone and format for datetime-local input
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    } catch (error) {
+        console.error('Error converting datetime:', error);
+        return '';
+    }
+};
+
 export default function PromoFormDialog({
     open, onOpenChange, onSuccess, initialData, isEdit, promoId, loading: parentLoading = false
 }) {
@@ -45,6 +68,8 @@ export default function PromoFormDialog({
             code: '',
             title: '',
             description: '',
+            starts_at: '',
+            ends_at: '',
             scope: '',
             discount_type: 'fixed',
             discount_value: '',
@@ -62,6 +87,12 @@ export default function PromoFormDialog({
                 code: initialData.code || '',
                 title: initialData.title || '',
                 description: initialData.description || '',
+                starts_at: initialData.starts_at
+                    ? convertToLocalDatetime(initialData.starts_at) // Convert to datetime-local format (YYYY-MM-DDTHH:MM)
+                    : '',
+                ends_at: initialData.ends_at
+                    ? convertToLocalDatetime(initialData.ends_at) // Convert to datetime-local format (YYYY-MM-DDTHH:MM)
+                    : '',
                 scope: initialData.scope || '',
                 discount_type: initialData.discount_type || 'fixed',
                 discount_value:
@@ -82,6 +113,8 @@ export default function PromoFormDialog({
                 code: '',
                 title: '',
                 description: '',
+                starts_at: '',
+                ends_at: '',
                 scope: '',
                 discount_type: 'fixed',
                 discount_value: '',
@@ -230,6 +263,64 @@ export default function PromoFormDialog({
                                                 {...field}
                                                 rows={3}
                                                 placeholder="Short description of the promo"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="starts_at"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Start Date & Time</FormLabel>
+                                        <FormControl>
+                                            <DateTimePicker
+                                                date={field.value ? new Date(field.value) : undefined}
+                                                setDate={(date) => {
+                                                    if (date) {
+                                                        // Convert to datetime-local format for backend
+                                                        const year = date.getFullYear();
+                                                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                                                        const day = String(date.getDate()).padStart(2, '0');
+                                                        const hours = String(date.getHours()).padStart(2, '0');
+                                                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                                                        field.onChange(`${year}-${month}-${day}T${hours}:${minutes}`);
+                                                    } else {
+                                                        field.onChange('');
+                                                    }
+                                                }}
+                                                placeholder="Select start date and time"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="ends_at"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>End Date & Time</FormLabel>
+                                        <FormControl>
+                                            <DateTimePicker
+                                                date={field.value ? new Date(field.value) : undefined}
+                                                setDate={(date) => {
+                                                    if (date) {
+                                                        // Convert to datetime-local format for backend
+                                                        const year = date.getFullYear();
+                                                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                                                        const day = String(date.getDate()).padStart(2, '0');
+                                                        const hours = String(date.getHours()).padStart(2, '0');
+                                                        const minutes = String(date.getMinutes()).padStart(2, '0');
+                                                        field.onChange(`${year}-${month}-${day}T${hours}:${minutes}`);
+                                                    } else {
+                                                        field.onChange('');
+                                                    }
+                                                }}
+                                                placeholder="Select end date and time"
                                             />
                                         </FormControl>
                                         <FormMessage />
