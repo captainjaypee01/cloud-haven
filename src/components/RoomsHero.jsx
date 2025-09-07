@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay"
 
-const RoomsHero = ({ imageUrls }) => {
+const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
     return (
         <div className="relative w-full">
             <Carousel
@@ -35,7 +35,7 @@ const RoomsHero = ({ imageUrls }) => {
             {/* Overlay Title */}
             <div className="absolute top-1/2 w-full text-center px-4">
                 <h1 className="text-4xl md:text-7xl font-bold text-white drop-shadow-lg">
-                    Accommodations
+                    {title}
                 </h1>
             </div>
         </div>

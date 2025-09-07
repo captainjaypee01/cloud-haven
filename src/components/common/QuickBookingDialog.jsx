@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
     Dialog,
@@ -14,6 +14,10 @@ import { formatCurrency } from '../../utils/currency';
 import { toast } from "sonner";
 import { useCart } from '@/context/CartContext';
 import { useRoomAvailability } from '../../hooks/useRoomAvailability';
+import { Checkbox } from "@/components/ui/checkbox";
+import { useApi } from "@/hooks/useApi";
+import { fetchDayTourAvailability } from "@/services/dayTour";
+import { format } from "date-fns";
 
 /**
  * Quick Booking Dialog Component
@@ -36,20 +40,31 @@ export const QuickBookingDialog = ({
     isUnavailable: propIsUnavailable,
     availabilityLoading: propAvailabilityLoading = false,
 }) => {
-    const { state, addItem } = useCart();
-    
+    const {
+        state,
+        addItem,
+        currentPricing,
+        mealProgram,
+        pricingLoading,
+        mealLoading,
+        fetchDayTourData
+    } = useCart();
+    const api = useApi();
+    const [includeLunch, setIncludeLunch] = useState(false);
+    const [includePmSnack, setIncludePmSnack] = useState(false);
+
     // Use room availability hook if room and dates are available
     const {
         availableUnits: hookAvailableUnits,
         isUnavailable: hookIsUnavailable,
         isLoading: hookAvailabilityLoading,
     } = useRoomAvailability(
-        room?.slug, 
-        state?.checkIn, 
+        room?.slug,
+        state?.checkIn,
         state?.checkOut,
         { enabled: !!room?.slug && !!state?.checkIn && !!state?.checkOut }
     );
-    
+
     // Use props if provided, otherwise use hook values
     const availableUnits = propAvailableUnits !== undefined ? propAvailableUnits : hookAvailableUnits;
     const isUnavailable = propIsUnavailable !== undefined ? propIsUnavailable : hookIsUnavailable;
@@ -60,6 +75,82 @@ export const QuickBookingDialog = ({
             children: "0"
         },
     });
+
+    // Determine if this is a Day Tour context
+    const isDayTourContext = () => {
+        // Check if room explicitly has day_tour type
+        if (room?.roomType === 'day_tour') return true;
+        
+        // Check if we have a Day Tour date set
+        if (state?.dayTourDate) return true;
+        
+        // Check if we have existing Day Tour items in cart
+        if (state?.items?.some(item => item.dayTourDate || item.roomType === 'day_tour')) return true;
+        
+        return false;
+    };
+
+    // Get guest limits for Day Tour rooms
+    const getGuestLimits = () => {
+        if (isDayTourContext()) {
+            // For Day Tour, try to get min/max from room data with multiple fallbacks
+            const minGuests = room?.min_guests || 1; // Default to 1 if not specified
+            
+            // Priority order for max guests:
+            // 1. max_guests_range (Day Tour specific range)
+            // 2. max_guests + extra_guests (traditional room logic) 
+            // 3. max_guests alone
+            // 4. Default to 10 if nothing is available
+            const maxGuests = room?.max_guests_range || 
+                             (room?.max_guests && room?.extra_guests ? room.max_guests + room.extra_guests : null) ||
+                             room?.max_guests || 
+                             10;
+            
+            console.log('QuickBookingDialog - Day Tour guest limits:', { minGuests, maxGuests, room });
+            return { minGuests, maxGuests };
+        } else {
+            // For overnight rooms, use traditional logic
+            const maxGuests = (room?.max_guests || 0) + (room?.extra_guests || 0);
+            return { 
+                minGuests: 0, 
+                maxGuests: maxGuests || 10 // Fallback to 10 if no limits specified
+            };
+        }
+    };
+
+    // Ensure Day Tour data is available when dialog opens for Day Tour context
+    useEffect(() => {
+        if (open && isDayTourContext()) {
+            console.log('QuickBookingDialog - Day Tour context detected');
+            console.log('QuickBookingDialog - Room type:', room?.roomType);
+            console.log('QuickBookingDialog - Day Tour date:', state?.dayTourDate);
+            console.log('QuickBookingDialog - Current pricing:', currentPricing);
+            console.log('QuickBookingDialog - Meal program:', mealProgram);
+            
+            // If we don't have the data and there's a Day Tour date, fetch it
+            if (!currentPricing && !mealProgram && state?.dayTourDate) {
+                console.log('QuickBookingDialog - Fetching Day Tour data for date:', state.dayTourDate);
+                fetchDayTourData(state.dayTourDate);
+            } else if (!currentPricing && !mealProgram && state?.items?.length > 0) {
+                // Try to get date from existing Day Tour items
+                const dayTourItem = state.items.find(item => item.dayTourDate || item.roomType === 'day_tour');
+                if (dayTourItem) {
+                    const dateToUse = dayTourItem.dayTourDate || state.dayTourDate;
+                    console.log('QuickBookingDialog - Fetching Day Tour data from cart item date:', dateToUse);
+                    fetchDayTourData(dateToUse);
+                }
+            }
+        }
+    }, [open, room?.roomType, currentPricing, mealProgram, state?.dayTourDate, state?.items]);
+
+    // Reset meal options when dialog closes
+    useEffect(() => {
+        if (!open) {
+            setIncludeLunch(false);
+            setIncludePmSnack(false);
+        }
+    }, [open]);
+
 
     // Watch form values for real-time validation
     const watchedAdults = watch("adults");
@@ -85,10 +176,20 @@ export const QuickBookingDialog = ({
             return;
         }
 
-        if (!state?.checkIn || !state?.checkOut) {
-            toast.error('Please select dates first.');
-            onOpenChange(false);
-            return;
+        // For Day Tour rooms, check if date is selected
+        if (room.roomType === 'day_tour') {
+            if (!room.dayTourDate) {
+                toast.error('Please select a Day Tour date first.');
+                onOpenChange(false);
+                return;
+            }
+        } else {
+            // For overnight rooms, check check-in/check-out dates
+            if (!state?.checkIn || !state?.checkOut) {
+                toast.error('Please select dates first.');
+                onOpenChange(false);
+                return;
+            }
         }
 
         if (isUnavailable) {
@@ -99,7 +200,7 @@ export const QuickBookingDialog = ({
 
         // Check availability limits
         const roomsInCart = state.items.filter(item => item.roomId === room.slug).length;
-        
+
         if (availableUnits !== undefined && roomsInCart >= availableUnits) {
             const remainingUnits = Math.max(0, availableUnits - roomsInCart);
             if (remainingUnits === 0) {
@@ -110,16 +211,71 @@ export const QuickBookingDialog = ({
             return;
         }
 
-        // Add room to cart
-        addItem({
+        // Calculate prices for Day Tour rooms
+        let roomData = {
             roomId: room.slug,
             name: room.name,
-            price: room.price,
             adults: parseInt(adults),
             children: parseInt(children),
             maxGuests: room.max_guests,
             extraGuests: room.extra_guests,
-        });
+            roomType: room.roomType,
+        };
+
+        if (isDayTourContext()) {
+            // Calculate Day Tour pricing using data from Cart Context
+            const pricePerPax = currentPricing?.price_per_pax || room.price || 0;
+            const basePrice = pricePerPax * totalGuests;
+            let lunchCost = 0;
+            let pmSnackCost = 0;
+
+            if (includeLunch && mealProgram?.lunch_prices) {
+                lunchCost = (parseInt(adults) * mealProgram.lunch_prices.adult) +
+                    (parseInt(children) * mealProgram.lunch_prices.child);
+            }
+
+            if (includePmSnack && mealProgram?.pm_snack_prices) {
+                pmSnackCost = (parseInt(adults) * mealProgram.pm_snack_prices.adult) +
+                    (parseInt(children) * mealProgram.pm_snack_prices.child);
+            }
+
+            const mealCost = lunchCost + pmSnackCost;
+            const totalPrice = basePrice + mealCost;
+
+            console.log('QuickBookingDialog - Day Tour pricing calculation:', {
+                pricePerPax,
+                totalGuests,
+                basePrice,
+                lunchCost,
+                pmSnackCost,
+                mealCost,
+                totalPrice
+            });
+
+            roomData = {
+                ...roomData,
+                roomType: 'day_tour', // Explicitly set Day Tour room type
+                pricePerPax: pricePerPax,
+                basePrice: basePrice,
+                price: totalPrice,
+                includeLunch: includeLunch,
+                includePmSnack: includePmSnack,
+                lunchCost: lunchCost,
+                pmSnackCost: pmSnackCost,
+                mealCost: mealCost,
+                dayTourDate: state?.dayTourDate || (state?.items?.find(item => item.dayTourDate)?.dayTourDate),
+                // Include guest limits for consistency
+                minGuests: room?.min_guests || 1,
+                maxGuestsRange: room?.max_guests_range || room?.max_guests || (room?.max_guests + room?.extra_guests),
+                totalGuests: totalGuests,
+            };
+        } else {
+            // For overnight rooms, use the original price
+            roomData.price = room.price;
+        }
+
+        // Add room to cart
+        addItem(roomData);
 
         // Show warning for extra guests
         if (exceedsMaxGuests) {
@@ -155,7 +311,9 @@ export const QuickBookingDialog = ({
                             <span className="font-medium text-lg text-sky-700">
                                 {formatCurrency(room.price)}
                             </span>
-                            <span className="text-gray-600"> / night</span>
+                            <span className="text-gray-600">
+                                {room.roomType === 'day_tour' ? ' / person' : ' / night'}
+                            </span>
                         </div>
                         <div className="text-sm text-gray-600">
                             Maximum guests: <span className="font-medium">{room.max_guests}</span>
@@ -163,7 +321,12 @@ export const QuickBookingDialog = ({
                                 <span> (+ {room.extra_guests} extra)</span>
                             )}
                         </div>
-                        {state?.checkIn && state?.checkOut && (
+                        {room.roomType === 'day_tour' && room.dayTourDate && (
+                            <div className="text-sm text-gray-600">
+                                Day Tour Date: {new Date(room.dayTourDate).toLocaleDateString()}
+                            </div>
+                        )}
+                        {room.roomType !== 'day_tour' && state?.checkIn && state?.checkOut && (
                             <div className="text-sm text-gray-600">
                                 {new Date(state.checkIn).toLocaleDateString()} - {new Date(state.checkOut).toLocaleDateString()}
                             </div>
@@ -181,7 +344,8 @@ export const QuickBookingDialog = ({
                                 render={({ field }) => (
                                     <div className="w-full">
                                         <GuestSelector
-                                            maxGuests={room.max_guests + room.extra_guests}
+                                            minGuests={1}
+                                            maxGuests={getGuestLimits().maxGuests}
                                             isDialog={true}
                                             {...field}
                                         />
@@ -197,7 +361,8 @@ export const QuickBookingDialog = ({
                                 render={({ field }) => (
                                     <div className="w-full">
                                         <GuestSelector
-                                            maxGuests={room.max_guests + room.extra_guests}
+                                            minGuests={0}
+                                            maxGuests={getGuestLimits().maxGuests}
                                             isDialog={true}
                                             {...field}
                                         />
@@ -207,6 +372,84 @@ export const QuickBookingDialog = ({
                         </div>
                     </div>
 
+                    {/* Meal Options for Day Tour */}
+                    {isDayTourContext() && mealProgram && (
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-medium text-gray-700">Meal Add-ons</h4>
+
+                            {/* Buffet Lunch Option */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <Checkbox
+                                        id="quick-lunch"
+                                        checked={includeLunch}
+                                        onCheckedChange={setIncludeLunch}
+                                        disabled={!mealProgram.buffet_active}
+                                        className="cursor-pointer"
+                                    />
+                                    <div>
+                                        <label htmlFor="quick-lunch" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                            Buffet Lunch
+                                            {!mealProgram.buffet_active && (
+                                                <span className="ml-2 text-xs text-gray-500">(Not available)</span>
+                                            )}
+                                        </label>
+                                        {includeLunch && mealProgram.lunch_prices && (
+                                            <div className="text-xs text-gray-600">
+                                                {watchedAdults} adult{watchedAdults > 1 ? 's' : ''} × {formatCurrency(mealProgram.lunch_prices.adult)}
+                                                {parseInt(watchedChildren) > 0 && (
+                                                    <> + {watchedChildren} child{parseInt(watchedChildren) > 1 ? 'ren' : ''} × {formatCurrency(mealProgram.lunch_prices.child)}</>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <span className="text-sm font-semibold text-green-600">
+                                    {includeLunch && mealProgram.lunch_prices ?
+                                        formatCurrency((parseInt(watchedAdults) * mealProgram.lunch_prices.adult) + (parseInt(watchedChildren) * mealProgram.lunch_prices.child)) :
+                                        "—"}
+                                </span>
+                            </div>
+
+                            {/* PM Snack Option */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <Checkbox
+                                        id="quick-pmSnack"
+                                        checked={includePmSnack}
+                                        onCheckedChange={setIncludePmSnack}
+                                        disabled={mealProgram.pm_snack_policy === 'hidden'}
+                                        className="cursor-pointer"
+                                    />
+                                    <div>
+                                        <label htmlFor="quick-pmSnack" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                            PM Snack
+                                            {mealProgram.pm_snack_policy === 'hidden' && (
+                                                <span className="ml-2 text-xs text-gray-500">(Not available)</span>
+                                            )}
+                                            {mealProgram.pm_snack_policy === 'required' && (
+                                                <span className="ml-2 text-xs text-orange-600">(Required)</span>
+                                            )}
+                                        </label>
+                                        {includePmSnack && mealProgram.pm_snack_prices && (
+                                            <div className="text-xs text-gray-600">
+                                                {watchedAdults} adult{watchedAdults > 1 ? 's' : ''} × {formatCurrency(mealProgram.pm_snack_prices.adult)}
+                                                {parseInt(watchedChildren) > 0 && (
+                                                    <> + {watchedChildren} child{parseInt(watchedChildren) > 1 ? 'ren' : ''} × {formatCurrency(mealProgram.pm_snack_prices.child)}</>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <span className="text-sm font-semibold text-green-600">
+                                    {includePmSnack && mealProgram.pm_snack_prices ?
+                                        formatCurrency((parseInt(watchedAdults) * mealProgram.pm_snack_prices.adult) + (parseInt(watchedChildren) * mealProgram.pm_snack_prices.child)) :
+                                        "—"}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Guest count feedback */}
                     <div className="space-y-1">
                         <div className="text-sm text-gray-600">
@@ -214,16 +457,16 @@ export const QuickBookingDialog = ({
                                 {totalGuests}
                             </span>
                         </div>
-                        
+
                         {exceedsCapacity && (
                             <p className="text-sm text-red-600">
                                 Exceeds maximum capacity of {room.max_guests + room.extra_guests} guests
                             </p>
                         )}
-                        
+
                         {exceedsMaxGuests && !exceedsCapacity && (
                             <p className="text-sm text-orange-600">
-                                Extra guest fee may apply (over {room.max_guests} guests)
+                                Maximum of extra {room.extra_guests} guests allowed
                             </p>
                         )}
 
@@ -232,24 +475,57 @@ export const QuickBookingDialog = ({
                                 Please select at least 1 guest
                             </p>
                         )}
+
+                        {/* Day Tour Guest Count Validation */}
+                        {isDayTourContext() && (() => {
+                            const { minGuests, maxGuests } = getGuestLimits();
+                            
+                            if (totalGuests > 0 && totalGuests < minGuests) {
+                                return (
+                                    <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                                        <p className="text-sm text-orange-800">
+                                            <strong>Minimum {minGuests} guests required</strong> for this facility. 
+                                            You currently have {totalGuests} guest{totalGuests !== 1 ? 's' : ''} selected.
+                                        </p>
+                                    </div>
+                                );
+                            }
+                            
+                            if (totalGuests > maxGuests) {
+                                return (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                        <p className="text-sm text-red-800">
+                                            <strong>Maximum {maxGuests} guests allowed</strong> for this facility. 
+                                            You currently have {totalGuests} guest{totalGuests !== 1 ? 's' : ''} selected.
+                                        </p>
+                                    </div>
+                                );
+                            }
+                            
+                            return null;
+                        })()}
                     </div>
 
                     <DialogFooter className="gap-2 pt-4 border-t">
-                        <Button 
-                            type="button" 
-                            variant="outline" 
+                        <Button
+                            type="button"
+                            variant="outline"
                             onClick={() => handleOpenChange(false)}
                             className="cursor-pointer flex-1 sm:flex-none"
                         >
                             Cancel
                         </Button>
-                        <Button 
+                        <Button
                             type="submit"
                             disabled={
-                                exceedsCapacity || 
-                                totalGuests === 0 || 
-                                isUnavailable || 
-                                availabilityLoading
+                                exceedsCapacity ||
+                                totalGuests === 0 ||
+                                isUnavailable ||
+                                availabilityLoading ||
+                                (isDayTourContext() && (() => {
+                                    const { minGuests, maxGuests } = getGuestLimits();
+                                    return totalGuests < minGuests || totalGuests > maxGuests;
+                                })())
                             }
                             className="cursor-pointer flex-1 sm:flex-none"
                         >

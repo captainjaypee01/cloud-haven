@@ -155,7 +155,14 @@ const PaymentPage = () => {
                             <div className="space-y-4">
                                 <div className="flex flex-col">
                                     <span className="text-sm font-medium text-gray-600 mb-1">Reference Number:</span>
-                                    <span className="font-mono font-semibold text-cyan-700 text-lg">{booking.reference_number || booking.reference_no}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-mono font-semibold text-cyan-700 text-lg">{booking.reference_number || booking.reference_no}</span>
+                                        {booking.booking_type === 'day_tour' && (
+                                            <span className="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-800 rounded-full border border-amber-300">
+                                                Day Tour
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                                 
                                 <div className="flex flex-col">
@@ -163,21 +170,36 @@ const PaymentPage = () => {
                                     <span className="font-medium text-gray-900 text-lg">{booking.guest_name}</span>
                                 </div>
                                 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-gray-600 mb-1">Check-in:</span>
-                                        <span className="font-medium text-gray-900">{booking.check_in_date}</span>
+                                {booking.booking_type === 'day_tour' ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-600 mb-1">Day Tour Date:</span>
+                                            <span className="font-medium text-gray-900">{booking.check_in_date}</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-600 mb-1">Tour Hours:</span>
+                                            <span className="font-medium text-gray-900">8:00 AM - 5:00 PM</span>
+                                        </div>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-gray-600 mb-1">Check-out:</span>
-                                        <span className="font-medium text-gray-900">{booking.check_out_date}</span>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-600 mb-1">Check-in:</span>
+                                            <span className="font-medium text-gray-900">{booking.check_in_date}</span>
+                                        </div>
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium text-gray-600 mb-1">Check-out:</span>
+                                            <span className="font-medium text-gray-900">{booking.check_out_date}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                                 
                                 <div className="pt-4 border-t border-gray-200">
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Room Total:</span>
+                                            <span className="text-sm font-medium text-gray-600">
+                                                {booking.booking_type === 'day_tour' ? 'Day Tour Total:' : 'Room Total:'}
+                                            </span>
                                             <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.total_price)}</span>
                                         </div>
                                         <div className="flex justify-between">

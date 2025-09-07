@@ -9,7 +9,7 @@ import {
 import { SelectGroup } from "./ui/select";
 
 // Reusable guest selector component
-export function GuestSelector({ name, maxGuests, value, defaultValue = "1", onChange, isPopover = false, isDialog = false }) {
+export function GuestSelector({ name, maxGuests, minGuests = 0, value, defaultValue = "1", onChange, isPopover = false, isDialog = false }) {
     return (
         <Select name={name}
             defaultValue={defaultValue}
@@ -18,7 +18,7 @@ export function GuestSelector({ name, maxGuests, value, defaultValue = "1", onCh
             <SelectTrigger className={
                 isPopover ? "w-[120px]" : 
                 isDialog ? "w-full" : 
-                "w-full sm:w-[240px]"
+                "w-full sm:w-[240px] md:w-[200px] px-2"
             }>
                 <SelectValue placeholder={"Select number of guests"} />
             </SelectTrigger>
@@ -28,7 +28,7 @@ export function GuestSelector({ name, maxGuests, value, defaultValue = "1", onCh
                 sideOffset={4}
             >
                 <SelectGroup>
-                    {Array.from({ length: maxGuests + 1 }, (_, i) => i).map((num) => (
+                    {Array.from({ length: maxGuests - minGuests + 1 }, (_, i) => i + minGuests).map((num) => (
                         <SelectItem key={num} value={String(num)}>
                             {num} {num > 1 ? "guests" : "guest"}
                         </SelectItem>

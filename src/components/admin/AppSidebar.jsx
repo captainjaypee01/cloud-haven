@@ -11,7 +11,8 @@ import {
     Salad,
     Image,
     TicketIcon,
-    Calendar
+    Calendar,
+    DollarSign
 } from "lucide-react";
 import NavMain from "@/components/admin/NavMain"
 import NavSecondary from "@/components/admin/NavSecondary"
@@ -43,6 +44,7 @@ const data = {
         { title: "Reports", url: "/admin/reports", icon: ChartBarIcon },
         { title: "Images", url: "/admin/images", icon: Image },
         { title: "Meal Prices", url: "/admin/meal-prices", icon: Salad },
+        { title: "Day Tour Pricing", url: "/admin/day-tour-pricing", icon: DollarSign },
     ],
     navSecondary: [
         {

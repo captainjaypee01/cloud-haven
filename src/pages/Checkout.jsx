@@ -24,8 +24,10 @@ import { useApi } from "@/hooks/useApi";
 import { Separator } from "@radix-ui/react-select";
 import { API_PREFIX } from "@/constants/api";
 import SeaWaveBg from "../components/common/SeaWaveBg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
+import { hasDayTourItems } from "@/utils/roomTypeUtils";
+import { fetchDayTourAvailability } from "@/services/dayTour";
 
 const FormSchema = z.object({
     fullName: z.string().min(1, { message: "Full name is required" }),
@@ -38,9 +40,10 @@ const CheckoutPage = () => {
     const { state: { items, checkIn, checkOut }, clear } = useCart();
     const { navigate } = useAppContext();
     const { show, hide } = useLoader();
-    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
     const api = useApi();
+    const [dayTourMealData, setDayTourMealData] = useState(null);
 
     const form = useForm({
         resolver: zodResolver(FormSchema),
@@ -52,51 +55,207 @@ const CheckoutPage = () => {
         }
     });
 
+    // Fetch Day Tour meal program data when there are Day Tour items
+    useEffect(() => {
+        const fetchDayTourMealData = async () => {
+            if (isDayTourCart && items.length > 0) {
+                const dayTourDate = items.find(item => item.dayTourDate)?.dayTourDate;
+                if (dayTourDate) {
+                    try {
+                        const mealData = await fetchDayTourAvailability(api, dayTourDate);
+                        setDayTourMealData(mealData);
+                    } catch (error) {
+                        console.error('Failed to fetch Day Tour meal data:', error);
+                        setDayTourMealData(null);
+                    }
+                }
+            } else {
+                setDayTourMealData(null);
+            }
+        };
+
+        fetchDayTourMealData();
+    }, [isDayTourCart, items, api]);
+
+    const checkAvailability = async () => {
+        try {
+            if (isDayTourCart) {
+                // For Day Tour, use the new batch availability check endpoint
+                const dayTourDate = items.find(item => item.dayTourDate)?.dayTourDate;
+                if (!dayTourDate) {
+                    toast.error("Day Tour date not found.");
+                    return false;
+                }
+
+                // Group items by room_id to count how many of each room type we're requesting
+                const roomCounts = {};
+                summary.forEach(item => {
+                    roomCounts[item.roomId] = (roomCounts[item.roomId] || 0) + 1;
+                });
+
+                // Convert to the format expected by the batch check API
+                const itemsToCheck = Object.entries(roomCounts).map(([roomId, count]) => ({
+                    room_id: roomId,
+                    requested_count: count
+                }));
+
+                const res = await api.post(`${API_PREFIX}/day-tours/availability`, {
+                    date: dayTourDate,
+                    items: itemsToCheck
+                });
+
+                // Filter out unavailable items
+                const unavailableItems = res.data.filter(
+                    x => !x.available || x.available_count < x.requested_count
+                );
+                
+                if (unavailableItems.length > 0) {
+                    // Show error message with unavailable rooms
+                    const unavailableRoomNames = unavailableItems.map(item => item.room_name).join(', ');
+                    toast.error(`The following rooms are no longer available: ${unavailableRoomNames}. Please return to your cart to remove them.`);
+                    navigate('/cart');
+                    return false;
+                }
+                
+                return true;
+            } else {
+                // For overnight bookings, use the existing logic
+                const res = await api.post(`${API_PREFIX}/rooms/availability`, {
+                    items: summary.map(item => ({
+                        room_id: item.roomId,
+                        requested_count: 1,
+                    })),
+                    check_in: checkIn,
+                    check_out: checkOut,
+                });
+
+                const unavailableItems = res.data.filter(
+                    x => !x.available || x.available_count < x.requested_count
+                );
+                
+                if (unavailableItems.length > 0) {
+                    // Show error message with unavailable rooms
+                    const unavailableRoomNames = unavailableItems.map(item => item.room_name).join(', ');
+                    toast.error(`The following rooms are no longer available: ${unavailableRoomNames}. Please return to your cart to remove them.`);
+                    navigate('/cart');
+                    return false;
+                }
+                
+                return true;
+            }
+        } catch (e) {
+            console.error('Availability check error:', e);
+            toast.error("Error checking availability. Please try again.");
+            return false;
+        }
+    };
+
     const onSubmit = async (data) => {
         show();
-        const bookingPayload = {
-            check_in_date: checkIn,
-            check_out_date: checkOut,
-            rooms: summary.map(item => ({
-                room_unique_id: item.uniqueId,
-                room_id: item.roomId,
-                adults: item.adults,
-                children: item.children,
-            })),
-            guest_name: data.fullName,
-            guest_email: data.email,
-            guest_phone: data.contactNumber,
-            special_requests: data.specialRequests,
-            total_adults: totalAdults,
-            total_children: totalChildren
-        };
-        if (promoInfo) {
-            bookingPayload.promo_id = promoInfo.id;
+        
+        // First, check availability before proceeding with booking
+        const availabilityOk = await checkAvailability();
+        if (!availabilityOk) {
+            hide();
+            return;
         }
         
-        try {
-            const bookingRes = await api.post(`${API_PREFIX}/bookings`, bookingPayload, {
-                headers: { "Content-Type": "application/json" },
-            });
-            const booking = bookingRes.data;
-            if (!booking?.reference_number) {
-                toast.error(bookingRes.data?.message || "Booking failed");
+        // Check if this is a Day Tour booking
+        const isDayTour = items.some(item => item.roomType === 'day_tour');
+        
+        if (isDayTour) {
+            // Day Tour booking
+            const dayTourDate = items.find(item => item.dayTourDate)?.dayTourDate;
+            
+            const bookingPayload = {
+                date: dayTourDate,
+                selections: summary.map(item => ({
+                    room_id: item.roomId,
+                    adults: item.adults,
+                    children: item.children,
+                    include_lunch: item.includeLunch || false,
+                    include_pm_snack: item.includePmSnack || false,
+                    lunch_cost: item.lunchCost || 0,
+                    pm_snack_cost: item.pmSnackCost || 0,
+                    meal_cost: item.mealCost || 0
+                })),
+                guest: {
+                    name: data.fullName,
+                    email: data.email,
+                    phone: data.contactNumber
+                },
+                special_requests: data.specialRequests,
+                // Include totals for validation
+                totals: {
+                    room_total: roomTotalPrice,
+                    meal_total: mealCost,
+                    grand_total: grandTotal
+                }
+            };
+            
+            try {
+                const bookingRes = await api.post(`${API_PREFIX}/bookings/day-tour`, bookingPayload, {
+                    headers: { "Content-Type": "application/json" },
+                });
+                const booking = bookingRes.data;
+                if (!booking?.reference_number) {
+                    toast.error(bookingRes.data?.message || "Day Tour booking failed");
+                    hide();
+                    return;
+                }
+                clear();
+                navigate(`/booking/${booking.reference_number}/payment`);
+            } catch (err) {
+                console.error('Day Tour checkout error:', err);
+                toast.error(err.response?.data?.message || "Something went wrong. Try again.");
+            } finally {
                 hide();
-                return;
             }
-            clear();
-            clearPromo(); // Clear promo code after successful booking
-            navigate(`/booking/${booking.reference_number}/payment`);
-        } catch (err) {
-            console.error('Checkout error:', err);
-            if (err.status === 409) {
-
-                toast.error(err.response.data.error);
-                return
+        } else {
+            // Overnight booking (existing logic)
+            const bookingPayload = {
+                check_in_date: checkIn,
+                check_out_date: checkOut,
+                rooms: summary.map(item => ({
+                    room_unique_id: item.uniqueId,
+                    room_id: item.roomId,
+                    adults: item.adults,
+                    children: item.children,
+                })),
+                guest_name: data.fullName,
+                guest_email: data.email,
+                guest_phone: data.contactNumber,
+                special_requests: data.specialRequests,
+                total_adults: totalAdults,
+                total_children: totalChildren
+            };
+            if (promoInfo) {
+                bookingPayload.promo_id = promoInfo.id;
             }
-            toast.error("Something went wrong. Try again.");
-        } finally {
-            hide();
+            
+            try {
+                const bookingRes = await api.post(`${API_PREFIX}/bookings`, bookingPayload, {
+                    headers: { "Content-Type": "application/json" },
+                });
+                const booking = bookingRes.data;
+                if (!booking?.reference_number) {
+                    toast.error(bookingRes.data?.message || "Booking failed");
+                    hide();
+                    return;
+                }
+                clear();
+                clearPromo(); // Clear promo code after successful booking
+                navigate(`/booking/${booking.reference_number}/payment`);
+            } catch (err) {
+                console.error('Checkout error:', err);
+                if (err.status === 409) {
+                    toast.error(err.response.data.error);
+                    return
+                }
+                toast.error("Something went wrong. Try again.");
+            } finally {
+                hide();
+            }
         }
     };
 
@@ -135,50 +294,116 @@ const CheckoutPage = () => {
                         </p>
                     )}
                     <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
-                            <span>Check-in date</span>
-                            <span>{checkIn || "—"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Check-out date</span>
-                            <span>{checkOut || "—"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Number of nights</span>
-                            <span>{numNights}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span>Total guests</span>
-                            <span>{totalGuests}</span>
-                        </div>
+                        {isDayTourCart ? (
+                            <>
+                                <div className="flex justify-between">
+                                    <span>Day Tour Date</span>
+                                    <span>{items.find(item => item.dayTourDate)?.dayTourDate || "—"}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Total guests</span>
+                                    <span>{totalGuests}</span>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex justify-between">
+                                    <span>Check-in date</span>
+                                    <span>{checkIn || "—"}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Check-out date</span>
+                                    <span>{checkOut || "—"}</span>
+                                </div>
+                                {!isDayTourCart && (
+                                    <div className="flex justify-between">
+                                        <span>Number of nights</span>
+                                        <span>{numNights}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between">
+                                    <span>Total guests</span>
+                                    <span>{totalGuests}</span>
+                                </div>
+                            </>
+                        )}
                     </div>
                     <div className="space-y-3 mt-4">
                         {summary.map(item => (
-                            <div key={item.uniqueId} className="border rounded-lg p-4 bg-white">
-                                <div className="flex justify-between">
-                                    <span className="font-medium">{item.name}</span>
-                                    <span>{formatCurrency(item.subtotal)}</span>
+                            <div key={item.uniqueId} className="bg-white rounded-lg p-3 border">
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="font-medium text-sm">{item.name}</span>
+                                    <span className="font-bold text-sm">{formatCurrency(item.subtotal)}</span>
                                 </div>
-                                <div className="text-xs text-gray-600">
-                                    {item.totalGuests} guests (<span>{item.adults}A / {item.children}C</span>), {numNights} night{numNights > 1 ? "s" : ""}
+                                <div className="text-xs text-gray-600 space-y-1">
+                                    <div className="flex justify-between">
+                                        <span>{item.totalGuests} guest{item.totalGuests > 1 ? 's' : ''}</span>
+                                        <span>
+                                            {isDayTourCart 
+                                                ? `${formatCurrency(item.pricePerPax)} per person`
+                                                : `${item.numNights} night${item.numNights > 1 ? "s" : ""}`
+                                            }
+                                        </span>
+                                    </div>
+                                    {isDayTourCart && item.includeLunch && dayTourMealData?.lunch_prices && (
+                                        <div className="flex justify-between">
+                                            <span>Buffet Lunch</span>
+                                            <span>{formatCurrency(dayTourMealData.lunch_prices.adult)} per person</span>
+                                        </div>
+                                    )}
+                                    {isDayTourCart && (item.includePmSnack || dayTourMealData?.pm_snack_policy === 'required') && dayTourMealData?.pm_snack_prices && (
+                                        <div className="flex justify-between">
+                                            <span>
+                                                PM Snack
+                                                {dayTourMealData?.pm_snack_policy === 'required' && (
+                                                    <span className="ml-1 text-xs bg-orange-100 text-orange-700 px-1 py-0.5 rounded">Required</span>
+                                                )}
+                                            </span>
+                                            <span>{formatCurrency(dayTourMealData.pm_snack_prices.adult)} per person</span>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <Separator />
-                    <div className="flex justify-between text-sm font-medium border-t pt-4">
-                        <span>Total Room Price:</span>
-                        <span>{formatCurrency(roomTotalPrice)}</span>
-                    </div>
-                    <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="my-2" />
-                    <div className="flex justify-between text-sm font-medium">
-                        <span>Meals (Adult × {totalAdults}, Child × {totalChildren}):</span>
-                        <span>{mealLoading ? "..." : formatCurrency(mealCost)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm font-medium">
-                        <span>Subtotal:</span>
-                        <span>{formatCurrency(grandTotal)}</span>
-                    </div>
+                    {/* Meal Availability Badges - Only for overnight bookings */}
+                    {!isDayTourCart && <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="my-2" />}
+                    
+                    {/* For overnight bookings, show detailed breakdown */}
+                    {!isDayTourCart && (
+                        <>
+                            <div className="flex justify-between text-sm font-medium">
+                                <span>Total Room Price:</span>
+                                <span>{formatCurrency(roomTotalPrice)}</span>
+                            </div>
+                            <div className="flex justify-between text-sm font-medium">
+                                <span>
+                                    {mealLoading ? (
+                                        "Meals:"
+                                    ) : mealQuote && mealQuote.nights ? (
+                                        mealQuote.nights.some(night => night.type === 'buffet') ? (
+                                            `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})`
+                                        ) : (
+                                            "Complimentary Breakfast Only"
+                                        )
+                                    ) : (
+                                        "Meals:"
+                                    )}
+                                </span>
+                                <span>
+                                    {mealLoading ? (
+                                        <span className="text-xs text-gray-500">Loading...</span>
+                                    ) : (
+                                        formatCurrency(mealCost)
+                                    )}
+                                </span>
+                            </div>
+                            <div className="flex justify-between text-sm font-medium">
+                                <span>Subtotal:</span>
+                                <span>{formatCurrency(grandTotal)}</span>
+                            </div>
+                        </>
+                    )}
                     {promoInfo && promoInfo.discountAmount > 0 && (
                         <div className="flex justify-between text-sm font-medium text-green-600">
                             <span>Promo Discount ({promoInfo.code}):</span>

@@ -3,12 +3,16 @@ import { useCart } from "../../context/CartContext";
 import { differenceInDays, parseISO } from "date-fns";
 import { useApi } from "../useApi";
 import { API_PREFIX } from "../../constants/api";
+import { hasDayTourItems } from "../../utils/roomTypeUtils";
 
 export function useCartSummaryWithMealPrograms() {
     const { state: { items, checkIn, checkOut } } = useCart();
     const [mealQuote, setMealQuote] = useState(null);
     const [loading, setLoading] = useState(false);
     const api = useApi();
+
+    // Check if cart has Day Tour items
+    const isDayTourCart = hasDayTourItems(items);
 
     const numNights =
         checkIn && checkOut
@@ -18,13 +22,18 @@ export function useCartSummaryWithMealPrograms() {
     const summary = items.map(item => {
         const totalGuests = item.adults + item.children;
         const calculatedExtraGuests = Math.max(totalGuests - parseInt(item.maxGuests), 0);
-        const subtotal = item.price * numNights;  // just room cost
+        
+        // For Day Tour items: price is already calculated as (pricePerPax * totalGuests)
+        // For overnight items: multiply by nights
+        const subtotal = item.roomType === 'day_tour' ? item.price : item.price * numNights;
+        
         return {
             ...item,
             subtotal,
             calculatedExtraGuests, // How many guests exceed the base limit
             totalGuests,
-            numNights,
+            numNights: item.roomType === 'day_tour' ? 1 : numNights, // Day Tour is always 1 "night" for display
+            pricePerPax: item.pricePerPax, // Preserve pricePerPax for Day Tour items
         };
     });
 
@@ -34,12 +43,13 @@ export function useCartSummaryWithMealPrograms() {
     const roomTotalPrice = summary.reduce((acc, item) => acc + item.subtotal, 0);
 
     useEffect(() => {
-        if (checkIn && checkOut && totalAdults > 0) {
+        // Only fetch meal quotes for overnight bookings, not Day Tour
+        if (!isDayTourCart && checkIn && checkOut && totalAdults > 0) {
             fetchMealQuote();
         } else {
             setMealQuote(null);
         }
-    }, [checkIn, checkOut, totalAdults, totalChildren]);
+    }, [isDayTourCart, checkIn, checkOut, totalAdults, totalChildren]);
 
     const fetchMealQuote = async () => {
         try {
@@ -79,5 +89,6 @@ export function useCartSummaryWithMealPrograms() {
         roomTotalPrice,
         mealQuote,
         mealLoading: loading,
+        isDayTourCart,
     };
 }

@@ -9,20 +9,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
+import { useAppContext } from "@/context/AppContext";
 
-const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isActions = true }) => {
+const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isActions = true, isDayTour = false }) => {
+    const { navigate } = useAppContext();
     return (
         <AnimatePresence>
             {open && (
                 <Dialog open={open} onOpenChange={onClose}>
-                    <DialogContent className="max-w-md">
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <div className="flex items-center gap-2 mb-1">
                                 <AlertTriangle className="text-destructive" size={22} />
-                                <DialogTitle>Room Availability Issue</DialogTitle>
+                                <DialogTitle>{isDayTour ? 'Day Tour Facility Availability Issue' : 'Room Availability Issue'}</DialogTitle>
                             </div>
                             <DialogDescription>
-                                One or more rooms are no longer available in the quantity you selected.
+                                {isDayTour 
+                                    ? 'One or more Day Tour facilities are no longer available for your selected date.'
+                                    : 'One or more rooms are no longer available in the quantity you selected.'
+                                }
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-2">
@@ -37,7 +42,7 @@ const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isAction
                                             {item.room_name || item.room_slug}
                                         </span>
                                         <span className="text-sm text-muted-foreground">
-                                            Only {item.available_count} left
+                                            {isDayTour ? 'Not available' : `Only ${item.available_count} left`}
                                         </span>
                                     </li>
                                 ))}
@@ -53,8 +58,8 @@ const AvailabilityModal = ({ open, items, onClose, onRefresh, checking, isAction
                                         Retry
                                     </Button>
                                 )}
-                                <Button variant="ghost" onClick={() => window.location.href = '/rooms'} className="cursor-pointer">
-                                    View All Rooms
+                                <Button variant="ghost" onClick={() => navigate(isDayTour ? '/day-tour' : '/rooms')} className="cursor-pointer">
+                                    {isDayTour ? 'View Day Tour Facilities' : 'View All Rooms'}
                                 </Button>
                             </DialogFooter>
                         )}

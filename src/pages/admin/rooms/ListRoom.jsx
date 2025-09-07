@@ -21,6 +21,7 @@ const ListRoom = () => {
   const debouncedSearch = useDebounce(search, 400); // 400ms debounce
   const [sorting, setSorting] = useState([]);
   const [status, setStatus] = useState("all");
+  const [roomType, setRoomType] = useState("all");
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [openDialog, setOpenDialog] = useState(false);
@@ -47,7 +48,7 @@ const ListRoom = () => {
         requiresAuth: true,
       });
       toast.success("Room archived successfully!");
-      fetchRooms({ search, status });
+      fetchRooms({ search, status, room_type: roomType });
       setDeleteRoom(null);
     } catch (error) {
       toast.error("Something went wrong. Please try again.");
@@ -113,9 +114,9 @@ const ListRoom = () => {
   };
 
   useEffect(() => {
-    fetchRooms({ search: debouncedSearch, status });
+    fetchRooms({ search: debouncedSearch, status, room_type: roomType });
     // eslint-disable-next-line
-  }, [debouncedSearch, sorting, status, pagination]);
+  }, [debouncedSearch, sorting, status, roomType, pagination]);
 
   return (
     <div>
@@ -131,15 +132,25 @@ const ListRoom = () => {
       <ControlsToolbar
         search={search}
         setSearch={setSearch}
-        filters={[{
-          key: "status", label: "Status", value: status, onChange: setStatus,
-          options: [
-            { value: "all", label: "All" },
-            { value: "available", label: "Available" },
-            { value: "unavailable", label: "Unavailable" },
-            { value: "archived", label: "Archived" },
-          ]
-        }]}
+        filters={[
+          {
+            key: "status", label: "Status", value: status, onChange: setStatus,
+            options: [
+              { value: "all", label: "All" },
+              { value: "available", label: "Available" },
+              { value: "unavailable", label: "Unavailable" },
+              { value: "archived", label: "Archived" },
+            ]
+          },
+          {
+            key: "room_type", label: "Room Type", value: roomType, onChange: setRoomType,
+            options: [
+              { value: "all", label: "All Types" },
+              { value: "overnight", label: "Overnight Stay" },
+              { value: "day_tour", label: "Day Tour" },
+            ]
+          }
+        ]}
       />
       <RoomFormDialog
         open={openDialog}
@@ -149,7 +160,7 @@ const ListRoom = () => {
         isEdit={!!editRoom}
         onSuccess={() => {
           setOpenDialog(false);
-          fetchRooms({ search, status });
+          fetchRooms({ search, status, room_type: roomType });
         }}
         roomId={editRoom?.id}
       />

@@ -134,13 +134,21 @@ export default function DayTimeline({ date, events }) {
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h4 className="font-semibold text-lg">{booking.guest_name}</h4>
-                  <Badge variant={statusVariant(booking.status)}>
-                    {booking.status}
-                  </Badge>
-                  <span className="font-mono text-sm text-muted-foreground">
-                    Ref: {booking.reference_number || 'N/A'}
-                  </span>
+                    <h4 className="font-semibold text-lg">{booking.guest_name}</h4>
+                    <Badge variant={statusVariant(booking.status)}>
+                        {booking.status}
+                    </Badge>
+                    {booking.booking_type && (
+                        <Badge 
+                            variant="secondary" 
+                            className={booking.booking_type === 'day_tour' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-blue-100 text-blue-800 border-blue-300'}
+                        >
+                            {booking.booking_type === 'day_tour' ? 'Day Tour' : 'Overnight'}
+                        </Badge>
+                    )}
+                    <span className="font-mono text-sm text-muted-foreground">
+                        Ref: {booking.reference_number || 'N/A'}
+                    </span>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {booking.start} → {booking.end} ({booking.nights} night{booking.nights !== 1 ? 's' : ''})

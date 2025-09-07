@@ -1,7 +1,9 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { useStickyState } from '@/hooks/useStickyState';
 import { toast } from 'sonner';
 import { useAppContext } from './AppContext';
+import { useApi } from '@/hooks/useApi';
+import { fetchCurrentDayTourPricing, fetchDayTourMealProgram } from '@/services/dayTour';
 
 const CartCtx = createContext();
 
@@ -10,6 +12,10 @@ function reducer(state, action) {
         case 'SET_DATES':
             return (action.from !== state.checkIn || action.to !== state.checkOut)
                 ? { ...state, checkIn: action.from, checkOut: action.to, items: [] }
+                : state;
+        case 'SET_DAY_TOUR_DATE':
+            return (action.date !== state.dayTourDate)
+                ? { ...state, dayTourDate: action.date, items: [] }
                 : state;
         case 'ADD':
             const addedAt = Date.now();
@@ -26,7 +32,7 @@ function reducer(state, action) {
                 ),
             };
         case 'CLEAR':
-            return { checkIn: '', checkOut: '', items: [] };
+            return { checkIn: '', checkOut: '', dayTourDate: '', items: [] };
         default:
             return state;
     }
@@ -34,10 +40,18 @@ function reducer(state, action) {
 
 export const CartProvider = ({ children }) => {
     const [stickyDates, setStickyDates] = useStickyState(
-        { checkIn: '', checkOut: '' },
+        { checkIn: '', checkOut: '', dayTourDate: '' },
         'booking-dates'
     );
     const { navigate } = useAppContext();
+    const api = useApi();
+    
+    // Day Tour specific data
+    const [currentPricing, setCurrentPricing] = useState(null);
+    const [mealProgram, setMealProgram] = useState(null);
+    const [pricingLoading, setPricingLoading] = useState(false);
+    const [mealLoading, setMealLoading] = useState(false);
+    
     const [state, dispatch] = useReducer(
         reducer,
         undefined,
@@ -76,11 +90,72 @@ export const CartProvider = ({ children }) => {
 
     // Sync the date part back to localStorage
     useEffect(() => {
-        setStickyDates({ checkIn: state.checkIn, checkOut: state.checkOut });
-    }, [state.checkIn, state.checkOut]);
+        setStickyDates({ checkIn: state.checkIn, checkOut: state.checkOut, dayTourDate: state.dayTourDate });
+    }, [state.checkIn, state.checkOut, state.dayTourDate]);
 
     // Persist cart too
     useEffect(() => localStorage.setItem('cart', JSON.stringify(state)), [state]);
+
+    // Fetch Day Tour data when Day Tour date changes
+    useEffect(() => {
+        if (state.dayTourDate) {
+            console.log('Cart Context - Day Tour date changed, fetching data for:', state.dayTourDate);
+            fetchDayTourData(state.dayTourDate);
+        } else {
+            // Clear Day Tour data when no date is set
+            setCurrentPricing(null);
+            setMealProgram(null);
+        }
+    }, [state.dayTourDate]);
+
+    const setDayTourDate = (date) => {
+        dispatch({ type: 'SET_DAY_TOUR_DATE', date });
+    };
+
+    // Fetch Day Tour pricing for a specific date
+    const fetchDayTourPricing = async (date) => {
+        if (!date) return;
+        
+        setPricingLoading(true);
+        try {
+            const pricingData = await fetchCurrentDayTourPricing(api, date);
+            setCurrentPricing(pricingData);
+            console.log('Cart Context - Day Tour pricing fetched:', pricingData);
+        } catch (error) {
+            console.error('Cart Context - Failed to fetch Day Tour pricing:', error);
+            setCurrentPricing(null);
+        } finally {
+            setPricingLoading(false);
+        }
+    };
+
+    // Fetch Day Tour meal program for a specific date
+    const fetchDayTourMealProgramData = async (date) => {
+        if (!date) return;
+        
+        setMealLoading(true);
+        try {
+            const mealData = await fetchDayTourMealProgram(api, date);
+            setMealProgram(mealData);
+            console.log('Cart Context - Day Tour meal program fetched:', mealData);
+        } catch (error) {
+            console.error('Cart Context - Failed to fetch Day Tour meal program:', error);
+            setMealProgram(null);
+        } finally {
+            setMealLoading(false);
+        }
+    };
+
+    // Fetch both pricing and meal program data
+    const fetchDayTourData = async (date) => {
+        if (!date) return;
+        
+        console.log('Cart Context - Fetching Day Tour data for date:', date);
+        await Promise.all([
+            fetchDayTourPricing(date),
+            fetchDayTourMealProgramData(date)
+        ]);
+    };
 
     return (
         <CartCtx.Provider value={{
@@ -88,7 +163,16 @@ export const CartProvider = ({ children }) => {
             updateItem,
             removeItem,
             addItem,
+            setDayTourDate,
             clear: () => dispatch({ type: 'CLEAR' }),
+            // Day Tour specific data and functions
+            currentPricing,
+            mealProgram,
+            pricingLoading,
+            mealLoading,
+            fetchDayTourData,
+            fetchDayTourPricing,
+            fetchDayTourMealProgramData,
         }}>
             {children}
         </CartCtx.Provider>

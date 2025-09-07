@@ -42,6 +42,7 @@ const formSchema = z.object({
   weekdays: z.array(z.string()).optional().nullable(),
   weekend_definition: z.enum(["SAT_SUN", "FRI_SUN", "CUSTOM"]).default("SAT_SUN"),
   inactive_label: z.string().default("Free Breakfast"),
+  pm_snack_policy: z.enum(["hidden", "optional", "required"]).default("hidden"),
   notes: z.string().optional().nullable(),
 }).refine((data) => {
   if (data.scope_type === "date_range" || (data.scope_type === "composite" && (data.date_start || data.date_end))) {
@@ -105,6 +106,7 @@ export default function MealProgramForm() {
       weekdays: [],
       weekend_definition: "SAT_SUN",
       inactive_label: "Free Breakfast",
+      pm_snack_policy: "hidden",
       notes: "",
     },
   });
@@ -133,6 +135,7 @@ export default function MealProgramForm() {
         weekdays: program.weekdays || [],
         weekend_definition: program.weekend_definition,
         inactive_label: program.inactive_label,
+        pm_snack_policy: program.pm_snack_policy || "hidden",
         notes: program.notes || "",
       });
     } catch (error) {
@@ -427,6 +430,32 @@ export default function MealProgramForm() {
                     </FormControl>
                     <FormDescription>
                       Label shown when buffet is not active
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pm_snack_policy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PM Snack Policy</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select PM snack policy" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="hidden">Hidden (Not offered for Day Tour)</SelectItem>
+                        <SelectItem value="optional">Optional (Customer choice)</SelectItem>
+                        <SelectItem value="required">Required (Auto-included)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Controls PM snack availability for Day Tour bookings
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

@@ -22,13 +22,15 @@ import { toast } from "sonner"
 import RequireDatesDialog from '@/components/common/RequireDatesDialog'
 import SEO from '@/components/SEO'
 import SocialShare from '@/components/SocialShare'
+import { validateRoomTypeMixing, isDayTourRoom } from "@/utils/roomTypeUtils";
+import DeleteDialog from "@/components/common/form/DeleteDialog";
 
 const iconsModule = lucideIcons;
 
 const RoomDetails = () => {
     const { roomId } = useParams()
     const { navigate } = useAppContext();
-    const { addItem, state } = useCart();
+    const { addItem, state, clear } = useCart();
     const { data: room, isLoading, isError, error, status } = useRoom(roomId);
     const { control, handleSubmit, watch } = useForm({
         defaultValues: { dateRange: { from: null, to: null }, accommodations: 1, adults: "1", children: "0" },
@@ -36,6 +38,7 @@ const RoomDetails = () => {
 
     const mainImage = room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0];
     const [requireDatesOpen, setRequireDatesOpen] = useState(false);
+    const [showMixingDialog, setShowMixingDialog] = useState(false);
 
     // If no dates selected (direct navigation), prompt user to select
     useEffect(() => {
@@ -131,6 +134,20 @@ const RoomDetails = () => {
         }
         if (isUnavailable) {
             toast.error('This room is not available for your selected dates.');
+            return;
+        }
+
+        // Check for room type mixing
+        const mixingValidation = validateRoomTypeMixing(state.items, room);
+        if (!mixingValidation.isValid) {
+            if (isDayTourRoom(room)) {
+                // Trying to add Day Tour room but cart has overnight rooms
+                setShowMixingDialog(true);
+            } else {
+                // Trying to add overnight room but cart has Day Tour rooms - shouldn't happen
+                // since Day Tour uses separate page, but for safety
+                toast.error('Cannot mix overnight and Day Tour bookings. Please clear your cart first.');
+            }
             return;
         }
 
@@ -494,6 +511,23 @@ const RoomDetails = () => {
             </div>
 
             <RequireDatesDialog open={requireDatesOpen} onOpenChange={setRequireDatesOpen} />
+            
+            {/* Mixing Prevention Dialog */}
+            <DeleteDialog
+                open={showMixingDialog}
+                onOpenChange={setShowMixingDialog}
+                title="Switch to Day Tour?"
+                description={`This is a Day Tour facility. You currently have overnight accommodations in your cart. Day Tour and overnight bookings must be separate. Would you like to clear your cart and book this Day Tour facility instead?`}
+                onConfirm={() => {
+                    clear(); // Clear the overnight cart
+                    setShowMixingDialog(false);
+                    // Navigate to Day Tour page
+                    toast.success("Cart cleared. Redirecting to Day Tour booking page...");
+                    setTimeout(() => navigate('/day-tour'), 1000);
+                }}
+                confirmText="Switch to Day Tour"
+                cancelText="Keep Current Cart"
+            />
         </div>
     )
 }

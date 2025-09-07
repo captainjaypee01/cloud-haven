@@ -144,12 +144,37 @@ export default function MonthGrid({ currentDate, summary, onDayClick }) {
               {/* Booking summary */}
               {summaryData && isCurrentMonth && (
                 <div className="space-y-1">
-                  <Badge 
-                    variant="success" 
-                    className="text-xs px-1 py-0"
-                  >
-                    {summaryData.bookings} booked
-                  </Badge>
+                  {/* Day Tour and Overnight counts */}
+                  {(summaryData.overnight_bookings > 0 || summaryData.day_tour_bookings > 0) && (
+                    <div className="flex gap-1 flex-wrap">
+                      {summaryData.overnight_bookings > 0 && (
+                        <Badge 
+                          variant="default" 
+                          className="text-xs px-1 py-0 bg-blue-600"
+                        >
+                          {summaryData.overnight_bookings} Overnight
+                        </Badge>
+                      )}
+                      {summaryData.day_tour_bookings > 0 && (
+                        <Badge 
+                          variant="secondary" 
+                          className="text-xs px-1 py-0 bg-amber-600 text-white"
+                        >
+                          {summaryData.day_tour_bookings} Day Tour
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Fallback to total bookings if type breakdown not available */}
+                  {!summaryData.overnight_bookings && !summaryData.day_tour_bookings && summaryData.bookings > 0 && (
+                    <Badge 
+                      variant="success" 
+                      className="text-xs px-1 py-0"
+                    >
+                      {summaryData.bookings} booked
+                    </Badge>
+                  )}
                   
                   <Badge 
                     variant={summaryData.rooms_left > 0 ? "secondary" : "destructive"} 
