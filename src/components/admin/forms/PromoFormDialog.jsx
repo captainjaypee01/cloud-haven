@@ -188,6 +188,9 @@ export default function PromoFormDialog({
             max_uses: values.max_uses === "" ? null : parseInt(values.max_uses),
             exclusive: !!values.exclusive,
             image_url: selectedImageUrl || null,
+            // Ensure starts_at and ends_at are properly formatted or null
+            starts_at: values.starts_at || null,
+            ends_at: values.ends_at || null,
         };
         try {
             if (isEdit && promoId) {
@@ -276,23 +279,23 @@ export default function PromoFormDialog({
                                     <FormItem>
                                         <FormLabel>Start Date & Time</FormLabel>
                                         <FormControl>
-                                            <DateTimePicker
-                                                date={field.value ? new Date(field.value) : undefined}
-                                                setDate={(date) => {
-                                                    if (date) {
-                                                        // Convert to datetime-local format for backend
-                                                        const year = date.getFullYear();
-                                                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                                                        const day = String(date.getDate()).padStart(2, '0');
-                                                        const hours = String(date.getHours()).padStart(2, '0');
-                                                        const minutes = String(date.getMinutes()).padStart(2, '0');
-                                                        field.onChange(`${year}-${month}-${day}T${hours}:${minutes}`);
-                                                    } else {
-                                                        field.onChange('');
-                                                    }
-                                                }}
-                                                placeholder="Select start date and time"
-                                            />
+                                                <DateTimePicker
+                                                    date={field.value ? new Date(field.value) : undefined}
+                                                    setDate={(date) => {
+                                                        if (date) {
+                                                            // Convert to datetime-local format for backend
+                                                            const year = date.getFullYear();
+                                                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                                                            const day = String(date.getDate()).padStart(2, '0');
+                                                            const hours = String(date.getHours()).padStart(2, '0');
+                                                            const minutes = String(date.getMinutes()).padStart(2, '0');
+                                                            field.onChange(`${year}-${month}-${day}T${hours}:${minutes}`);
+                                                        } else {
+                                                            field.onChange('');
+                                                        }
+                                                    }}
+                                                    placeholder="Select start date and time"
+                                                />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
