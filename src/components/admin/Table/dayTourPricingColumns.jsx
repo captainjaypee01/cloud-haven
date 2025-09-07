@@ -1,10 +1,12 @@
-// components/admin/Table/roomColumns.jsx
+// components/admin/Table/dayTourPricingColumns.jsx
 import React from "react";
 import { formatCurrency } from "@/utils/currency";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
-export const roomColumns = [
+export const dayTourPricingColumns = [
     {
         accessorKey: "name",
         header: ({ column }) => {
@@ -22,26 +24,7 @@ export const roomColumns = [
         },
     },
     {
-        accessorKey: "max_guests",
-        header: "Guests",
-    },
-    {
-        accessorKey: "quantity",
-        header: "No of Units",
-    },
-    {
-        accessorKey: "room_type",
-        header: "Type",
-        cell: info => {
-            const map = { 
-                "overnight": "Overnight", 
-                "day_tour": "Day Tour" 
-            };
-            return map[info.getValue()] || "Overnight";
-        },
-    },
-    {
-        accessorKey: "price",
+        accessorKey: "price_per_pax",
         header: ({ column }) => {
             return (
                 <Button
@@ -49,22 +32,37 @@ export const roomColumns = [
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     className="flex items-center gap-1 select-none cursor-pointer"
                 >
-                    Price
+                    Price per Pax
                     {column.getIsSorted() === 'asc' && <ArrowUp />}
                     {column.getIsSorted() === 'desc' && <ArrowDown />}
                 </Button>
             )
         },
+        cell: info => formatCurrency(info.getValue()),
+    },
+    {
+        accessorKey: "effective_from",
+        header: "Effective From",
+        cell: info => format(new Date(info.getValue()), 'MMM dd, yyyy'),
+    },
+    {
+        accessorKey: "effective_until",
+        header: "Effective Until",
         cell: info => {
-            return formatCurrency(info.getValue())
+            const value = info.getValue();
+            return value ? format(new Date(value), 'MMM dd, yyyy') : 'Ongoing';
         },
     },
     {
-        accessorKey: "status",
+        accessorKey: "is_active",
         header: "Status",
         cell: info => {
-            const map = { "available": "Available", "unavailable": "Unavailable", "archived": "Archived" };
-            return map[info.getValue()];
+            const isActive = info.getValue();
+            return (
+                <Badge variant={isActive ? "default" : "secondary"}>
+                    {isActive ? "Active" : "Inactive"}
+                </Badge>
+            );
         },
     },
 ];

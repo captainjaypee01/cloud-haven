@@ -156,9 +156,19 @@ export default function DayTable({ date, events }) {
                   </TableCell>
                   
                   <TableCell>
-                    <Badge variant={statusVariant(booking.status)}>
-                      {booking.status}
-                    </Badge>
+                    <div className="flex flex-col gap-1">
+                      <Badge variant={statusVariant(booking.status)}>
+                        {booking.status}
+                      </Badge>
+                      {booking.booking_type && (
+                        <Badge 
+                          variant="outline" 
+                          className={booking.booking_type === 'day_tour' ? 'border-amber-600 text-amber-600' : 'border-blue-600 text-blue-600'}
+                        >
+                          {booking.booking_type === 'day_tour' ? 'Day Tour' : 'Overnight'}
+                        </Badge>
+                      )}
+                    </div>
                   </TableCell>
                   
                   <TableCell className="text-sm">

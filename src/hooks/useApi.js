@@ -7,7 +7,8 @@ export function useApi() {
     const { getToken, signOut } = useAuth();             // ← now legal
     
     return useMemo(() => {
-        const instance = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL });
+        const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+        const instance = axios.create({ baseURL });
 
         instance.interceptors.request.use(async (config) => {
 

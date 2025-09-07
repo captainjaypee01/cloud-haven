@@ -32,6 +32,12 @@ const formSchema = z.object({
   currency: z.string().length(3, "Currency must be 3 characters"),
   adult_price: z.number().min(0, "Price must be positive").max(999999.99),
   child_price: z.number().min(0, "Price must be positive").max(999999.99),
+  adult_lunch_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  child_lunch_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  adult_pm_snack_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  child_pm_snack_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  adult_dinner_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  child_dinner_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   effective_from: z.string().optional().nullable(),
   effective_to: z.string().optional().nullable(),
 }).refine((data) => {
@@ -51,6 +57,12 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
       currency: tier?.currency || "SGD",
       adult_price: tier?.adult_price || 0,
       child_price: tier?.child_price || 0,
+      adult_lunch_price: tier?.adult_lunch_price || null,
+      child_lunch_price: tier?.child_lunch_price || null,
+      adult_pm_snack_price: tier?.adult_pm_snack_price || null,
+      child_pm_snack_price: tier?.child_pm_snack_price || null,
+      adult_dinner_price: tier?.adult_dinner_price || null,
+      child_dinner_price: tier?.child_dinner_price || null,
       effective_from: tier?.effective_from || null,
       effective_to: tier?.effective_to || null,
     },
@@ -62,6 +74,12 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
         currency: tier.currency,
         adult_price: parseFloat(tier.adult_price),
         child_price: parseFloat(tier.child_price),
+        adult_lunch_price: tier.adult_lunch_price ? parseFloat(tier.adult_lunch_price) : null,
+        child_lunch_price: tier.child_lunch_price ? parseFloat(tier.child_lunch_price) : null,
+        adult_pm_snack_price: tier.adult_pm_snack_price ? parseFloat(tier.adult_pm_snack_price) : null,
+        child_pm_snack_price: tier.child_pm_snack_price ? parseFloat(tier.child_pm_snack_price) : null,
+        adult_dinner_price: tier.adult_dinner_price ? parseFloat(tier.adult_dinner_price) : null,
+        child_dinner_price: tier.child_dinner_price ? parseFloat(tier.child_dinner_price) : null,
         effective_from: tier.effective_from,
         effective_to: tier.effective_to,
       });
@@ -70,6 +88,12 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
         currency: "SGD",
         adult_price: 0,
         child_price: 0,
+        adult_lunch_price: null,
+        child_lunch_price: null,
+        adult_pm_snack_price: null,
+        child_pm_snack_price: null,
+        adult_dinner_price: null,
+        child_dinner_price: null,
         effective_from: null,
         effective_to: null,
       });
@@ -82,7 +106,7 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{tier ? "Edit Pricing Tier" : "Add Pricing Tier"}</DialogTitle>
           <DialogDescription>
@@ -115,44 +139,190 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="adult_price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Adult Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-4">
+              <div>
+                <h4 className="text-sm font-medium mb-3">Full Buffet Pricing (Overnight)</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="adult_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adult Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="child_price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Child Price</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  <FormField
+                    control={form.control}
+                    name="child_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Child Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-3">Day Tour Lunch Pricing</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="adult_lunch_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adult Lunch Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="child_lunch_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Child Lunch Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-3">PM Snack Pricing</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="adult_pm_snack_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adult PM Snack Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="child_pm_snack_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Child PM Snack Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-3">Dinner Pricing (Future Use)</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="adult_dinner_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adult Dinner Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="child_dinner_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Child Dinner Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

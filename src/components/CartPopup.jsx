@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Popover,
     PopoverTrigger,
@@ -20,19 +20,88 @@ import { useSyncCartForm } from "../hooks/cart/useSyncCartForm";
 import MealAvailabilityBadges from "./booking/MealAvailabilityBadges";
 import { useApi } from "@/hooks/useApi";
 import { Link } from "react-router-dom";
+import { hasDayTourItems } from "@/utils/roomTypeUtils";
+import { fetchDayTourAvailability } from "@/services/dayTour";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
+    const [dayTourMealData, setDayTourMealData] = useState(null);
     const {
         state: { items, checkIn, checkOut },
         updateItem,
         removeItem,
     } = useCart();
+
+    const handleMealOptionChange = (item, option, checked) => {
+        const adults = item.adults;
+        const children = item.children;
+        const total = adults + children;
+        
+        // Start with existing meal costs to preserve the other option
+        let newLunchCost = item.lunchCost || 0;
+        let newPmSnackCost = item.pmSnackCost || 0;
+        
+        // Only update the specific option being changed
+        if (option === 'lunch') {
+            if (checked && dayTourMealData?.lunch_prices) {
+                newLunchCost = (adults * dayTourMealData.lunch_prices.adult) + 
+                              (children * dayTourMealData.lunch_prices.child);
+            } else {
+                newLunchCost = 0;
+            }
+        } else if (option === 'pmSnack') {
+            if (checked && dayTourMealData?.pm_snack_prices) {
+                newPmSnackCost = (adults * dayTourMealData.pm_snack_prices.adult) + 
+                                (children * dayTourMealData.pm_snack_prices.child);
+            } else {
+                newPmSnackCost = 0;
+            }
+        }
+        
+        const newMealCost = newLunchCost + newPmSnackCost;
+        const newBasePrice = item.pricePerPax * total;
+        const newTotalPrice = newBasePrice + newMealCost;
+        
+        const updatedItem = {
+            ...(option === 'lunch' ? { includeLunch: checked } : {}),
+            ...(option === 'pmSnack' ? { includePmSnack: checked } : {}),
+            lunchCost: newLunchCost,
+            pmSnackCost: newPmSnackCost,
+            mealCost: newMealCost,
+            basePrice: newBasePrice,
+            price: newTotalPrice
+        };
+        
+        updateItem(item.uniqueId, updatedItem);
+    };
     const { control, clearErrors, reset } = useForm();
-    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests, mealQuote, mealLoading } = useCartSummaryWithMealPrograms();
+    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
     const api = useApi();
     useSyncCartForm(items, reset);
+
+    // Fetch Day Tour meal program data when there are Day Tour items
+    useEffect(() => {
+        const fetchDayTourMealData = async () => {
+            if (isDayTourCart && items.length > 0) {
+                const dayTourDate = items.find(item => item.dayTourDate)?.dayTourDate;
+                if (dayTourDate) {
+                    try {
+                        const mealData = await fetchDayTourAvailability(api, dayTourDate);
+                        setDayTourMealData(mealData);
+                    } catch (error) {
+                        console.error('Failed to fetch Day Tour meal data:', error);
+                        setDayTourMealData(null);
+                    }
+                }
+            } else {
+                setDayTourMealData(null);
+            }
+        };
+
+        fetchDayTourMealData();
+    }, [isDayTourCart, items, api]);
 
     const handleApplyPromo = async () => {
         await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal);
@@ -63,7 +132,46 @@ export function CartPopup() {
         }
 
         clearErrors(`${item.uniqueId}`);
-        updateItem(item.uniqueId, { adults, children, guests: total });
+
+        // For Day Tour items, recalculate the total price when guest count changes
+        let updatedItem = { adults, children, guests: total };
+        if (item.roomType === 'day_tour' && item.pricePerPax) {
+            const newBasePrice = item.pricePerPax * total;
+
+            // Recalculate meal costs based on new guest counts
+            let newMealCost = 0;
+            let newLunchCost = 0;
+            let newPmSnackCost = 0;
+
+            if (dayTourMealData && dayTourMealData.buffet_active) {
+                // Recalculate buffet lunch cost
+                if (item.includeLunch && dayTourMealData.lunch_prices) {
+                    newLunchCost = (adults * dayTourMealData.lunch_prices.adult) +
+                        (children * dayTourMealData.lunch_prices.child);
+                }
+
+                // Recalculate PM snack cost
+                if (item.includePmSnack && dayTourMealData.pm_snack_prices) {
+                    newPmSnackCost = (adults * dayTourMealData.pm_snack_prices.adult) +
+                        (children * dayTourMealData.pm_snack_prices.child);
+                }
+
+                newMealCost = newLunchCost + newPmSnackCost;
+            }
+
+            const newTotalPrice = newBasePrice + newMealCost;
+
+            updatedItem = {
+                ...updatedItem,
+                price: newTotalPrice,
+                basePrice: newBasePrice,
+                mealCost: newMealCost,
+                lunchCost: newLunchCost,
+                pmSnackCost: newPmSnackCost
+            };
+        }
+
+        updateItem(item.uniqueId, updatedItem);
     };
 
     return (
@@ -75,25 +183,42 @@ export function CartPopup() {
                 <h3 className="text-lg font-semibold">Your Booking Cart</h3>
                 {/* --- Dates Summary --- */}
                 <div className="space-y-1 text-sm text-gray-700">
-                    <div className="flex justify-between">
-                        <span>Check-in</span>
-                        <span>{checkIn || "—"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Check-out</span>
-                        <span>{checkOut || "—"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Nights</span>
-                        <span>{numNights}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Number of guests</span>
-                        <span>{totalGuests}</span>
-                    </div>
+                    {isDayTourCart ? (
+                        <>
+                            <div className="flex justify-between">
+                                <span>Day Tour Date</span>
+                                <span>{items.find(item => item.dayTourDate)?.dayTourDate || "—"}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Number of guests</span>
+                                <span>{totalGuests}</span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-between">
+                                <span>Check-in</span>
+                                <span>{checkIn || "—"}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Check-out</span>
+                                <span>{checkOut || "—"}</span>
+                            </div>
+                            {!isDayTourCart && (
+                                <div className="flex justify-between">
+                                    <span>Nights</span>
+                                    <span>{numNights}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between">
+                                <span>Number of guests</span>
+                                <span>{totalGuests}</span>
+                            </div>
+                        </>
+                    )}
                 </div>
-                {/* Meal Availability Badges */}
-                <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="mt-2" />
+                {/* Meal Availability Badges - Only for overnight bookings */}
+                {!isDayTourCart && <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="mt-2" />}
                 {items.length === 0 ? (
                     <p className="text-sm text-gray-500">No rooms added.</p>
                 ) : (
@@ -155,18 +280,109 @@ export function CartPopup() {
                                     </div>
                                 </div>
                                 {/* Subtotals */}
-                                <div className="flex justify-between text-sm text-gray-600">
-                                    <span>Room Price:</span>
-                                    <span>{formatCurrency(item.price)} x {numNights} night{numNights > 1 ? "s" : ""}</span>
-                                </div>
-                                <div className="flex justify-between font-medium">
-                                    <span>Subtotal:</span>
-                                    <span>{formatCurrency(item.subtotal)}</span>
-                                </div>
+                                {isDayTourCart ? (
+                                    <>
+                                        <div className="flex justify-between text-sm text-gray-600">
+                                            <span>Day Tour Price:</span>
+                                            <span>
+                                                {formatCurrency(item.pricePerPax)} × {item.totalGuests} guest{item.totalGuests > 1 ? 's' : ''}
+                                            </span>
+                                        </div>
+                                        {isDayTourCart && (
+                                            <div className="bg-gray-50 rounded-lg p-3 mt-2 space-y-2">
+                                                <h6 className="text-xs font-medium text-gray-700">Meal Add-ons</h6>
+                                                
+                                                {/* Buffet Lunch Option */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`popup-lunch-${item.uniqueId}`}
+                                                            checked={item.includeLunch || false}
+                                                            onCheckedChange={(checked) => handleMealOptionChange(item, 'lunch', checked)}
+                                                            disabled={!dayTourMealData?.buffet_active}
+                                                            className="cursor-pointer"
+                                                        />
+                                                        <div>
+                                                            <label htmlFor={`popup-lunch-${item.uniqueId}`} className="text-xs font-medium text-gray-700 cursor-pointer">
+                                                                Buffet Lunch
+                                                                {!dayTourMealData?.buffet_active && (
+                                                                    <span className="ml-1 text-xs text-gray-500">(Not available)</span>
+                                                                )}
+                                                            </label>
+                                                            {item.includeLunch && dayTourMealData?.lunch_prices && (
+                                                                <div className="text-xs text-gray-500">
+                                                                    {item.adults} adult{item.adults > 1 ? 's' : ''} × {formatCurrency(dayTourMealData.lunch_prices.adult)}
+                                                                    {item.children > 0 && (
+                                                                        <> + {item.children} child{item.children > 1 ? 'ren' : ''} × {formatCurrency(dayTourMealData.lunch_prices.child)}</>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-green-600">
+                                                        {item.includeLunch && item.lunchCost > 0 ? formatCurrency(item.lunchCost) : "—"}
+                                                    </span>
+                                                </div>
+                                                
+                                                {/* PM Snack Option */}
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`popup-pmSnack-${item.uniqueId}`}
+                                                            checked={item.includePmSnack || false}
+                                                            onCheckedChange={(checked) => handleMealOptionChange(item, 'pmSnack', checked)}
+                                                            disabled={dayTourMealData?.pm_snack_policy === 'hidden'}
+                                                            className="cursor-pointer"
+                                                        />
+                                                        <div>
+                                                            <label htmlFor={`popup-pmSnack-${item.uniqueId}`} className="text-xs font-medium text-gray-700 cursor-pointer">
+                                                                PM Snack
+                                                                {dayTourMealData?.pm_snack_policy === 'hidden' && (
+                                                                    <span className="ml-1 text-xs text-gray-500">(Not available)</span>
+                                                                )}
+                                                                {dayTourMealData?.pm_snack_policy === 'required' && (
+                                                                    <span className="ml-1 text-xs text-orange-600">(Required)</span>
+                                                                )}
+                                                            </label>
+                                                            {item.includePmSnack && dayTourMealData?.pm_snack_prices && (
+                                                                <div className="text-xs text-gray-500">
+                                                                    {item.adults} adult{item.adults > 1 ? 's' : ''} × {formatCurrency(dayTourMealData.pm_snack_prices.adult)}
+                                                                    {item.children > 0 && (
+                                                                        <> + {item.children} child{item.children > 1 ? 'ren' : ''} × {formatCurrency(dayTourMealData.pm_snack_prices.child)}</>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-xs font-semibold text-green-600">
+                                                        {item.includePmSnack && item.pmSnackCost > 0 ? formatCurrency(item.pmSnackCost) : "—"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between font-medium">
+                                            <span>Subtotal:</span>
+                                            <span>{formatCurrency(item.subtotal)}</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="flex justify-between text-sm text-gray-600">
+                                            <span>Room Price:</span>
+                                            <span>
+                                                {formatCurrency(item.price)} x {numNights} night{numNights > 1 ? "s" : ""}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between font-medium">
+                                            <span>Subtotal:</span>
+                                            <span>{formatCurrency(item.subtotal)}</span>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         ))}
                         <div className="flex justify-between text-sm font-medium">
-                            <span>Total Room Price:</span>
+                            <span>{isDayTourCart ? 'Total Day Tour Price:' : 'Total Room Price:'}</span>
                             <span>{formatCurrency(roomTotalPrice)}</span>
                         </div>
                         <div className="flex justify-between text-sm font-medium">
@@ -191,7 +407,7 @@ export function CartPopup() {
                                 )}
                             </span>
                         </div>
-                        
+
                         {/* Promo Code Section */}
                         <div className="space-y-2">
                             <div className="flex items-center gap-2">
@@ -221,7 +437,7 @@ export function CartPopup() {
                                 </p>
                             )}
                         </div>
-                        
+
                         <Separator />
                         <div className="flex justify-between text-sm font-medium">
                             <span>Subtotal:</span>

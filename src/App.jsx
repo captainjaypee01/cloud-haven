@@ -12,10 +12,12 @@ import NoIndexEnvironments from './components/UATNoIndex';
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
 const RoomDetails = React.lazy(() => import('./pages/RoomDetails'));
+const DayTourRoomDetails = React.lazy(() => import('./pages/DayTourRoomDetails'));
 const MyBookings = React.lazy(() => import('./pages/MyBookings'));
 const Cart = React.lazy(() => import('./pages/Cart'));
 const Checkout = React.lazy(() => import('./pages/Checkout'));
 const RoomsPage = React.lazy(() => import('./pages/RoomsPage'));
+const DayTour = React.lazy(() => import('./pages/DayTour'));
 const PaymentPage = React.lazy(() => import('./pages/PaymentPage'));
 const BookingDetailsPage = React.lazy(() => import('./pages/BookingDetailPage'));
 const LeaveReview = React.lazy(() => import('./pages/LeaveReview'));
@@ -37,6 +39,7 @@ const ListPromos = React.lazy(() => import('./pages/admin/promos/ListPromos'));
 const ListMeals = React.lazy(() => import('./pages/admin/meals/ListMeals'));
 const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
 const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
+const ListDayTourPricing = React.lazy(() => import('./pages/admin/day-tour-pricing/ListDayTourPricing'));
 
 // Meal Programs
 const MealProgramList = React.lazy(() => import('./pages/admin/meal-programs/index'));
@@ -54,7 +57,7 @@ const App = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
-  
+
   return (
     <>
       {/* Default sitewide SEO fallbacks (no twitter) */}
@@ -68,80 +71,89 @@ const App = () => {
           <div className='min-h-[70vh]'>
             <Suspense fallback={<Loader />}>
               <Routes>
-              <Route
-                path='/'
-                element={<Home />}
-              />
-              <Route
-                path='/rooms'
-                element={<RoomsPage />}
-              />
-              <Route
-                path='/about-us'
-                element={<AboutUs />}
-              />
-              <Route
-                path='/contact-us'
-                element={<ContactUsPage />}
-              />
-              <Route
-                path='/policy'
-                element={<Policies />}
-              />
-              <Route
-                path='/rooms/:roomId'
-                element={<RoomDetails />}
-              />
-              <Route
-                path='/cart'
-                element={<Cart />}
-              />
-              <Route
-                path='/checkout'
-                element={<Checkout />}
-              />
-              <Route
-                path='/booking/:refNo'
-                element={<BookingDetailsPage />}
-              />
-              <Route
-                path='/booking/:refNo/review'
-                element={<LeaveReview />}
-              />
-              <Route
-                path='/booking/:refNo/payment'
-                element={<PaymentPage />}
-              />
-              <Route
-                path='/my-bookings'
-                element={<MyBookings />}
-              />
-              <Route
-                path='/admin'
-                element={<Layout />}
-              >
-                <Route index element={<Dashboard />} />
-                <Route path="rooms" element={<ListRoom />} />
-                <Route path="room-units/:roomId" element={<ListRoomUnits />} />
-                <Route path="bookings" element={<ListBooking />} />
-                <Route path="bookings/calendar" element={<BookingsCalendarPage />} />
-                <Route path="bookings/:id" element={<BookingDetails />} />
-                <Route path="amenities" element={<ListAmenity />} />
-                <Route path="users" element={<ListUsers />} />
-                <Route path="reports" element={<ListRoom />} />
-                <Route path="images" element={<ManageImages />} />
-                <Route path="meal-prices" element={<ListMeals />} />
-                <Route path="promos" element={<ListPromos />} />
-                
-                {/* Meal Programs */}
-                <Route path="meal-programs" element={<MealProgramList />} />
-                <Route path="meal-programs/new" element={<MealProgramNew />} />
-                <Route path="meal-programs/:id/edit" element={<MealProgramEdit />} />
-                <Route path="meal-programs/:id/preview" element={<MealProgramPreview />} />
-                <Route path="meal-programs/:id" element={<MealProgramShow />} />
-              </Route>
-              {/* 404 Route - Must be last */}
-              <Route path="*" element={<NotFound />} />
+                <Route
+                  path='/'
+                  element={<Home />}
+                />
+                <Route
+                  path='/rooms'
+                  element={<RoomsPage />}
+                />
+                <Route
+                  path='/day-tour'
+                  element={<DayTour />}
+                />
+                <Route
+                  path='/about-us'
+                  element={<AboutUs />}
+                />
+                <Route
+                  path='/contact-us'
+                  element={<ContactUsPage />}
+                />
+                <Route
+                  path='/policy'
+                  element={<Policies />}
+                />
+                <Route
+                  path='/rooms/:roomId'
+                  element={<RoomDetails />}
+                />
+                <Route
+                  path='/day-tour/:roomId'
+                  element={<DayTourRoomDetails />}
+                />
+                <Route
+                  path='/cart'
+                  element={<Cart />}
+                />
+                <Route
+                  path='/checkout'
+                  element={<Checkout />}
+                />
+                <Route
+                  path='/booking/:refNo'
+                  element={<BookingDetailsPage />}
+                />
+                <Route
+                  path='/booking/:refNo/review'
+                  element={<LeaveReview />}
+                />
+                <Route
+                  path='/booking/:refNo/payment'
+                  element={<PaymentPage />}
+                />
+                <Route
+                  path='/my-bookings'
+                  element={<MyBookings />}
+                />
+                <Route
+                  path='/admin'
+                  element={<Layout />}
+                >
+                  <Route index element={<Dashboard />} />
+                  <Route path="rooms" element={<ListRoom />} />
+                  <Route path="room-units/:roomId" element={<ListRoomUnits />} />
+                  <Route path="bookings" element={<ListBooking />} />
+                  <Route path="bookings/calendar" element={<BookingsCalendarPage />} />
+                  <Route path="bookings/:id" element={<BookingDetails />} />
+                  <Route path="amenities" element={<ListAmenity />} />
+                  <Route path="users" element={<ListUsers />} />
+                  <Route path="reports" element={<ListRoom />} />
+                  <Route path="images" element={<ManageImages />} />
+                  <Route path="meal-prices" element={<ListMeals />} />
+                  <Route path="promos" element={<ListPromos />} />
+                  <Route path="day-tour-pricing" element={<ListDayTourPricing />} />
+
+                  {/* Meal Programs */}
+                  <Route path="meal-programs" element={<MealProgramList />} />
+                  <Route path="meal-programs/new" element={<MealProgramNew />} />
+                  <Route path="meal-programs/:id/edit" element={<MealProgramEdit />} />
+                  <Route path="meal-programs/:id/preview" element={<MealProgramPreview />} />
+                  <Route path="meal-programs/:id" element={<MealProgramShow />} />
+                </Route>
+                {/* 404 Route - Must be last */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </div>

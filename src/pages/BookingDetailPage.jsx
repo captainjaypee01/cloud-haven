@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Separator } from "@radix-ui/react-select";
 import SEO from "@/components/SEO";
 import PaymentCard from "@/components/PaymentCard";
+import MealDetailComponent from "@/components/booking/MealDetailComponent";
 import { CreditCard, Building } from "lucide-react";
 
 const statusColor = status => {
@@ -114,7 +115,11 @@ const UnifiedBookingResultPage = () => {
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden ">
             <SEO title="Booking Details" description="View your Netania De Laiya booking details." noindex={true} />
             <SeaWaveBg />
-            <div className="relative z-10 w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 mt-20">
+            <div className="relative z-10 w-full max-w-7xl mt-20">
+                {/* Responsive Layout: Single column on mobile, Two columns on medium+ screens */}
+                <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Left Column: Booking Details */}
+                    <div className="flex-1 bg-white rounded-xl shadow-lg p-6 lg:p-8">
                 {user && (
                     <div className="mb-4 flex items-center gap-2">
                         <Button variant="ghost" size="sm" onClick={() => navigate('/my-bookings')} className="cursor-pointer">
@@ -141,8 +146,17 @@ const UnifiedBookingResultPage = () => {
                 {/* Booking summary grid just like PaymentPage */}
                 <div className="mb-4 flex flex-col gap-1 text-sm">
                     <div className="flex justify-between"><span>Guest</span><span>{booking.guest_name}</span></div>
-                    <div className="flex justify-between"><span>Check-in</span><span>{booking.check_in_date}</span></div>
-                    <div className="flex justify-between"><span>Check-out</span><span>{booking.check_out_date}</span></div>
+                    {booking.booking_type === 'day_tour' ? (
+                        <>
+                            <div className="flex justify-between"><span>Day Tour Date</span><span>{booking.check_in_date}</span></div>
+                            <div className="flex justify-between"><span>Tour Hours</span><span>8:00 AM - 5:00 PM</span></div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-between"><span>Check-in</span><span>{booking.check_in_date}</span></div>
+                            <div className="flex justify-between"><span>Check-out</span><span>{booking.check_out_date}</span></div>
+                        </>
+                    )}
                     <div className="flex justify-between"><span>Total guests</span><span>{booking.total_guests}</span></div>
                     <div className="flex justify-between"><span>Adults</span><span>{booking.adults}</span></div>
                     <div className="flex justify-between"><span>Children</span><span>{booking.children}</span></div>
@@ -196,105 +210,125 @@ const UnifiedBookingResultPage = () => {
                         </div>
                     )}
                 </div>
-                {/* Payment History */}
-                <div className="mt-8 mb-4">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="p-2 bg-blue-100 rounded-full">
-                            <CreditCard className="h-5 w-5 text-blue-600" />
+                
+                {/* Day Tour Meal Breakdown */}
+                {booking.booking_type === 'day_tour' && booking.meal_quote_data && (
+                    <div className="mb-4">
+                        <b>Meal Details:</b>
+                        <div className="mt-2">
+                            <MealDetailComponent 
+                                mealQuoteData={booking.meal_quote_data}
+                                showTitle={false}
+                                className="!p-0 !shadow-none !bg-transparent"
+                            />
                         </div>
-                        <h3 className="font-semibold text-xl text-gray-900">Payment History</h3>
+                    </div>
+                )}
                     </div>
                     
-                    {/* Bank Details - Displayed once for all payments */}
-                    <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Building className="h-4 w-4 text-blue-600" />
-                            <h4 className="font-medium text-blue-900 text-sm">Bank Details for Payment</h4>
-                        </div>
-                        <div className="space-y-3 text-sm">
-                            <div className="flex flex-col">
-                                <span className="font-medium text-blue-900 mb-1">Bank:</span>
-                                <span className="text-blue-800">BDO Unibank</span>
+                    {/* Right Column: Payment Section */}
+                    <div className="lg:w-96 bg-white rounded-xl shadow-lg p-6 lg:p-8">
+                        {/* Payment History */}
+                        <div className="mb-6">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="p-2 bg-blue-100 rounded-full">
+                                    <CreditCard className="h-5 w-5 text-blue-600" />
+                                </div>
+                                <h3 className="font-semibold text-xl text-gray-900">Payment</h3>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-medium text-blue-900 mb-1">Account Name:</span>
-                                <span className="text-blue-800">NETANIA DE LAIYA INC.</span>
+                            
+                            {/* Bank Details - Displayed once for all payments */}
+                            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Building className="h-4 w-4 text-blue-600" />
+                                    <h4 className="font-medium text-blue-900 text-sm">Bank Details for Payment</h4>
+                                </div>
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-blue-900 mb-1">Bank:</span>
+                                        <span className="text-blue-800">BDO Unibank</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-blue-900 mb-1">Account Name:</span>
+                                        <span className="text-blue-800">NETANIA DE LAIYA INC.</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-blue-900 mb-1">Account Number:</span>
+                                        <span className="font-mono text-blue-800">004978007114</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex flex-col">
-                                <span className="font-medium text-blue-900 mb-1">Account Number:</span>
-                                <span className="font-mono text-blue-800">004978007114</span>
+                            
+                            {(!booking.payments || booking.payments.length === 0) ? (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                                    <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                                    <div className="text-gray-500 text-sm">No payments yet.</div>
+                                    <div className="text-gray-400 text-xs mt-1">Payment history will appear here once payments are made.</div>
+                                </div>
+                            ) : (
+                                <div className="space-y-6">
+                                    {booking.payments.map((payment) => (
+                                        <PaymentCard 
+                                            key={payment.id} 
+                                            payment={payment} 
+                                            onPaymentUpdate={handlePaymentUpdate}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        {/* Status-specific UI and actions */}
+                        {booking.status === "pending" && (
+                            <div className="mb-6">
+                                <div className="mb-3 text-yellow-700 font-medium">Payment required to confirm your booking.</div>
+                                <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
+                                    <Button size="lg" className="w-full cursor-pointer">Proceed to Payment</Button>
+                                </Link>
                             </div>
+                        )}
+                        {booking.status === "downpayment" && (
+                            <div className="mb-6">
+                                <div className="mb-2 text-yellow-700">Downpayment paid. Remaining balance due at check-in or pay now:</div>
+                                <div className="mb-3 text-base text-yellow-700">
+                                    Remaining: {formatCurrency(remainingBalance)}
+                                </div>
+                                <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
+                                    <Button variant="outline" size="lg" className="w-full cursor-pointer">Pay Remaining Balance Now</Button>
+                                </Link>
+                            </div>
+                        )}
+                        {booking.status === "paid" && (
+                            <div className="mb-6 text-green-700 font-semibold text-lg text-center">
+                                Thank you! Your booking is fully paid.<br />See you at the resort!
+                            </div>
+                        )}
+                        {booking.status === "completed" && (
+                            <div className="mb-6 text-blue-700 font-semibold text-lg text-center">
+                                Thank you for staying with us!<br />We hope you enjoyed your stay.
+                            </div>
+                        )}
+                        {(booking.status === "cancelled" || booking.status === "expired") && (
+                            <div className="mb-6 text-red-700 font-semibold text-center">
+                                This booking is no longer available.
+                            </div>
+                        )}
+                        {booking.status === "completed" && (
+                            <Link to={`/booking/${refNo}/review`} onClick={() => { window.scrollTo(0, 0); }}>
+                                <Button variant="secondary" size="lg" className="w-full mb-4 cursor-pointer">Leave a Review</Button>
+                            </Link>
+                        )}
+                        {/* Claim/Add to My Bookings if not attached */}
+                        {user && !booking.user && (
+                            <div className="mb-4">
+                                <Button variant="outline" className="w-full cursor-pointer" onClick={handleClaim}>Add to My Bookings</Button>
+                            </div>
+                        )}
+                        <div>
+                            <Link to="/">
+                                <Button variant="outline" className="w-full cursor-pointer">Back to Home</Button>
+                            </Link>
                         </div>
                     </div>
-                    
-                    {(!booking.payments || booking.payments.length === 0) ? (
-                        <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                            <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                            <div className="text-gray-500 text-sm">No payments yet.</div>
-                            <div className="text-gray-400 text-xs mt-1">Payment history will appear here once payments are made.</div>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {booking.payments.map((payment) => (
-                                <PaymentCard 
-                                    key={payment.id} 
-                                    payment={payment} 
-                                    onPaymentUpdate={handlePaymentUpdate}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-                {/* Status-specific UI and actions */}
-                {booking.status === "pending" && (
-                    <div className="my-5">
-                        <div className="mb-2 text-yellow-700 font-medium">Payment required to confirm your booking.</div>
-                        <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
-                            <Button size="lg" className="w-full cursor-pointer">Proceed to Payment</Button>
-                        </Link>
-                    </div>
-                )}
-                {booking.status === "downpayment" && (
-                    <div className="my-5">
-                        <div className="mb-2 text-yellow-700">Downpayment paid. Remaining balance due at check-in or pay now:</div>
-                        <div className="mb-2 text-base text-yellow-700">
-                            Remaining: {formatCurrency(remainingBalance)}
-                        </div>
-                        <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
-                            <Button variant="outline" size="lg" className="w-full cursor-pointer">Pay Remaining Balance Now</Button>
-                        </Link>
-                    </div>
-                )}
-                {booking.status === "paid" && (
-                    <div className="my-7 text-green-700 font-semibold text-lg text-center">
-                        Thank you! Your booking is fully paid.<br />See you at the resort!
-                    </div>
-                )}
-                {booking.status === "completed" && (
-                    <div className="my-7 text-blue-700 font-semibold text-lg text-center">
-                        Thank you for staying with us!<br />We hope you enjoyed your stay.
-                    </div>
-                )}
-                {(booking.status === "cancelled" || booking.status === "expired") && (
-                    <div className="my-7 text-red-700 font-semibold text-center">
-                        This booking is no longer available.
-                    </div>
-                )}
-                {booking.status === "completed" && (
-                    <Link to={`/booking/${refNo}/review`} onClick={() => { window.scrollTo(0, 0); }}>
-                        <Button variant="secondary" size="lg" className="w-full mt-3 cursor-pointer">Leave a Review</Button>
-                    </Link>
-                )}
-                {/* Claim/Add to My Bookings if not attached */}
-                {user && !booking.user && (
-                    <div className="mt-4">
-                        <Button variant="outline" className="w-full cursor-pointer" onClick={handleClaim}>Add to My Bookings</Button>
-                    </div>
-                )}
-                <div className="mt-8">
-                    <Link to="/">
-                        <Button variant="outline" className="w-full cursor-pointer">Back to Home</Button>
-                    </Link>
                 </div>
             </div>
             <RoomDetailModal

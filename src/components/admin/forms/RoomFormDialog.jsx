@@ -25,7 +25,7 @@ const formSchema = z.object({
     max_guests: z.coerce.number().min(1, "Required"),
     extra_guests: z.coerce.number().default(2),
     quantity: z.coerce.number().default(1),
-    allows_day_use: z.coerce.boolean().default(0),
+    room_type: z.union([z.literal("overnight"), z.literal("day_tour")]).default("overnight"),
     base_weekday_rate: z.coerce.number().min(0),
     base_weekend_rate: z.coerce.number().min(0),
     price_per_night: z.coerce.number().min(0),
@@ -39,6 +39,12 @@ const STATUS_OPTIONS = [
     { value: "unavailable", label: "Unavailable" },
     { value: "archived", label: "Archived" }
 ];
+
+const ROOM_TYPE_OPTIONS = [
+    { value: "overnight", label: "Overnight Stay" },
+    { value: "day_tour", label: "Day Tour" }
+];
+
 const YES_NO_OPTIONS = [
     { value: 1, label: "Yes" },
     { value: 0, label: "No" }
@@ -79,7 +85,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
             max_guests: 1,
             extra_guests: 2,
             quantity: 1,
-            allows_day_use: 0,
+            room_type: "overnight",
             base_weekday_rate: 0,
             base_weekend_rate: 0,
             price_per_night: 0,
@@ -104,6 +110,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
         if (open && initialData) {
             form.reset({
                 ...initialData,
+                room_type: initialData.room_type || "overnight",
                 amenity_ids: (initialData.amenities || []).map((a) => a.id),
             });
             if (initialData.images) {
@@ -123,7 +130,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                 max_guests: 1,
                 extra_guests: 2,
                 quantity: 1,
-                allows_day_use: 0,
+                room_type: "overnight",
                 base_weekday_rate: 0,
                 base_weekend_rate: 0,
                 price_per_night: 0,
@@ -466,7 +473,7 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                                 </FormItem>
                             )} />
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <FormSelectField name="allows_day_use" control={form.control} label="Allows Day Use?" options={YES_NO_OPTIONS} />
+                                <FormSelectField name="room_type" control={form.control} label="Room Type" options={ROOM_TYPE_OPTIONS} />
                                 <FormSelectField name="is_featured" control={form.control} label="Featured?" options={YES_NO_OPTIONS} />
                                 <FormSelectField name="status" control={form.control} label="Status" options={STATUS_OPTIONS} />
                             </div>

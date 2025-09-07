@@ -2,7 +2,6 @@ import { useUser, useAuth } from "@clerk/clerk-react";
 // import axios from "axios";
 import { createContext, useContext, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMealPrices } from "../queries/mealPrices";
 import { LoaderProvider } from "./LoaderContext";
 
 const AppContext = createContext();
@@ -13,8 +12,6 @@ export const AppProvider = ({ children }) => {
     const { user, isLoaded } = useUser();
 
     const { getToken } = useAuth();
-
-    const { data: mealPrices } = useMealPrices();
 
     // Determine if user has admin role
     const isAdmin = useMemo(() => {
@@ -48,7 +45,6 @@ export const AppProvider = ({ children }) => {
         getToken, 
         isAdmin, 
         userRole,
-        mealPrices
     }
 
     useEffect(() => {

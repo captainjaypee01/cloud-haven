@@ -28,7 +28,7 @@ export function RoomDetailModal({ roomId, open, onOpenChange }) {
             <DialogTrigger asChild>
                 {/* if you want external trigger, else omit */}
             </DialogTrigger>
-            <DialogContent className="max-w-2xl w-full">
+            <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Room Details</DialogTitle>
                 </DialogHeader>

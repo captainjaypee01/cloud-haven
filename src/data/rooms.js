@@ -8,6 +8,31 @@ export const roomPhotos = [
     'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756914611/room-6.jpg',
     'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756910579/room-2.jpg'
 ];
+
+export const dayTourRoomPhotos = [
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-2.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-3.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-4.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-5.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255493/day-tour-6.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-7.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255738/day-tour-8.jpg',
+];
+
+export const cabanaRoomPhotos = [
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-2.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-3.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255493/day-tour-6.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255738/day-tour-8.jpg',
+];
+
+export const umbrellaRoomPhotos = [
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-4.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-5.jpg',
+    'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255494/day-tour-7.jpg',
+];
 export const rooms = [
     {
         _id: "67f7647c197ac559e4089b96",
