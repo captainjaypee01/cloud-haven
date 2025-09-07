@@ -41,6 +41,24 @@ export const promoColumns = ({ onEdit, onDelete, onStatusChange, onExclusiveChan
           cell: ({ row }) => row.original.scope || '—',
         },
         {
+            accessorKey: "starts_at",
+            header: "Date Start",
+            cell: ({ row }) => {
+                const startsAt = row.original.starts_at;
+                if (!startsAt) return "—";
+                return formatDate(startsAt);
+            },
+        },
+        {
+            accessorKey: "ends_at",
+            header: "Date End",
+            cell: ({ row }) => {
+                const endsAt = row.original.ends_at;
+                if (!endsAt) return "—";
+                return formatDate(endsAt);
+            },
+        },
+        {
             id: "discount",
             header: "Discount",
             cell: ({ row }) => {
