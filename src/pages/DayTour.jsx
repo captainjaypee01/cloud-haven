@@ -201,7 +201,6 @@ export default function DayTour() {
             includePmSnack: includePmSnack || (availability?.pm_snack_policy === 'required')
         };
         
-        console.log('DayTour - Adding item to cart:', cartItem);
         addItem(cartItem);
     };
 

@@ -81,8 +81,6 @@ const CartList = ({
                 min_guests: item.minGuests || 1,
                 max_guests_range: item.maxGuestsRange || item.maxGuests,
             };
-            console.log('CartList - Adding another Day Tour room with data:', dayTourRoom);
-            console.log('CartList - Original Day Tour item data:', item);
             setSelectedDayTourRoom(dayTourRoom);
             setShowDayTourDialog(true);
         } else {
@@ -94,8 +92,6 @@ const CartList = ({
                 max_guests: parseInt(item.maxGuests),
                 extra_guests: parseInt(item.extraGuests),
             };
-            console.log('CartList - Adding another overnight room with data:', roomForBooking);
-            console.log('CartList - Original overnight item data:', item);
             setSelectedRoomForBooking(roomForBooking);
             setShowBookingDialog(true);
         }
@@ -340,7 +336,6 @@ const CartList = ({
                             includePmSnack: includePmSnack || (mealProgram?.pm_snack_policy === 'required')
                         };
                         
-                        console.log('CartList - Adding Day Tour item to cart:', cartItem);
                         
                         // Add to cart using the cart context
                         addItem(cartItem);

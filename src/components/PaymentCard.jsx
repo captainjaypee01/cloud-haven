@@ -456,7 +456,7 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
                                                         return formatSingaporeDateTime(date);
                                                     }
                                                 } catch (e) {
-                                                    console.warn('Could not parse date:', uploadedAt);
+                                                    // Could not parse date
                                                 }
                                                 // Fallback to original string
                                                 return uploadedAt;

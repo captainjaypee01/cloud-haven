@@ -207,7 +207,7 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
       const bookingId = event.booking_id;
       // Skip events without a valid booking_id
       if (!bookingId || bookingId === undefined || bookingId === null) {
-        console.warn('Skipping event without booking_id:', event);
+        // Skipping event without booking_id
         return;
       }
       
@@ -333,7 +333,7 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
       const bookingId = event.booking_id;
       // Skip events without a valid booking_id
       if (!bookingId || bookingId === undefined || bookingId === null) {
-        console.warn('Skipping event without booking_id:', event);
+        // Skipping event without booking_id
         return;
       }
       

@@ -99,7 +99,6 @@ export const CartProvider = ({ children }) => {
     // Fetch Day Tour data when Day Tour date changes
     useEffect(() => {
         if (state.dayTourDate) {
-            console.log('Cart Context - Day Tour date changed, fetching data for:', state.dayTourDate);
             fetchDayTourData(state.dayTourDate);
         } else {
             // Clear Day Tour data when no date is set
@@ -120,9 +119,8 @@ export const CartProvider = ({ children }) => {
         try {
             const pricingData = await fetchCurrentDayTourPricing(api, date);
             setCurrentPricing(pricingData);
-            console.log('Cart Context - Day Tour pricing fetched:', pricingData);
         } catch (error) {
-            console.error('Cart Context - Failed to fetch Day Tour pricing:', error);
+            console.error('Failed to fetch Day Tour pricing:', error);
             setCurrentPricing(null);
         } finally {
             setPricingLoading(false);
@@ -137,9 +135,8 @@ export const CartProvider = ({ children }) => {
         try {
             const mealData = await fetchDayTourMealProgram(api, date);
             setMealProgram(mealData);
-            console.log('Cart Context - Day Tour meal program fetched:', mealData);
         } catch (error) {
-            console.error('Cart Context - Failed to fetch Day Tour meal program:', error);
+            console.error('Failed to fetch Day Tour meal program:', error);
             setMealProgram(null);
         } finally {
             setMealLoading(false);
@@ -150,7 +147,6 @@ export const CartProvider = ({ children }) => {
     const fetchDayTourData = async (date) => {
         if (!date) return;
         
-        console.log('Cart Context - Fetching Day Tour data for date:', date);
         await Promise.all([
             fetchDayTourPricing(date),
             fetchDayTourMealProgramData(date)

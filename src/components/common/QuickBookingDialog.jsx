@@ -106,7 +106,6 @@ export const QuickBookingDialog = ({
                              room?.max_guests || 
                              10;
             
-            console.log('QuickBookingDialog - Day Tour guest limits:', { minGuests, maxGuests, room });
             return { minGuests, maxGuests };
         } else {
             // For overnight rooms, use traditional logic
@@ -121,22 +120,15 @@ export const QuickBookingDialog = ({
     // Ensure Day Tour data is available when dialog opens for Day Tour context
     useEffect(() => {
         if (open && isDayTourContext()) {
-            console.log('QuickBookingDialog - Day Tour context detected');
-            console.log('QuickBookingDialog - Room type:', room?.roomType);
-            console.log('QuickBookingDialog - Day Tour date:', state?.dayTourDate);
-            console.log('QuickBookingDialog - Current pricing:', currentPricing);
-            console.log('QuickBookingDialog - Meal program:', mealProgram);
             
             // If we don't have the data and there's a Day Tour date, fetch it
             if (!currentPricing && !mealProgram && state?.dayTourDate) {
-                console.log('QuickBookingDialog - Fetching Day Tour data for date:', state.dayTourDate);
                 fetchDayTourData(state.dayTourDate);
             } else if (!currentPricing && !mealProgram && state?.items?.length > 0) {
                 // Try to get date from existing Day Tour items
                 const dayTourItem = state.items.find(item => item.dayTourDate || item.roomType === 'day_tour');
                 if (dayTourItem) {
                     const dateToUse = dayTourItem.dayTourDate || state.dayTourDate;
-                    console.log('QuickBookingDialog - Fetching Day Tour data from cart item date:', dateToUse);
                     fetchDayTourData(dateToUse);
                 }
             }
@@ -242,16 +234,7 @@ export const QuickBookingDialog = ({
             const mealCost = lunchCost + pmSnackCost;
             const totalPrice = basePrice + mealCost;
 
-            console.log('QuickBookingDialog - Day Tour pricing calculation:', {
-                pricePerPax,
-                totalGuests,
-                basePrice,
-                lunchCost,
-                pmSnackCost,
-                mealCost,
-                totalPrice
-            });
-
+            // Calculate Day Tour pricing
             roomData = {
                 ...roomData,
                 roomType: 'day_tour', // Explicitly set Day Tour room type
