@@ -4,19 +4,46 @@ import path from 'node:path';
 
 // Basic public routes
 const ORIGIN = process.env.SITE_ORIGIN || 'https://www.netaniadelaiya.com';
-const staticPaths = ['/', '/rooms', '/about-us', '/contact-us', '/policy', 'day-tour'];
+const staticPaths = ['/', '/rooms', '/about-us', '/contact-us', '/policy', '/day-tour'];
 
 // Attempt to pull dynamic room slugs from backend if env provided
 async function fetchRoomSlugs() {
-  const apiBase = process.env.API_BASE; // e.g., https://api.netaniadelaiya.com/api/v1
+  // Try multiple environment variable sources for backend URL
+  const apiBase = process.env.VITE_BACKEND_URL || 
+                  process.env.BACKEND_URL || 
+                  process.env.APP_URL || 
+                  'https://api.netaniadelaiya.com';
+  
   if (!apiBase) return [];
+  
   try {
-    const res = await fetch(`${apiBase}/rooms`);
+    const res = await fetch(`${apiBase}/api/v1/rooms`);
     if (!res.ok) return [];
     const data = await res.json();
     const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
     return list.map((r) => r.slug || r.room_slug || r.id).filter(Boolean);
-  } catch {
+  } catch (error) {
+    console.log('Failed to fetch room slugs:', error.message);
+    return [];
+  }
+}
+async function fetchDayTourRoomSlugs() {
+  // Try multiple environment variable sources for backend URL
+  const apiBase = process.env.VITE_BACKEND_URL || 
+                  process.env.BACKEND_URL || 
+                  process.env.APP_URL || 
+                  'https://api.netaniadelaiya.com';
+  
+  if (!apiBase) return [];
+  
+  try {
+    const res = await fetch(`${apiBase}/api/v1/rooms?room_type=day_tour`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+    return list.map((r) => r.slug || r.room_slug || r.id).filter(Boolean);
+  } catch (error) {
+    console.log('Failed to fetch day tour room slugs:', error.message);
     return [];
   }
 }
@@ -32,8 +59,10 @@ function xmlEscape(str) {
 
 async function main() {
   const roomSlugs = await fetchRoomSlugs();
+  const dayTourRoomSlugs = await fetchDayTourRoomSlugs();
   const dynamicPaths = roomSlugs.map((slug) => `/rooms/${slug}`);
-  const urls = [...staticPaths, ...dynamicPaths];
+  const dayTourDynamicPaths = dayTourRoomSlugs.map((slug) => `/day-tour/${slug}`);
+  const urls = [...staticPaths, ...dynamicPaths, ...dayTourDynamicPaths];
 
   const today = new Date().toISOString();
   const body = urls
