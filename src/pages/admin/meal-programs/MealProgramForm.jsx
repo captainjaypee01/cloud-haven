@@ -43,6 +43,7 @@ const formSchema = z.object({
   weekend_definition: z.enum(["SAT_SUN", "FRI_SUN", "CUSTOM"]).default("SAT_SUN"),
   inactive_label: z.string().default("Free Breakfast"),
   pm_snack_policy: z.enum(["hidden", "optional", "required"]).default("hidden"),
+  buffet_enabled: z.boolean().default(true),
   notes: z.string().optional().nullable(),
 }).refine((data) => {
   if (data.scope_type === "date_range" || (data.scope_type === "composite" && (data.date_start || data.date_end))) {
@@ -107,6 +108,7 @@ export default function MealProgramForm() {
       weekend_definition: "SAT_SUN",
       inactive_label: "Free Breakfast",
       pm_snack_policy: "hidden",
+      buffet_enabled: true,
       notes: "",
     },
   });
@@ -136,6 +138,7 @@ export default function MealProgramForm() {
         weekend_definition: program.weekend_definition,
         inactive_label: program.inactive_label,
         pm_snack_policy: program.pm_snack_policy || "hidden",
+        buffet_enabled: program.buffet_enabled ?? true,
         notes: program.notes || "",
       });
     } catch (error) {
@@ -458,6 +461,29 @@ export default function MealProgramForm() {
                       Controls PM snack availability for Day Tour bookings
                     </FormDescription>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="buffet_enabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>
+                        Buffet Enabled
+                      </FormLabel>
+                      <FormDescription>
+                        Enable buffet service for this meal program. When disabled, only PM snacks will be available for Day Tours.
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />
