@@ -1,11 +1,11 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "./DateRangePicker";
 import { useCart } from "../context/CartContext";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 
@@ -15,9 +15,16 @@ const SearchForm = () => {
     const { navigate } = useAppContext();
     const { dispatch, state } = useCart();
 
-    const { control, handleSubmit } = useForm({
-        defaultValues: { dateRange: { from: state?.checkIn ?? null, to: state?.checkOut ?? null } },
+    const { control, handleSubmit, reset } = useForm({
+        defaultValues: { dateRange: { from: state?.checkIn ? parseISO(state.checkIn) : null, to: state?.checkOut ? parseISO(state.checkOut) : null } },
     });
+
+    // Reset form when cart state changes (e.g., when cart is cleared)
+    useEffect(() => {
+        const from = state?.checkIn ? parseISO(state.checkIn) : null;
+        const to = state?.checkOut ? parseISO(state.checkOut) : null;
+        reset({ dateRange: { from, to } });
+    }, [state?.checkIn, state?.checkOut, reset]);
 
     const handleDateSelection = ({ dateRange }) => {
         const { from, to } = dateRange;

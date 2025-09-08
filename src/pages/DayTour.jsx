@@ -25,7 +25,7 @@ export default function DayTour() {
     const api = useApi();
     const { navigate } = useAppContext();
     const { show: showLoader, hide: hideLoader } = useLoader();
-    const { state: cartState, addItem, clear: clearCart, setDayTourDate } = useCart();
+    const { state: cartState, addItem, clear: clearCart, clearItemsOnly, setDayTourDate } = useCart();
     
     const [selectedDate, setSelectedDate] = useState(null);
     const [availability, setAvailability] = useState(null);
@@ -424,7 +424,7 @@ export default function DayTour() {
                 title="Clear Overnight Booking?"
                 description="You have overnight rooms in your cart. Day Tour and overnight bookings cannot be mixed. Would you like to clear your cart and continue with Day Tour?"
                 onConfirm={() => {
-                    clearCart(); // Clear the overnight cart
+                    clearItemsOnly(); // Clear only items but preserve dates
                     setShowMixingDialog(false);
                     toast.success("Cart cleared. You can now add Day Tour facilities.");
                 }}

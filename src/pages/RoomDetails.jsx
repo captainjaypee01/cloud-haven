@@ -30,7 +30,7 @@ const iconsModule = lucideIcons;
 const RoomDetails = () => {
     const { roomId } = useParams()
     const { navigate } = useAppContext();
-    const { addItem, state, clear } = useCart();
+    const { addItem, state, clear, clearItemsOnly } = useCart();
     const { data: room, isLoading, isError, error, status } = useRoom(roomId);
     const { control, handleSubmit, watch } = useForm({
         defaultValues: { dateRange: { from: null, to: null }, accommodations: 1, adults: "1", children: "0" },
@@ -140,14 +140,8 @@ const RoomDetails = () => {
         // Check for room type mixing
         const mixingValidation = validateRoomTypeMixing(state.items, room);
         if (!mixingValidation.isValid) {
-            if (isDayTourRoom(room)) {
-                // Trying to add Day Tour room but cart has overnight rooms
-                setShowMixingDialog(true);
-            } else {
-                // Trying to add overnight room but cart has Day Tour rooms - shouldn't happen
-                // since Day Tour uses separate page, but for safety
-                toast.error('Cannot mix overnight and Day Tour bookings. Please clear your cart first.');
-            }
+            // Show mixing dialog for both cases - consistent behavior
+            setShowMixingDialog(true);
             return;
         }
 
@@ -516,17 +510,26 @@ const RoomDetails = () => {
             <DeleteDialog
                 open={showMixingDialog}
                 onOpenChange={setShowMixingDialog}
-                title="Switch to Day Tour?"
-                description={`This is a Day Tour facility. You currently have overnight accommodations in your cart. Day Tour and overnight bookings must be separate. Would you like to clear your cart and book this Day Tour facility instead?`}
+                title={isDayTourRoom(room) ? "Clear Overnight Booking?" : "Clear Day Tour Booking?"}
+                description={
+                    isDayTourRoom(room) 
+                        ? "You have overnight rooms in your cart. Day Tour and overnight bookings cannot be mixed. Would you like to clear your cart and continue with Day Tour?"
+                        : "You have Day Tour rooms in your cart. Day Tour and overnight bookings cannot be mixed. Would you like to clear your cart and continue with overnight booking?"
+                }
                 onConfirm={() => {
-                    clear(); // Clear the overnight cart
+                    clearItemsOnly(); // Clear only items but preserve dates
                     setShowMixingDialog(false);
-                    // Navigate to Day Tour page
-                    toast.success("Cart cleared. Redirecting to Day Tour booking page...");
-                    setTimeout(() => navigate('/day-tour'), 1000);
+                    if (isDayTourRoom(room)) {
+                        // Navigate to Day Tour page if this is a Day Tour room
+                        toast.success("Cart cleared. Redirecting to Day Tour booking page...");
+                        setTimeout(() => navigate('/day-tour'), 1000);
+                    } else {
+                        // Stay on current page for overnight rooms
+                        toast.success("Cart cleared. You can now add this overnight room.");
+                    }
                 }}
-                confirmText="Switch to Day Tour"
-                cancelText="Keep Current Cart"
+                confirmText="Clear Cart"
+                cancelText="Cancel"
             />
         </div>
     )
