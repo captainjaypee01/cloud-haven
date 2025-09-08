@@ -18,6 +18,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useApi } from "@/hooks/useApi";
 import { fetchDayTourAvailability } from "@/services/dayTour";
 import { format } from "date-fns";
+import { validateRoomTypeMixing, isDayTourRoom } from "@/utils/roomTypeUtils";
+import DeleteDialog from "@/components/common/form/DeleteDialog";
 
 /**
  * Quick Booking Dialog Component
@@ -43,6 +45,8 @@ export const QuickBookingDialog = ({
     const {
         state,
         addItem,
+        clear,
+        clearItemsOnly,
         currentPricing,
         mealProgram,
         pricingLoading,
@@ -52,6 +56,7 @@ export const QuickBookingDialog = ({
     const api = useApi();
     const [includeLunch, setIncludeLunch] = useState(false);
     const [includePmSnack, setIncludePmSnack] = useState(false);
+    const [showMixingDialog, setShowMixingDialog] = useState(false);
 
     // Use room availability hook if room and dates are available
     const {
@@ -184,6 +189,13 @@ export const QuickBookingDialog = ({
         if (isUnavailable) {
             toast.error('This room is not available for your selected dates.');
             onOpenChange(false);
+            return;
+        }
+
+        // Check for room type mixing
+        const mixingValidation = validateRoomTypeMixing(state.items, room);
+        if (!mixingValidation.isValid) {
+            setShowMixingDialog(true);
             return;
         }
 
@@ -514,6 +526,26 @@ export const QuickBookingDialog = ({
                     </DialogFooter>
                 </form>
             </DialogContent>
+            
+            {/* Room Type Mixing Prevention Dialog */}
+            <DeleteDialog
+                open={showMixingDialog}
+                onOpenChange={setShowMixingDialog}
+                title={isDayTourRoom(room) ? "Clear Overnight Booking?" : "Clear Day Tour Booking?"}
+                description={
+                    isDayTourRoom(room) 
+                        ? "You have overnight rooms in your cart. Day Tour and overnight bookings cannot be mixed. Would you like to clear your cart and continue with Day Tour?"
+                        : "You have Day Tour rooms in your cart. Day Tour and overnight bookings cannot be mixed. Would you like to clear your cart and continue with overnight booking?"
+                }
+                onConfirm={() => {
+                    // Clear only the items but preserve dates
+                    clearItemsOnly();
+                    setShowMixingDialog(false);
+                    toast.success("Cart cleared. You can now add this room type.");
+                }}
+                confirmText="Clear Cart"
+                cancelText="Cancel"
+            />
         </Dialog>
     );
 };

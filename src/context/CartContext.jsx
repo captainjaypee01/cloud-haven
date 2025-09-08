@@ -33,6 +33,8 @@ function reducer(state, action) {
             };
         case 'CLEAR':
             return { checkIn: '', checkOut: '', dayTourDate: '', items: [] };
+        case 'CLEAR_ITEMS_ONLY':
+            return { ...state, items: [] };
         default:
             return state;
     }
@@ -161,6 +163,7 @@ export const CartProvider = ({ children }) => {
             addItem,
             setDayTourDate,
             clear: () => dispatch({ type: 'CLEAR' }),
+            clearItemsOnly: () => dispatch({ type: 'CLEAR_ITEMS_ONLY' }),
             // Day Tour specific data and functions
             currentPricing,
             mealProgram,
