@@ -244,8 +244,10 @@ export default function MealProgramDetail() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Currency</TableHead>
-                    <TableHead>Adult Price</TableHead>
-                    <TableHead>Child Price</TableHead>
+                    <TableHead>Full Buffet (Overnight)</TableHead>
+                    <TableHead>Lunch Price</TableHead>
+                    <TableHead>PM Snack Price</TableHead>
+                    <TableHead>Dinner Price</TableHead>
                     <TableHead>Effective From</TableHead>
                     <TableHead>Effective To</TableHead>
                     <TableHead>Actions</TableHead>
@@ -254,7 +256,7 @@ export default function MealProgramDetail() {
                 <TableBody>
                   {program.pricing_tiers?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={8} className="text-center text-muted-foreground">
                         No pricing tiers defined. Add a tier to set meal prices.
                       </TableCell>
                     </TableRow>
@@ -262,8 +264,30 @@ export default function MealProgramDetail() {
                     program.pricing_tiers?.map((tier) => (
                       <TableRow key={tier.id}>
                         <TableCell>{tier.currency}</TableCell>
-                        <TableCell>{tier.adult_price}</TableCell>
-                        <TableCell>{tier.child_price}</TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>Adult: {tier.adult_price}</div>
+                            <div>Child: {tier.child_price}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>Adult: {tier.adult_lunch_price || "—"}</div>
+                            <div>Child: {tier.child_lunch_price || "—"}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>Adult: {tier.adult_pm_snack_price || "—"}</div>
+                            <div>Child: {tier.child_pm_snack_price || "—"}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>Adult: {tier.adult_dinner_price || "—"}</div>
+                            <div>Child: {tier.child_dinner_price || "—"}</div>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           {tier.effective_from ? format(new Date(tier.effective_from), "MMM d, yyyy") : "—"}
                         </TableCell>
