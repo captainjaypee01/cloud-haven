@@ -4,7 +4,7 @@ import path from 'node:path';
 
 // Basic public routes
 const ORIGIN = process.env.SITE_ORIGIN || 'https://www.netaniadelaiya.com';
-const staticPaths = ['/', '/rooms', '/about-us', '/contact-us', '/policy'];
+const staticPaths = ['/', '/rooms', '/about-us', '/contact-us', '/policy', 'day-tour'];
 
 // Attempt to pull dynamic room slugs from backend if env provided
 async function fetchRoomSlugs() {
