@@ -202,6 +202,14 @@ export default function MealProgramDetail() {
               <dd>{program.inactive_label}</dd>
             </div>
             <div>
+              <dt className="text-sm font-medium text-muted-foreground">Buffet Enabled</dt>
+              <dd>
+                <Badge variant={program.buffet_enabled ? "success" : "secondary"}>
+                  {program.buffet_enabled ? "Enabled" : "Disabled"}
+                </Badge>
+              </dd>
+            </div>
+            <div>
               <dt className="text-sm font-medium text-muted-foreground">Last Updated</dt>
               <dd>{format(new Date(program.updated_at), "MMMM d, yyyy 'at' h:mm a")}</dd>
             </div>
@@ -352,7 +360,8 @@ export default function MealProgramDetail() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date/Month</TableHead>
                     <TableHead>Override</TableHead>
                     <TableHead>Note</TableHead>
                     <TableHead>Actions</TableHead>
@@ -361,15 +370,23 @@ export default function MealProgramDetail() {
                 <TableBody>
                   {program.calendar_overrides?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-muted-foreground">
-                        No calendar overrides defined. Add overrides to force buffet on or off on specific dates.
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No calendar overrides defined. Add overrides to force buffet on or off on specific dates or months.
                       </TableCell>
                     </TableRow>
                   ) : (
                     program.calendar_overrides?.map((override) => (
                       <TableRow key={override.id}>
                         <TableCell>
-                          {format(new Date(override.date), "MMMM d, yyyy")}
+                          <Badge variant={override.override_type === "month" ? "default" : "outline"}>
+                            {override.override_type === "month" ? "Month" : "Date"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {override.override_type === "month" 
+                            ? `${new Date(2025, override.month - 1, 1).toLocaleString('default', { month: 'long' })} ${override.year}`
+                            : format(new Date(override.date), "MMMM d, yyyy")
+                          }
                         </TableCell>
                         <TableCell>
                           <Badge variant={override.is_active ? "success" : "secondary"}>

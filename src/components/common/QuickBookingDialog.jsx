@@ -78,14 +78,11 @@ export const QuickBookingDialog = ({
 
     // Determine if this is a Day Tour context
     const isDayTourContext = () => {
-        // Check if room explicitly has day_tour type
+        // Check if current room explicitly has day_tour type
         if (room?.roomType === 'day_tour') return true;
         
-        // Check if we have a Day Tour date set
-        if (state?.dayTourDate) return true;
-        
-        // Check if we have existing Day Tour items in cart
-        if (state?.items?.some(item => item.dayTourDate || item.roomType === 'day_tour')) return true;
+        // Check if we have a Day Tour date set AND current room is for Day Tour
+        if (state?.dayTourDate && room?.roomType === 'day_tour') return true;
         
         return false;
     };
