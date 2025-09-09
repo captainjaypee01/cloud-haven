@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { ChevronDownIcon, X } from "lucide-react";
 import { useState } from "react";
 
-export function DayTourDatePicker({ date, onChange }) {
+export function DayTourDatePicker({ date, onChange, disabledRanges = [] }) {
     const [open, setOpen] = useState(false);
     
     const formatted = date
@@ -24,6 +24,25 @@ export function DayTourDatePicker({ date, onChange }) {
         onChange(null);
     };
 
+    // Create disabled function that checks both past dates and meal program ranges
+    const isDateDisabled = (date) => {
+        // Disable past dates
+        if (date < new Date()) {
+            return true;
+        }
+
+        // If no meal program ranges are provided, only disable past dates
+        if (disabledRanges.length === 0) {
+            return false;
+        }
+
+        // Check if date falls within any available range
+        const dateStr = format(date, 'yyyy-MM-dd');
+        return !disabledRanges.some(range => 
+            dateStr >= range.start && dateStr <= range.end
+        );
+    };
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -38,9 +57,7 @@ export function DayTourDatePicker({ date, onChange }) {
                     selected={date}
                     onSelect={handleDateSelect}
                     className="w-full"
-                    disabled={{
-                        before: new Date(),
-                    }}
+                    disabled={isDateDisabled}
                     footer={
                         date ? (
                             <Button

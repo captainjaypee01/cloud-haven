@@ -93,7 +93,7 @@ export const CartProvider = ({ children }) => {
     // Sync the date part back to localStorage
     useEffect(() => {
         setStickyDates({ checkIn: state.checkIn, checkOut: state.checkOut, dayTourDate: state.dayTourDate });
-    }, [state.checkIn, state.checkOut, state.dayTourDate]);
+    }, [state.checkIn, state.checkOut, state.dayTourDate, setStickyDates]);
 
     // Persist cart too
     useEffect(() => localStorage.setItem('cart', JSON.stringify(state)), [state]);
@@ -155,6 +155,16 @@ export const CartProvider = ({ children }) => {
         ]);
     };
 
+    const clearAll = () => {
+        // Clear all localStorage
+        localStorage.removeItem('cart');
+        localStorage.removeItem('booking-dates');
+        // Reset sticky dates to initial empty state
+        setStickyDates({ checkIn: '', checkOut: '', dayTourDate: '' });
+        // Dispatch clear action
+        dispatch({ type: 'CLEAR' });
+    };
+
     return (
         <CartCtx.Provider value={{
             state, dispatch,
@@ -162,7 +172,7 @@ export const CartProvider = ({ children }) => {
             removeItem,
             addItem,
             setDayTourDate,
-            clear: () => dispatch({ type: 'CLEAR' }),
+            clear: clearAll,
             clearItemsOnly: () => dispatch({ type: 'CLEAR_ITEMS_ONLY' }),
             // Day Tour specific data and functions
             currentPricing,

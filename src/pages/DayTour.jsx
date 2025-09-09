@@ -20,12 +20,14 @@ import { dayTourRoomPhotos } from "@/data/rooms";
 import DeleteDialog from "@/components/common/form/DeleteDialog";
 import { hasOvernightItems } from "@/utils/roomTypeUtils";
 import { useAppContext } from "@/context/AppContext";
+import { useMealDateRangesContext } from "@/context/MealDateRangesContext";
 
 export default function DayTour() {
     const api = useApi();
     const { navigate } = useAppContext();
     const { show: showLoader, hide: hideLoader } = useLoader();
     const { state: cartState, addItem, clear: clearCart, clearItemsOnly, setDayTourDate } = useCart();
+    const { dateRanges, hasActivePrograms } = useMealDateRangesContext();
     
     const [selectedDate, setSelectedDate] = useState(null);
     const [availability, setAvailability] = useState(null);
@@ -248,6 +250,7 @@ export default function DayTour() {
                                     <DayTourDatePicker
                                         date={selectedDate}
                                         onChange={handleDateChange}
+                                        disabledRanges={hasActivePrograms ? dateRanges : []}
                                     />
                                 </div>
                                 <div className="flex items-center gap-2 text-sm text-gray-600">

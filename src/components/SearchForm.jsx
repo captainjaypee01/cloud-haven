@@ -8,12 +8,15 @@ import { useCart } from "../context/CartContext";
 import { format, parseISO } from "date-fns";
 import { useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
+import { useMealDateRangesContext } from "../context/MealDateRangesContext";
+import { toast } from "sonner";
 
 const SearchForm = () => {
 
     const location = useLocation()
     const { navigate } = useAppContext();
     const { dispatch, state } = useCart();
+    const { dateRanges, hasActivePrograms, loading: dateRangesLoading } = useMealDateRangesContext();
 
     const { control, handleSubmit, reset } = useForm({
         defaultValues: { dateRange: { from: state?.checkIn ? parseISO(state.checkIn) : null, to: state?.checkOut ? parseISO(state.checkOut) : null } },
@@ -28,12 +31,73 @@ const SearchForm = () => {
 
     const handleDateSelection = ({ dateRange }) => {
         const { from, to } = dateRange;
+        
+        // If dates are cleared, clear the cart state and reset form
+        if (!from || !to) {
+            dispatch({ type: 'CLEAR' });
+            // Force form reset to ensure UI reflects cleared state
+            reset({ dateRange: { from: null, to: null } });
+            return;
+        }
+        
+        // Validate that dates are not in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Reset time to start of day
+        
+        if (from < today) {
+            toast.warning("Check-in date cannot be in the past.");
+            return;
+        }
+        
+        if (to <= from) {
+            toast.warning("Check-out date must be after check-in date.");
+            return;
+        }
+        
+        // Validate that dates are within available meal program ranges (if any)
+        if (hasActivePrograms && dateRanges.length > 0) {
+            const fromStr = format(from, "yyyy-MM-dd");
+            const toStr = format(to, "yyyy-MM-dd");
+            
+            const isFromValid = dateRanges.some(range => 
+                fromStr >= range.start && fromStr <= range.end
+            );
+            const isToValid = dateRanges.some(range => 
+                toStr >= range.start && toStr <= range.end
+            );
+            
+            if (!isFromValid || !isToValid) {
+                toast.warning("Selected dates are not available. Please choose dates within the available meal program periods.");
+                return;
+            }
+        }
+        
         dispatch({ type: 'SET_DATES', from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") });
+        if(location.pathname !== "/rooms") navigate("/rooms");
+    }
+
+    const handleFormSubmit = ({ dateRange }) => {
+        const { from, to } = dateRange;
+        
+        // Validate that dates are selected before submitting
+        if (!from || !to) {
+            toast.warning("Please select both check-in and check-out dates.");
+            return;
+        }
+        
+        // Additional check: ensure cart state also has dates
+        if (!state.checkIn || !state.checkOut) {
+            toast.warning("Please select both check-in and check-out dates.");
+            return;
+        }
+        
+        // If we reach here, dates are valid and already set in cart state
+        // Just navigate to rooms page
         if(location.pathname !== "/rooms") navigate("/rooms");
     }
     return (
         <form
-            onSubmit={handleSubmit(handleDateSelection)}
+            onSubmit={handleSubmit(handleFormSubmit)}
             className="
                 grid
                 grid-cols-1
@@ -54,7 +118,11 @@ const SearchForm = () => {
                     render={({ field }) => (
                         <DateRangePicker
                             range={field.value}
-                            onChange={field.onChange}
+                            onChange={(dateRange) => {
+                                field.onChange(dateRange);
+                                handleDateSelection({ dateRange });
+                            }}
+                            disabledRanges={hasActivePrograms ? dateRanges : []}
                         />
                     )}
                 />

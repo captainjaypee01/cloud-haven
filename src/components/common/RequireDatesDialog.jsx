@@ -15,6 +15,7 @@ import { useCart } from "@/context/CartContext";
 import { useAppContext } from "@/context/AppContext";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
+import { useMealDateRangesContext } from "@/context/MealDateRangesContext";
 
 const RequireDatesDialog = ({ 
   open, 
@@ -27,6 +28,7 @@ const RequireDatesDialog = ({
 }) => {
   const { state, dispatch, setDayTourDate } = useCart();
   const { navigate } = useAppContext();
+  const { dateRanges, hasActivePrograms } = useMealDateRangesContext();
 
   // Prepare default dates
   const defaultFrom = state?.checkIn ? parseISO(state.checkIn) : null;
@@ -104,6 +106,7 @@ const RequireDatesDialog = ({
                   <DayTourDatePicker
                     date={field.value}
                     onChange={field.onChange}
+                    disabledRanges={hasActivePrograms ? dateRanges : []}
                   />
                 )}
               />
@@ -117,7 +120,11 @@ const RequireDatesDialog = ({
                 name="dateRange"
                 control={control}
                 render={({ field }) => (
-                  <DateRangePicker range={field.value} onChange={field.onChange} />
+                  <DateRangePicker 
+                    range={field.value} 
+                    onChange={field.onChange} 
+                    disabledRanges={hasActivePrograms ? dateRanges : []}
+                  />
                 )}
               />
             </div>

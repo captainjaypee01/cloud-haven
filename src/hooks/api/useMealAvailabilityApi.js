@@ -6,7 +6,7 @@ export const useMealAvailabilityApi = () => {
     const api = useApi();
     return {
         // Public meal availability (no auth required)
-        getAvailability: (params) => api.get(`${API_PREFIX}/dashboard/meals/availability`, { params }),
-        getQuote: (data) => api.post(`${API_PREFIX}/dashboard/meals/quote`, data),
+        getAvailability: (params) => api.get(`${API_PREFIX}/meals/availability`, { params }),
+        getQuote: (data) => api.post(`${API_PREFIX}/meals/quote`, data),
     };
 };
