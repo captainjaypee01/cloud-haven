@@ -54,7 +54,7 @@ export function useCartSummaryWithMealPrograms() {
     const fetchMealQuote = async () => {
         try {
             setLoading(true);
-            const response = await api.post(`${API_PREFIX}/public/quotes/meal`, {
+            const response = await api.post(`${API_PREFIX}/meals/quote`, {
                 check_in: checkIn,
                 check_out: checkOut,
                 adults: totalAdults,

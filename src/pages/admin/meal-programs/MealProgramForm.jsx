@@ -156,12 +156,14 @@ export default function MealProgramForm() {
       if (id) {
         await mealProgramsApi.update(id, values);
         toast.success("Meal program updated successfully");
+        navigate("/admin/meal-programs/" + id);
+        return
       } else {
         await mealProgramsApi.create(values);
         toast.success("Meal program created successfully");
+        navigate("/admin/meal-programs");
       }
 
-      navigate("/admin/meal-programs");
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to save meal program");
     } finally {

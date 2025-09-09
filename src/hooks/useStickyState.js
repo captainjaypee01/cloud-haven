@@ -8,7 +8,11 @@ export function useStickyState(initial, key) {
     });
 
     useEffect(() => {
-        localStorage.setItem(key, JSON.stringify(value));
+        if (value) {
+            localStorage.setItem(key, JSON.stringify(value));
+        } else {
+            localStorage.removeItem(key);
+        }
     }, [key, value]);
 
     return [value, setValue];

@@ -20,7 +20,7 @@ export default function MealAvailabilityBadges({ checkIn, checkOut, className = 
   const fetchAvailability = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`${API_PREFIX}/public/meal-availability`, {
+      const response = await api.get(`${API_PREFIX}/meals/availability`, {
         params: {
           from: checkIn,
           to: checkOut,

@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { ChevronDownIcon, X, Check } from "lucide-react";
 import { useState } from "react";
 
-export function DateRangePicker({ range, onChange }) {
+export function DateRangePicker({ range, onChange, disabledRanges = [] }) {
     const [open, setOpen] = useState(false);
     
     const formatted = range.from && range.to
@@ -27,6 +27,25 @@ export function DateRangePicker({ range, onChange }) {
     const hasSelection = range?.from || range?.to;
     const isComplete = range?.from && range?.to;
 
+    // Create disabled function that checks both past dates and meal program ranges
+    const isDateDisabled = (date) => {
+        // Disable past dates
+        if (date < new Date()) {
+            return true;
+        }
+
+        // If no meal program ranges are provided, only disable past dates
+        if (disabledRanges.length === 0) {
+            return false;
+        }
+
+        // Check if date falls within any available range
+        const dateStr = format(date, 'yyyy-MM-dd');
+        return !disabledRanges.some(range => 
+            dateStr >= range.start && dateStr <= range.end
+        );
+    };
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -42,9 +61,7 @@ export function DateRangePicker({ range, onChange }) {
                     onSelect={handleDateSelect}
                     numberOfMonths={2}
                     className="w-[100%]"
-                    disabled={{
-                        before: new Date(),
-                    }}
+                    disabled={isDateDisabled}
                     footer={
                         <div className="flex gap-2 p-2 border-t">
                             {hasSelection && (

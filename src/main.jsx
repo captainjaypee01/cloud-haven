@@ -10,6 +10,7 @@ import { CartProvider } from './context/CartContext.jsx'
 import { PromoCodeProvider } from './context/PromoCodeContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { SidebarProvider } from './context/SidebarContext.jsx'
+import { MealDateRangesProvider } from './context/MealDateRangesContext.jsx'
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
@@ -39,9 +40,11 @@ createRoot(document.getElementById('root')).render(
           <SidebarProvider>
             <AppProvider>
               <CartProvider>
-                <PromoCodeProvider>
-                  <App />
-                </PromoCodeProvider>
+                <MealDateRangesProvider>
+                  <PromoCodeProvider>
+                    <App />
+                  </PromoCodeProvider>
+                </MealDateRangesProvider>
               </CartProvider>
             </AppProvider>
           </SidebarProvider>
