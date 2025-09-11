@@ -6,16 +6,25 @@ import { format } from "date-fns";
 import Loader from "@/components/common/Loader";
 import { Utensils, Coffee } from "lucide-react";
 
-export default function MealAvailabilityBadges({ checkIn, checkOut, className = "" }) {
+export default function MealAvailabilityBadges({ checkIn, checkOut, className = "", mealQuote = null }) {
   const [availability, setAvailability] = useState({});
   const [loading, setLoading] = useState(false);
   const api = useApi();
 
   useEffect(() => {
-    if (checkIn && checkOut) {
+    if (mealQuote?.nights) {
+      // Use the provided meal quote data instead of fetching separately
+      const availabilityData = {};
+      mealQuote.nights.forEach(night => {
+        availabilityData[night.date] = night.type;
+      });
+      setAvailability(availabilityData);
+      setLoading(false);
+    } else if (checkIn && checkOut) {
+      // Fallback to fetching if no meal quote provided
       fetchAvailability();
     }
-  }, [checkIn, checkOut]);
+  }, [checkIn, checkOut, mealQuote]);
 
   const fetchAvailability = async () => {
     try {
@@ -63,33 +72,33 @@ export default function MealAvailabilityBadges({ checkIn, checkOut, className = 
   const buffetDates = Object.entries(availability)
     .filter(([date, type]) => type === 'buffet')
     .map(([date]) => {
-      const startDate = new Date(date);
-      const endDate = new Date(date);
-      endDate.setDate(endDate.getDate() + 1);
-      return `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} to ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
   
   const freeBreakfastDates = Object.entries(availability)
     .filter(([date, type]) => type === 'free_breakfast')
     .map(([date]) => {
-      // Show the next day (when breakfast is actually served)
-      const breakfastDate = new Date(date);
-      breakfastDate.setDate(breakfastDate.getDate() + 1);
-      return breakfastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      // Show the breakfast date (which is the date in the API)
+      return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {buffetNights > 0 && (
-        <Badge variant="success" className="flex items-center gap-1">
+        <Badge variant="success" className="flex items-center gap-1 p-2">
           <Utensils className="w-3 h-3" />
-          Buffet on {buffetNights} night{buffetNights > 1 ? "s" : ""} ({buffetDates.join(', ')})
+          Buffet on {buffetNights} night{buffetNights > 1 ? "s" : ""}
         </Badge>
       )}
-      {freeBreakfastNights > 0 && (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <Coffee className="w-3 h-3" />
-          Complimentary Breakfast Only on {freeBreakfastNights} day{freeBreakfastNights > 1 ? "s" : ""} ({freeBreakfastDates.join(', ')})
+      {freeBreakfastNights > 0 && buffetNights === 0 && (
+        <Badge variant="secondary" className="flex flex-col items-start gap-1 p-2">
+          <div className="flex items-center gap-1">
+            <Coffee className="w-3 h-3" />
+            Complimentary Breakfast Only on {freeBreakfastNights} day{freeBreakfastNights > 1 ? "s" : ""}
+          </div>
+          <div className="text-xs">
+            ({freeBreakfastDates.join(', ')})
+          </div>
         </Badge>
       )}
     </div>

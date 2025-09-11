@@ -256,6 +256,7 @@ export default function MealProgramDetail() {
                     <TableHead>Lunch Price</TableHead>
                     <TableHead>PM Snack Price</TableHead>
                     <TableHead>Dinner Price</TableHead>
+                    <TableHead>Breakfast Price (Extra Guests)</TableHead>
                     <TableHead>Effective From</TableHead>
                     <TableHead>Effective To</TableHead>
                     <TableHead>Actions</TableHead>
@@ -264,7 +265,7 @@ export default function MealProgramDetail() {
                 <TableBody>
                   {program.pricing_tiers?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground">
+                      <TableCell colSpan={9} className="text-center text-muted-foreground">
                         No pricing tiers defined. Add a tier to set meal prices.
                       </TableCell>
                     </TableRow>
@@ -294,6 +295,12 @@ export default function MealProgramDetail() {
                           <div className="text-sm">
                             <div>Adult: {tier.adult_dinner_price || "—"}</div>
                             <div>Child: {tier.child_dinner_price || "—"}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            <div>Adult: {tier.adult_breakfast_price || "—"}</div>
+                            <div>Child: {tier.child_breakfast_price || "—"}</div>
                           </div>
                         </TableCell>
                         <TableCell>
