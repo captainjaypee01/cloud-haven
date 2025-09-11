@@ -24,6 +24,8 @@ const LeaveReview = React.lazy(() => import('./pages/LeaveReview'));
 const ContactUsPage = React.lazy(() => import('./pages/ContactUs'));
 const AboutUs = React.lazy(() => import('./pages/AboutUs'));
 const Policies = React.lazy(() => import('./pages/Policies'));
+const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
+const Terms = React.lazy(() => import('./pages/Terms'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 // Admin pages - loaded separately
@@ -96,6 +98,14 @@ const App = () => {
                   element={<Policies />}
                 />
                 <Route
+                  path='/privacy'
+                  element={<PrivacyPolicy />}
+                />
+                <Route
+                  path='/terms'
+                  element={<Terms />}
+                />
+                <Route
                   path='/rooms/:roomId'
                   element={<RoomDetails />}
                 />
@@ -162,7 +172,7 @@ const App = () => {
       )
       }
 
-      {!isAdminPath && <ResortPolicyDialog />}
+      {/* {!isAdminPath && <ResortPolicyDialog />} */}
       {/* <ResortPolicyDialog /> */}
       <Toaster position="top-right" richColors closeButton expand={true} />
     </>

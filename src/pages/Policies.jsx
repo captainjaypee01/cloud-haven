@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RESORT_POLICIES, POLICY_ICONS, HERO_IMAGE } from "@/constants/policies";
 
 const Policies = () => {
-    const [activeTab, setActiveTab] = useState('child');
+    const [activeTab, setActiveTab] = useState('checkin');
 
     // Memoize policy data to prevent unnecessary re-renders
     const policyEntries = useMemo(() => Object.entries(RESORT_POLICIES), []);
 
     // Enhanced SEO data with complete policy information
     const seoData = useMemo(() => ({
-        title: "Resort Policies - Child, Room & Buffet Rules",
-        description: "Complete resort policies for Netania De Laiya: child pricing (₱1,000 for 4-6 years), check-in/out times (3:00 PM/1:00 PM), buffet schedules, accommodation rules, and pet policies. Book with confidence knowing our comprehensive guidelines.",
+        title: "Resort Policies - House Rules & Guest Guidelines",
+        description: "Official house rules of Netania De Laiya: check-in/out, booking, occupancy, security, facilities hours, and proper conduct.",
         canonical: typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://www.netaniadelaiya.com/policy',
         og: { 
             url: 'https://www.netaniadelaiya.com/policy',
@@ -27,14 +27,6 @@ const Policies = () => {
             mainEntity: [
                 {
                     '@type': 'Question',
-                    name: 'What is the child policy for buffet?',
-                    acceptedAnswer: { 
-                        '@type': 'Answer', 
-                        text: 'Children aged 3 and below are free. Children 4-6 years old pay ₱1,000 for buffet. Children 7 and above pay adult rate of ₱1,700.' 
-                    }
-                },
-                {
-                    '@type': 'Question',
                     name: 'What are the check-in and check-out times?',
                     acceptedAnswer: { 
                         '@type': 'Answer', 
@@ -43,26 +35,18 @@ const Policies = () => {
                 },
                 {
                     '@type': 'Question',
-                    name: 'What are the buffet timings?',
+                    name: 'Can I bring food inside the rooms?',
                     acceptedAnswer: { 
                         '@type': 'Answer', 
-                        text: 'Breakfast: 6:30 AM - 8:00 AM, Lunch: 11:30 AM - 1:00 PM, Dinner: 6:30 PM - 8:00 PM' 
+                        text: 'Food is not allowed inside rooms. Snacks, drinks, and certain items are permitted with no corkage; lechon has ₱2,500 corkage.' 
                     }
                 },
                 {
                     '@type': 'Question',
-                    name: 'Can I bring food to the resort?',
+                    name: 'What are the beach and pool hours?',
                     acceptedAnswer: { 
                         '@type': 'Answer', 
-                        text: 'Outside food is not allowed in hotel rooms, but you can bring snacks, drinks, and fast food with no corkage fee. Lechon has a ₱2,500 corkage fee.' 
-                    }
-                },
-                {
-                    '@type': 'Question',
-                    name: 'Are pets allowed?',
-                    acceptedAnswer: { 
-                        '@type': 'Answer', 
-                        text: 'Small pets up to 10kg are allowed in designated rooms with a cleaning fee. Pets must be leashed in common areas.' 
+                        text: 'Beach: until 6:00 PM. Pool: until 10:00 PM.' 
                     }
                 }
             ]
