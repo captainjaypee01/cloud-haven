@@ -35,7 +35,7 @@ const Footer = () => {
                             <Link to={`/rooms`}>Accommodations</Link>
                         </li>
                         <li>
-                            <Link to={`/policy`}>Policy</Link>
+                            <Link to={`/policy`}>Resort Policy</Link>
                         </li>
                     </ul>
                 </div>
@@ -69,8 +69,8 @@ const Footer = () => {
             <div className='flex flex-col md:flex-row gap-2 items-center justify-between py-5'>
                 <p>© {new Date().getFullYear()} Netania De Laiya. All rights reserved.</p>
                 <ul className='flex items-center gap-4'>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Terms</a></li>
+                    <li><Link to={`/privacy`}>Privacy</Link></li>
+                    <li><Link to={`/terms`}>Terms</Link></li>
                     <li><a href="#">Sitemap</a></li>
                 </ul>
             </div>

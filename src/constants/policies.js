@@ -1,124 +1,87 @@
 export const RESORT_POLICIES = {
-  child: {
-    title: "Child Policy",
-    description: "Our policies for children of different age groups",
+  checkin: {
+    title: "Resort Policy",
+    description: "Arrival/departure times, rescheduling rules, headcount, pets, and ecological fees.",
     policies: [
       {
-        category: "3 years old and below",
+        category: "Guidelines",
         rules: [
-          "Free of charge for entrance fee",
-          "Allowed to share bed with accompanying adults at no additional cost",
-          "Not required to avail of buffet but may share food from adults' plates"
-        ]
-      },
-      {
-        category: "4 to 6 years old",
-        rules: [
-          "Buffet rate: ₱1,000 per person (Adult rate: ₱1,700)"
-        ]
-      },
-      {
-        category: "7 years old and above",
-        rules: [
-          "Same rate as adult: ₱1,700 per person"
+          "1.1 Check-in time: 3:00 PM / Check-out time: 1:00 PM. Extended hours depend on availability; rate adjustment applies; requires at least 16 hours advance notice.",
+          "1.2 You may enter the resort gate 15 minutes before check-in to settle the balance. Wait in parking or seating areas until 3:00 PM.",
+          "1.3 Rescheduling: Inform the resort 1 week before schedule. Deposits are non-refundable; rescheduling valid for 30 days.",
+          "1.4 Final rooms and headcount due 1 week before schedule. Reductions without notice are not refundable. Drivers are included. Children 3 and below are free of charge.",
+          "1.5 Forfeited reservation if the client fails to arrive on the reserved date.",
+          "1.6 Pets allowed: Max two (2) pets per cabana or table for day tours; regardless of overnight rooms. Pets up to 18 kg only. Keep leashed or in carrier; diapers encouraged in public areas.",
+          "1.7 Ecological Fee: Present Booking Confirmation at Municipal Tourism Reception Area. Pay ₱50/person and claim tickets with Referral Slip; present slip upon arrival."
         ]
       }
     ]
   },
-  
-  accommodation: {
-    title: "Hotel Rooms Reminders",
-    description: "Important information about room accommodations and policies",
+
+  occupancy: {
+    title: "Occupancy & Room Services",
+    description: "Room capacity and food policy inside rooms.",
     policies: [
       {
-        category: "Check-in/Check-out",
+        category: "Guidelines",
         rules: [
-          "CHECK IN: 3:00 PM",
-          "CHECK OUT: 1:00 PM"
-        ]
-      },
-      {
-        category: "Restaurant Services",
-        rules: [
-          "We have restaurant inside the resort",
-          "You can order through the resort restaurant menu an hour in advance"
-        ]
-      },
-      {
-        category: "Food Policies",
-        rules: [
-          "Bringing food is not allowed inside the hotel rooms/resort",
-          "You are allowed to bring snacks, chips, bread, pizza, fruits, fast food meal, liquor and drinks - NO CORKAGE",
-          "Bringing Lechon (with corkage fee = ₱2,500)"
+          "2.1 Room capacity shall be strictly observed.",
+          "2.2 Bringing food is not allowed inside rooms. Order via resort restaurant an hour in advance. Snacks, chips, bread, pizza, fruits, fast food, liquor and drinks are allowed — no corkage.",
+          "2.3 Bringing lechon (corkage fee ₱2,500)."
         ]
       }
     ]
   },
-  
-  buffet: {
-    title: "Terms & Condition for Buffet",
-    description: "Buffet schedules and dining policies",
+
+  damages: {
+    title: "Damages & Losses",
+    description: "Guest responsibility for damages to resort property.",
     policies: [
       {
-        category: "Buffet Timings",
+        category: "Guidelines",
         rules: [
-          "DINNER: 6:30 PM - 8:00 PM",
-          "BREAKFAST: 6:30 AM - 8:00 AM",
-          "LUNCH: 11:30 AM - 1:00 PM"
-        ]
-      },
-      {
-        category: "Dining Rules",
-        rules: [
-          "Food items have to be consumed only within the premises",
-          "Take out is not allowed",
-          "It's not possible to get food for pulutan"
+          "3.1 Guests are responsible for any damage that may occur during their stay."
         ]
       }
     ]
   },
-  
-  resort: {
-    title: "Resort Policies",
-    description: "General resort rules and guidelines",
+
+  security: {
+    title: "Security & Valuables",
+    description: "Liability, missing items, and gate hours.",
     policies: [
       {
-        category: "General Rules",
+        category: "Guidelines",
         rules: [
-          "Proper swimwear is required in the pool area",
-          "Outside food and beverages are not allowed within the resort premises",
-          "Quiet hours are from 10:00 PM to 7:00 AM"
-        ]
-      },
-      {
-        category: "Safety & Courtesy",
-        rules: [
-          "Please respect other guests by keeping noise to a minimum during quiet hours",
-          "Follow all posted safety guidelines",
-          "Report any issues to resort staff immediately"
+          "4.1 The resort is not liable for lost, stolen, or damaged items. Keep valuables secure and do not leave belongings unattended.",
+          "4.2 Gate closes at 10:00 PM; for emergencies, inform front desk or guard for assistance."
         ]
       }
     ]
   },
-  
-  pet: {
-    title: "Pet Policy",
-    description: "Guidelines for guests bringing pets",
+
+  facilities: {
+    title: "Pool & Beach Availability",
+    description: "Operating hours for beach and pools.",
     policies: [
       {
-        category: "Pet Requirements",
+        category: "Hours",
         rules: [
-          "Small pets (up to 10 kg) are allowed in designated rooms only",
-          "Cleaning fee applies per stay",
-          "Pets must be on a leash in common areas"
+          "Beach cut-off time: 6:00 PM",
+          "Swimming pool cut-off time: 10:00 PM"
         ]
-      },
+      }
+    ]
+  },
+
+  conduct: {
+    title: "Proper Conduct",
+    description: "Quiet hours and courtesy to other guests.",
+    policies: [
       {
-        category: "Pet Restrictions",
+        category: "Guidelines",
         rules: [
-          "Aggressive pets are not permitted",
-          "Pets must not disturb other guests",
-          "Pet owners are responsible for any damages"
+          "6.1 Observe silence between 10:00 PM to 6:30 AM. Refrain from loud music or noise during these hours. Karaokes or sound systems allowed only for exclusive and pre-arranged functions."
         ]
       }
     ]
@@ -126,11 +89,12 @@ export const RESORT_POLICIES = {
 };
 
 export const POLICY_ICONS = {
-  child: "👶",
-  accommodation: "🏨",
-  buffet: "🍽️",
-  resort: "🏖️",
-  pet: "🐕"
+  checkin: "📝",
+  occupancy: "🏨",
+  damages: "🛠️",
+  security: "🔐",
+  facilities: "🏖️",
+  conduct: "🤝"
 };
 
 export const HERO_IMAGE = "https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg";
