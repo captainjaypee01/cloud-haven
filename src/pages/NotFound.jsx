@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Home, MapPin, Calendar, Phone } from 'lucide-react';
 import SEO from '@/components/SEO';
+import { SUPPORT_EMAIL } from '@/constants/AppConstant';
 
 const NotFound = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -129,8 +130,8 @@ const NotFound = () => {
                             <a href="tel:+639497989831" className="hover:text-blue-600 transition-colors">
                                 📞 +63 949 798 9831
                             </a>
-                            <a href="mailto:info@netaniadelaiya.com" className="hover:text-blue-600 transition-colors">
-                                ✉️ info@netaniadelaiya.com
+                            <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-blue-600 transition-colors">
+                                ✉️ {SUPPORT_EMAIL}
                             </a>
                         </div>
                     </div>
