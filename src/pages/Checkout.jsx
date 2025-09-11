@@ -244,7 +244,7 @@ const CheckoutPage = () => {
                     return;
                 }
                 clear();
-                clearPromo(); // Clear promo code after successful booking
+                clearPromo(false); // Clear promo code silently after successful booking
                 navigate(`/booking/${booking.reference_number}/payment`);
             } catch (err) {
                 console.error('Checkout error:', err);
@@ -382,28 +382,59 @@ const CheckoutPage = () => {
                             <span>{formatCurrency(mealCost)}</span>
                         </div>
                     ) : (
-                        <div className="flex justify-between text-sm font-medium">
-                            <span>
-                                {mealLoading ? (
-                                    "Meals:"
-                                ) : mealQuote && mealQuote.nights ? (
-                                    mealQuote.nights.every(night => night.type === 'buffet') ? (
-                                        `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})`
-                                    ) : (
-                                        "Complimentary Breakfast Only"
-                                    )
-                                ) : (
-                                    "Meals:"
-                                )}
-                            </span>
-                            <span>
-                                {mealLoading ? (
+                        <>
+                            {/* Combined meal display */}
+                            {!mealLoading && mealQuote && mealQuote.nights && (
+                                <>
+                                    {/* Buffet Meals */}
+                                    {mealQuote.nights.some(night => night.type === 'buffet') && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <span>
+                                                Buffet Meals ({totalAdults}A{totalChildren > 0 ? `, ${totalChildren}C` : ''})
+                                            </span>
+                                            <span>
+                                                {formatCurrency(mealQuote.nights
+                                                    .filter(night => night.type === 'buffet')
+                                                    .reduce((total, night) => total + (night.night_total || 0), 0)
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Complimentary Breakfast - separate line */}
+                                    {mealQuote.nights.some(night => night.type === 'free_breakfast') && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <span>
+                                                Complimentary Breakfast ({totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0)} guest{totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                            </span>
+                                            <span className="text-green-600">Free</span>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Extra Guest Breakfast Fees - separate line */}
+                                    {mealQuote.nights.some(night => night.breakfast_total > 0) && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <span>
+                                                Extra Guest Breakfast Fee ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                            </span>
+                                            <span className="text-orange-600">
+                                                {formatCurrency(mealQuote.nights
+                                                    .reduce((total, night) => total + (night.breakfast_total || 0), 0)
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            
+                            {/* Loading state */}
+                            {mealLoading && (
+                                <div className="flex justify-between text-sm font-medium">
+                                    <span>Meals:</span>
                                     <span className="text-xs text-gray-500">Loading...</span>
-                                ) : (
-                                    formatCurrency(mealCost)
-                                )}
-                            </span>
-                        </div>
+                                </div>
+                            )}
+                        </>
                     )}
                     
                     {/* Subtotal - same for both booking types */}
