@@ -13,6 +13,7 @@ import { Form } from "@/components/ui/form";
 import { useBookingsAdminApi } from "@/hooks/api/useBookingsAdminApi";
 import * as roomsSvc from "@/services/rooms";
 import { useApi } from "@/hooks/useApi";
+import { formatCurrency } from "@/lib/format";
 
 // Date utility functions
 const getFirstDayOfMonth = (date) => {
@@ -194,12 +195,180 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
     setView('day');
   };
 
+  // Helper function to get booking type display and breakfast info
+  const getBookingTypeInfo = (booking) => {
+    const bookingType = booking.booking_type || 'overnight';
+    const mealQuoteData = booking.meal_quote_data || {};
+    const totalGuests = booking.booking_adults + booking.booking_children;
+    
+    let typeDisplay = '';
+    let breakfastInfo = '';
+    
+    switch (bookingType) {
+      case 'day_tour':
+        typeDisplay = 'Day Tour';
+        break;
+      case 'overnight':
+        // Check meal_quote_data to determine if buffet or free breakfast
+        const hasBuffet = mealQuoteData.nights && mealQuoteData.nights.some(night => night.type === 'buffet');
+        
+        if (hasBuffet) {
+          typeDisplay = 'Overnight (Buffet)';
+        } else {
+          typeDisplay = 'Overnight (Free Breakfast)';
+          // Calculate free breakfast guests (typically 2 per room) and extra guests
+          const totalRooms = booking.rooms ? booking.rooms.length : 1;
+          const freeBreakfastGuests = totalRooms * 2; // 2 free breakfast per room
+          const extraGuests = Math.max(0, totalGuests - freeBreakfastGuests);
+          breakfastInfo = `Free: ${freeBreakfastGuests}, Extra: ${extraGuests}`;
+        }
+        break;
+      default:
+        typeDisplay = 'Overnight (Buffet)';
+    }
+    
+    return { typeDisplay, breakfastInfo };
+  };
+
+// Helper function to get meal information per room
+const getMealInfoPerRoom = (booking, room) => {
+  const bookingType = booking.booking_type || 'overnight';
+  
+  if (bookingType === 'day_tour') {
+    // For Day Tours, use the actual booking_rooms data from the API
+    const mealCost = room.meal_cost || 0;
+    const includeLunch = room.include_lunch || false;
+    const includePmSnack = room.include_pm_snack || false;
+    
+    // Build details based on what's included
+    let details = [];
+    if (includeLunch) details.push('Lunch');
+    if (includePmSnack) details.push('PM Snack');
+    if (details.length === 0) details.push('No meals');
+    
+    return {
+      type: 'Day Tour Meals',
+      cost: mealCost,
+      details: details.join(', ')
+    };
+  } else {
+    const mealQuoteData = booking.meal_quote_data || {};
+      // For overnight bookings, check meal program type
+      const hasBuffet = mealQuoteData.nights && mealQuoteData.nights.some(night => night.type === 'buffet');
+      
+      if (hasBuffet) {
+        // For buffet, calculate cost per room based on room guests
+        const roomGuests = room.adults + room.children;
+        const buffetNights = mealQuoteData.buffet_nights || 0;
+        const adultPrice = mealQuoteData.nights?.[0]?.adult_price || 0;
+        const childPrice = mealQuoteData.nights?.[0]?.child_price || 0;
+        const roomMealCost = (room.adults * adultPrice + room.children * childPrice) * buffetNights;
+        
+        return {
+          type: 'Buffet',
+          cost: roomMealCost,
+          details: `${buffetNights} night(s)`
+        };
+      } else {
+        // Free breakfast - calculate extra guests for this specific room
+        const roomGuests = room.adults + room.children;
+        const roomMaxGuests = room.room_capacity || 2;
+        const extraGuestsInRoom = Math.max(0, roomGuests - roomMaxGuests);
+        
+        // Calculate cost for extra guests per night (like cart logic)
+        let totalExtraCost = 0;
+        if (extraGuestsInRoom > 0 && mealQuoteData.nights && mealQuoteData.nights.length > 0) {
+          mealQuoteData.nights.forEach(night => {
+            if (night.type === 'free_breakfast') {
+              const roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
+              totalExtraCost += roomBreakfastCost;
+            }
+          });
+        }
+        
+        return {
+          type: 'Free Breakfast',
+          cost: totalExtraCost,
+          breakfastPrice: extraGuestsInRoom > 0 && mealQuoteData.nights && mealQuoteData.nights.length > 0 ? mealQuoteData.nights[0].adult_breakfast_price || 0 : 0,
+          details: `Free: ${roomMaxGuests}, Extra: ${extraGuestsInRoom}${totalExtraCost > 0 ? ` (${formatCurrency(totalExtraCost)})` : ''}`
+        };
+      }
+    }
+  };
+
+  // Helper function to get overall meal information for booking
+  const getMealInfo = (booking) => {
+    const bookingType = booking.booking_type || 'overnight';
+    const mealQuoteData = booking.meal_quote_data || {};
+    
+    if (bookingType === 'day_tour') {
+      // For day tours, show total meal cost from selections
+      if (mealQuoteData.selections && Array.isArray(mealQuoteData.selections)) {
+        const totalMealCost = mealQuoteData.selections.reduce((sum, selection) => sum + (selection.meal_cost || 0), 0);
+        return {
+          type: 'Day Tour Meals',
+          cost: totalMealCost,
+          details: `${mealQuoteData.selections.length} selection(s)`
+        };
+      }
+      return { type: 'Day Tour Meals', cost: 0, details: 'No meal data' };
+    } else {
+      // For overnight bookings, check meal program type
+      const hasBuffet = mealQuoteData.nights && mealQuoteData.nights.some(night => night.type === 'buffet');
+      
+      if (hasBuffet) {
+        const totalMealCost = mealQuoteData.meal_subtotal || 0;
+        const buffetNights = mealQuoteData.buffet_nights || 0;
+        return {
+          type: 'Buffet',
+          cost: totalMealCost,
+          details: `${buffetNights} night(s)`
+        };
+      } else {
+        // Free breakfast - calculate total extra guests across all rooms
+        let totalFreeGuests = 0;
+        let totalExtraGuests = 0;
+        let totalExtraCost = 0;
+        
+        booking.rooms.forEach(room => {
+          const roomGuests = room.adults + room.children;
+          const roomMaxGuests = room.room_capacity || 2;
+          const extraGuestsInRoom = Math.max(0, roomGuests - roomMaxGuests);
+          
+          totalFreeGuests += roomMaxGuests;
+          totalExtraGuests += extraGuestsInRoom;
+          
+          // Calculate extra cost for this room per night (like cart logic)
+          if (extraGuestsInRoom > 0 && mealQuoteData.nights && mealQuoteData.nights.length > 0) {
+            mealQuoteData.nights.forEach(night => {
+              if (night.type === 'free_breakfast') {
+                const roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
+                totalExtraCost += roomBreakfastCost;
+              }
+            });
+          }
+        });
+        
+        return {
+          type: 'Free Breakfast',
+          cost: totalExtraCost,
+          details: `Free: ${totalFreeGuests}, Extra: ${totalExtraGuests}${totalExtraCost > 0 ? ` (${formatCurrency(totalExtraCost)})` : ''}`
+        };
+      }
+    }
+  };
+
   // Print functionality
   const handlePrint = () => {
     const targetDate = formatDate(view === 'day' ? selectedDate : currentDate);
-    const selectedDateEvents = events.filter(ev =>
-      ev.start <= targetDate && targetDate < ev.end
-    );
+    const selectedDateEvents = events.filter(ev => {
+      // For Day Tours, start and end are the same date
+      if (ev.booking_type === 'day_tour') {
+        return ev.start === targetDate;
+      }
+      // For overnight bookings, use the standard logic (exclude checkout day)
+      return ev.start <= targetDate && targetDate < ev.end;
+    });
 
     // Group events by booking_id
     const bookingMap = new Map();
@@ -207,7 +376,6 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
       const bookingId = event.booking_id;
       // Skip events without a valid booking_id
       if (!bookingId || bookingId === undefined || bookingId === null) {
-        // Skipping event without booking_id
         return;
       }
       
@@ -224,17 +392,34 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
           remaining_balance: event.remaining_balance,
           booking_adults: event.booking_adults,
           booking_children: event.booking_children,
+          booking_type: event.booking_type || 'overnight',
+          meal_quote_data: event.meal_quote_data,
           rooms: []
         });
       }
-      bookingMap.get(bookingId).rooms.push({
+      
+      // Add room to the booking with Day Tour specific fields (print function)
+      const roomData = {
         room_type_name: event.room_type_name,
         room_unit_number: event.room_unit_number,
         room_capacity: event.room_capacity,
         room_price_per_night: event.room_price_per_night,
         adults: event.adults,
-        children: event.children
-      });
+        children: event.children,
+        total_guests: event.total_guests
+      };
+      
+      // Add Day Tour specific fields if they exist
+      if (event.price_per_pax !== undefined) roomData.price_per_pax = event.price_per_pax;
+      if (event.include_lunch !== undefined) roomData.include_lunch = event.include_lunch;
+      if (event.include_pm_snack !== undefined) roomData.include_pm_snack = event.include_pm_snack;
+      if (event.lunch_cost !== undefined) roomData.lunch_cost = event.lunch_cost;
+      if (event.pm_snack_cost !== undefined) roomData.pm_snack_cost = event.pm_snack_cost;
+      if (event.meal_cost !== undefined) roomData.meal_cost = event.meal_cost;
+      if (event.base_price !== undefined) roomData.base_price = event.base_price;
+      if (event.room_total_price !== undefined) roomData.room_total_price = event.room_total_price;
+      
+      bookingMap.get(bookingId).rooms.push(roomData);
     });
 
     const groupedBookings = Array.from(bookingMap.values());
@@ -271,46 +456,83 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
                 <th>Reference</th>
                 <th>Guest</th>
                 <th>Status</th>
-                <th>Room(s)</th>
+                <th>Type</th>
+                <th>Room Details</th>
                 <th>Check-in</th>
                 <th>Check-out</th>
                 <th>Nights</th>
                 <th>Total Price</th>
                 <th>Balance</th>
-                <th>Guests</th>
+                <th>Total Guests</th>
+                <th>Breakfast Info</th>
               </tr>
             </thead>
             <tbody>
-              ${groupedBookings.map((booking, index) => `
-                <tr class="booking-header status-${booking.status}">
-                  <td>${booking.reference_number}</td>
-                  <td>${booking.guest_name}</td>
-                  <td>${booking.status}</td>
-                  <td>${booking.rooms.map(room => 
-                    `${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'}`
-                  ).join(', ')}</td>
-                  <td>${booking.start}</td>
-                  <td>${booking.end}</td>
-                  <td>${booking.nights}</td>
-                  <td>₱${booking.final_price?.toLocaleString() || '0'}</td>
-                  <td>₱${booking.remaining_balance?.toLocaleString() || '0'}</td>
-                  <td>${booking.booking_adults} adults, ${booking.booking_children} children</td>
-                </tr>
-                ${booking.rooms.map((room, roomIndex) => `
-                  <tr class="room-row">
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td style="padding-left: 20px;">• ${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'} - Capacity: ${room.room_capacity} pax - ₱${room.room_price_per_night?.toLocaleString() || '0'}/night - ${room.adults} adults, ${room.children} children</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+              ${groupedBookings.map((booking) => {
+                const { typeDisplay, breakfastInfo } = getBookingTypeInfo(booking);
+                return `
+                  <tr class="booking-header status-${booking.status}">
+                    <td>${booking.reference_number}</td>
+                    <td>${booking.guest_name}</td>
+                    <td>${booking.status}</td>
+                    <td>${typeDisplay}</td>
+                    <td>${booking.rooms.length} room(s)</td>
+                    <td>${booking.start}</td>
+                    <td>${booking.end}</td>
+                    <td>${booking.nights}</td>
+                    <td>${formatCurrency(booking.final_price || 0).replace('₱', 'PHP ')}</td>
+                    <td>${formatCurrency(booking.remaining_balance || 0).replace('₱', 'PHP ')}</td>
+                    <td>${booking.booking_adults + booking.booking_children} (${booking.booking_adults}A, ${booking.booking_children}C)</td>
+                    <td>${breakfastInfo || '-'}</td>
                   </tr>
-                `).join('')}
-              `).join('')}
+                  ${booking.rooms.map((room) => `
+                    <tr class="room-row">
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td style="padding-left: 20px;">• ${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'} - Capacity: ${room.room_capacity} pax - ${(() => {
+                        if (booking.booking_type === 'day_tour') {
+                          const pricePerPax = room.price_per_pax || room.room_price_per_night || 0;
+                          return formatCurrency(pricePerPax).replace('₱', 'PHP ') + ' per pax';
+                        } else {
+                          return formatCurrency(room.room_price_per_night || 0).replace('₱', 'PHP ') + ' per night';
+                        }
+                      })()} - ${room.adults}A, ${room.children}C - Meal: ${(() => {
+                        if (booking.booking_type === 'day_tour') {
+                          // For Day Tours, show specific meal selections
+                          const includeLunch = room.include_lunch || false;
+                          const includePmSnack = room.include_pm_snack || false;
+                          const mealCost = room.meal_cost || 0;
+                          
+                          let mealDetails = [];
+                          if (includeLunch) mealDetails.push('Lunch Buffet');
+                          if (includePmSnack) mealDetails.push('PM Snack');
+                          
+                          if (mealDetails.length === 0) {
+                            return 'No meals';
+                          } else {
+                            const mealText = mealDetails.join(' + ');
+                            const costText = mealCost > 0 ? ` (${formatCurrency(mealCost).replace('₱', 'PHP ')})` : ' (Free)';
+                            return mealText + costText;
+                          }
+                        } else {
+                          // For overnight bookings, use existing logic
+                          const mealInfo = getMealInfoPerRoom(booking, room);
+                          return mealInfo.cost > 0 ? formatCurrency(mealInfo.cost).replace('₱', 'PHP ') : 'Free';
+                        }
+                      })()}</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  `).join('')}
+                `;
+              }).join('')}
             </tbody>
           </table>
         </body>
@@ -323,9 +545,14 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
   // Export functionality
   const handleExport = () => {
     const targetDate = formatDate(view === 'day' ? selectedDate : currentDate);
-    const selectedDateEvents = events.filter(ev =>
-      ev.start <= targetDate && targetDate < ev.end
-    );
+    const selectedDateEvents = events.filter(ev => {
+      // For Day Tours, start and end are the same date
+      if (ev.booking_type === 'day_tour') {
+        return ev.start === targetDate;
+      }
+      // For overnight bookings, use the standard logic (exclude checkout day)
+      return ev.start <= targetDate && targetDate < ev.end;
+    });
 
     // Group events by booking_id
     const bookingMap = new Map();
@@ -333,7 +560,6 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
       const bookingId = event.booking_id;
       // Skip events without a valid booking_id
       if (!bookingId || bookingId === undefined || bookingId === null) {
-        // Skipping event without booking_id
         return;
       }
       
@@ -350,40 +576,125 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
           remaining_balance: event.remaining_balance,
           booking_adults: event.booking_adults,
           booking_children: event.booking_children,
+          booking_type: event.booking_type || 'overnight',
+          meal_quote_data: event.meal_quote_data,
           rooms: []
         });
       }
-      bookingMap.get(bookingId).rooms.push({
+      
+      // Add room to the booking with Day Tour specific fields (export function)
+      const roomData = {
         room_type_name: event.room_type_name,
         room_unit_number: event.room_unit_number,
         room_capacity: event.room_capacity,
         room_price_per_night: event.room_price_per_night,
         adults: event.adults,
-        children: event.children
-      });
+        children: event.children,
+        total_guests: event.total_guests
+      };
+      
+      // Add Day Tour specific fields if they exist
+      if (event.price_per_pax !== undefined) roomData.price_per_pax = event.price_per_pax;
+      if (event.include_lunch !== undefined) roomData.include_lunch = event.include_lunch;
+      if (event.include_pm_snack !== undefined) roomData.include_pm_snack = event.include_pm_snack;
+      if (event.lunch_cost !== undefined) roomData.lunch_cost = event.lunch_cost;
+      if (event.pm_snack_cost !== undefined) roomData.pm_snack_cost = event.pm_snack_cost;
+      if (event.meal_cost !== undefined) roomData.meal_cost = event.meal_cost;
+      if (event.base_price !== undefined) roomData.base_price = event.base_price;
+      if (event.room_total_price !== undefined) roomData.room_total_price = event.room_total_price;
+      
+      bookingMap.get(bookingId).rooms.push(roomData);
     });
 
     const groupedBookings = Array.from(bookingMap.values());
 
-    const csvContent = [
-      ['Reference', 'Guest', 'Status', 'Rooms', 'Check-in', 'Check-out', 'Nights', 'Total Price', 'Balance', 'Total Guests', 'Adults', 'Children'],
-      ...groupedBookings.map(booking => [
+    // Create CSV matching print format: booking header + room details
+    const csvRows = [
+      ['Reference', 'Guest', 'Status', 'Type', 'Room Details', 'Check-in', 'Check-out', 'Nights', 'Total Price', 'Balance', 'Total Guests', 'Breakfast Info']
+    ];
+
+    groupedBookings.forEach(booking => {
+      const { typeDisplay, breakfastInfo } = getBookingTypeInfo(booking);
+      
+      // Add booking header row
+      csvRows.push([
         booking.reference_number,
         booking.guest_name,
         booking.status,
-        booking.rooms.map(room => 
-          `${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'}`
-        ).join('; '),
+        typeDisplay,
+        `${booking.rooms.length} room(s)`,
         booking.start,
         booking.end,
         booking.nights,
-        booking.final_price?.toLocaleString() || '0',
-        booking.remaining_balance?.toLocaleString() || '0',
-        `${booking.booking_adults + booking.booking_children}`,
-        booking.booking_adults,
-        booking.booking_children
-      ])
-    ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+        formatCurrency(booking.final_price || 0).replace('₱', 'PHP '),
+        formatCurrency(booking.remaining_balance || 0).replace('₱', 'PHP '),
+        `${booking.booking_adults + booking.booking_children} (${booking.booking_adults}A, ${booking.booking_children}C)`,
+        breakfastInfo || '-'
+      ]);
+      
+      // Add room detail rows
+      booking.rooms.forEach((room) => {
+        csvRows.push([
+          '', // Empty reference
+          '', // Empty guest
+          '', // Empty status
+          '', // Empty type
+          `${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'} - Capacity: ${room.room_capacity} pax - ${(() => {
+            if (booking.booking_type === 'day_tour') {
+              const pricePerPax = room.price_per_pax || room.room_price_per_night || 0;
+              return formatCurrency(pricePerPax).replace('₱', 'PHP ') + ' per pax';
+            } else {
+              return formatCurrency(room.room_price_per_night || 0).replace('₱', 'PHP ') + ' per night';
+            }
+          })()} - ${room.adults}A, ${room.children}C - Meal: ${(() => {
+            if (booking.booking_type === 'day_tour') {
+              // For Day Tours, show specific meal selections
+              const includeLunch = room.include_lunch || false;
+              const includePmSnack = room.include_pm_snack || false;
+              const mealCost = room.meal_cost || 0;
+              
+              let mealDetails = [];
+              if (includeLunch) mealDetails.push('Lunch Buffet');
+              if (includePmSnack) mealDetails.push('PM Snack');
+              
+              if (mealDetails.length === 0) {
+                return 'No meals';
+              } else {
+                const mealText = mealDetails.join(' + ');
+                const costText = mealCost > 0 ? ` (${formatCurrency(mealCost).replace('₱', 'PHP ')})` : ' (Free)';
+                return mealText + costText;
+              }
+            } else {
+              // For overnight bookings, use existing logic
+              const mealInfo = getMealInfoPerRoom(booking, room);
+              return mealInfo.cost > 0 ? formatCurrency(mealInfo.cost).replace('₱', 'PHP ') : 'Free';
+            }
+          })()}`,
+          '', // Empty check-in
+          '', // Empty check-out
+          '', // Empty nights
+          '', // Empty total price
+          '', // Empty balance
+          '', // Empty total guests
+          ''  // Empty breakfast info
+        ]);
+      });
+    });
+
+    const csvContent = csvRows.map(row => 
+      row.map(cell => {
+        // Clean and escape CSV content - remove special characters that cause issues in Excel
+        const cleanCell = String(cell || '')
+          .replace(/"/g, '""')           // Escape quotes
+          .replace(/\n/g, ' ')          // Replace newlines with spaces
+          .replace(/\r/g, '')           // Remove carriage returns
+          .replace(/[^\x20-\x7E]/g, '') // Remove non-ASCII characters
+          .replace(/₱/g, 'PHP')         // Replace peso symbol with PHP
+          .replace(/•/g, '-')           // Replace bullet points with dashes
+          .replace(/[^\w\s\-.,()]/g, ''); // Remove other special characters except basic punctuation
+        return `"${cleanCell}"`;
+      }).join(',')
+    ).join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/format";
 
 const statusVariant = (status) => {
   switch (status) {
@@ -20,7 +21,11 @@ const statusVariant = (status) => {
 
 
 const isBookingOnDay = (booking, dayStr) => {
-  // Check if the booking spans this day
+  // For Day Tours, start and end are the same date
+  if (booking.booking_type === 'day_tour') {
+    return booking.start === dayStr;
+  }
+  // For overnight bookings, use the standard logic (exclude checkout day)
   return booking.start <= dayStr && dayStr < booking.end;
 };
 
@@ -63,12 +68,13 @@ export default function DayTimeline({ date, events }) {
           remaining_balance: event.remaining_balance,
           booking_adults: event.booking_adults,
           booking_children: event.booking_children,
+          booking_type: event.booking_type,
           rooms: []
         });
       }
       
-      // Add room to the booking
-      bookingMap.get(bookingId).rooms.push({
+      // Add room to the booking with Day Tour specific fields
+      const roomData = {
         room_type_id: event.room_type_id,
         room_type_name: event.room_type_name,
         room_unit_id: event.room_unit_id,
@@ -78,7 +84,19 @@ export default function DayTimeline({ date, events }) {
         adults: event.adults,
         children: event.children,
         total_guests: event.total_guests
-      });
+      };
+      
+      // Add Day Tour specific fields if they exist
+      if (event.price_per_pax !== undefined) roomData.price_per_pax = event.price_per_pax;
+      if (event.include_lunch !== undefined) roomData.include_lunch = event.include_lunch;
+      if (event.include_pm_snack !== undefined) roomData.include_pm_snack = event.include_pm_snack;
+      if (event.lunch_cost !== undefined) roomData.lunch_cost = event.lunch_cost;
+      if (event.pm_snack_cost !== undefined) roomData.pm_snack_cost = event.pm_snack_cost;
+      if (event.meal_cost !== undefined) roomData.meal_cost = event.meal_cost;
+      if (event.base_price !== undefined) roomData.base_price = event.base_price;
+      if (event.room_total_price !== undefined) roomData.room_total_price = event.room_total_price;
+      
+      bookingMap.get(bookingId).rooms.push(roomData);
     });
 
     // Convert to array and sort by guest name
@@ -151,15 +169,15 @@ export default function DayTimeline({ date, events }) {
                     </span>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {booking.start} → {booking.end} ({booking.nights} night{booking.nights !== 1 ? 's' : ''})
+                  {booking.start} → {booking.end} ({booking.booking_type === 'day_tour' ? 'Day Tour' : `${booking.nights} night${booking.nights !== 1 ? 's' : ''}`})
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-semibold text-lg">
-                  ₱{booking.final_price?.toLocaleString() || '0'}
+                  {formatCurrency(booking.final_price || 0)}
                 </div>
                 <div className={`text-sm ${booking.remaining_balance > 0 ? 'text-amber-600 font-medium' : 'text-green-600 font-medium'}`}>
-                  Balance: ₱{booking.remaining_balance?.toLocaleString() || '0'}
+                  Balance: {formatCurrency(booking.remaining_balance || 0)}
                 </div>
               </div>
             </div>
@@ -182,7 +200,10 @@ export default function DayTimeline({ date, events }) {
                     </div>
                     <div className="text-right">
                       <div className="font-medium">
-                        ₱{room.room_price_per_night?.toLocaleString() || '0'}/night
+                        {booking.booking_type === 'day_tour' 
+                          ? `${formatCurrency(room.price_per_pax || room.room_price_per_night || 0)} per pax`
+                          : `${formatCurrency(room.room_price_per_night || 0)} per night`
+                        }
                       </div>
                     </div>
                   </div>
