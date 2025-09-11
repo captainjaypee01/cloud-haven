@@ -19,7 +19,12 @@ const ListBooking = () => {
     const debouncedSearch = useDebounce(search, 400);
     const [sorting, setSorting] = useState([]);
     const [status, setStatus] = useState("all");
-    const [dateFilter, setDateFilter] = useState("");
+    const [bookingDate, setBookingDate] = useState("");
+    const [bookingFromDate, setBookingFromDate] = useState("");
+    const [bookingToDate, setBookingToDate] = useState("");
+    const [checkinCheckoutDate, setCheckinCheckoutDate] = useState("");
+    const [checkinCheckoutFromDate, setCheckinCheckoutFromDate] = useState("");
+    const [checkinCheckoutToDate, setCheckinCheckoutToDate] = useState("");
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
     const api = useApi();
@@ -119,7 +124,12 @@ const ListBooking = () => {
                 ? `${sorting[0].id}|${sorting[0].desc ? 'desc' : 'asc'}`
                 : 'created_at|desc',
             status: status === 'all' ? undefined : status,
-            date: dateFilter || undefined,
+            created_date: bookingDate || undefined,
+            created_from: bookingFromDate || undefined,
+            created_to: bookingToDate || undefined,
+            date: checkinCheckoutDate || undefined,
+            date_from: checkinCheckoutFromDate || undefined,
+            date_to: checkinCheckoutToDate || undefined,
         };
         try {
             const res = await api.get(`${API_PREFIX}/admin/bookings`, {
@@ -135,9 +145,18 @@ const ListBooking = () => {
     };
 
     useEffect(() => {
-        fetchBookings({ search: debouncedSearch, status, date: dateFilter });
+        fetchBookings({ 
+            search: debouncedSearch, 
+            status, 
+            created_date: bookingDate,
+            created_from: bookingFromDate,
+            created_to: bookingToDate,
+            date: checkinCheckoutDate,
+            date_from: checkinCheckoutFromDate,
+            date_to: checkinCheckoutToDate
+        });
         // eslint-disable-next-line
-    }, [debouncedSearch, sorting, status, dateFilter, pagination]);
+    }, [debouncedSearch, sorting, status, bookingDate, bookingFromDate, bookingToDate, checkinCheckoutDate, checkinCheckoutFromDate, checkinCheckoutToDate, pagination]);
 
     return (
         <div>
@@ -166,27 +185,126 @@ const ListBooking = () => {
                     ]
                 }]}
             />
-            <div className="mb-4 flex gap-4 items-center">
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Filter by Date</label>
-                    <Input
-                        type="date"
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-48"
-                        placeholder="Select date to filter bookings"
-                    />
+            <div className="mb-4 space-y-4">
+                {/* Date Filters - One line on larger screens */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Booking Creation Date Filters */}
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700">Filter by Booking Creation Date</h4>
+                        <div className="flex gap-4 items-end">
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium mb-1">Date Range</label>
+                                <div className="flex gap-2 items-center">
+                                    <Input
+                                        type="date"
+                                        value={bookingFromDate}
+                                        onChange={(e) => setBookingFromDate(e.target.value)}
+                                        className="w-36"
+                                        placeholder="From date"
+                                    />
+                                    <span className="text-gray-500">to</span>
+                                    <Input
+                                        type="date"
+                                        value={bookingToDate}
+                                        onChange={(e) => setBookingToDate(e.target.value)}
+                                        className="w-36"
+                                        placeholder="To date"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium mb-1">Or specific date</label>
+                                <Input
+                                    type="date"
+                                    value={bookingDate}
+                                    onChange={(e) => setBookingDate(e.target.value)}
+                                    className="w-36"
+                                    placeholder="Select date"
+                                />
+                            </div>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setBookingFromDate("");
+                                setBookingToDate("");
+                                setBookingDate("");
+                            }}
+                            className="text-xs"
+                        >
+                            Clear Booking Date
+                        </Button>
+                    </div>
+
+                    {/* Check-in/Check-out Date Filters */}
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-gray-700">Filter by Check-in/Check-out Date</h4>
+                        <div className="flex gap-4 items-end">
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium mb-1">Date Range</label>
+                                <div className="flex gap-2 items-center">
+                                    <Input
+                                        type="date"
+                                        value={checkinCheckoutFromDate}
+                                        onChange={(e) => setCheckinCheckoutFromDate(e.target.value)}
+                                        className="w-36"
+                                        placeholder="From date"
+                                    />
+                                    <span className="text-gray-500">to</span>
+                                    <Input
+                                        type="date"
+                                        value={checkinCheckoutToDate}
+                                        onChange={(e) => setCheckinCheckoutToDate(e.target.value)}
+                                        className="w-36"
+                                        placeholder="To date"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex flex-col">
+                                <label className="text-sm font-medium mb-1">Or specific date</label>
+                                <Input
+                                    type="date"
+                                    value={checkinCheckoutDate}
+                                    onChange={(e) => setCheckinCheckoutDate(e.target.value)}
+                                    className="w-36"
+                                    placeholder="Select date"
+                                />
+                            </div>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                                setCheckinCheckoutFromDate("");
+                                setCheckinCheckoutToDate("");
+                                setCheckinCheckoutDate("");
+                            }}
+                            className="text-xs"
+                        >
+                            Clear Check-in/Check-out Date
+                        </Button>
+                    </div>
                 </div>
-                {dateFilter && (
+
+                {/* Clear All Filters */}
+                <div className="flex justify-end">
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setDateFilter("")}
-                        className="mt-6"
+                        onClick={() => {
+                            setBookingDate("");
+                            setBookingFromDate("");
+                            setBookingToDate("");
+                            setCheckinCheckoutDate("");
+                            setCheckinCheckoutFromDate("");
+                            setCheckinCheckoutToDate("");
+                        }}
+                        className="text-red-600 hover:text-red-700"
                     >
-                        Clear Date Filter
+                        Clear All Date Filters
                     </Button>
-                )}
+                </div>
             </div>
             <DataTable
                 columns={bookingColumns}

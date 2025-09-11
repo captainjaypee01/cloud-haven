@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import MealDetailComponent from '@/components/booking/MealDetailComponent';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getPaymentProviderLabel } from '@/utils/paymentUtils';
 
 const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showAddPayment, setShowAddPayment] = useState(false);
@@ -554,7 +555,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                 {booking.payments?.map((p, idx) => (
                                     <tr key={idx} className="border-b last:border-b-0">
                                         <td className="py-2 pr-4">{formatDateTime(p.created_at)}</td>
-                                        <td className="py-2 pr-4">{p.provider}</td>
+                                        <td className="py-2 pr-4">{getPaymentProviderLabel(p.provider)}</td>
                                         <td className="py-2 pr-4">{formatCurrency(p.amount)}</td>
                                         <td className="py-2 pr-4"><StatusBadge status={p.status} /></td>
                                         <td className="py-2 pr-4">{p.transaction_id || '-'}</td>
