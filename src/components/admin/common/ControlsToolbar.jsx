@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 
 export default function ControlsToolbar({
     search, setSearch,
+    searchLabel = "Search…",
     filters = [], // [{ key, label, options: [{value, label}], value, onChange }]
     // sorts = [],   // [{ value, label }]
     onExport
 }) {
     return (
         <div className="flex flex-wrap gap-2 items-center mb-4">
-            <Input placeholder="Search…" value={search} onChange={e => setSearch(e.target.value)} />
+            <Input placeholder={searchLabel} value={search} onChange={e => setSearch(e.target.value)} />
             {/* {sorts.options.length > 0 && (
                 <Select value={sorts.selected} onValueChange={val => sorts.onChange(val)}>
                     <SelectTrigger className="w-44"><SelectValue placeholder="Sort by" /></SelectTrigger>
