@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { SUPPORT_EMAIL } from '@/constants/AppConstant';
 
 const SocialShare = ({ 
   url, 
@@ -44,7 +45,7 @@ const SocialShare = ({
     email: {
       name: 'Email',
       icon: <Mail className="w-4 h-4" />,
-      url: `mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(`${shareDescription}\n\n${shareUrl}\n\nFor reservations, call: +63 949 798 9831\nEmail: info@netaniadelaiya.com`)}`
+      url: `mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(`${shareDescription}\n\n${shareUrl}\n\nFor reservations, call: +63 949 798 9831\nEmail: ${SUPPORT_EMAIL}`)}`
     }
   };
 
