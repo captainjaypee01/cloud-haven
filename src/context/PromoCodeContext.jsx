@@ -78,9 +78,11 @@ export const PromoCodeProvider = ({ children }) => {
         dispatch({ type: 'SET_PROMO_ERROR', promoError });
     };
 
-    const clearPromo = () => {
+    const clearPromo = (showToast = true) => {
         dispatch({ type: 'CLEAR_PROMO' });
-        toast.success("Promo code removed.");
+        if (showToast) {
+            toast.success("Promo code removed.");
+        }
     };
 
     const applyPromo = async (api, promoCode, roomTotalPrice, mealCost, grandTotal) => {

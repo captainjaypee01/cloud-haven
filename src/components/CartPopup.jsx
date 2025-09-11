@@ -380,38 +380,63 @@ export function CartPopup() {
                                 {!isDayTourCart && item.hasRoomMealBreakdown && (
                                     <div className="mt-2 p-2 bg-blue-50 rounded-lg">
                                         <h6 className="text-xs font-medium text-blue-700 mb-1">Meal Breakdown for this Room</h6>
-                                        <div className="space-y-1 text-xs text-blue-600">
+                                        <div className="space-y-2">
                                             {item.mealBreakdown.map((mealNight, index) => (
-                                                <div key={index} className="flex justify-between">
-                                                    <span>{new Date(mealNight.date).toLocaleDateString()}</span>
-                                                    <div className="text-right">
-                                                        {mealNight.type === 'buffet' ? (
-                                                            <div>
-                                                                <span className="text-green-600 font-medium">Buffet</span>
-                                                                <span className="ml-1">{formatCurrency(mealNight.cost)}</span>
-                                                                <div className="text-xs text-gray-600 mt-1 space-y-0.5">
-                                                                    <div>{item.adults} Adult{item.adults > 1 ? 's' : ''} at {formatCurrency(mealNight.adultPrice)} each = {formatCurrency(item.adults * mealNight.adultPrice)}</div>
-                                                                    {item.children > 0 && (
-                                                                        <div>{item.children} Child{item.children > 1 ? 'ren' : ''} at {formatCurrency(mealNight.childPrice)} each = {formatCurrency(item.children * mealNight.childPrice)}</div>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <div>
-                                                                <span className="text-orange-600">Extra Guest Breakfast</span>
-                                                                <span className="ml-1">{formatCurrency(mealNight.cost)}</span>
-                                                                <div className="text-xs text-gray-600">
-                                                                    {mealNight.extraGuests} extra guest{mealNight.extraGuests > 1 ? 's' : ''}
-                                                                </div>
-                                                            </div>
-                                                        )}
+                                                <div key={index} className="border-b border-blue-200 pb-2 last:border-b-0 last:pb-0">
+                                                    {/* Date Header */}
+                                                    <div className="flex justify-between items-center mb-1">
+                                                        <span className="text-xs font-medium text-blue-700">
+                                                            {new Date(mealNight.date).toLocaleDateString('en-US', { 
+                                                                weekday: 'short', 
+                                                                month: 'short', 
+                                                                day: 'numeric' 
+                                                            })} - {mealNight.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                                        </span>
+                                                        <span className="text-xs font-semibold text-blue-900">
+                                                            {formatCurrency(mealNight.cost)}
+                                                        </span>
                                                     </div>
+                                                    
+                                                    {/* Breakdown Details */}
+                                                    {mealNight.type === 'buffet' ? (
+                                                        <div className="ml-3 space-y-0.5 text-xs text-blue-600">
+                                                            {item.adults > 0 && (
+                                                                <div className="flex justify-between">
+                                                                    <span>{item.adults} Adult{item.adults > 1 ? 's' : ''} at {formatCurrency(mealNight.adultPrice)} each</span>
+                                                                    <span className="font-medium">{formatCurrency(item.adults * mealNight.adultPrice)}</span>
+                                                                </div>
+                                                            )}
+                                                            {item.children > 0 && (
+                                                                <div className="flex justify-between">
+                                                                    <span>{item.children} Child{item.children > 1 ? 'ren' : ''} at {formatCurrency(mealNight.childPrice)} each</span>
+                                                                    <span className="font-medium">{formatCurrency(item.children * mealNight.childPrice)}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="ml-3 space-y-0.5 text-xs text-blue-600">
+                                                            {/* Always show complimentary breakfast for guests within room capacity */}
+                                                            <div className="flex justify-between">
+                                                                <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast</span>
+                                                                <span className="font-medium text-green-600">Free</span>
+                                                            </div>
+                                                            {/* Show extra guest breakfast fee if there are extra guests */}
+                                                            {mealNight.extraGuests > 0 && (
+                                                                <div className="flex justify-between">
+                                                                    <span className="text-orange-600">{mealNight.extraGuests} Extra Guest{mealNight.extraGuests > 1 ? 's' : ''} at {formatCurrency(mealNight.adultBreakfastPrice || 0)} each</span>
+                                                                    <span className="font-medium text-orange-600">{formatCurrency(mealNight.extraGuests * (mealNight.adultBreakfastPrice || 0))}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
-                                            <div className="pt-1 mt-1 border-t border-blue-300 font-medium">
-                                                <div className="flex justify-between">
-                                                    <span>Room Meal Total:</span>
-                                                    <span>{formatCurrency(item.roomMealTotal)}</span>
+                                            
+                                            {/* Total */}
+                                            <div className="pt-1">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-xs font-semibold text-blue-800">Room Meal Total:</span>
+                                                    <span className="text-xs font-bold text-green-600">{formatCurrency(item.roomMealTotal)}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -442,48 +467,89 @@ export function CartPopup() {
 
                         {/* Meal Summary - Only for overnight bookings */}
                         {!isDayTourCart && (
-                            <div className="flex justify-between text-sm font-medium">
-                                <div className="flex flex-col">
-                                    <span>
-                                        {mealLoading ? (
-                                            "Meals:"
-                                        ) : mealQuote && mealQuote.nights ? (
-                                            mealQuote.nights.every(night => night.type === 'buffet') ? (
-                                                totalAdults > 0 || totalChildren > 0 ? 
-                                                    `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})` :
-                                                    "Buffet Available"
-                                            ) : (
-                                                "Complimentary Breakfast"
-                                            )
-                                        ) : (
-                                            "Meals:"
+                            <>
+                                {/* Combined meal display */}
+                                {!mealLoading && mealQuote && mealQuote.nights && (
+                                    <>
+                                        {/* Buffet Meals */}
+                                        {mealQuote.nights.some(night => night.type === 'buffet') && (
+                                            <div className="flex justify-between text-xs font-medium">
+                                                <div className="flex flex-col">
+                                                    <span>
+                                                        {totalAdults > 0 || totalChildren > 0 ? 
+                                                            `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})` :
+                                                            "Buffet Available"
+                                                        }
+                                                    </span>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.type === 'buffet')
+                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                            .join(', ')
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <span>
+                                                    {formatCurrency(mealQuote.nights
+                                                        .filter(night => night.type === 'buffet')
+                                                        .reduce((total, night) => total + (night.night_total || 0), 0)
+                                                    )}
+                                                </span>
+                                            </div>
                                         )}
-                                    </span>
-                                    {!mealLoading && mealQuote && mealQuote.nights && (
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            {mealQuote.nights.every(night => night.type === 'buffet') ? (
-                                                // All buffet days, show the buffet dates
-                                                mealQuote.nights
-                                                    .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                    .join(', ')
-                                            ) : (
-                                                // Mixed or all free breakfast, show free breakfast dates
-                                                mealQuote.nights
-                                                    .filter(night => night.type === 'free_breakfast')
-                                                    .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                    .join(', ')
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                                <span>
-                                    {mealLoading ? (
+                                        
+                                        {/* Complimentary Breakfast - separate line */}
+                                        {mealQuote.nights.some(night => night.type === 'free_breakfast') && (
+                                            <div className="flex justify-between text-xs font-medium">
+                                                <div className="flex flex-col">
+                                                    <span>
+                                                        Complimentary Breakfast ({totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0)} guest{totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                    </span>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.type === 'free_breakfast')
+                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                            .join(', ')
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <span className="text-green-600 text-xs">Free</span>
+                                            </div>
+                                        )}
+                                        
+                                        {/* Extra Guest Breakfast Fees - separate line */}
+                                        {mealQuote.nights.some(night => night.breakfast_total > 0) && (
+                                            <div className="flex justify-between text-xs font-medium">
+                                                <div className="flex flex-col">
+                                                    <span>
+                                                        Extra Guest Breakfast Fee ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                    </span>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.breakfast_total > 0)
+                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                            .join(', ')
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <span className="text-orange-600 text-xs">
+                                                    {formatCurrency(mealQuote.nights
+                                                        .reduce((total, night) => total + (night.breakfast_total || 0), 0)
+                                                    )}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                
+                                {/* Loading state */}
+                                {mealLoading && (
+                                    <div className="flex justify-between text-xs font-medium">
+                                        <span>Meals:</span>
                                         <span className="text-xs text-gray-500">Loading...</span>
-                                    ) : (
-                                        formatCurrency(mealCost)
-                                    )}
-                                </span>
-                            </div>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {/* Promo Code Section */}

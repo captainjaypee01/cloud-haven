@@ -273,44 +273,63 @@ const CartList = ({
             {!isDayTourCart && item.hasRoomMealBreakdown && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                     <h6 className="text-sm font-medium text-blue-700 mb-2">Meal Breakdown for this Room</h6>
-                    <div className="space-y-1 text-xs text-blue-600">
+                    <div className="space-y-3">
                         {item.mealBreakdown.map((mealNight, index) => (
-                            <div key={index} className="flex justify-between">
-                                <span>{new Date(mealNight.date).toLocaleDateString()}</span>
-                                <div className="text-right">
-                                    {mealNight.type === 'buffet' ? (
-                                        <div>
-                                            <span className="text-green-600 font-medium">Buffet</span>
-                                            <span className="ml-2">{formatCurrency(mealNight.cost)}</span>
-                                            <div className="text-xs text-gray-600 mt-1 space-y-0.5">
-                                                <div className="flex justify-between">
-                                                    <span>{item.adults} Adult{item.adults > 1 ? 's' : ''} at {formatCurrency(mealNight.adultPrice)} each</span>
-                                                    <span>{formatCurrency(item.adults * mealNight.adultPrice)}</span>
-                                                </div>
-                                                {item.children > 0 && (
-                                                    <div className="flex justify-between">
-                                                        <span>{item.children} Child{item.children > 1 ? 'ren' : ''} at {formatCurrency(mealNight.childPrice)} each</span>
-                                                        <span>{formatCurrency(item.children * mealNight.childPrice)}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div>
-                                            <span className="text-orange-600">Extra Guest Breakfast</span>
-                                            <span className="ml-2">{formatCurrency(mealNight.cost)}</span>
-                                            <div className="text-xs text-gray-600">
-                                                {mealNight.extraGuests} extra guest{mealNight.extraGuests > 1 ? 's' : ''}
-                                            </div>
-                                        </div>
-                                    )}
+                            <div key={index} className="border-b border-blue-200 pb-3 last:border-b-0 last:pb-0">
+                                {/* Date Header */}
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-blue-700">
+                                        {new Date(mealNight.date).toLocaleDateString('en-US', { 
+                                            weekday: 'short', 
+                                            month: 'short', 
+                                            day: 'numeric' 
+                                        })} - {mealNight.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                    </span>
+                                    <span className="text-sm font-semibold text-blue-900">
+                                        {formatCurrency(mealNight.cost)}
+                                    </span>
                                 </div>
+                                
+                                {/* Breakdown Details */}
+                                {mealNight.type === 'buffet' ? (
+                                    <div className="ml-4 space-y-1 text-xs text-blue-600">
+                                        {item.adults > 0 && (
+                                            <div className="flex justify-between">
+                                                <span>{item.adults} Adult{item.adults > 1 ? 's' : ''} at {formatCurrency(mealNight.adultPrice)} each</span>
+                                                <span className="font-medium">{formatCurrency(item.adults * mealNight.adultPrice)}</span>
+                                            </div>
+                                        )}
+                                        {item.children > 0 && (
+                                            <div className="flex justify-between">
+                                                <span>{item.children} Child{item.children > 1 ? 'ren' : ''} at {formatCurrency(mealNight.childPrice)} each</span>
+                                                <span className="font-medium">{formatCurrency(item.children * mealNight.childPrice)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="ml-4 space-y-1 text-xs text-blue-600">
+                                        {/* Always show complimentary breakfast for guests within room capacity */}
+                                        <div className="flex justify-between">
+                                            <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast</span>
+                                            <span className="font-medium text-green-600">Free</span>
+                                        </div>
+                                        {/* Show extra guest breakfast fee if there are extra guests */}
+                                        {mealNight.extraGuests > 0 && (
+                                            <div className="flex justify-between">
+                                                <span className="text-orange-600">{mealNight.extraGuests} Extra Guest{mealNight.extraGuests > 1 ? 's' : ''} at {formatCurrency(mealNight.adultBreakfastPrice || 0)} each</span>
+                                                <span className="font-medium text-orange-600">{formatCurrency(mealNight.extraGuests * (mealNight.adultBreakfastPrice || 0))}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         ))}
-                        <div className="pt-2 mt-2 border-t border-blue-300 font-medium">
-                            <div className="flex justify-between">
-                                <span>Room Meal Total:</span>
-                                <span>{formatCurrency(item.roomMealTotal)}</span>
+                        
+                        {/* Total */}
+                        <div className="pt-2">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-semibold text-blue-800">Room Meal Total:</span>
+                                <span className="text-sm font-bold text-green-600">{formatCurrency(item.roomMealTotal)}</span>
                             </div>
                         </div>
                     </div>

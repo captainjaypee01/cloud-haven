@@ -73,7 +73,7 @@ const Cart = () => {
 
     const handleClearCart = () => {
         clear(); // Clear cart items
-        clearPromo(); // Clear promo code
+        clearPromo(false); // Clear promo code silently
     };
 
     const checkAvailability = async () => {
@@ -348,48 +348,87 @@ const Cart = () => {
                                 <span>Total Room Price:</span>
                                 <span>{formatCurrency(roomTotalPrice)}</span>
                             </div>
-                            <div className="flex justify-between text-sm font-medium">
-                                <div className="flex flex-col">
-                                    <span>
-                                        {mealLoading ? (
-                                            "Meals:"
-                                        ) : mealQuote && mealQuote.nights ? (
-                                            mealQuote.nights.every(night => night.type === 'buffet') ? (
-                                                totalAdults > 0 || totalChildren > 0 ? 
-                                                    `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})` :
-                                                    "Buffet Available"
-                                            ) : (
-                                                "Complimentary Breakfast"
-                                            )
-                                        ) : (
-                                            "Meals:"
-                                        )}
-                                    </span>
-                                    {!mealLoading && mealQuote && mealQuote.nights && (
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            {mealQuote.nights.every(night => night.type === 'buffet') ? (
-                                                // All buffet days, show the buffet dates
-                                                mealQuote.nights
-                                                    .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                    .join(', ')
-                                            ) : (
-                                                // Mixed or all free breakfast, show free breakfast dates
-                                                mealQuote.nights
-                                                    .filter(night => night.type === 'free_breakfast')
-                                                    .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                    .join(', ')
-                                            )}
+                            {/* Combined meal display */}
+                            {!mealLoading && mealQuote && mealQuote.nights && (
+                                <>
+                                    {/* Buffet Meals */}
+                                    {mealQuote.nights.some(night => night.type === 'buffet') && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <div className="flex flex-col">
+                                                <span>
+                                                    {totalAdults > 0 || totalChildren > 0 ? 
+                                                        `Buffet Meals (${totalAdults}A${totalChildren > 0 ? `, ${totalChildren}C` : ''})` :
+                                                        "Buffet Available"
+                                                    }
+                                                </span>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {mealQuote.nights
+                                                        .filter(night => night.type === 'buffet')
+                                                        .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                        .join(', ')
+                                                    }
+                                                </div>
+                                            </div>
+                                            <span>
+                                                {formatCurrency(mealQuote.nights
+                                                    .filter(night => night.type === 'buffet')
+                                                    .reduce((total, night) => total + (night.night_total || 0), 0)
+                                                )}
+                                            </span>
                                         </div>
                                     )}
-                                </div>
-                                <span>
-                                    {mealLoading ? (
-                                        <span className="text-xs text-gray-500">Loading...</span>
-                                    ) : (
-                                        formatCurrency(mealCost)
+                                    
+                                    {/* Complimentary Breakfast - separate line */}
+                                    {mealQuote.nights.some(night => night.type === 'free_breakfast') && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <div className="flex flex-col">
+                                                <span>
+                                                    Complimentary Breakfast ({totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0)} guest{totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                </span>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {mealQuote.nights
+                                                        .filter(night => night.type === 'free_breakfast')
+                                                        .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                        .join(', ')
+                                                    }
+                                                </div>
+                                            </div>
+                                            <span className="text-green-600">Free</span>
+                                        </div>
                                     )}
-                                </span>
-                            </div>
+                                    
+                                    {/* Extra Guest Breakfast Fees - separate line */}
+                                    {mealQuote.nights.some(night => night.breakfast_total > 0) && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <div className="flex flex-col">
+                                                <span>
+                                                    Extra Guest Breakfast Fee ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                </span>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {mealQuote.nights
+                                                        .filter(night => night.breakfast_total > 0)
+                                                        .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                        .join(', ')
+                                                    }
+                                                </div>
+                                            </div>
+                                            <span className="text-orange-600">
+                                                {formatCurrency(mealQuote.nights
+                                                    .reduce((total, night) => total + (night.breakfast_total || 0), 0)
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                            
+                            {/* Loading state */}
+                            {mealLoading && (
+                                <div className="flex justify-between text-sm font-medium">
+                                    <span>Meals:</span>
+                                    <span className="text-xs text-gray-500">Loading...</span>
+                                </div>
+                            )}
                             
                             {/* Professional Meal Breakdown */}
                             {mealQuote && mealQuote.nights && !mealLoading && (
@@ -408,7 +447,7 @@ const Cart = () => {
                                                         })} - {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
                                                     </span>
                                                     <span className="text-sm font-semibold text-gray-900">
-                                                        {formatCurrency(night.night_total)}
+                                                        {night.type === 'buffet' ? formatCurrency(night.night_total) : formatCurrency(night.breakfast_total || 0)}
                                                     </span>
                                                 </div>
                                                 
@@ -429,20 +468,26 @@ const Cart = () => {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    night.breakfast_total > 0 && (
-                                                        <div className="ml-4 space-y-1 text-xs text-gray-600">
+                                                    <div className="ml-4 space-y-1 text-xs text-gray-600">
+                                                        {/* Always show complimentary breakfast for guests within room capacity */}
+                                                        <div className="flex justify-between">
+                                                            <span className="text-green-600">{(night.adults || 0) + (night.children || 0) - (night.extra_adults || 0)} Guest{((night.adults || 0) + (night.children || 0) - (night.extra_adults || 0)) > 1 ? 's' : ''} - Complimentary Breakfast</span>
+                                                            <span className="font-medium text-green-600">Free</span>
+                                                        </div>
+                                                        {/* Show extra guest breakfast fee if there are extra guests */}
+                                                        {night.breakfast_total > 0 && (
                                                             <div className="flex justify-between">
-                                                                <span className="text-orange-600">{night.extra_adults} Extra Guest{night.extra_adults !== 1 ? 's' : ''} Breakfast</span>
+                                                                <span className="text-orange-600">{night.extra_adults} Extra Guest{night.extra_adults !== 1 ? 's' : ''} at {formatCurrency(night.adult_breakfast_price || 0)} each</span>
                                                                 <span className="font-medium text-orange-600">{formatCurrency(night.breakfast_total)}</span>
                                                             </div>
-                                                        </div>
-                                                    )
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
                                         ))}
                                         
                                         {/* Total */}
-                                        <div className="pt-2 border-t border-gray-300">
+                                        <div className="pt-2">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-sm font-semibold text-gray-800">Total Meal Cost</span>
                                                 <span className="text-sm font-bold text-green-600">{formatCurrency(mealCost)}</span>

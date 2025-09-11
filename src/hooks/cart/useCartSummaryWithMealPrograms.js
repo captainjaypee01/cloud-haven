@@ -101,11 +101,15 @@ export function useCartSummaryWithMealPrograms() {
                     // Buffet: charge all guests in this room
                     roomNightCost = (item.adults * (night.adult_price || 0)) + (item.children * (night.child_price || 0));
                     showBreakdown = true; // Always show breakdown for buffet
-                } else if (night.type === 'free_breakfast' && hasExtraGuests) {
-                    // Free breakfast: only charge extra guests
-                    roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
-                    roomNightCost = roomBreakfastCost;
-                    showBreakdown = true; // Show breakdown when there are extra guests
+                } else if (night.type === 'free_breakfast') {
+                    // Free breakfast: charge extra guests if any, but always show breakdown
+                    if (hasExtraGuests) {
+                        roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
+                        roomNightCost = roomBreakfastCost;
+                    } else {
+                        roomNightCost = 0; // No cost for complimentary breakfast
+                    }
+                    showBreakdown = true; // Always show breakdown for free breakfast days
                 }
 
                 roomMealTotal += roomNightCost;
