@@ -37,6 +37,14 @@ const PaymentPage = () => {
             // Handle different API response structures
             const data = response.data?.data || response.data?.booking || response.data;
             if (data) {
+                // Debug: Log the booking data to see what we're receiving
+                console.log('PaymentPage - Booking data received:', {
+                    reference_number: data.reference_number,
+                    total_price: data.total_price,
+                    meal_price: data.meal_price,
+                    final_price: data.final_price,
+                    discount_amount: data.discount_amount
+                });
                 setBooking(data);
             } else {
                 toast.error("Failed to fetch booking details");
@@ -85,7 +93,8 @@ const PaymentPage = () => {
     const actualFinalPrice = booking.final_price - (booking.discount_amount || 0);
     const downpaymentAmount = booking.downpayment_amount || (actualFinalPrice * 0.5);
     const remainingBalance = Math.max(0, actualFinalPrice - paidAmount);
-    
+    const subtotal = ((booking.total_price || 0) + (booking.meal_price || 0));
+    console.log('subtotal', subtotal);
     // Check if downpayment has been paid (total paid amount >= downpayment amount)
     const downpaymentPaid = paidAmount >= downpaymentAmount;
     // Check if full payment has been made
@@ -200,15 +209,15 @@ const PaymentPage = () => {
                                             <span className="text-sm font-medium text-gray-600">
                                                 {booking.booking_type === 'day_tour' ? 'Day Tour Total:' : 'Room Total:'}
                                             </span>
-                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.total_price)}</span>
+                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.total_price || 0)}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-sm font-medium text-gray-600">Meal Total:</span>
-                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.meal_price)}</span>
+                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.meal_price || 0)}</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-sm font-medium text-gray-600">Subtotal:</span>
-                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.total_price + booking.meal_price)}</span>
+                                            <span className="text-sm font-medium text-gray-900">{formatCurrency(subtotal)}</span>
                                         </div>
                                         {booking.discount_amount > 0 && (
                                             <div className="flex justify-between text-green-600">
@@ -218,7 +227,7 @@ const PaymentPage = () => {
                                         )}
                                         <div className="flex justify-between pt-2 border-t border-gray-200">
                                             <span className="text-lg font-bold text-gray-900">Total Amount:</span>
-                                            <span className="text-2xl font-bold text-cyan-700">{formatCurrency(booking.final_price - (booking.discount_amount || 0))}</span>
+                                            <span className="text-2xl font-bold text-cyan-700">{formatCurrency((booking.final_price || 0) - (booking.discount_amount || 0))}</span>
                                         </div>
                                     </div>
                                 </div>

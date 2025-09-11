@@ -457,9 +457,16 @@ export const QuickBookingDialog = ({
                         )}
 
                         {exceedsMaxGuests && !exceedsCapacity && (
-                            <p className="text-sm text-orange-600">
-                                Maximum of extra {room.extra_guests} guests allowed
-                            </p>
+                            <div className="space-y-1">
+                                <p className="text-sm text-orange-600">
+                                    Maximum of extra {room.extra_guests} guests allowed
+                                </p>
+                                {!isDayTourContext() && (
+                                    <p className="text-xs text-orange-700 bg-orange-50 p-2 rounded">
+                                        ⚠️ Extra guests may incur additional breakfast fees on free breakfast days
+                                    </p>
+                                )}
+                            </div>
                         )}
 
                         {totalGuests === 0 && (

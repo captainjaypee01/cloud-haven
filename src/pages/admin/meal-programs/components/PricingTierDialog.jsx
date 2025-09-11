@@ -38,6 +38,8 @@ const formSchema = z.object({
   child_pm_snack_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   adult_dinner_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   child_dinner_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  adult_breakfast_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  child_breakfast_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   effective_from: z.string().optional().nullable(),
   effective_to: z.string().optional().nullable(),
 }).refine((data) => {
@@ -63,6 +65,8 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
       child_pm_snack_price: tier?.child_pm_snack_price || null,
       adult_dinner_price: tier?.adult_dinner_price || null,
       child_dinner_price: tier?.child_dinner_price || null,
+      adult_breakfast_price: tier?.adult_breakfast_price || null,
+      child_breakfast_price: tier?.child_breakfast_price || null,
       effective_from: tier?.effective_from || null,
       effective_to: tier?.effective_to || null,
     },
@@ -80,6 +84,8 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
         child_pm_snack_price: tier.child_pm_snack_price ? parseFloat(tier.child_pm_snack_price) : null,
         adult_dinner_price: tier.adult_dinner_price ? parseFloat(tier.adult_dinner_price) : null,
         child_dinner_price: tier.child_dinner_price ? parseFloat(tier.child_dinner_price) : null,
+        adult_breakfast_price: tier.adult_breakfast_price ? parseFloat(tier.adult_breakfast_price) : null,
+        child_breakfast_price: tier.child_breakfast_price ? parseFloat(tier.child_breakfast_price) : null,
         effective_from: tier.effective_from,
         effective_to: tier.effective_to,
       });
@@ -94,6 +100,8 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
         child_pm_snack_price: null,
         adult_dinner_price: null,
         child_dinner_price: null,
+        adult_breakfast_price: null,
+        child_breakfast_price: null,
         effective_from: null,
         effective_to: null,
       });
@@ -307,6 +315,56 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Child Dinner Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium mb-3">Breakfast Pricing (Extra Guests Only)</h4>
+                <p className="text-xs text-gray-600 mb-3">
+                  Charged to extra guests beyond room capacity on free breakfast days (when buffet is not active)
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="adult_breakfast_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Adult Breakfast Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="Optional"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="child_breakfast_price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Child Breakfast Price</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
