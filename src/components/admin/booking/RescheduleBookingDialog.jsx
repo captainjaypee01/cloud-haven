@@ -14,22 +14,35 @@ import {
 import AvailabilityModal from '@/components/common/AvailabilityModal';
 import { differenceInDays, parseISO, isValid } from 'date-fns';
 
-const formSchema = z.object({
-    check_in_date: z.string().min(1, 'Check-in date is required'),
-    check_out_date: z.string().min(1, 'Check-out date is required'),
-}).refine(
-    (data) => !data.check_in_date || !data.check_out_date || data.check_in_date <= data.check_out_date,
-    {
-        message: 'Check-out date must be after or same as check-in date',
-        path: ['check_out_date'],
+// Dynamic schema based on booking type
+const createFormSchema = (isDayTour) => {
+    if (isDayTour) {
+        return z.object({
+            tour_date: z.string().min(1, 'Tour date is required'),
+        });
+    } else {
+        return z.object({
+            check_in_date: z.string().min(1, 'Check-in date is required'),
+            check_out_date: z.string().min(1, 'Check-out date is required'),
+        }).refine(
+            (data) => !data.check_in_date || !data.check_out_date || data.check_in_date <= data.check_out_date,
+            {
+                message: 'Check-out date must be after or same as check-in date',
+                path: ['check_out_date'],
+            }
+        );
     }
-);
+};
 
 const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => {
     const api = useApi();
+    const isDayTour = booking?.booking_type === 'day_tour';
+    
     const form = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
+        resolver: zodResolver(createFormSchema(isDayTour)),
+        defaultValues: isDayTour ? {
+            tour_date: booking?.check_in_date || '',
+        } : {
             check_in_date: booking?.check_in_date || '',
             check_out_date: booking?.check_out_date || '',
         },
@@ -44,43 +57,76 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
         return differenceInDays(parseISO(booking.check_out_date), parseISO(booking.check_in_date));
     }, [booking]);
 
-    const checkIn = watch('check_in_date');
-    const checkOut = watch('check_out_date');
+    const checkIn = isDayTour ? watch('tour_date') : watch('check_in_date');
+    const checkOut = isDayTour ? watch('tour_date') : watch('check_out_date');
 
     const newNights = useMemo(() => {
+        if (isDayTour) return 0; // Day tours are always 0 nights
         if (!checkIn || !checkOut) return 0;
         const inDate = parseISO(checkIn);
         const outDate = parseISO(checkOut);
         if (!isValid(inDate) || !isValid(outDate)) return 0;
         return differenceInDays(outDate, inDate);
-    }, [checkIn, checkOut]);
+    }, [checkIn, checkOut, isDayTour]);
 
     const durationError = (
-        !!checkIn && !!checkOut && newNights !== originalNights
+        !isDayTour && !!checkIn && !!checkOut && newNights !== originalNights
             ? `Selected dates must be exactly ${originalNights} night(s).`
             : null
     );
     useEffect(() => {
         if (open && booking) {
-            reset({
-                check_in_date: booking.check_in_date,
-                check_out_date: booking.check_out_date,
-            });
+            if (isDayTour) {
+                reset({
+                    tour_date: booking.check_in_date,
+                });
+            } else {
+                reset({
+                    check_in_date: booking.check_in_date,
+                    check_out_date: booking.check_out_date,
+                });
+            }
         }
-    }, [open, booking, reset]);
+    }, [open, booking, reset, isDayTour]);
 
     // Check room availability for new date
     const checkAvailability = async (check_in, check_out) => {
         setChecking(true);
         try {
-            const res = await api.post(`${API_PREFIX}/rooms/availability`, {
-                items: booking.booking_rooms.map(br => ({
-                    room_id: br.room?.slug,
-                    requested_count: 1,
-                })),
-                check_in,
-                check_out,
-            });
+            let res;
+            
+            if (isDayTour) {
+                // For Day Tours, use the Day Tour availability endpoint
+                const dayTourDate = check_in; // For Day Tours, check_in and check_out are the same
+                const roomCounts = {};
+                booking.booking_rooms.forEach(br => {
+                    const roomId = br.room?.slug;
+                    if (roomId) {
+                        roomCounts[roomId] = (roomCounts[roomId] || 0) + 1;
+                    }
+                });
+
+                const itemsToCheck = Object.entries(roomCounts).map(([roomId, count]) => ({
+                    room_id: roomId,
+                    requested_count: count
+                }));
+
+                res = await api.post(`${API_PREFIX}/day-tours/availability`, {
+                    date: dayTourDate,
+                    items: itemsToCheck
+                });
+            } else {
+                // For overnight bookings, use the regular room availability endpoint
+                res = await api.post(`${API_PREFIX}/rooms/availability`, {
+                    items: booking.booking_rooms.map(br => ({
+                        room_id: br.room?.slug,
+                        requested_count: 1,
+                    })),
+                    check_in,
+                    check_out,
+                });
+            }
+            
             const unavailableItems = res.data.filter(x => !x.available || x.available_count < x.requested_count);
             setUnavailable(unavailableItems);
             setAvailabilityModalOpen(unavailableItems.length > 0);
@@ -94,11 +140,22 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     };
 
     const handleSubmit = async (values) => {
-        const ok = await checkAvailability(values.check_in_date, values.check_out_date);
+        let checkInDate, checkOutDate;
+        
+        if (isDayTour) {
+            checkInDate = values.tour_date;
+            checkOutDate = values.tour_date;
+        } else {
+            checkInDate = values.check_in_date;
+            checkOutDate = values.check_out_date;
+        }
+        
+        const ok = await checkAvailability(checkInDate, checkOutDate);
         if (!ok) return;
+        
         try {
             await api.patch(`${API_PREFIX}/admin/bookings/${booking.id}/reschedule`, values, { requiresAuth: true });
-            toast.success('Booking rescheduled!');
+            toast.success(`${isDayTour ? 'Day Tour' : 'Booking'} rescheduled successfully!`);
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (err) {
@@ -110,7 +167,7 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             } else if (err.response?.data?.message) {
                 toast.error(err.response.data.message);
             } else {
-                toast.error('Failed to reschedule booking.');
+                toast.error(`Failed to reschedule ${isDayTour ? 'day tour' : 'booking'}.`);
             }
         }
     };
@@ -119,30 +176,44 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Reschedule Booking</DialogTitle>
+                    <DialogTitle>Reschedule {isDayTour ? 'Day Tour' : 'Booking'}</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-2">
-                        <FormField name="check_in_date" control={form.control} render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Check-in Date</FormLabel>
-                                <FormControl><Input type="date" {...field} /></FormControl>
-                                <FormMessage />
-                                {durationError && (
-                                    <div className="text-sm text-red-600 mt-2">{durationError}</div>
-                                )}
-                            </FormItem>
-                        )} />
-                        <FormField name="check_out_date" control={form.control} render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Check-out Date</FormLabel>
-                                <FormControl><Input type="date" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <div className="text-xs text-gray-500 italic">
-                            Original booking duration: {originalNights} night(s)
-                        </div>
+                        {isDayTour ? (
+                            // Day Tour - Single date field
+                            <FormField name="tour_date" control={form.control} render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Tour Date</FormLabel>
+                                    <FormControl><Input type="date" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        ) : (
+                            // Overnight - Check-in and Check-out dates
+                            <>
+                                <FormField name="check_in_date" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Check-in Date</FormLabel>
+                                        <FormControl><Input type="date" {...field} /></FormControl>
+                                        <FormMessage />
+                                        {durationError && (
+                                            <div className="text-sm text-red-600 mt-2">{durationError}</div>
+                                        )}
+                                    </FormItem>
+                                )} />
+                                <FormField name="check_out_date" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Check-out Date</FormLabel>
+                                        <FormControl><Input type="date" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )} />
+                                <div className="text-xs text-gray-500 italic">
+                                    Original booking duration: {originalNights} night(s)
+                                </div>
+                            </>
+                        )}
                         <DialogFooter>
                             <Button
                                 type="submit"
@@ -160,7 +231,11 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
                     onClose={() => setAvailabilityModalOpen(false)}
                     onRefresh={async () => {
                         const values = form.getValues();
-                        await checkAvailability(values.check_in_date, values.check_out_date);
+                        if (isDayTour) {
+                            await checkAvailability(values.tour_date, values.tour_date);
+                        } else {
+                            await checkAvailability(values.check_in_date, values.check_out_date);
+                        }
                     }}
                     checking={checking}
                     isActions={false}

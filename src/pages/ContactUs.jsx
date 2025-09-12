@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { HERO_CAROUSEL_IMAGES } from "@/constants/contact-us";
-import { SUPPORT_EMAIL } from "@/constants/AppConstant";
+import { SUPPORT_EMAIL, SUPPORT_LANDLINE, SUPPORT_PHONE } from "@/constants/AppConstant";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -138,11 +138,12 @@ const ContactUsPage = () => {
                 {/* Contact Details */}
                 <div className="text-gray-800">
                     <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
-                    <p className="mb-2"><strong>Phone:</strong> +63 949 798 9831</p>
+                    <p className="mb-2"><strong>Tel:</strong> {SUPPORT_LANDLINE}</p>
+                    <p className="mb-2"><strong>Phone:</strong> {SUPPORT_PHONE}</p>
                     <p className="mb-2"><strong>Email:</strong> {SUPPORT_EMAIL}</p>
                     <p className="mb-2"><strong>Address:</strong> Laiya-Aplaya,San Juan,Batangas, Batangas City, Philippines</p>
-                    <p className="mb-2"><strong>Facebook:</strong> <a href="https://www.facebook.com/profile.php?id=100064182843841" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Netania De Laiya</a></p>
-                    <p className="mb-2"><strong>Instagram:</strong> <a href="https://www.instagram.com/netaniadelaiya" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Netania De Laiya</a></p>
+                    <p className="mb-2"><strong>Facebook:</strong> <a href="https://www.facebook.com/profile.php?id=100064182843841" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Follow Us on Facebook</a></p>
+                    <p className="mb-2"><strong>Instagram:</strong> <a href="https://www.instagram.com/netaniadelaiya" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Follow Us on Instagram</a></p>
                     <p className="mt-6 text-sm text-gray-600">
                         We’d love to hear from you! Whether you have a question about our rooms, want to inquire about availability, or need help with anything else, feel free to reach out. You can also connect with us on our social media pages for the latest updates and promotions.
                     </p>

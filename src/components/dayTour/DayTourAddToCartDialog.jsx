@@ -105,6 +105,7 @@ export function DayTourAddToCartDialog({
                                     maxGuests={getGuestLimits().maxGuests}
                                     value={children.toString()}
                                     onChange={(value) => setChildren(parseInt(value))}
+                                    showChildPolicy={true}
                                 />
                             </div>
                         </div>

@@ -85,6 +85,33 @@ export const RESORT_POLICIES = {
         ]
       }
     ]
+  },
+
+  childpolicy: {
+    title: "Child Policy",
+    description: "Age categories, pricing, and policies for children.",
+    policies: [
+      {
+        category: "Age Categories & Pricing",
+        rules: [
+          "Children aged 3 years old and below are free of charge for the entrance fee.",
+          "They are allowed to share a bed with accompanying adults at no additional cost.",
+          "3 years old below are not required to avail of the buffet but may share food from the adults' plates.",
+          "Children aged 4 to 6 years old will be charged a reduced buffet rate. Current pricing available during booking.",
+          "7 years old above will be charged same rate as adult."
+        ]
+      },
+      {
+        category: "Additional Child Policies",
+        rules: [
+          "Final number of children and headcount must be confirmed one week before the booking schedule.",
+          "Drivers are included in the final head count.",
+          "The resort reserves the right to verify age with valid identification if needed.",
+          "Children must be supervised by adults at all times, especially around water areas.",
+          "Parents/guardians are responsible for their children's safety and conduct during the stay."
+        ]
+      }
+    ]
   }
 };
 
@@ -94,7 +121,8 @@ export const POLICY_ICONS = {
   damages: "🛠️",
   security: "🔐",
   facilities: "🏖️",
-  conduct: "🤝"
+  conduct: "🤝",
+  childpolicy: "👶"
 };
 
 export const HERO_IMAGE = "https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg";

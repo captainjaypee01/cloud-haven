@@ -405,6 +405,7 @@ const RoomDetails = () => {
                                 <GuestSelector
                                     className="w-full justify-between text-left"
                                     maxGuests={room.max_guests + room.extra_guests}
+                                    showChildPolicy={true}
                                     {...field}
                                 />
                             )}

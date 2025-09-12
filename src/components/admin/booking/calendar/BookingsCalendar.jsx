@@ -491,37 +491,7 @@ const getMealInfoPerRoom = (booking, room) => {
                       <td></td>
                       <td></td>
                       <td></td>
-                      <td style="padding-left: 20px;">• ${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'} - Capacity: ${room.room_capacity} pax - ${(() => {
-                        if (booking.booking_type === 'day_tour') {
-                          const pricePerPax = room.price_per_pax || room.room_price_per_night || 0;
-                          return formatCurrency(pricePerPax).replace('₱', 'PHP ') + ' per pax';
-                        } else {
-                          return formatCurrency(room.room_price_per_night || 0).replace('₱', 'PHP ') + ' per night';
-                        }
-                      })()} - ${room.adults}A, ${room.children}C - Meal: ${(() => {
-                        if (booking.booking_type === 'day_tour') {
-                          // For Day Tours, show specific meal selections
-                          const includeLunch = room.include_lunch || false;
-                          const includePmSnack = room.include_pm_snack || false;
-                          const mealCost = room.meal_cost || 0;
-                          
-                          let mealDetails = [];
-                          if (includeLunch) mealDetails.push('Lunch Buffet');
-                          if (includePmSnack) mealDetails.push('PM Snack');
-                          
-                          if (mealDetails.length === 0) {
-                            return 'No meals';
-                          } else {
-                            const mealText = mealDetails.join(' + ');
-                            const costText = mealCost > 0 ? ` (${formatCurrency(mealCost).replace('₱', 'PHP ')})` : ' (Free)';
-                            return mealText + costText;
-                          }
-                        } else {
-                          // For overnight bookings, use existing logic
-                          const mealInfo = getMealInfoPerRoom(booking, room);
-                          return mealInfo.cost > 0 ? formatCurrency(mealInfo.cost).replace('₱', 'PHP ') : 'Free';
-                        }
-                      })()}</td>
+                      <td style="padding-left: 20px;">• ${room.room_unit_number ? 'Unit ' + room.room_unit_number : '(Unassigned)'} - ${room.adults}A, ${room.children}C</td>
                       <td></td>
                       <td></td>
                       <td></td>
@@ -639,37 +609,7 @@ const getMealInfoPerRoom = (booking, room) => {
           '', // Empty guest
           '', // Empty status
           '', // Empty type
-          `${room.room_type_name}${room.room_unit_number ? ' Unit ' + room.room_unit_number : ' (Unassigned)'} - Capacity: ${room.room_capacity} pax - ${(() => {
-            if (booking.booking_type === 'day_tour') {
-              const pricePerPax = room.price_per_pax || room.room_price_per_night || 0;
-              return formatCurrency(pricePerPax).replace('₱', 'PHP ') + ' per pax';
-            } else {
-              return formatCurrency(room.room_price_per_night || 0).replace('₱', 'PHP ') + ' per night';
-            }
-          })()} - ${room.adults}A, ${room.children}C - Meal: ${(() => {
-            if (booking.booking_type === 'day_tour') {
-              // For Day Tours, show specific meal selections
-              const includeLunch = room.include_lunch || false;
-              const includePmSnack = room.include_pm_snack || false;
-              const mealCost = room.meal_cost || 0;
-              
-              let mealDetails = [];
-              if (includeLunch) mealDetails.push('Lunch Buffet');
-              if (includePmSnack) mealDetails.push('PM Snack');
-              
-              if (mealDetails.length === 0) {
-                return 'No meals';
-              } else {
-                const mealText = mealDetails.join(' + ');
-                const costText = mealCost > 0 ? ` (${formatCurrency(mealCost).replace('₱', 'PHP ')})` : ' (Free)';
-                return mealText + costText;
-              }
-            } else {
-              // For overnight bookings, use existing logic
-              const mealInfo = getMealInfoPerRoom(booking, room);
-              return mealInfo.cost > 0 ? formatCurrency(mealInfo.cost).replace('₱', 'PHP ') : 'Free';
-            }
-          })()}`,
+          `${room.room_unit_number ? 'Unit ' + room.room_unit_number : '(Unassigned)'} - ${room.adults}A, ${room.children}C`,
           '', // Empty check-in
           '', // Empty check-out
           '', // Empty nights
