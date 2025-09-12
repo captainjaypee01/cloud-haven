@@ -9,8 +9,9 @@ import AddOtherChargeDialog from './AddOtherChargeDialog';
 import RescheduleBookingDialog from './RescheduleBookingDialog';
 import ProofImageDialog from './ProofImageDialog';
 import BookingCancellationDialog from './BookingCancellationDialog';
+import BookingDeletionDialog from './BookingDeletionDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2 } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -22,6 +23,7 @@ import MealDetailComponent from '@/components/booking/MealDetailComponent';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { getPaymentProviderLabel } from '@/utils/paymentUtils';
+import { useAppContext } from '@/context/AppContext';
 
 const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showAddPayment, setShowAddPayment] = useState(false);
@@ -36,9 +38,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [statusProofDialog, setStatusProofDialog] = useState(false);
     const [selectedProofPayment, setSelectedProofPayment] = useState(null);
     const [showCancellation, setShowCancellation] = useState(false);
+    const [showDeletion, setShowDeletion] = useState(false);
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const api = useApi();
     const navigate = useNavigate();
+    const { userRole } = useAppContext();
+
+    // Permission checks
+    const canCancel = ['admin', 'superadmin'].includes(userRole);
+    const canDelete = userRole === 'superadmin';
 
     const resetForm = useForm({
         defaultValues: { reason: '' }
@@ -148,6 +156,11 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
         setShowCancellation(false);
     };
 
+    const handleDeletionSuccess = () => {
+        if (fetchBooking) fetchBooking();
+        setShowDeletion(false);
+    };
+
     const getProofStatusBadge = (proofStatus, uploadCount = 0) => {
         if (!proofStatus || proofStatus === 'none') {
             return <span className="text-xs text-gray-500">{uploadCount}/3</span>;
@@ -198,8 +211,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <Calendar className="h-4 w-4 mr-2" />
                         Calendar View
                     </Button>
-                    {/* Cancellation Button - Only show if booking can be cancelled */}
-                    {['pending', 'failed'].includes(booking.status) && (
+                    {/* Cancellation Button - Only show if user can cancel and booking can be cancelled */}
+                    {canCancel && ['pending', 'failed'].includes(booking.status) && (
                         <Button
                             className="cursor-pointer"
                             variant="outline"
@@ -209,9 +222,20 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             Cancel Booking
                         </Button>
                     )}
+                    {/* Delete Button - Show only for superadmin */}
+                    {canDelete && (
+                        <Button
+                            className="cursor-pointer"
+                            variant="destructive"
+                            onClick={() => setShowDeletion(true)}
+                        >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Booking
+                        </Button>
+                    )}
                     <Button
                         className="cursor-pointer"
-                        variant="destructive"
+                        variant="outline"
                         onClick={() => setShowReschedule(true)}
                     >
                         Reschedule
@@ -719,12 +743,24 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 imageUrl={selectedPaymentProof?.proof_image_url || selectedPaymentProof?.proof_last_file_path}
                 paymentInfo={selectedPaymentProof}
             />
-            <BookingCancellationDialog
-                open={showCancellation}
-                onOpenChange={setShowCancellation}
-                booking={booking}
-                onSuccess={handleCancellationSuccess}
-            />
+            {/* Only render cancellation dialog if user has permission */}
+            {canCancel && (
+                <BookingCancellationDialog
+                    open={showCancellation}
+                    onOpenChange={setShowCancellation}
+                    booking={booking}
+                    onSuccess={handleCancellationSuccess}
+                />
+            )}
+            {/* Only render deletion dialog if user is superadmin */}
+            {canDelete && (
+                <BookingDeletionDialog
+                    open={showDeletion}
+                    onOpenChange={setShowDeletion}
+                    booking={booking}
+                    onSuccess={handleDeletionSuccess}
+                />
+            )}
 
             {/* Reset Proof Uploads Dialog */}
             <AlertDialog open={resetProofDialog} onOpenChange={setResetProofDialog}>

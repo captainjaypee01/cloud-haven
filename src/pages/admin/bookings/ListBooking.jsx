@@ -100,14 +100,16 @@ const ListBooking = () => {
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
-                <Button
-                    size="sm"
-                    className="cursor-pointer"
-                    variant="secondary"
-                    onClick={() => navigate(`/admin/bookings/${row.original.id}`)}
-                >
-                    View
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        size="sm"
+                        className="cursor-pointer"
+                        variant="secondary"
+                        onClick={() => navigate(`/admin/bookings/${row.original.id}`)}
+                    >
+                        View
+                    </Button>
+                </div>
             ),
             enableSorting: false,
         }

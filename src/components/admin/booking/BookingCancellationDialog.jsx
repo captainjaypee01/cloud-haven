@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
@@ -24,6 +25,7 @@ import { AlertTriangle } from 'lucide-react';
 
 const formSchema = z.object({
     reason: z.string().min(1, 'Cancellation reason is required'),
+    reference_confirmation: z.string().min(1, 'Reference number confirmation is required'),
     confirm_cancellation: z.boolean().refine(val => val === true, {
         message: 'You must confirm the cancellation',
     }),
@@ -38,6 +40,7 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
         resolver: zodResolver(formSchema),
         defaultValues: {
             reason: '',
+            reference_confirmation: '',
             confirm_cancellation: false,
         },
     });
@@ -82,6 +85,16 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
     const handleSubmit = async (values) => {
         if (!booking?.id) {
             toast.error('No booking selected');
+            return;
+        }
+
+        // Validate reference number confirmation
+        if (values.reference_confirmation !== booking.reference_number) {
+            setError('reference_confirmation', { 
+                type: 'manual', 
+                message: 'Reference number does not match. Please enter the exact reference number to confirm cancellation.' 
+            });
+            toast.error('Reference number confirmation failed');
             return;
         }
 
@@ -131,6 +144,8 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
                         This action cannot be undone. The booking will be permanently cancelled and an email notification will be sent to the guest.
+                        <br />
+                        <em className="text-xs text-destructive/80 mt-1 block">Note: This feature is available to Admin and Superadmin users only.</em>
                     </AlertDescription>
                 </Alert>
 
@@ -164,6 +179,30 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
                                 options={cancellationReasons}
                                 loading={loadingReasons}
                                 placeholder="Select a reason for cancellation"
+                            />
+
+                            {/* Reference Number Confirmation */}
+                            <FormField
+                                name="reference_confirmation"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="text-destructive">
+                                            Confirm Cancellation by Typing Reference Number
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder={`Type "${booking?.reference_number}" to confirm`}
+                                                {...field}
+                                                className="border-destructive/50 focus:border-destructive"
+                                            />
+                                        </FormControl>
+                                        <p className="text-xs text-muted-foreground">
+                                            Enter the booking reference number <strong>{booking?.reference_number}</strong> to confirm cancellation
+                                        </p>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
 
                             <FormField
@@ -202,7 +241,11 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
                                     type="submit"
                                     variant="destructive"
                                     className="cursor-pointer"
-                                    disabled={form.formState.isSubmitting || !form.watch('confirm_cancellation')}
+                                    disabled={
+                                        form.formState.isSubmitting || 
+                                        !form.watch('confirm_cancellation') ||
+                                        form.watch('reference_confirmation') !== booking?.reference_number
+                                    }
                                 >
                                     {form.formState.isSubmitting ? 'Cancelling...' : 'Cancel Booking'}
                                 </Button>

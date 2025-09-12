@@ -356,6 +356,7 @@ export const QuickBookingDialog = ({
                                             minGuests={0}
                                             maxGuests={getGuestLimits().maxGuests}
                                             isDialog={true}
+                                            showChildPolicy={true}
                                             {...field}
                                         />
                                     </div>

@@ -313,12 +313,11 @@ const Cart = () => {
                                                 : `${item.adults} Adult${item.adults > 1 ? 's' : ''}${item.children > 0 ? `, ${item.children} Child${item.children > 1 ? 'ren' : ''}` : ''}`
                                             }
                                         </span>
-                                        <span>
-                                            {isDayTourCart 
-                                                ? `${formatCurrency(item.pricePerPax)} per person`
-                                                : `${formatCurrency(item.roomMealTotal || 0)}`
-                                            }
-                                        </span>
+                                        {isDayTourCart && (
+                                            <span>
+                                                {`${formatCurrency(item.pricePerPax)} per person`}
+                                            </span>
+                                        )}
                                     </div>
                                     {isDayTourCart && item.includeLunch && dayTourMealData?.lunch_prices && (
                                         <div className="flex justify-between">
@@ -437,50 +436,51 @@ const Cart = () => {
                                     <div className="space-y-4">
                                         {mealQuote.nights.map((night, index) => (
                                             <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
-                                                {/* Date Header */}
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <span className="text-sm font-medium text-gray-700">
-                                                        {new Date(night.date).toLocaleDateString('en-US', { 
-                                                            weekday: 'short', 
-                                                            month: 'short', 
-                                                            day: 'numeric' 
-                                                        })} - {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
-                                                    </span>
-                                                    <span className="text-sm font-semibold text-gray-900">
-                                                        {night.type === 'buffet' ? formatCurrency(night.night_total) : formatCurrency(night.breakfast_total || 0)}
-                                                    </span>
-                                                </div>
-                                                
-                                                {/* Breakdown Details */}
                                                 {night.type === 'buffet' ? (
-                                                    <div className="ml-4 space-y-1 text-xs text-gray-600">
-                                                        {totalAdults > 0 && (
-                                                            <div className="flex justify-between">
-                                                                <span>{totalAdults} Adult{totalAdults > 1 ? 's' : ''} - {formatCurrency(night.adult_price || 0)} each</span>
-                                                                <span className="font-medium">{formatCurrency(totalAdults * (night.adult_price || 0))}</span>
-                                                            </div>
-                                                        )}
-                                                        {totalChildren > 0 && (
-                                                            <div className="flex justify-between">
-                                                                <span>{totalChildren} Child{totalChildren > 1 ? 'ren' : ''} - {formatCurrency(night.child_price || 0)} each</span>
-                                                                <span className="font-medium">{formatCurrency(totalChildren * (night.child_price || 0))}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div className="ml-4 space-y-1 text-xs text-gray-600">
-                                                        {/* Always show complimentary breakfast for guests within room capacity */}
-                                                        <div className="flex justify-between">
-                                                            <span className="text-green-600">{(night.adults || 0) + (night.children || 0) - (night.extra_adults || 0)} Guest{((night.adults || 0) + (night.children || 0) - (night.extra_adults || 0)) > 1 ? 's' : ''} - Complimentary Breakfast</span>
-                                                            <span className="font-medium text-green-600">Free</span>
+                                                    <>
+                                                        {/* Date Header for Buffet */}
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <span className="text-sm font-medium text-gray-700">
+                                                                {new Date(night.date).toLocaleDateString('en-US', { 
+                                                                    weekday: 'short', 
+                                                                    month: 'short', 
+                                                                    day: 'numeric' 
+                                                                })} - Buffet
+                                                            </span>
+                                                            <span className="text-sm font-semibold text-gray-900">
+                                                                {formatCurrency(night.night_total)}
+                                                            </span>
                                                         </div>
-                                                        {/* Show extra guest breakfast fee if there are extra guests */}
-                                                        {night.breakfast_total > 0 && (
-                                                            <div className="flex justify-between">
-                                                                <span className="text-orange-600">{night.extra_adults} Extra Guest{night.extra_adults !== 1 ? 's' : ''} at {formatCurrency(night.adult_breakfast_price || 0)} each</span>
-                                                                <span className="font-medium text-orange-600">{formatCurrency(night.breakfast_total)}</span>
-                                                            </div>
-                                                        )}
+                                                        
+                                                        {/* Buffet Breakdown Details */}
+                                                        <div className="ml-4 space-y-1 text-xs text-gray-600">
+                                                            {totalAdults > 0 && (
+                                                                <div className="flex justify-between">
+                                                                    <span>{totalAdults} Adult{totalAdults > 1 ? 's' : ''} - {formatCurrency(night.adult_price || 0)} each</span>
+                                                                    <span className="font-medium">{formatCurrency(totalAdults * (night.adult_price || 0))}</span>
+                                                                </div>
+                                                            )}
+                                                            {totalChildren > 0 && (
+                                                                <div className="flex justify-between">
+                                                                    <span>{totalChildren} Child{totalChildren > 1 ? 'ren' : ''} - {formatCurrency(night.child_price || 0)} each</span>
+                                                                    <span className="font-medium">{formatCurrency(totalChildren * (night.child_price || 0))}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    /* Simplified Free Breakfast Display */
+                                                    <div className="text-sm font-medium text-gray-700">
+                                                        <div>
+                                                            {new Date(night.date).toLocaleDateString('en-US', { 
+                                                                weekday: 'short', 
+                                                                month: 'short', 
+                                                                day: 'numeric' 
+                                                            })}
+                                                        </div>
+                                                        <div className="text-green-600 font-semibold">
+                                                            {(night.adults || 0) + (night.children || 0)} Guest{((night.adults || 0) + (night.children || 0)) > 1 ? 's' : ''} Complimentary Breakfast
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
