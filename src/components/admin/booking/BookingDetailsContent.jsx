@@ -157,7 +157,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     };
 
     const handleDeletionSuccess = () => {
-        if (fetchBooking) fetchBooking();
+        // After successful deletion, redirect to booking list since the booking no longer exists
+        navigate('/admin/bookings');
         setShowDeletion(false);
     };
 
