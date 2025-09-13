@@ -310,7 +310,7 @@ const CartList = ({
                                     <div className="ml-4 space-y-1 text-xs text-blue-600">
                                         {/* Always show complimentary breakfast for guests within room capacity */}
                                         <div className="flex justify-between">
-                                            <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast</span>
+                                            <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast (Plated)</span>
                                             <span className="font-medium text-green-600">Free</span>
                                         </div>
                                         {/* Show extra guest breakfast fee if there are extra guests */}

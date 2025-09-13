@@ -181,7 +181,14 @@ export function useCartSummaryWithMealPrograms() {
     };
 
     const { mealCost, detailedBreakdown, summaryWithMealBreakdown } = calculateMealCosts();
-    const grandTotal = roomTotalPrice + mealCost;
+    
+    // For Day Tour, meal costs are already included in item.price, so don't add them again
+    let finalMealCost = mealCost;
+    if (isDayTourCart) {
+        finalMealCost = 0; // Don't add meal costs separately for Day Tour
+    }
+    
+    const grandTotal = roomTotalPrice + finalMealCost;
     
     // Update mealQuote with calculated values for display
     const calculatedMealQuote = mealQuote ? {
@@ -199,7 +206,7 @@ export function useCartSummaryWithMealPrograms() {
         numNights,
         totalAdults,
         totalChildren,
-        mealCost,
+        mealCost: finalMealCost,
         roomTotalPrice,
         mealQuote: calculatedMealQuote,
         mealLoading: loading,
