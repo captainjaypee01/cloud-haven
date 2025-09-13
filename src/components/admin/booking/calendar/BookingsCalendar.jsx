@@ -491,7 +491,7 @@ const getMealInfoPerRoom = (booking, room) => {
                       <td></td>
                       <td></td>
                       <td></td>
-                      <td style="padding-left: 20px;">• ${room.room_unit_number ? 'Unit ' + room.room_unit_number : '(Unassigned)'} - ${room.adults}A, ${room.children}C</td>
+                      <td style="padding-left: 20px;">• ${room.room_unit_number ? room.room_unit_number : '(Unassigned)'}</td>
                       <td></td>
                       <td></td>
                       <td></td>
@@ -609,7 +609,7 @@ const getMealInfoPerRoom = (booking, room) => {
           '', // Empty guest
           '', // Empty status
           '', // Empty type
-          `${room.room_unit_number ? 'Unit ' + room.room_unit_number : '(Unassigned)'} - ${room.adults}A, ${room.children}C`,
+          `${room.room_unit_number ? room.room_unit_number : '(Unassigned)'}`,
           '', // Empty check-in
           '', // Empty check-out
           '', // Empty nights

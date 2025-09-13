@@ -218,7 +218,7 @@ export function CartPopup() {
                     )}
                 </div>
                 {/* Meal Availability Badges - Only for overnight bookings */}
-                {!isDayTourCart && <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="mt-2" mealQuote={mealQuote} />}
+                {/* {!isDayTourCart && <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="mt-2" mealQuote={mealQuote} />} */}
                 {items.length === 0 ? (
                     <p className="text-sm text-gray-500">No rooms added.</p>
                 ) : (
@@ -417,7 +417,7 @@ export function CartPopup() {
                                                         <div className="ml-3 space-y-0.5 text-xs text-blue-600">
                                                             {/* Always show complimentary breakfast for guests within room capacity */}
                                                             <div className="flex justify-between">
-                                                                <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast</span>
+                                                                <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast (Plated)</span>
                                                                 <span className="font-medium text-green-600">Free</span>
                                                             </div>
                                                             {/* Show extra guest breakfast fee if there are extra guests */}
@@ -504,6 +504,7 @@ export function CartPopup() {
                                                 <div className="flex flex-col">
                                                     <span>
                                                         Complimentary Breakfast ({totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0)} guest{totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                        <p className="text-xs text-gray-500 mt-1">Plated</p>
                                                     </span>
                                                     <div className="text-xs text-gray-500 mt-1">
                                                         {mealQuote.nights
@@ -522,7 +523,7 @@ export function CartPopup() {
                                             <div className="flex justify-between text-xs font-medium">
                                                 <div className="flex flex-col">
                                                     <span>
-                                                        Extra Guest Breakfast Fee ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                        Extra Guest ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
                                                     </span>
                                                     <div className="text-xs text-gray-500 mt-1">
                                                         {mealQuote.nights

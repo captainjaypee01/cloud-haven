@@ -367,22 +367,88 @@ const CheckoutPage = () => {
                         ))}
                     </div>
                     {/* Meal Availability Badges - Only for overnight bookings */}
-                    {!isDayTourCart && <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="my-2" mealQuote={mealQuote} />}
+                    {/* {!isDayTourCart && <MealAvailabilityBadges checkIn={checkIn} checkOut={checkOut} className="my-2" mealQuote={mealQuote} />} */}
                     
-                    {/* Price breakdown for both overnight and day tour */}
-                    <div className="flex justify-between text-sm font-medium">
-                        <span>Total Room Price:</span>
-                        <span>{formatCurrency(roomTotalPrice)}</span>
-                    </div>
-                    
-                    {/* Meal breakdown - different for overnight vs day tour */}
+                    {/* Price breakdown - different for overnight vs day tour */}
                     {isDayTourCart ? (
-                        <div className="flex justify-between text-sm font-medium">
-                            <span>Meals (Lunch & PM Snack):</span>
-                            <span>{formatCurrency(mealCost)}</span>
-                        </div>
-                    ) : (
                         <>
+                            {/* For Day Tour: Show breakdown of the total prices */}
+                            {(() => {
+                                let totalDayTourPrice = 0;
+                                let totalBasePrice = 0;
+                                let totalLunchCost = 0;
+                                let totalPmSnackCost = 0;
+                                
+                                // Sum up all costs from Day Tour cart items
+                                summary.forEach(item => {
+                                    if (item.roomType === 'day_tour') {
+                                        totalDayTourPrice += item.price || 0; // Total price (base + meals)
+                                        totalBasePrice += item.basePrice || 0; // Base Day Tour cost
+                                        totalLunchCost += item.lunchCost || 0;
+                                        totalPmSnackCost += item.pmSnackCost || 0;
+                                    }
+                                });
+                                
+                                // Only show breakdown if there are meal costs
+                                const hasMealCosts = totalLunchCost > 0 || totalPmSnackCost > 0;
+                                
+                                return (
+                                    <>
+                                        {hasMealCosts ? (
+                                            <>
+                                                {/* Show base Day Tour price */}
+                                                <div className="flex justify-between text-sm font-medium">
+                                                    <span>Day Tour Base Price:</span>
+                                                    <span>{formatCurrency(totalBasePrice)}</span>
+                                                </div>
+                                                
+                                                {/* Show lunch cost if applicable */}
+                                                {totalLunchCost > 0 && (
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>
+                                                            Buffet Lunch:
+                                                            {!dayTourMealData?.buffet_active && (
+                                                                <span className="text-xs text-gray-500 ml-1">(Not available)</span>
+                                                            )}
+                                                        </span>
+                                                        <span>{formatCurrency(totalLunchCost)}</span>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Show PM snack cost if applicable */}
+                                                {totalPmSnackCost > 0 && (
+                                                    <div className="flex justify-between text-sm font-medium">
+                                                        <span>
+                                                            PM Snack:
+                                                            {dayTourMealData?.pm_snack_policy === 'required' && (
+                                                                <span className="text-xs text-blue-500 ml-1">(Required)</span>
+                                                            )}
+                                                            {dayTourMealData?.pm_snack_policy === 'optional' && (
+                                                                <span className="text-xs text-gray-500 ml-1">(Optional)</span>
+                                                            )}
+                                                        </span>
+                                                        <span>{formatCurrency(totalPmSnackCost)}</span>
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            /* No meals selected - show total as "Day Tour Price" */
+                                            <div className="flex justify-between text-sm font-medium">
+                                                <span>Day Tour Price:</span>
+                                                <span>{formatCurrency(totalDayTourPrice)}</span>
+                                            </div>
+                                        )}
+                                    </>
+                                );
+                            })()}
+                        </>
+                    ) : (
+                        /* Overnight booking price breakdown */
+                        <>
+                            <div className="flex justify-between text-sm font-medium">
+                                <span>Total Room Price:</span>
+                                <span>{formatCurrency(roomTotalPrice)}</span>
+                            </div>
                             {/* Combined meal display */}
                             {!mealLoading && mealQuote && mealQuote.nights && (
                                 <>
@@ -406,6 +472,7 @@ const CheckoutPage = () => {
                                         <div className="flex justify-between text-sm font-medium">
                                             <span>
                                                 Complimentary Breakfast ({totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0)} guest{totalAdults + totalChildren - (mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                <p className="text-xs text-gray-500 mt-1">Plated</p>
                                             </span>
                                             <span className="text-green-600">Free</span>
                                         </div>
@@ -415,7 +482,7 @@ const CheckoutPage = () => {
                                     {mealQuote.nights.some(night => night.breakfast_total > 0) && (
                                         <div className="flex justify-between text-sm font-medium">
                                             <span>
-                                                Extra Guest Breakfast Fee ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
+                                                Extra Guest ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
                                             </span>
                                             <span className="text-orange-600">
                                                 {formatCurrency(mealQuote.nights

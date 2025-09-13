@@ -27,15 +27,25 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
     const [showDatesDialog, setShowDatesDialog] = useState(false);
     const [showBookingDialog, setShowBookingDialog] = useState(false);
 
-    // Get availability data for this room
+    // Use availability data from the main rooms API if available (when dates are provided)
+    // Otherwise fall back to individual room availability hook
+    const hasAvailabilityData = room.available_count !== null && room.available_count !== undefined;
+    
     const {
-        availableUnits,
+        availableUnits: hookAvailableUnits,
         isLoading: availabilityLoading,
         isError: availabilityError,
         isDebouncing,
-        isUnavailable,
-        pending,
-    } = useRoomAvailability(room.slug, state.checkIn, state.checkOut);
+        isUnavailable: hookIsUnavailable,
+        pending: hookPending,
+    } = useRoomAvailability(room.slug, state.checkIn, state.checkOut, {
+        enabled: !hasAvailabilityData && !!(state.checkIn && state.checkOut) // Only call hook if no data from main API
+    });
+
+    // Use data from main API if available, otherwise use hook data
+    const availableUnits = hasAvailabilityData ? room.available_count : hookAvailableUnits;
+    const pending = hasAvailabilityData ? (room.pending_count || 0) : hookPending;
+    const isUnavailable = hasAvailabilityData ? (room.available_count === 0) : hookIsUnavailable;
 
     const handleViewDetailsClick = useCallback((e) => {
         if (!state.checkIn || !state.checkOut) {

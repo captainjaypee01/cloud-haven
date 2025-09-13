@@ -11,9 +11,9 @@ export const useRooms = () => {
     const { checkIn, checkOut }  = state;
     const params = createGetParameters({check_in: checkIn, check_out: checkOut});
     return useQuery({
-        queryKey: ["rooms"],
+        queryKey: ["rooms", checkIn, checkOut], // Include dates in cache key
         queryFn: () => roomsSvc.listRooms(api, params),
-        staleTime: 5 * 60_000, gcTime: 30 * 60_000,        // cache knobs
+        staleTime: 30_000, gcTime: 5 * 60_000, // Reduce stale time to 30 seconds for faster updates
     });
 };
 
@@ -43,15 +43,7 @@ export const useRoom = (id) => {
     });
 };
 
-export const useAvailability = (params) => {
-    const api = useApi();
-    return useQuery({
-        queryKey: ["availability", params],
-        enabled: !!params?.check_in && !!params?.check_out,
-        queryFn: () => roomsSvc.checkAvailability(api, params),
-        staleTime: 30_000, refetchInterval: 30_000,        // live polling
-    });
-};
+// Removed unused useAvailability hook - replaced by useRoomAvailability
 
 /*** admin CRUD ***/
 export const useCreateRoom = () => {
