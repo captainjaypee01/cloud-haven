@@ -8,7 +8,7 @@ import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import DataTable from '@/components/admin/Table/DataTable';
 import { StatusBadge } from '@/components/admin/common/StatusBadge';
-import { formatCurrency, formatDate } from '@/lib/format';
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/format';
 import { useNavigate } from 'react-router-dom';
 import { useDebounce } from '@/hooks/useDebounce';
 
@@ -19,6 +19,7 @@ const ListBooking = () => {
     const debouncedSearch = useDebounce(search, 400);
     const [sorting, setSorting] = useState([]);
     const [status, setStatus] = useState("all");
+    const [bookingType, setBookingType] = useState("all");
     const [bookingDate, setBookingDate] = useState("");
     const [bookingFromDate, setBookingFromDate] = useState("");
     const [bookingToDate, setBookingToDate] = useState("");
@@ -45,16 +46,57 @@ const ListBooking = () => {
             cell: ({ row }) => row.original.guest_name,
         },
         {
-            id: "check_in_date",
-            header: "Check-in",
-            accessorKey: "check_in_date",
-            cell: ({ row }) => formatDate(row.original.check_in_date),
+            id: "booking_type",
+            header: "Type",
+            accessorKey: "booking_type",
+            cell: ({ row }) => {
+                const type = row.original.booking_type || 'overnight';
+                return (
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                        type === 'day_tour' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-green-100 text-green-800'
+                    }`}>
+                        {type === 'day_tour' ? 'Day Tour' : 'Overnight'}
+                    </span>
+                );
+            },
         },
         {
-            id: "check_out_date",
-            header: "Check-out",
-            accessorKey: "check_out_date",
-            cell: ({ row }) => formatDate(row.original.check_out_date),
+            id: "booking_date",
+            header: "Booking Date",
+            accessorKey: "local_created_at",
+            cell: ({ row }) => formatDateTime(row.original.local_created_at),
+        },
+        {
+            id: "stay_details",
+            header: "Stay Details",
+            accessorKey: "stay_details",
+            cell: ({ row }) => {
+                const booking = row.original;
+                const isDayTour = booking.booking_type === 'day_tour';
+                
+                if (isDayTour) {
+                    return (
+                        <div className="text-sm">
+                            <div><span className="font-medium">Date:</span> {formatDate(booking.check_in_date)}</div>
+                        </div>
+                    );
+                } else {
+                    // Calculate nights for overnight bookings
+                    const checkIn = new Date(booking.check_in_date);
+                    const checkOut = new Date(booking.check_out_date);
+                    const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+                    
+                    return (
+                        <div className="text-sm">
+                            <div><span className="font-medium">Check-in:</span> {formatDate(booking.check_in_date)}</div>
+                            <div><span className="font-medium">Check-out:</span> {formatDate(booking.check_out_date)}</div>
+                            <div><span className="font-medium">Nights:</span> {nights}</div>
+                        </div>
+                    );
+                }
+            },
         },
         {
             id: "total_guests",
@@ -126,6 +168,7 @@ const ListBooking = () => {
                 ? `${sorting[0].id}|${sorting[0].desc ? 'desc' : 'asc'}`
                 : 'created_at|desc',
             status: status === 'all' ? undefined : status,
+            booking_type: bookingType === 'all' ? undefined : bookingType,
             created_date: bookingDate || undefined,
             created_from: bookingFromDate || undefined,
             created_to: bookingToDate || undefined,
@@ -150,6 +193,7 @@ const ListBooking = () => {
         fetchBookings({ 
             search: debouncedSearch, 
             status, 
+            booking_type: bookingType,
             created_date: bookingDate,
             created_from: bookingFromDate,
             created_to: bookingToDate,
@@ -158,7 +202,7 @@ const ListBooking = () => {
             date_to: checkinCheckoutToDate
         });
         // eslint-disable-next-line
-    }, [debouncedSearch, sorting, status, bookingDate, bookingFromDate, bookingToDate, checkinCheckoutDate, checkinCheckoutFromDate, checkinCheckoutToDate, pagination]);
+    }, [debouncedSearch, sorting, status, bookingType, bookingDate, bookingFromDate, bookingToDate, checkinCheckoutDate, checkinCheckoutFromDate, checkinCheckoutToDate, pagination]);
 
     return (
         <div>
@@ -175,17 +219,27 @@ const ListBooking = () => {
             <ControlsToolbar
                 search={search}
                 setSearch={setSearch}
-                filters={[{
-                    key: "status", label: "Status", value: status, onChange: setStatus,
-                    options: [
-                        { value: "all", label: "All" },
-                        { value: "pending", label: "Pending" },
-                        { value: "downpayment", label: "Downpayment" },
-                        { value: "paid", label: "Paid" },
-                        { value: "cancelled", label: "Cancelled" },
-                        { value: "failed", label: "Failed" },
-                    ]
-                }]}
+                filters={[
+                    {
+                        key: "status", label: "Status", value: status, onChange: setStatus,
+                        options: [
+                            { value: "all", label: "All" },
+                            { value: "pending", label: "Pending" },
+                            { value: "downpayment", label: "Downpayment" },
+                            { value: "paid", label: "Paid" },
+                            { value: "cancelled", label: "Cancelled" },
+                            { value: "failed", label: "Failed" },
+                        ]
+                    },
+                    {
+                        key: "booking_type", label: "Type", value: bookingType, onChange: setBookingType,
+                        options: [
+                            { value: "all", label: "All" },
+                            { value: "overnight", label: "Overnight" },
+                            { value: "day_tour", label: "Day Tour" },
+                        ]
+                    }
+                ]}
             />
             <div className="mb-4 space-y-4">
                 {/* Date Filters - One line on larger screens */}
@@ -301,10 +355,12 @@ const ListBooking = () => {
                             setCheckinCheckoutDate("");
                             setCheckinCheckoutFromDate("");
                             setCheckinCheckoutToDate("");
+                            setBookingType("all");
+                            setStatus("all");
                         }}
                         className="text-red-600 hover:text-red-700"
                     >
-                        Clear All Date Filters
+                        Clear All Filters
                     </Button>
                 </div>
             </div>
