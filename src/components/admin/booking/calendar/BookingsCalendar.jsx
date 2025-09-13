@@ -216,11 +216,28 @@ export default function BookingsCalendar({ initialDate, initialMonth }) {
           typeDisplay = 'Overnight (Buffet)';
         } else {
           typeDisplay = 'Overnight (Free Breakfast)';
-          // Calculate free breakfast guests (typically 2 per room) and extra guests
-          const totalRooms = booking.rooms ? booking.rooms.length : 1;
-          const freeBreakfastGuests = totalRooms * 2; // 2 free breakfast per room
-          const extraGuests = Math.max(0, totalGuests - freeBreakfastGuests);
-          breakfastInfo = `Free: ${freeBreakfastGuests}, Extra: ${extraGuests}`;
+          // Calculate free breakfast guests based on actual room capacities
+          let totalFreeBreakfastGuests = 0;
+          let totalExtraGuests = 0;
+          
+          if (booking.rooms && booking.rooms.length > 0) {
+            booking.rooms.forEach(room => {
+              const roomGuests = room.adults + room.children;
+              const roomCapacity = room.room_capacity || 2; // Default to 2 if not specified
+              const extraGuestsInRoom = Math.max(0, roomGuests - roomCapacity);
+              
+              totalFreeBreakfastGuests += roomCapacity;
+              totalExtraGuests += extraGuestsInRoom;
+            });
+          } else {
+            // Fallback if no room data
+            totalFreeBreakfastGuests = 2;
+            totalExtraGuests = Math.max(0, totalGuests - 2);
+          }
+          
+          breakfastInfo = totalExtraGuests > 0 
+            ? `Free: ${totalFreeBreakfastGuests}, Extra: ${totalExtraGuests} (charged)`
+            : `Free: ${totalFreeBreakfastGuests} (no extra charges)`;
         }
         break;
       default:
