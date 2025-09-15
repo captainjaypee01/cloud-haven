@@ -473,7 +473,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-purple-600">
-                                                {formatCurrency(booking.meal_quote_data.meal_subtotal || 0)}
+                                                {formatCurrency(booking.meal_price || 0)}
                                             </div>
                                             <div className="text-sm text-gray-600">Total Meal Cost</div>
                                         </div>
@@ -505,8 +505,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                 {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
                                                             </Badge>
                                                         </td>
-                                                        <td className="py-2 pr-4">{night.adults}</td>
-                                                        <td className="py-2 pr-4">{night.children}</td>
+                                                        <td className="py-2 pr-4">{booking.adults}</td>
+                                                        <td className="py-2 pr-4">{booking.children}</td>
                                                         <td className="py-2 pr-4">
                                                             {night.type === 'buffet' ? formatCurrency(night.adult_price || 0) : 'Free'}
                                                         </td>
@@ -514,7 +514,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                             {night.type === 'buffet' ? formatCurrency(night.child_price || 0) : 'Free'}
                                                         </td>
                                                         <td className="py-2 pr-4 font-medium">
-                                                            {formatCurrency(night.night_total || 0)}
+                                                            {formatCurrency((booking.adults * night.adult_price) + (booking.children * night.child_price) || 0)}
                                                         </td>
                                                     </tr>
                                                 ))}
