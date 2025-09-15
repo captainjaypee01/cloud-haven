@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/admin/common/StatusBadge';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { Users, CalendarCheck, DollarSign, Star, Calendar, Eye } from 'lucide-react';  // example icons
 import { useNavigate } from 'react-router-dom';
+import RoomUnitCalendar from '@/components/admin/calendar/RoomUnitCalendar';
 // Recharts components
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
@@ -423,6 +424,11 @@ const Dashboard = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Room Unit Calendar */}
+            <div className="mt-8">
+                <RoomUnitCalendar />
             </div>
         </div>
     );
