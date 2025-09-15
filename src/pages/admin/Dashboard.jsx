@@ -47,7 +47,7 @@ const Dashboard = () => {
     const bookingStatusData = booking_status_distribution || [];
     const paymentStatusData = payment_status_distribution || [];
     const occupancyData = occupancy_trends || [];
-    
+
     // Color schemes for charts
     const COLORS = {
         primary: '#3b82f6',
@@ -60,7 +60,7 @@ const Dashboard = () => {
         purple: '#8b5cf6',
         pink: '#ec4899'
     };
-    
+
     const PIE_COLORS = [COLORS.primary, COLORS.secondary, COLORS.accent, COLORS.danger, COLORS.warning, COLORS.info, COLORS.success, COLORS.purple];
 
     // Helper to display room info (if multiple rooms in a booking)
@@ -133,9 +133,96 @@ const Dashboard = () => {
                     </div>
                 </Card>
             </div>
+            {/* Upcoming Bookings Table */}
+            <div className="flex items-center justify-between mb-3">
+                <h3 className="text-xl font-semibold text-blue-950/70">Upcoming Bookings (Today &amp; Tomorrow)</h3>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleViewToday}
+                        className="flex items-center gap-2"
+                    >
+                        <Calendar className="w-4 h-4" />
+                        View Today
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleViewMonth}
+                        className="flex items-center gap-2"
+                    >
+                        <CalendarCheck className="w-4 h-4" />
+                        View Month
+                    </Button>
+                </div>
+            </div>
+            <div className="w-full text-left border border-gray-300 rounded-lg max-h-80 overflow-y-auto">
+                <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-gray-800 font-medium">
+                        <tr>
+                            <th className="py-2 px-4 text-left">Guest Name</th>
+                            <th className="py-2 px-4 text-left">Check-in</th>
+                            <th className="py-2 px-4 text-left">Check-out</th>
+                            <th className="py-2 px-4 text-left">Room(s)</th>
+                            <th className="py-2 px-4 text-center">Total Amount</th>
+                            <th className="py-2 px-4 text-center">Remaining Balance</th>
+                            <th className="py-2 px-4 text-center">Status</th>
+                            <th className="py-2 px-4 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="text-gray-700">
+                        {(bookings_today_tomorrow || []).map((booking) => {
+
+                            const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
+
+                            // Remaining balance = (final price + other charges) - total paid (never negative)
+                            const totalPayable = Number(booking.final_price) + Number(booking.other_charges);
+                            const remainingBalance = Math.max(booking.final_price - totalPaid, 0);
+                            return (
+                                <tr key={booking.id} className="border-t border-gray-300">
+                                    <td className="py-2 px-4">{booking.guest_name}</td>
+                                    <td className="py-2 px-4">{formatDate(booking.check_in_date)}</td>
+                                    <td className="py-2 px-4">{formatDate(booking.check_out_date)}</td>
+                                    <td className="py-2 px-4 max-sm:hidden">{formatRooms(booking.rooms)}</td>
+                                    <td className="py-2 px-4 text-center">{formatCurrency(totalPayable)}</td>
+                                    <td className="py-2 px-4 text-center">{formatCurrency(remainingBalance)}</td>
+                                    <td className="py-2 px-4 text-center">
+                                        <StatusBadge status={booking.status} />
+                                    </td>
+                                    <td className="py-2 px-4 text-center">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleViewBookingDetails(booking.id)}
+                                            className="flex items-center gap-1"
+                                        >
+                                            <Eye className="w-4 h-4" />
+                                            View
+                                        </Button>
+                                    </td>
+                                </tr>
+                            )
+                        }
+                        )}
+                        {(bookings_today_tomorrow || []).length === 0 && (
+                            <tr>
+                                <td className="py-2 px-4 text-center text-gray-500" colSpan="8">
+                                    No bookings for the next two days.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Charts section */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-8">
+
+                {/* Room Unit Calendar */}
+                <div className="mt-8 xl:col-span-2">
+                    <RoomUnitCalendar />
+                </div>
                 {/* Monthly Bookings & Guests (Line Chart) */}
                 <Card className="p-4">
                     <h3 className="text-lg font-semibold mb-2">Monthly Bookings vs Guests</h3>
@@ -159,8 +246,8 @@ const Dashboard = () => {
                         <LineChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: 60 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="month" tickLine={false} />
-                            <YAxis 
-                                tickLine={false} 
+                            <YAxis
+                                tickLine={false}
                                 tickFormatter={(value) => {
                                     if (value >= 1000000) {
                                         return `₱${(value / 1000000).toFixed(1)}M`;
@@ -171,7 +258,7 @@ const Dashboard = () => {
                                 }}
                                 width={60}
                             />
-                            <Tooltip 
+                            <Tooltip
                                 formatter={(value) => [formatCurrency(value), 'Revenue']}
                                 labelFormatter={(label) => `Month: ${label}`}
                             />
@@ -194,6 +281,7 @@ const Dashboard = () => {
                     </ResponsiveContainer>
                 </Card>
             </div>
+
 
             {/* Additional Analytics Charts */}
             {(bookingStatusData.length > 0 || paymentStatusData.length > 0 || occupancyData.length > 0) && (
@@ -258,19 +346,19 @@ const Dashboard = () => {
                                 <AreaChart data={occupancyData} margin={{ top: 10, right: 20, bottom: 0, left: 0 }}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="month" tickLine={false} />
-                                    <YAxis 
-                                        tickLine={false} 
+                                    <YAxis
+                                        tickLine={false}
                                         domain={[0, 100]}
                                         tickFormatter={(value) => `${value}%`}
                                     />
-                                    <Tooltip 
+                                    <Tooltip
                                         formatter={(value) => [`${value}%`, 'Occupancy Rate']}
                                         labelFormatter={(label) => `Month: ${label}`}
                                     />
-                                    <Area 
-                                        type="monotone" 
-                                        dataKey="occupancy_rate" 
-                                        stroke={COLORS.primary} 
+                                    <Area
+                                        type="monotone"
+                                        dataKey="occupancy_rate"
+                                        stroke={COLORS.primary}
                                         fill={COLORS.primary}
                                         fillOpacity={0.3}
                                         strokeWidth={2}
@@ -291,7 +379,7 @@ const Dashboard = () => {
                             <BarChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: 60 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="month" tickLine={false} />
-                                <YAxis 
+                                <YAxis
                                     tickLine={false}
                                     tickFormatter={(value) => {
                                         if (value >= 1000000) {
@@ -303,7 +391,7 @@ const Dashboard = () => {
                                     }}
                                     width={60}
                                 />
-                                <Tooltip 
+                                <Tooltip
                                     formatter={(value) => [formatCurrency(value), '']}
                                     labelFormatter={(label) => `Month: ${label}`}
                                 />
@@ -320,22 +408,22 @@ const Dashboard = () => {
                             <LineChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: 60 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="month" tickLine={false} />
-                                <YAxis 
+                                <YAxis
                                     tickLine={false}
                                     tickFormatter={(value) => `${value}%`}
                                     domain={[0, 100]}
                                 />
-                                <Tooltip 
+                                <Tooltip
                                     formatter={(value) => [`${value}%`, 'Profit Margin']}
                                     labelFormatter={(label) => `Month: ${label}`}
                                 />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="profit_margin" 
-                                    name="Profit Margin" 
-                                    stroke={COLORS.accent} 
-                                    strokeWidth={3} 
-                                    dot={{ r: 4 }} 
+                                <Line
+                                    type="monotone"
+                                    dataKey="profit_margin"
+                                    name="Profit Margin"
+                                    stroke={COLORS.accent}
+                                    strokeWidth={3}
+                                    dot={{ r: 4 }}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
@@ -343,93 +431,7 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {/* Upcoming Bookings Table */}
-            <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl font-semibold text-blue-950/70">Upcoming Bookings (Today &amp; Tomorrow)</h3>
-                <div className="flex gap-2">
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleViewToday}
-                        className="flex items-center gap-2"
-                    >
-                        <Calendar className="w-4 h-4" />
-                        View Today
-                    </Button>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleViewMonth}
-                        className="flex items-center gap-2"
-                    >
-                        <CalendarCheck className="w-4 h-4" />
-                        View Month
-                    </Button>
-                </div>
-            </div>
-            <div className="w-full text-left border border-gray-300 rounded-lg max-h-80 overflow-y-auto">
-                <table className="w-full text-sm">
-                    <thead className="bg-gray-50 text-gray-800 font-medium">
-                        <tr>
-                            <th className="py-2 px-4 text-left">Guest Name</th>
-                            <th className="py-2 px-4 text-left">Check-in</th>
-                            <th className="py-2 px-4 text-left">Check-out</th>
-                            <th className="py-2 px-4 text-left">Room(s)</th>
-                            <th className="py-2 px-4 text-center">Total Amount</th>
-                            <th className="py-2 px-4 text-center">Remaining Balance</th>
-                            <th className="py-2 px-4 text-center">Status</th>
-                            <th className="py-2 px-4 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="text-gray-700">
-                        {(bookings_today_tomorrow || []).map((booking) => {
-                            
-                            const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
-                            
-                            // Remaining balance = (final price + other charges) - total paid (never negative)
-                            const totalPayable = Number(booking.final_price) + Number(booking.other_charges);
-                            const remainingBalance = Math.max(booking.final_price - totalPaid, 0);
-                            return (
-                                <tr key={booking.id} className="border-t border-gray-300">
-                                    <td className="py-2 px-4">{booking.guest_name}</td>
-                                    <td className="py-2 px-4">{formatDate(booking.check_in_date)}</td>
-                                    <td className="py-2 px-4">{formatDate(booking.check_out_date)}</td>
-                                    <td className="py-2 px-4 max-sm:hidden">{formatRooms(booking.rooms)}</td>
-                                    <td className="py-2 px-4 text-center">{formatCurrency(totalPayable)}</td>
-                                    <td className="py-2 px-4 text-center">{formatCurrency(remainingBalance)}</td>
-                                    <td className="py-2 px-4 text-center">
-                                        <StatusBadge status={booking.status} />
-                                    </td>
-                                    <td className="py-2 px-4 text-center">
-                                        <Button 
-                                            variant="ghost" 
-                                            size="sm" 
-                                            onClick={() => handleViewBookingDetails(booking.id)}
-                                            className="flex items-center gap-1"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                            View
-                                        </Button>
-                                    </td>
-                                </tr>
-                            )
-                        }
-                        )}
-                        {(bookings_today_tomorrow || []).length === 0 && (
-                            <tr>
-                                <td className="py-2 px-4 text-center text-gray-500" colSpan="8">
-                                    No bookings for the next two days.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
 
-            {/* Room Unit Calendar */}
-            <div className="mt-8">
-                <RoomUnitCalendar />
-            </div>
         </div>
     );
 };
