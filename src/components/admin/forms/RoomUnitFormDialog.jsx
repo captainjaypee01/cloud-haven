@@ -25,31 +25,83 @@ import { toast } from "sonner";
 const RoomUnitFormDialog = ({ open, onOpenChange, initialData, onSuccess }) => {
   const [formData, setFormData] = useState({
     status: 'available',
-    notes: ''
+    notes: '',
+    maintenance_start_at: '',
+    maintenance_end_at: '',
+    blocked_start_at: '',
+    blocked_end_at: ''
   });
   const [loading, setLoading] = useState(false);
   const api = useApi();
+
+  // Helper function to format date for HTML input
+  const formatDateForInput = (dateValue) => {
+    if (!dateValue) return '';
+    
+    // If it's already in YYYY-MM-DD format, return as is
+    if (typeof dateValue === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return dateValue;
+    }
+    
+    // If it's a full datetime string, extract just the date part
+    if (typeof dateValue === 'string' && dateValue.includes('T')) {
+      return dateValue.split('T')[0];
+    }
+    
+    // If it's a different string format, try to parse and format
+    try {
+      const date = new Date(dateValue);
+      if (!isNaN(date.getTime())) {
+        return date.toISOString().split('T')[0];
+      }
+    } catch (error) {
+      console.warn('Failed to parse date:', dateValue);
+    }
+    
+    return '';
+  };
 
   // Reset form when dialog opens/closes or data changes
   useEffect(() => {
     if (initialData) {
       setFormData({
         status: initialData.status || 'available',
-        notes: initialData.notes || ''
+        notes: initialData.notes || '',
+        maintenance_start_at: initialData.maintenance_start_at || '',
+        maintenance_end_at: initialData.maintenance_end_at || '',
+        blocked_start_at: initialData.blocked_start_at || '',
+        blocked_end_at: initialData.blocked_end_at || ''
       });
     } else {
       setFormData({
         status: 'available', 
-        notes: ''
+        notes: '',
+        maintenance_start_at: '',
+        maintenance_end_at: '',
+        blocked_start_at: '',
+        blocked_end_at: ''
       });
     }
   }, [initialData, open]);
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // Clear date fields when status changes to a different value
+      if (field === 'status') {
+        if (value !== 'maintenance') {
+          newData.maintenance_start_at = '';
+          newData.maintenance_end_at = '';
+        }
+        if (value !== 'blocked') {
+          newData.blocked_start_at = '';
+          newData.blocked_end_at = '';
+        }
+      }
+      
+      return newData;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -61,6 +113,8 @@ const RoomUnitFormDialog = ({ open, onOpenChange, initialData, onSuccess }) => {
     }
 
     setLoading(true);
+    
+    console.log('Submitting form data:', formData);
     
     try {
       const response = await api.patch(
@@ -145,6 +199,60 @@ const RoomUnitFormDialog = ({ open, onOpenChange, initialData, onSuccess }) => {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Maintenance Date Fields */}
+          {formData.status === 'maintenance' && (
+            <>
+              <div>
+                <Label htmlFor="maintenance-start">Maintenance Start Date</Label>
+                <Input
+                  id="maintenance-start"
+                  type="date"
+                  value={formData.maintenance_start_at}
+                  onChange={(e) => handleInputChange('maintenance_start_at', e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="maintenance-end">Maintenance End Date</Label>
+                <Input
+                  id="maintenance-end"
+                  type="date"
+                  value={formData.maintenance_end_at}
+                  onChange={(e) => handleInputChange('maintenance_end_at', e.target.value)}
+                  min={formData.maintenance_start_at}
+                  required
+                />
+              </div>
+            </>
+          )}
+
+          {/* Blocked Date Fields */}
+          {formData.status === 'blocked' && (
+            <>
+              <div>
+                <Label htmlFor="blocked-start">Blocked Start Date</Label>
+                <Input
+                  id="blocked-start"
+                  type="date"
+                  value={formData.blocked_start_at}
+                  onChange={(e) => handleInputChange('blocked_start_at', e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="blocked-end">Blocked End Date</Label>
+                <Input
+                  id="blocked-end"
+                  type="date"
+                  value={formData.blocked_end_at}
+                  onChange={(e) => handleInputChange('blocked_end_at', e.target.value)}
+                  min={formData.blocked_start_at}
+                  required
+                />
+              </div>
+            </>
+          )}
 
           {/* Notes */}
           <div>

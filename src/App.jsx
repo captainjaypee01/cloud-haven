@@ -33,6 +33,7 @@ const Layout = React.lazy(() => import('./pages/admin/Layout'));
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const ListRoom = React.lazy(() => import('./pages/admin/rooms/ListRoom'));
 const ListRoomUnits = React.lazy(() => import('./pages/admin/room-units/ListRoomUnits'));
+const RoomUnitCalendarPage = React.lazy(() => import('./pages/admin/room-units/RoomUnitCalendarPage'));
 const ListBooking = React.lazy(() => import('./pages/admin/bookings/ListBooking'));
 const BookingsCalendarPage = React.lazy(() => import('./pages/admin/bookings/BookingsCalendarPage'));
 const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
@@ -144,6 +145,7 @@ const App = () => {
                   <Route index element={<Dashboard />} />
                   <Route path="rooms" element={<ListRoom />} />
                   <Route path="room-units/:roomId" element={<ListRoomUnits />} />
+                  <Route path="room-units/calendar" element={<RoomUnitCalendarPage />} />
                   <Route path="bookings" element={<ListBooking />} />
                   <Route path="bookings/calendar" element={<BookingsCalendarPage />} />
                   <Route path="bookings/:id" element={<BookingDetails />} />
