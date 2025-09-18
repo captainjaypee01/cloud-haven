@@ -141,7 +141,11 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 },
                 { requiresAuth: true }
             );
-            toast.success(`Proof ${proofAction} successfully`);
+            if (proofAction === 'rejected') {
+                toast.success('Proof rejected, payment marked as failed, and booking cancelled successfully');
+            } else {
+                toast.success(`Proof ${proofAction} successfully`);
+            }
             setStatusProofDialog(false);
             setSelectedProofPayment(null);
             setProofAction(null);
@@ -812,33 +816,47 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <AlertDialogDescription>
                             {proofAction === 'accepted' 
                                 ? 'Mark this proof of payment as accepted and verified.'
-                                : 'Reject this proof of payment. Please provide a reason for rejection.'
+                                : 'Reject this proof of payment. Please provide a reason for rejection. Note: Rejecting the proof will automatically cancel the booking.'
                             }
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                                          <Form {...statusForm}>
                          <form onSubmit={(e) => e.preventDefault()}>
                             {proofAction === 'rejected' && (
-                                <FormField
-                                    control={statusForm.control}
-                                    name="reason"
-                                    rules={{ 
-                                        required: 'Rejection reason is required',
-                                        validate: (value) => value.trim() !== '' || 'Rejection reason cannot be empty'
-                                    }}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Rejection Reason *</FormLabel>
-                                            <FormControl>
-                                                <Textarea 
-                                                    placeholder="Enter reason for rejecting this proof..."
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <>
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                                        <div className="flex items-start gap-2">
+                                            <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                                            <div>
+                                                <h4 className="text-sm font-medium text-red-900">Important Notice</h4>
+                                                <p className="text-sm text-red-700 mt-1">
+                                                    Rejecting this proof of payment will mark the payment as failed, automatically cancel the booking, 
+                                                    and send both a proof rejection email and a booking cancellation email to the guest.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <FormField
+                                        control={statusForm.control}
+                                        name="reason"
+                                        rules={{ 
+                                            required: 'Rejection reason is required',
+                                            validate: (value) => value.trim() !== '' || 'Rejection reason cannot be empty'
+                                        }}
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Rejection Reason *</FormLabel>
+                                                <FormControl>
+                                                    <Textarea 
+                                                        placeholder="Enter reason for rejecting this proof..."
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
                             )}
                                                          <AlertDialogFooter className="mt-4">
                                  <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>

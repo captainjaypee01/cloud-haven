@@ -16,7 +16,7 @@ import { BadgeCheckIcon, BadgeAlertIcon, Upload, FileText, X, Eye, Clock, CheckC
 import ProofImageDialog from '@/components/admin/booking/ProofImageDialog';
 import { formatSingaporeDateTime } from '@/utils/dateUtils';
 
-const PaymentCard = ({ payment, onPaymentUpdate }) => {
+const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
     const [showUploadDialog, setShowUploadDialog] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -32,8 +32,10 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
     const currentUploads = payment.proof_upload_count || 0;
     const proofStatus = payment.proof_status || 'none';
     
-    // Determine if user can upload based on count AND status
-    const canUpload = currentUploads < maxUploads && 
+    // Determine if user can upload based on count, status, and booking status
+    const isBookingCancelled = booking?.status === 'cancelled';
+    const canUpload = !isBookingCancelled && 
+                     currentUploads < maxUploads && 
                      (proofStatus === 'none' || proofStatus === 'rejected');
 
     const handleFileSelect = (file) => {
@@ -60,7 +62,9 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
         setIsDragging(false);
         
         if (!canUpload) {
-            if (proofStatus === 'accepted') {
+            if (isBookingCancelled) {
+                toast.error('Cannot upload proof - booking has been cancelled.');
+            } else if (proofStatus === 'accepted') {
                 toast.info('This payment proof has already been accepted by admin.');
             } else if (proofStatus === 'pending') {
                 toast.info('Your proof is currently under review by admin.');
@@ -91,7 +95,9 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
 
     const handleUploadClick = () => {
         if (!canUpload) {
-            if (proofStatus === 'accepted') {
+            if (isBookingCancelled) {
+                toast.error('Cannot upload proof - booking has been cancelled.');
+            } else if (proofStatus === 'accepted') {
                 toast.info('This payment proof has already been accepted by admin.');
             } else if (proofStatus === 'pending') {
                 toast.info('Your proof is currently under review by admin.');
@@ -171,6 +177,8 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
             
             if (error.response?.data?.error_code === 'proof_upload_limit_reached') {
                 toast.error(error.response.data.message);
+            } else if (error.response?.data?.error_code === 'booking_cancelled') {
+                toast.error(error.response.data.message);
             } else if (error.response?.data?.message) {
                 toast.error(error.response.data.message);
             } else {
@@ -184,7 +192,14 @@ const PaymentCard = ({ payment, onPaymentUpdate }) => {
 
     const renderUploadArea = () => {
         if (!canUpload) {
-            if (proofStatus === 'accepted') {
+            if (isBookingCancelled) {
+                return (
+                    <div className="flex items-center justify-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <XCircle className="h-5 w-5 text-red-600" />
+                        <span className="text-sm font-medium text-red-700">Booking cancelled - proof uploads not allowed</span>
+                    </div>
+                );
+            } else if (proofStatus === 'accepted') {
                 return (
                     <div className="flex items-center justify-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
                         <CheckCircle className="h-5 w-5 text-green-600" />
