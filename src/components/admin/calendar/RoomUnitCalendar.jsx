@@ -13,12 +13,17 @@ import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import BookingDetailsDialog from './BookingDetailsDialog';
 
 const RoomUnitCalendar = () => {
   const [calendarData, setCalendarData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [selectedUnit, setSelectedUnit] = useState(null);
+  const [loadingBooking, setLoadingBooking] = useState(null); // Store the specific cell being loaded
   const api = useApi();
 
   // Generate year options (current year ± 2)
@@ -44,16 +49,16 @@ const RoomUnitCalendar = () => {
     { value: 12, label: 'December' },
   ];
 
-  // Status colors mapping
+  // Status colors mapping - darker colors with full cell shading
   const getStatusColor = (status) => {
     const colors = {
-      available: 'bg-green-100 border-green-300 hover:bg-green-200',
-      booked: 'bg-blue-100 border-blue-300 hover:bg-blue-200',
-      pending: 'bg-yellow-100 border-yellow-300 hover:bg-yellow-200',
-      maintenance: 'bg-orange-100 border-orange-300 hover:bg-orange-200',
-      blocked: 'bg-red-100 border-red-300 hover:bg-red-200',
+      available: 'bg-green-600 text-white hover:bg-green-700',
+      booked: 'bg-blue-600 text-white hover:bg-blue-700',
+      pending: 'bg-yellow-600 text-white hover:bg-yellow-700',
+      maintenance: 'bg-orange-600 text-white hover:bg-orange-700',
+      blocked: 'bg-red-600 text-white hover:bg-red-700',
     };
-    return colors[status] || 'bg-gray-100 border-gray-300 hover:bg-gray-200';
+    return colors[status] || 'bg-gray-600 text-white hover:bg-gray-700';
   };
 
   // Fetch calendar data
@@ -96,6 +101,47 @@ const RoomUnitCalendar = () => {
   useEffect(() => {
     fetchCalendarData();
   }, [selectedYear, selectedMonth]);
+
+  // Handle cell click to show booking details
+  const handleCellClick = async (dayStatus, unit, room) => {
+    // Only fetch booking details for booked or pending dates
+    if (!['booked', 'pending'].includes(dayStatus.status)) {
+      return;
+    }
+
+    const cellKey = `${unit.id}-${dayStatus.date}`;
+    setLoadingBooking(cellKey);
+    try {
+      const response = await api.get(
+        `${API_PREFIX}/admin/room-units/${unit.id}/booking-details`,
+        {
+          params: { date: dayStatus.date },
+          requiresAuth: true,
+        }
+      );
+
+      if (response.data?.success) {
+        setSelectedBooking(response.data.data);
+        setSelectedUnit({
+          room_name: room.room_name,
+          unit_number: unit.unit_number,
+          date: dayStatus.date
+        });
+        setShowBookingDialog(true);
+      } else {
+        toast.error('Failed to load booking details');
+      }
+    } catch (error) {
+      console.error('Error fetching booking details:', error);
+      if (error.response?.status === 404) {
+        toast.error('No booking found for this date');
+      } else {
+        toast.error('Failed to load booking details');
+      }
+    } finally {
+      setLoadingBooking(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -189,23 +235,23 @@ const RoomUnitCalendar = () => {
         {/* Legend */}
         <div className="flex items-center gap-4 text-sm">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-green-200 border border-green-300 rounded"></div>
+            <div className="w-3 h-3 bg-green-600 rounded"></div>
             <span>Available</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-blue-200 border border-blue-300 rounded"></div>
+            <div className="w-3 h-3 bg-blue-600 rounded"></div>
             <span>Booked</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-yellow-200 border border-yellow-300 rounded"></div>
+            <div className="w-3 h-3 bg-yellow-600 rounded"></div>
             <span>Pending</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-orange-200 border border-orange-300 rounded"></div>
+            <div className="w-3 h-3 bg-orange-600 rounded"></div>
             <span>Maintenance</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-red-200 border border-red-300 rounded"></div>
+            <div className="w-3 h-3 bg-red-600 rounded"></div>
             <span>Blocked</span>
           </div>
         </div>
@@ -259,11 +305,27 @@ const RoomUnitCalendar = () => {
                         </span>
                       </td>
                       {unit.day_statuses.map(dayStatus => (
-                        <td key={dayStatus.day} className="border border-gray-300 p-1">
-                          <div
-                            className={`w-6 h-6 border rounded cursor-pointer transition-colors ${getStatusColor(dayStatus.status)}`}
-                            title={`${dayStatus.date}: ${dayStatus.status.charAt(0).toUpperCase() + dayStatus.status.slice(1)}`}
-                          />
+                        <td 
+                          key={dayStatus.day} 
+                          className={`border border-gray-300 p-1 text-center transition-colors ${
+                            ['booked', 'pending'].includes(dayStatus.status) 
+                              ? 'cursor-pointer hover:opacity-80' 
+                              : 'cursor-default'
+                          } ${getStatusColor(dayStatus.status)}`}
+                          onClick={() => handleCellClick(dayStatus, unit, room)}
+                          title={
+                            ['booked', 'pending'].includes(dayStatus.status)
+                              ? `Click to view booking details - ${dayStatus.date}`
+                              : `${dayStatus.date}: ${dayStatus.status.charAt(0).toUpperCase() + dayStatus.status.slice(1)}`
+                          }
+                        >
+                          <div className="w-full h-6 flex items-center justify-center text-xs font-medium">
+                            {loadingBooking === `${unit.id}-${dayStatus.date}` ? (
+                              <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                              dayStatus.day
+                            )}
+                          </div>
                         </td>
                       ))}
                     </tr>
@@ -280,6 +342,14 @@ const RoomUnitCalendar = () => {
           </div>
         )}
       </CardContent>
+
+      {/* Booking Details Dialog */}
+      <BookingDetailsDialog
+        open={showBookingDialog}
+        onOpenChange={setShowBookingDialog}
+        bookingData={selectedBooking}
+        unitInfo={selectedUnit}
+      />
     </Card>
   );
 };
