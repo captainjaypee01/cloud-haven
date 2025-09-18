@@ -22,7 +22,7 @@ import { API_PREFIX } from "@/constants/api";
 import { formatCurrency } from "@/utils/currency";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, X, Image as ImageIcon } from "lucide-react";
+import { Upload, FileText, X, Image as ImageIcon, XCircle } from "lucide-react";
 
 const paymentProviders = [
     { value: 'bank_bdo', label: 'Bank Transfer (BDO)' },
@@ -218,6 +218,12 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
     const handleSubmit = async (values) => {
         if (!booking || !paymentOption) return;
 
+        // Check if booking is cancelled - prevent proof uploads for cancelled bookings
+        if (booking.status === 'cancelled') {
+            toast.error('Cannot upload proof - booking has been cancelled.');
+            return;
+        }
+
         setSubmitting(true);
         setUploadProgress(0);
         
@@ -324,6 +330,19 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                 <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader className="space-y-3">
                         <DialogTitle className="text-lg font-semibold">Upload Proof of Payment</DialogTitle>
+                        
+                        {booking?.status === 'cancelled' && (
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                    <XCircle className="h-5 w-5 text-red-600" />
+                                    <div>
+                                        <div className="text-sm font-medium text-red-900">Booking Cancelled</div>
+                                        <div className="text-sm text-red-700">This booking has been cancelled. Proof uploads are not allowed.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
                         <div className="text-sm text-muted-foreground space-y-2">
                             <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                 <div>
@@ -566,7 +585,7 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={submitting || !proofFile}
+                                    disabled={submitting || !proofFile || booking?.status === 'cancelled'}
                                     className="min-w-[150px] cursor-pointer"
                                 >
                                     {submitting ? "Uploading..." : 

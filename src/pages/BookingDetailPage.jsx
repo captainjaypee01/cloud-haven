@@ -271,6 +271,7 @@ const UnifiedBookingResultPage = () => {
                                         <PaymentCard 
                                             key={payment.id} 
                                             payment={payment} 
+                                            booking={booking}
                                             onPaymentUpdate={handlePaymentUpdate}
                                         />
                                     ))}
