@@ -243,74 +243,50 @@ const PaymentPage = () => {
                                 <h3 className="text-xl font-semibold text-gray-900">Payment Options</h3>
                             </div>
                             
-                            {/* If already paid DP and remaining balance > 0, show only remaining balance payment option */}
-                            {downpaymentPaid && remainingBalance > 0 ? (
+                            {/* Show downpayment option only */}
+                            {downpaymentPaid ? (
                                 <div className="space-y-4">
-                                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <Clock className="h-5 w-5 text-yellow-600" />
-                                            <span className="font-medium text-yellow-800">Downpayment Already Paid</span>
+                                            <CheckCircle className="h-5 w-5 text-green-600" />
+                                            <span className="font-medium text-green-800">Downpayment Already Paid</span>
                                         </div>
-                                        <p className="text-yellow-700 text-sm">
-                                            You have already paid the downpayment. You can now pay the remaining balance online or at the resort.
+                                        <p className="text-green-700 text-sm">
+                                            Your downpayment has been paid. Please settle the remaining balance at the resort during check-in.
                                         </p>
-                                    </div>
-                                    
-                                    <div className="border-2 border-cyan-600 bg-cyan-50 p-6 rounded-lg">
-                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <CreditCard className="h-5 w-5 text-cyan-600" />
-                                                    <h4 className="text-lg font-semibold text-cyan-900">Pay Remaining Balance</h4>
-                                                </div>
-                                                <div className="text-2xl font-bold text-cyan-700 mb-2">{formatCurrency(remainingBalance)}</div>
-                                                <p className="text-cyan-600 text-sm">
-                                                    Pay now to fully settle your booking. You can also pay at the resort.
-                                                </p>
+                                        <div className="mt-3 p-3 bg-white border border-green-300 rounded-lg">
+                                            <div className="text-sm text-green-800">
+                                                <div className="font-medium mb-1">Remaining Balance:</div>
+                                                <div className="text-lg font-bold">{formatCurrency(remainingBalance)}</div>
+                                                <div className="text-xs mt-1">To be paid at the resort</div>
                                             </div>
-                                            <Button
-                                                onClick={() => handlePaymentClick({ amount: remainingBalance, type: "full" })}
-                                                className="w-full lg:w-auto px-8 py-3 text-lg font-semibold cursor-pointer bg-cyan-600 hover:bg-cyan-700"
-                                            >
-                                                Pay Remaining Balance
-                                            </Button>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {booking.pay_now_options?.map(opt => (
+                                    {/* Only show downpayment option */}
+                                    {booking.pay_now_options?.filter(opt => opt.type === 'downpayment').map(opt => (
                                         <div
                                             key={opt.type}
-                                            className={`border-2 p-6 rounded-lg transition-all duration-200 ${
-                                                selectedOption && selectedOption.type === opt.type 
-                                                    ? 'border-cyan-600 bg-cyan-50 shadow-lg scale-[1.02]' 
-                                                    : 'border-gray-200 bg-white hover:border-cyan-300 hover:shadow-md'
-                                            }`}
+                                            className="border-2 border-amber-600 bg-amber-50 p-6 rounded-lg shadow-lg"
                                         >
                                             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <CreditCard className="h-5 w-5 text-cyan-600" />
-                                                        <h4 className="text-lg font-semibold text-gray-900">{opt.label}</h4>
+                                                        <CreditCard className="h-5 w-5 text-amber-600" />
+                                                        <h4 className="text-lg font-semibold text-amber-900">Pay Downpayment</h4>
                                                     </div>
-                                                    <div className="text-2xl font-bold text-cyan-700 mb-2">{formatCurrency(opt.amount)}</div>
-                                                    <p className="text-gray-600 text-sm">
-                                                        {opt.type === 'downpayment' 
-                                                            ? 'Pay now, remaining balance due at check-in.' 
-                                                            : 'Settle everything now, skip the counter later!'
-                                                        }
+                                                    <div className="text-2xl font-bold text-amber-700 mb-2">{formatCurrency(opt.amount)}</div>
+                                                    <p className="text-amber-600 text-sm">
+                                                        Pay now to secure your booking. Remaining balance will be settled at the resort during check-in.
                                                     </p>
                                                 </div>
                                                 <Button 
                                                     onClick={() => handlePaymentClick(opt)} 
-                                                    className={`w-full lg:w-auto px-8 py-3 text-lg font-semibold cursor-pointer ${
-                                                        opt.type === 'downpayment' 
-                                                            ? 'bg-amber-600 hover:bg-amber-700' 
-                                                            : 'bg-cyan-600 hover:bg-cyan-700'
-                                                    }`}
+                                                    className="w-full lg:w-auto px-8 py-3 text-lg font-semibold cursor-pointer bg-amber-600 hover:bg-amber-700"
                                                 >
-                                                    {opt.type === 'downpayment' ? 'Pay Downpayment' : 'Pay Full Amount'}
+                                                    Pay Downpayment
                                                 </Button>
                                             </div>
                                         </div>

@@ -18,7 +18,7 @@ import { Separator } from "@radix-ui/react-select";
 import SEO from "@/components/SEO";
 import PaymentCard from "@/components/PaymentCard";
 import MealDetailComponent from "@/components/booking/MealDetailComponent";
-import { CreditCard, Building } from "lucide-react";
+import { CreditCard, Building, CheckCircle } from "lucide-react";
 
 const statusColor = status => {
     switch (status) {
@@ -288,13 +288,22 @@ const UnifiedBookingResultPage = () => {
                         )}
                         {booking.status === "downpayment" && (
                             <div className="mb-6">
-                                <div className="mb-2 text-yellow-700">Downpayment paid. Remaining balance due at check-in or pay now:</div>
-                                <div className="mb-3 text-base text-yellow-700">
-                                    Remaining: {formatCurrency(remainingBalance)}
+                                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <CheckCircle className="h-5 w-5 text-green-600" />
+                                        <span className="font-medium text-green-800">Downpayment Paid</span>
+                                    </div>
+                                    <p className="text-green-700 text-sm mb-3">
+                                        Your downpayment has been paid and confirmed. Please settle the remaining balance at the resort during check-in.
+                                    </p>
+                                    <div className="p-3 bg-white border border-green-300 rounded-lg">
+                                        <div className="text-sm text-green-800">
+                                            <div className="font-medium mb-1">Remaining Balance:</div>
+                                            <div className="text-lg font-bold">{formatCurrency(remainingBalance)}</div>
+                                            <div className="text-xs mt-1">To be paid at the resort</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <Link to={`/booking/${refNo}/payment`} onClick={() => { window.scrollTo(0, 0); }}>
-                                    <Button variant="outline" size="lg" className="w-full cursor-pointer">Pay Remaining Balance Now</Button>
-                                </Link>
                             </div>
                         )}
                         {booking.status === "paid" && (

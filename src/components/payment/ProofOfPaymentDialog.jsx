@@ -67,14 +67,6 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
 
     // Check for existing payments when dialog opens
     const checkExistingPayments = useCallback(() => {
-        // For remaining balance payments, always create a new payment
-        // because we're paying a different amount than what was already paid
-        if (paymentOption.type === 'full') {
-            setExistingPayment(null);
-            setShouldCreateNew(true);
-            return;
-        }
-
         // Look for existing payment with same amount
         const existingPaymentForAmount = booking.payments?.find(payment => 
             Math.abs(payment.amount - paymentOption.amount) < 0.01 // Allow for floating point differences
