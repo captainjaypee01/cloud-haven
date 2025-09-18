@@ -58,18 +58,18 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-lg">
             <Home className="h-5 w-5" />
             Booking Details - {unitInfo?.room_name} Unit {unitInfo?.unit_number}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto flex-1 pr-2">
           {/* Booking Status & Reference */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <Badge className={getStatusColor(status)}>
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </Badge>
@@ -77,8 +77,8 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
                 {booking_type === 'day_tour' ? 'Day Tour' : 'Overnight Stay'}
               </span>
             </div>
-            <div className="text-right">
-              <div className="font-mono text-sm text-muted-foreground">
+            <div className="text-left sm:text-right">
+              <div className="font-mono text-sm text-muted-foreground break-all">
                 {reference_number}
               </div>
             </div>
@@ -90,7 +90,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
               <User className="h-5 w-5" />
               Guest Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+            <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-gray-500" />
@@ -100,7 +100,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-gray-500" />
                   <span className="font-medium">Email:</span>
-                  <span className="text-sm">{guest_email}</span>
+                  <span className="text-sm break-all">{guest_email}</span>
                 </div>
                 {guest_phone && (
                   <div className="flex items-center gap-2">
@@ -110,21 +110,21 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
                   </div>
                 )}
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="font-medium">Adults:</span>
-                  <span>{adults}</span>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 pt-2 border-t border-gray-200">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base">Adults:</span>
+                  <span className="font-semibold">{adults}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="font-medium">Children:</span>
-                  <span>{children}</span>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base">Children:</span>
+                  <span className="font-semibold">{children}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="font-medium">Total Guests:</span>
-                  <span className="font-semibold">{total_guests}</span>
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Users className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base">Total:</span>
+                  <span className="font-bold text-base sm:text-lg">{total_guests}</span>
                 </div>
               </div>
             </div>
@@ -136,7 +136,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
               <Calendar className="h-5 w-5" />
               Stay Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg">
+            <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-blue-600" />
@@ -149,12 +149,10 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
                   <span>{formatDate(check_out_date)}</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">Duration:</span>
-                  <span className="font-semibold">{nights} {nights === 1 ? 'night' : 'nights'}</span>
-                </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-blue-200">
+                <Clock className="h-4 w-4 text-blue-600" />
+                <span className="font-medium">Duration:</span>
+                <span className="font-bold text-lg">{nights} {nights === 1 ? 'night' : 'nights'}</span>
               </div>
             </div>
           </div>
@@ -166,36 +164,34 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
               Pricing Information
             </h3>
             <div className="space-y-3 p-4 bg-green-50 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Room Price:</span>
-                    <span className="font-medium">{formatCurrency(room_price)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Meal Price:</span>
-                    <span className="font-medium">{formatCurrency(meal_price || 0)}</span>
-                  </div>
-                  {other_charges > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Other Charges:</span>
-                      <span className="font-medium">{formatCurrency(other_charges)}</span>
-                    </div>
-                  )}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Room Price:</span>
+                  <span className="font-medium text-sm sm:text-base">{formatCurrency(room_price)}</span>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between border-t pt-2">
-                    <span className="font-semibold">Total Payable:</span>
-                    <span className="font-bold text-lg">{formatCurrency(total_payable)}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">Meal Price:</span>
+                  <span className="font-medium text-sm sm:text-base">{formatCurrency(meal_price || 0)}</span>
+                </div>
+                {other_charges > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Other Charges:</span>
+                    <span className="font-medium text-sm sm:text-base">{formatCurrency(other_charges)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-green-600">Total Paid:</span>
-                    <span className="font-semibold text-green-600">{formatCurrency(total_paid)}</span>
-                  </div>
-                  <div className="flex justify-between border-t pt-2">
-                    <span className="font-semibold text-red-600">Remaining Balance:</span>
-                    <span className="font-bold text-lg text-red-600">{formatCurrency(remaining_balance)}</span>
-                  </div>
+                )}
+              </div>
+              <div className="space-y-2 pt-2 border-t border-green-200">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-sm sm:text-base">Total Payable:</span>
+                  <span className="font-bold text-base sm:text-lg">{formatCurrency(total_payable)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-green-600">Total Paid:</span>
+                  <span className="font-semibold text-green-600 text-sm sm:text-base">{formatCurrency(total_paid)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-green-200">
+                  <span className="font-semibold text-red-600 text-sm sm:text-base">Remaining Balance:</span>
+                  <span className="font-bold text-base sm:text-lg text-red-600">{formatCurrency(remaining_balance)}</span>
                 </div>
               </div>
             </div>
