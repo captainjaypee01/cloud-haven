@@ -10,8 +10,9 @@ import RescheduleBookingDialog from './RescheduleBookingDialog';
 import ProofImageDialog from './ProofImageDialog';
 import BookingCancellationDialog from './BookingCancellationDialog';
 import BookingDeletionDialog from './BookingDeletionDialog';
+import ChangeRoomUnitDialog from './ChangeRoomUnitDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2 } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3 } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -39,6 +40,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [selectedProofPayment, setSelectedProofPayment] = useState(null);
     const [showCancellation, setShowCancellation] = useState(false);
     const [showDeletion, setShowDeletion] = useState(false);
+    const [showChangeRoomUnit, setShowChangeRoomUnit] = useState(false);
+    const [selectedBookingRoom, setSelectedBookingRoom] = useState(null);
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const api = useApi();
     const navigate = useNavigate();
@@ -164,6 +167,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
         // After successful deletion, redirect to booking list since the booking no longer exists
         navigate('/admin/bookings');
         setShowDeletion(false);
+    };
+
+    const handleChangeRoomUnit = (bookingRoom) => {
+        setSelectedBookingRoom(bookingRoom);
+        setShowChangeRoomUnit(true);
+    };
+
+    const handleRoomUnitChangeSuccess = () => {
+        setShowChangeRoomUnit(false);
+        setSelectedBookingRoom(null);
+        if (fetchBooking) fetchBooking();
     };
 
     const getProofStatusBadge = (proofStatus, uploadCount = 0) => {
@@ -375,6 +389,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             <th className="py-2 pr-4 font-medium">Total Price</th>
                                         </>
                                     )}
+                                    <th className="py-2 pr-4 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -435,6 +450,18 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                 <td className="py-2 pr-4 font-medium">{formatCurrency(br.total_price || 0)}</td>
                                             </>
                                         )}
+                                        <td className="py-2 pr-4">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="cursor-pointer"
+                                                onClick={() => handleChangeRoomUnit(br)}
+                                                title="Change room unit"
+                                            >
+                                                <Edit3 className="h-3 w-3 mr-1" />
+                                                Change Unit
+                                            </Button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -872,6 +899,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     </Form>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Change Room Unit Dialog */}
+            <ChangeRoomUnitDialog
+                open={showChangeRoomUnit}
+                onOpenChange={setShowChangeRoomUnit}
+                booking={booking}
+                bookingRoom={selectedBookingRoom}
+                onSuccess={handleRoomUnitChangeSuccess}
+            />
         </div>
     );
 };
