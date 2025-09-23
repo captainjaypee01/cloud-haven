@@ -30,6 +30,7 @@ import {
 import NavManagement from "./NavManagement";
 
 import { NETANIA_LOGO } from "@/constants/AppConstant";
+import { Link } from "react-router-dom";
 const data = {
     navMain: [
         { title: "Dashboard", url: "/admin", icon: LayoutDashboardIcon },
@@ -75,8 +76,12 @@ export default function AppSidebar({ ...props }) {
                         <SidebarMenuButton
                             className="data-[slot=sidebar-menu-button]:!p-1.5"
                         >
-                            <img src={NETANIA_LOGO} alt="Logo" className="h-6 w-6" />
-                            <span className="font-bold text-lg tracking-tight">Netania De Laiya</span>
+                            <Link to="/" onClick={() => { window.scrollTo(0, 0); }}>
+                                <img src={NETANIA_LOGO} alt="Logo" className="h-6 w-6" />
+                            </Link>
+                            <Link to="/" onClick={() => { window.scrollTo(0, 0); }}>
+                                <span className="font-bold text-lg tracking-tight">Netania De Laiya</span>
+                            </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

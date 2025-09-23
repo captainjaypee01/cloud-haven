@@ -12,7 +12,7 @@ import {
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, RefreshCw } from 'lucide-react';
 import BookingDetailsDialog from './BookingDetailsDialog';
 
 const RoomUnitCalendar = () => {
@@ -228,6 +228,16 @@ const RoomUnitCalendar = () => {
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchCalendarData}
+                disabled={loading}
+                className="cursor-pointer"
+                title="Refresh calendar data"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
           </div>
         </div>
@@ -341,6 +351,7 @@ const RoomUnitCalendar = () => {
         onOpenChange={setShowBookingDialog}
         bookingData={selectedBooking}
         unitInfo={selectedUnit}
+        onBookingUpdate={fetchCalendarData}
       />
     </Card>
   );
