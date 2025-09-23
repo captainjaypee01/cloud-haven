@@ -190,7 +190,9 @@ const CheckoutPage = () => {
                     room_total: roomTotalPrice,
                     meal_total: mealCost,
                     grand_total: grandTotal
-                }
+                },
+                // Include promo information if present
+                promo_id: promoInfo ? promoInfo.id : null
             };
             
             try {
@@ -260,7 +262,12 @@ const CheckoutPage = () => {
     };
 
     const handleApplyPromo = async () => {
-        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal);
+        const bookingDates = {
+            checkIn: checkIn,
+            checkOut: checkOut,
+            dayTourDate: isDayTourCart ? items.find(item => item.dayTourDate)?.dayTourDate : null
+        };
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates);
     };
     return (
         <div className="relative min-h-screen pb-[200px] py-16 px-2 md:px-8 lg:px-32 mt-10 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">

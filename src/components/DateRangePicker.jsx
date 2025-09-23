@@ -27,14 +27,25 @@ export function DateRangePicker({ range, onChange, disabledRanges = [] }) {
     const hasSelection = range?.from || range?.to;
     const isComplete = range?.from && range?.to;
 
-    // Create disabled function that checks both past dates and meal program ranges
+    // Create disabled function that checks past dates, meal program ranges, and 5-day limit
     const isDateDisabled = (date) => {
         // Disable past dates
         if (date < new Date()) {
             return true;
         }
 
-        // If no meal program ranges are provided, only disable past dates
+        // If we have a check-in date selected, enforce 5-day maximum limit
+        if (range?.from) {
+            const checkInDate = new Date(range.from);
+            const daysDifference = Math.ceil((date - checkInDate) / (1000 * 60 * 60 * 24));
+            
+            // Disable dates more than 5 days after check-in
+            if (daysDifference > 5) {
+                return true;
+            }
+        }
+
+        // If no meal program ranges are provided, only apply above rules
         if (disabledRanges.length === 0) {
             return false;
         }

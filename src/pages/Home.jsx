@@ -1,12 +1,16 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Hero from '../components/Hero'
 import FeaturedRooms from '../components/FeaturedRooms'
 import ExclusiveOffers from '@/components/exclusive-offer/ExclusiveOffers'
+import ExclusiveOffersDialog from '@/components/exclusive-offer/ExclusiveOffersDialog'
 import NewsLetter from '../components/NewsLetter'
 import { TestimonialsSection } from '@/components/testimonials'
 import SEO from '@/components/SEO'
 
 const Home = () => {
+    const [showOffersDialog, setShowOffersDialog] = useState(true);
+
+
     return (
         <>
       <SEO
@@ -52,6 +56,12 @@ const Home = () => {
             <ExclusiveOffers />
             <TestimonialsSection />
             <NewsLetter />
+            
+            {/* Exclusive Offers Dialog */}
+            <ExclusiveOffersDialog 
+                open={showOffersDialog} 
+                onOpenChange={setShowOffersDialog} 
+            />
         </>
     )
 }

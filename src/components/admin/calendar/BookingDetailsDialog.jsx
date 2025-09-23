@@ -17,12 +17,12 @@ import {
   Mail,
   Phone,
   Clock,
-  Home
+  Home,
+  Notebook
 } from 'lucide-react';
 
 const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => {
   if (!bookingData) return null;
-
   const {
     reference_number,
     guest_name,
@@ -42,7 +42,8 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
     total_paid,
     remaining_balance,
     status,
-    booking_type
+    booking_type,
+    special_requests
   } = bookingData;
 
   const getStatusColor = (status) => {
@@ -107,6 +108,13 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo }) => 
                     <Phone className="h-4 w-4 text-gray-500" />
                     <span className="font-medium">Phone:</span>
                     <span>{guest_phone}</span>
+                  </div>
+                )}
+                {special_requests && (
+                  <div className="flex items-center gap-2">
+                    <Notebook className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium">Special Requests:</span>
+                    <span>{special_requests}</span>
                   </div>
                 )}
               </div>

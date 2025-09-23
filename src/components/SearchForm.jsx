@@ -54,6 +54,13 @@ const SearchForm = () => {
             return;
         }
         
+        // Check for 5-day maximum limit for overnight bookings
+        const nights = Math.ceil((to - from) / (1000 * 60 * 60 * 24));
+        if (nights > 5) {
+            toast.warning("Overnight bookings are limited to a maximum of 5 days.");
+            return;
+        }
+        
         // Validate that dates are within available meal program ranges (if any)
         if (hasActivePrograms && dateRanges.length > 0) {
             const fromStr = format(from, "yyyy-MM-dd");

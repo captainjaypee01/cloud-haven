@@ -9,7 +9,7 @@ import {
     DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Copy, CheckCircle2, X } from 'lucide-react';
+import { Copy, CheckCircle2, X, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
 
 const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
@@ -21,6 +21,16 @@ const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
         navigator.clipboard.writeText(offer.code);
         setCopied(true);
         setTimeout(() => setCopied(false), 1800);
+    };
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        return date.toLocaleDateString(undefined, { 
+            month: 'short', 
+            day: 'numeric', 
+            year: 'numeric'
+        });
     };
 
     return (
@@ -36,11 +46,6 @@ const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
                     </DialogTitle>
                     <DialogDescription>
                         {offer.description}
-                        {offer.expires_at &&
-                            <div className="text-xs text-gray-500 mt-2">
-                                Valid until {new Date(offer.expires_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                            </div>
-                        }
                     </DialogDescription>
                 </DialogHeader>
 
@@ -59,6 +64,39 @@ const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
                             : <><Copy className="text-gray-500" size={18} /> Copy Code</>
                         }
                     </Button>
+                </div>
+
+                {/* Date Information */}
+                <div className="mt-4 space-y-3">
+                    {offer.starts_at && (
+                        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                            <Calendar className="h-4 w-4 text-blue-600" />
+                            <div>
+                                <p className="font-medium text-blue-900">Starts</p>
+                                <p className="text-blue-700 text-sm">{formatDateTime(offer.starts_at)}</p>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {offer.ends_at && (
+                        <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg">
+                            <Calendar className="h-4 w-4 text-orange-600" />
+                            <div>
+                                <p className="font-medium text-orange-900">Ends</p>
+                                <p className="text-orange-700 text-sm">{formatDateTime(offer.ends_at)}</p>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {offer.expires_at && (
+                        <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+                            <Clock className="h-4 w-4 text-red-600" />
+                            <div>
+                                <p className="font-medium text-red-900">Expires</p>
+                                <p className="text-red-700 text-sm">{formatDateTime(offer.expires_at)}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter className="mt-6 flex justify-end gap-2">
