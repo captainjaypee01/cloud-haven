@@ -270,9 +270,6 @@ const RoomUnitCalendar = () => {
                 <th className="border border-gray-300 p-2 text-left font-medium min-w-[120px]">
                   Unit
                 </th>
-                <th className="border border-gray-300 p-2 text-left font-medium min-w-[100px]">
-                  Current Status
-                </th>
                 {calendarData.days.map(day => (
                   <th key={day} className="border border-gray-300 p-1 text-center font-medium w-8">
                     {day}
@@ -298,11 +295,6 @@ const RoomUnitCalendar = () => {
                     <tr key={unit.id} className="hover:bg-gray-50">
                       <td className="border border-gray-300 p-2 font-medium">
                         {unit.unit_number}
-                      </td>
-                      <td className="border border-gray-300 p-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(unit.current_status)}`}>
-                          {unit.current_status.charAt(0).toUpperCase() + unit.current_status.slice(1)}
-                        </span>
                       </td>
                       {unit.day_statuses.map(dayStatus => (
                         <td 
