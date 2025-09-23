@@ -11,11 +11,11 @@ function reducer(state, action) {
     switch (action.type) {
         case 'SET_DATES':
             return (action.from !== state.checkIn || action.to !== state.checkOut)
-                ? { ...state, checkIn: action.from, checkOut: action.to, items: [] }
+                ? { ...state, checkIn: action.from, checkOut: action.to, dayTourDate: '', items: [] }
                 : state;
         case 'SET_DAY_TOUR_DATE':
             return (action.date !== state.dayTourDate)
-                ? { ...state, dayTourDate: action.date, items: [] }
+                ? { ...state, dayTourDate: action.date, checkIn: '', checkOut: '', items: [] }
                 : state;
         case 'ADD':
             const addedAt = Date.now();

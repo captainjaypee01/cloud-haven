@@ -22,7 +22,7 @@ const PaymentPage = React.lazy(() => import('./pages/PaymentPage'));
 const BookingDetailsPage = React.lazy(() => import('./pages/BookingDetailPage'));
 const LeaveReview = React.lazy(() => import('./pages/LeaveReview'));
 const ContactUsPage = React.lazy(() => import('./pages/ContactUs'));
-const AboutUs = React.lazy(() => import('./pages/AboutUs'));
+// const AboutUs = React.lazy(() => import('./pages/AboutUs'));
 const Policies = React.lazy(() => import('./pages/Policies'));
 const PrivacyPolicy = React.lazy(() => import('./pages/PrivacyPolicy'));
 const Terms = React.lazy(() => import('./pages/Terms'));
@@ -86,10 +86,10 @@ const App = () => {
                   path='/day-tour'
                   element={<DayTour />}
                 />
-                <Route
+                {/* <Route
                   path='/about-us'
                   element={<AboutUs />}
-                />
+                /> */}
                 <Route
                   path='/contact-us'
                   element={<ContactUsPage />}

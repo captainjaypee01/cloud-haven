@@ -64,7 +64,12 @@ const Cart = () => {
     }, [isDayTourCart, items, api]);
 
     const handleApplyPromo = async () => {
-        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal);
+        const bookingDates = {
+            checkIn: checkIn,
+            checkOut: checkOut,
+            dayTourDate: isDayTourCart ? items.find(item => item.dayTourDate)?.dayTourDate : null
+        };
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates);
     };
 
     const handleRemovePromo = () => {

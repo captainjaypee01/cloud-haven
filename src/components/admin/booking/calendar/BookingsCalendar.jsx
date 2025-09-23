@@ -802,10 +802,10 @@ const getMealInfoPerRoom = (booking, room) => {
 
         {view === 'day' && (
           <div className="p-4 space-y-6">
-            <DayTimeline
+            {/* <DayTimeline
               date={selectedDate}
               events={events}
-            />
+            /> */}
             <DayTable
               date={selectedDate}
               events={events}

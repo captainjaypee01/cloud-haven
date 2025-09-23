@@ -85,13 +85,25 @@ export const PromoCodeProvider = ({ children }) => {
         }
     };
 
-    const applyPromo = async (api, promoCode, roomTotalPrice, mealCost, grandTotal) => {
+    const applyPromo = async (api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates = {}) => {
         setPromoError("");
         if (!promoCode) return;
         
         try {
-            const res = await api.get(`/api/v1/promos/${promoCode}`);
+            // Build query parameters for booking dates
+            const queryParams = new URLSearchParams();
+            if (bookingDates.checkIn) queryParams.append('check_in_date', bookingDates.checkIn);
+            if (bookingDates.checkOut) queryParams.append('check_out_date', bookingDates.checkOut);
+            if (bookingDates.dayTourDate) queryParams.append('day_tour_date', bookingDates.dayTourDate);
+            
+            const queryString = queryParams.toString();
+            const url = `/api/v1/promos/${promoCode}${queryString ? `?${queryString}` : ''}`;
+            
+            const res = await api.get(url);
             const promo = res.data;
+            
+            // Note: Day Tour scope validation is now handled by the backend API
+            // The backend will return an error if a non-total scope promo is used for Day Tour bookings
             
             // Compute discount based on promo.scope
             let discountAmount = 0;
