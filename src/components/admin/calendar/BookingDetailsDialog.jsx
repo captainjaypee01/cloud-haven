@@ -121,14 +121,18 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
     room_price,
     meal_price,
     final_price,
+    discount_amount,
     other_charges,
-    total_payable,
     total_paid,
-    remaining_balance,
     status,
     booking_type,
     special_requests
   } = currentBookingData;
+
+  // Calculate total_payable and remaining_balance consistently with BookingDetailsContent
+  const actualFinalPrice = Number(final_price) - Number(discount_amount || 0);
+  const totalPayable = actualFinalPrice + Number(other_charges || 0);
+  const remainingBalance = Math.max(totalPayable - Number(total_paid || 0), 0);
 
   const fetchBookingData = async () => {
     if (!currentBookingData?.id) return;
@@ -392,7 +396,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
               <div className="space-y-2 pt-2 border-t border-green-200">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-sm sm:text-base">Total Payable:</span>
-                  <span className="font-bold text-base sm:text-lg">{formatCurrency(total_payable)}</span>
+                  <span className="font-bold text-base sm:text-lg">{formatCurrency(totalPayable)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-green-600">Total Paid:</span>
@@ -400,7 +404,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-green-200">
                   <span className="font-semibold text-red-600 text-sm sm:text-base">Remaining Balance:</span>
-                  <span className="font-bold text-base sm:text-lg text-red-600">{formatCurrency(remaining_balance)}</span>
+                  <span className="font-bold text-base sm:text-lg text-red-600">{formatCurrency(remainingBalance)}</span>
                 </div>
               </div>
             </div>
@@ -419,9 +423,9 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
                   {status.charAt(0).toUpperCase() + status.slice(1)}
                 </Badge>
               </div>
-              {remaining_balance > 0 && (
+              {remainingBalance > 0 && (
                 <div className="mt-2 text-sm text-amber-700">
-                  <strong>Note:</strong> Remaining balance of {formatCurrency(remaining_balance)} is due at the resort during check-in.
+                  <strong>Note:</strong> Remaining balance of {formatCurrency(remainingBalance)} is due at the resort during check-in.
                 </div>
               )}
             </div>

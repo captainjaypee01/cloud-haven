@@ -279,13 +279,13 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             <>
                                 <div><span className="font-semibold">Day Tour Date:</span> {formatDate(booking.check_in_date)}</div>
                                 <div><span className="font-semibold">Tour Hours:</span> 8:00 AM - 5:00 PM</div>
-                                <div><span className="font-semibold">Reserved Until:</span> {booking.reserved_until ? formatDateTime(booking.local_reserved_until) : '-'}</div>
+                                <div><span className="font-semibold">Reserved Until:</span> {booking.local_reserved_until ? formatDateTime(booking.local_reserved_until) : '-'}</div>
                             </>
                         ) : (
                             <>
                                 <div><span className="font-semibold">Check-in:</span> {formatDate(booking.check_in_date)}</div>
                                 <div><span className="font-semibold">Check-out:</span> {formatDate(booking.check_out_date)}</div>
-                                <div><span className="font-semibold">Reserved Until:</span> {booking.reserved_until ? formatDateTime(booking.local_reserved_until) : '-'}</div>
+                                <div><span className="font-semibold">Reserved Until:</span> {booking.local_reserved_until ? formatDateTime(booking.local_reserved_until) : '-'}</div>
                             </>
                         )}
                         <div><span className="font-semibold">Payment Option:</span> {booking.payment_option?.toUpperCase() || '-'}</div>
