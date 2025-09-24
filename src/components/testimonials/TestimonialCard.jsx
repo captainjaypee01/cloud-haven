@@ -11,7 +11,18 @@ const getColor = (name = "") =>
 
 const TestimonialCard = ({ review }) => {
     const user = review.user || {};
-    const name = user?.first_name || "Guest";
+    
+    // Determine the name to display - prioritize user data, fallback to review's first_name/last_name
+    let name = "Guest";
+    if (user?.first_name) {
+        name = user.first_name;
+    } else if (review.first_name) {
+        name = review.first_name;
+        if (review.last_name) {
+            name += ` ${review.last_name}`;
+        }
+    }
+    
     const initial = getInitial(name);
     const color = getColor(name);
 
@@ -32,7 +43,7 @@ const TestimonialCard = ({ review }) => {
             )}
             <h3 className="font-playfair text-lg mt-2 text-center">{name}</h3>
             <StarRating rating={review.rating} />
-            <p className="text-gray-600 mt-2 text-center text-base min-h-[56px]">“{review.comment}”</p>
+            <p className="text-gray-600 mt-2 text-center text-base min-h-[56px]">"{review.comment}"</p>
         </article>
     );
 };

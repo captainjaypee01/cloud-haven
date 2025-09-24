@@ -13,7 +13,8 @@ import {
     TicketIcon,
     Calendar,
     DollarSign,
-    CreditCard
+    CreditCard,
+    Star
 } from "lucide-react";
 import NavMain from "@/components/admin/NavMain"
 import NavSecondary from "@/components/admin/NavSecondary"
@@ -41,6 +42,7 @@ const data = {
         { title: "Amenities", url: "/admin/amenities", icon: Salad },
         { title: "Meal Programs", url: "/admin/meal-programs", icon: Calendar },
         { title: "Promos", url: "/admin/promos", icon: TicketIcon },
+        { title: "Reviews", url: "/admin/reviews", icon: Star },
     ],
     navManagement: [
         { title: "Users", url: "/admin/users", icon: UsersIcon },

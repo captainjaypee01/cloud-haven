@@ -43,6 +43,7 @@ const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
 const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
 const ListDayTourPricing = React.lazy(() => import('./pages/admin/day-tour-pricing/ListDayTourPricing'));
 const ListPayment = React.lazy(() => import('./pages/admin/payments/ListPayment'));
+const ListReviews = React.lazy(() => import('./pages/admin/reviews/ListReviews'));
 
 // Meal Programs
 const MealProgramList = React.lazy(() => import('./pages/admin/meal-programs/index'));
@@ -155,6 +156,7 @@ const App = () => {
                   <Route path="reports" element={<ListRoom />} />
                   <Route path="images" element={<ManageImages />} />
                   <Route path="promos" element={<ListPromos />} />
+                  <Route path="reviews" element={<ListReviews />} />
                   <Route path="day-tour-pricing" element={<ListDayTourPricing />} />
 
                   {/* Meal Programs */}
