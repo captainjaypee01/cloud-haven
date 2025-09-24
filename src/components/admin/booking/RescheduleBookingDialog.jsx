@@ -15,14 +15,54 @@ import AvailabilityModal from '@/components/common/AvailabilityModal';
 import { differenceInDays, parseISO, isValid } from 'date-fns';
 
 // Dynamic schema based on booking type
-const createFormSchema = (isDayTour) => {
+const createFormSchema = (isDayTour, maxRescheduleDate) => {
     if (isDayTour) {
         return z.object({
-            tour_date: z.string().min(1, 'Tour date is required'),
+            tour_date: z.string()
+                .min(1, 'Tour date is required')
+                .refine(
+                    (date) => {
+                        if (!date) return false;
+                        const selectedDate = new Date(date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return selectedDate >= today;
+                    },
+                    { message: 'Tour date must be today or later' }
+                )
+                .refine(
+                    (date) => {
+                        if (!date || !maxRescheduleDate) return true;
+                        const selectedDate = new Date(date);
+                        const maxDate = new Date(maxRescheduleDate);
+                        return selectedDate <= maxDate;
+                    },
+                    { message: `Tour date must be within 30 days of original date (max: ${maxRescheduleDate})` }
+                ),
         });
     } else {
         return z.object({
-            check_in_date: z.string().min(1, 'Check-in date is required'),
+            check_in_date: z.string()
+                .min(1, 'Check-in date is required')
+                .refine(
+                    (date) => {
+                        if (!date) return false;
+                        const selectedDate = new Date(date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return selectedDate >= today;
+                    },
+                    { message: 'Check-in date must be today or later' }
+                )
+                .refine(
+                    (date) => {
+                        if (!date || !maxRescheduleDate) return true;
+                        const selectedDate = new Date(date);
+                        const maxDate = new Date(maxRescheduleDate);
+                        return selectedDate <= maxDate;
+                    },
+                    { message: `Check-in date must be within 30 days of original date (max: ${maxRescheduleDate})` }
+                ),
             check_out_date: z.string().min(1, 'Check-out date is required'),
         }).refine(
             (data) => !data.check_in_date || !data.check_out_date || data.check_in_date <= data.check_out_date,
@@ -38,8 +78,17 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     const api = useApi();
     const isDayTour = booking?.booking_type === 'day_tour';
     
+    // Calculate max reschedule date (30 days from original check-in)
+    const maxRescheduleDate = useMemo(() => {
+        if (!booking?.check_in_date) return null;
+        const originalDate = new Date(booking.check_in_date);
+        const maxDate = new Date(originalDate);
+        maxDate.setDate(maxDate.getDate() + 30);
+        return maxDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    }, [booking?.check_in_date]);
+    
     const form = useForm({
-        resolver: zodResolver(createFormSchema(isDayTour)),
+        resolver: zodResolver(createFormSchema(isDayTour, maxRescheduleDate)),
         defaultValues: isDayTour ? {
             tour_date: booking?.check_in_date || '',
         } : {
@@ -74,6 +123,44 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             ? `Selected dates must be exactly ${originalNights} night(s).`
             : null
     );
+
+    // Check if dates have changed
+    const datesChanged = useMemo(() => {
+        if (isDayTour) {
+            return checkIn !== booking?.check_in_date;
+        } else {
+            return checkIn !== booking?.check_in_date || checkOut !== booking?.check_out_date;
+        }
+    }, [checkIn, checkOut, booking?.check_in_date, booking?.check_out_date, isDayTour]);
+
+    // Check if dates are within 30-day limit
+    const withinLimit = useMemo(() => {
+        if (!maxRescheduleDate || !checkIn) return true;
+        const selectedDate = new Date(checkIn);
+        const maxDate = new Date(maxRescheduleDate);
+        return selectedDate <= maxDate;
+    }, [checkIn, maxRescheduleDate]);
+
+    // Get form errors count as a stable value
+    const formErrorsCount = useMemo(() => {
+        return Object.keys(form.formState.errors).length;
+    }, [form.formState.errors]);
+
+    // Check if there are any validation errors
+    const hasValidationErrors = useMemo(() => {
+        // Check form validation errors
+        const formErrors = formErrorsCount > 0;
+        
+        // Check duration error for overnight bookings
+        const durationErrorExists = !isDayTour && durationError;
+        
+        return formErrors || durationErrorExists || !withinLimit;
+    }, [formErrorsCount, durationError, isDayTour, withinLimit]);
+
+    // Check if submit should be disabled
+    const isSubmitDisabled = useMemo(() => {
+        return !datesChanged || hasValidationErrors || form.formState.isSubmitting || checking;
+    }, [datesChanged, hasValidationErrors, form.formState.isSubmitting, checking]);
     useEffect(() => {
         if (open && booking) {
             if (isDayTour) {
@@ -159,13 +246,14 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (err) {
+            console.log('error', err);
             if (err.response?.status === 422 && err.response.data?.errors) {
                 Object.entries(err.response.data.errors).forEach(([field, messages]) => {
                     setError(field, { type: "manual", message: messages.join(", ") });
                 });
                 toast.error('Please fix the errors in the form.');
-            } else if (err.response?.data?.message) {
-                toast.error(err.response.data.message);
+            } else if (err.response?.data) {
+                toast.error(err.response.data.message || err.response.data.error || 'Failed to reschedule');
             } else {
                 toast.error(`Failed to reschedule ${isDayTour ? 'day tour' : 'booking'}.`);
             }
@@ -185,8 +273,24 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
                             <FormField name="tour_date" control={form.control} render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Tour Date</FormLabel>
-                                    <FormControl><Input type="date" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input 
+                                            type="date" 
+                                            {...field} 
+                                            max={maxRescheduleDate}
+                                        />
+                                    </FormControl>
                                     <FormMessage />
+                                    {maxRescheduleDate && (
+                                        <div className="text-xs text-blue-600 mt-1">
+                                            Maximum reschedule date: {maxRescheduleDate} (30 days from original date)
+                                        </div>
+                                    )}
+                                    {checkIn && maxRescheduleDate && new Date(checkIn) > new Date(maxRescheduleDate) && (
+                                        <div className="text-xs text-red-600 mt-1">
+                                            Selected date exceeds 30-day reschedule limit
+                                        </div>
+                                    )}
                                 </FormItem>
                             )} />
                         ) : (
@@ -195,10 +299,26 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
                                 <FormField name="check_in_date" control={form.control} render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>Check-in Date</FormLabel>
-                                        <FormControl><Input type="date" {...field} /></FormControl>
+                                        <FormControl>
+                                            <Input 
+                                                type="date" 
+                                                {...field} 
+                                                max={maxRescheduleDate}
+                                            />
+                                        </FormControl>
                                         <FormMessage />
                                         {durationError && (
                                             <div className="text-sm text-red-600 mt-2">{durationError}</div>
+                                        )}
+                                        {maxRescheduleDate && (
+                                            <div className="text-xs text-blue-600 mt-1">
+                                                Maximum reschedule date: {maxRescheduleDate} (30 days from original date)
+                                            </div>
+                                        )}
+                                        {checkIn && maxRescheduleDate && new Date(checkIn) > new Date(maxRescheduleDate) && (
+                                            <div className="text-xs text-red-600 mt-1">
+                                                Selected date exceeds 30-day reschedule limit
+                                            </div>
                                         )}
                                     </FormItem>
                                 )} />
@@ -212,16 +332,56 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
                                 <div className="text-xs text-gray-500 italic">
                                     Original booking duration: {originalNights} night(s)
                                 </div>
+                                {!isDayTour && checkIn && checkOut && (
+                                    <div className="text-xs text-gray-500 italic">
+                                        New booking duration: {newNights} night(s)
+                                        {newNights !== originalNights && (
+                                            <span className="text-red-600 ml-1">(Duration mismatch!)</span>
+                                        )}
+                                    </div>
+                                )}
                             </>
                         )}
+                        
+                        {/* Validation Summary */}
+                        {datesChanged && (
+                            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                                <div className="text-sm font-medium text-gray-700 mb-2">Reschedule Summary:</div>
+                                <div className="text-xs space-y-1">
+                                    <div className={`flex items-center gap-2 ${datesChanged ? 'text-green-600' : 'text-gray-500'}`}>
+                                        <span className="w-2 h-2 rounded-full bg-current"></span>
+                                        Dates changed: {datesChanged ? 'Yes' : 'No'}
+                                    </div>
+                                    <div className={`flex items-center gap-2 ${!hasValidationErrors ? 'text-green-600' : 'text-red-600'}`}>
+                                        <span className="w-2 h-2 rounded-full bg-current"></span>
+                                        Validation: {hasValidationErrors ? 'Errors found' : 'Valid'}
+                                    </div>
+                                    {maxRescheduleDate && (
+                                        <div className="flex items-center gap-2 text-blue-600">
+                                            <span className="w-2 h-2 rounded-full bg-current"></span>
+                                            Within 30-day limit: {checkIn && new Date(checkIn) <= new Date(maxRescheduleDate) ? 'Yes' : 'No'}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                         <DialogFooter>
-                            <Button
-                                type="submit"
-                                className="cursor-pointer"
-                                disabled={form.formState.isSubmitting || checking}
-                            >
-                                {form.formState.isSubmitting || checking ? 'Saving...' : 'Reschedule'}
-                            </Button>
+                            <div className="flex flex-col gap-2 w-full">
+                                {/* Show helpful message when button is disabled */}
+                                {isSubmitDisabled && !form.formState.isSubmitting && !checking && (
+                                    <div className="text-sm text-gray-600">
+                                        {!datesChanged && "Please change the dates to reschedule"}
+                                        {datesChanged && hasValidationErrors && "Please fix the validation errors above"}
+                                    </div>
+                                )}
+                                <Button
+                                    type="submit"
+                                    className="cursor-pointer"
+                                    disabled={isSubmitDisabled}
+                                >
+                                    {form.formState.isSubmitting || checking ? 'Saving...' : 'Reschedule'}
+                                </Button>
+                            </div>
                         </DialogFooter>
                     </form>
                 </Form>
