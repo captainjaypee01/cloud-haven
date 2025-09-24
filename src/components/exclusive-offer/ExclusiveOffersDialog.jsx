@@ -124,8 +124,9 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                <DialogHeader className="text-center pb-6">
+            <DialogContent className="w-[75vw] max-w-[75vw] h-[70vh] max-h-[70vh] sm:w-[90vw] sm:max-w-2xl sm:h-auto sm:max-h-[80vh] mx-auto p-0 flex flex-col">
+                {/* Header - Fixed at top */}
+                <DialogHeader className="text-center pb-3 sm:pb-6 px-6 pt-6 bg-white border-b border-gray-100 flex-shrink-0">
                     <DialogTitle className="text-2xl font-semibold text-gray-900">
                         Exclusive Offers
                     </DialogTitle>
@@ -134,170 +135,174 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6">
-                    {/* Image Carousel */}
-                    <div className="relative">
-                        <div className="relative overflow-hidden rounded-lg bg-gray-100">
-                            <div 
-                                className="h-64 bg-cover bg-center bg-no-repeat"
-                                style={{ 
-                                    backgroundImage: `url(${currentOffer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'})` 
-                                }}
-                            >
-                                <div className="absolute inset-0 bg-black/40" />
-                                
-                                {/* Discount Badge */}
-                                <div className="absolute top-4 left-4">
-                                    <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                                        isActive 
-                                            ? 'bg-green-500 text-white' 
-                                            : promoStatus.status === 'upcoming'
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-red-500 text-white'
-                                    }`}>
-                                        {discountLabel}
-                                    </span>
-                                </div>
-                                
-                                {/* Slide Counter */}
-                                {offers.length > 1 && (
-                                    <div className="absolute top-4 right-4">
-                                        <span className="bg-black/50 text-white px-2 py-1 rounded text-sm">
-                                            {currentSlide + 1} / {offers.length}
+                {/* Body - Scrollable content */}
+                <div className="flex-1 overflow-y-auto px-6 py-4">
+                    <div className="space-y-3 sm:space-y-6">
+                        {/* Image Carousel */}
+                        <div className="relative">
+                            <div className="relative overflow-hidden rounded-lg bg-gray-100">
+                                <div 
+                                    className="h-36 sm:h-64 bg-cover bg-center bg-no-repeat"
+                                    style={{ 
+                                        backgroundImage: `url(${currentOffer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'})` 
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-black/40" />
+                                    
+                                    {/* Discount Badge */}
+                                    <div className="absolute top-4 left-4">
+                                        <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                                            isActive 
+                                                ? 'bg-green-500 text-white' 
+                                                : promoStatus.status === 'upcoming'
+                                                ? 'bg-blue-500 text-white'
+                                                : 'bg-red-500 text-white'
+                                        }`}>
+                                            {discountLabel}
                                         </span>
                                     </div>
-                                )}
+                                    
+                                    {/* Slide Counter */}
+                                    {offers.length > 1 && (
+                                        <div className="absolute top-4 right-4">
+                                            <span className="bg-black/50 text-white px-2 py-1 rounded text-sm">
+                                                {currentSlide + 1} / {offers.length}
+                                            </span>
+                                        </div>
+                                    )}
 
-                                {/* Navigation */}
-                                {offers.length > 1 && (
-                                    <>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800"
-                                            onClick={prevSlide}
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800"
-                                            onClick={nextSlide}
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Slide Indicators */}
-                        {offers.length > 1 && (
-                            <div className="flex justify-center gap-2 mt-4">
-                                {offers.map((_, index) => (
-                                    <button
-                                        key={index}
-                                        className={`w-2 h-2 rounded-full transition-colors ${
-                                            index === currentSlide ? 'bg-gray-600' : 'bg-gray-300'
-                                        }`}
-                                        onClick={() => setCurrentSlide(index)}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="space-y-4">
-                        {/* Title and Description */}
-                        <div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                                {currentOffer.title}
-                            </h3>
-                            <p className="text-gray-600">
-                                {currentOffer.description}
-                            </p>
-                        </div>
-
-                        {/* Status */}
-                        <div className="flex items-center gap-2">
-                            <span className={`px-3 py-1 text-sm rounded-full ${
-                                isActive 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : promoStatus.status === 'upcoming'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : 'bg-red-100 text-red-800'
-                            }`}>
-                                {promoStatus.message}
-                            </span>
-                        </div>
-
-                        {/* Promo Code */}
-                        <div className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600 mb-1">Promo Code</p>
-                                    <p className="text-lg font-mono font-semibold text-gray-900">
-                                        {currentOffer.code}
-                                    </p>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    onClick={handleCopy}
-                                    disabled={copied}
-                                    className="flex items-center gap-2"
-                                >
-                                    {copied ? (
+                                    {/* Navigation */}
+                                    {offers.length > 1 && (
                                         <>
-                                            <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                            Copied
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Copy className="h-4 w-4" />
-                                            Copy
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800"
+                                                onClick={prevSlide}
+                                            >
+                                                <ChevronLeft className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800"
+                                                onClick={nextSlide}
+                                            >
+                                                <ChevronRight className="h-4 w-4" />
+                                            </Button>
                                         </>
                                     )}
-                                </Button>
+                                </div>
                             </div>
+
+                            {/* Slide Indicators */}
+                            {offers.length > 1 && (
+                                <div className="flex justify-center gap-2 mt-4">
+                                    {offers.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            className={`w-2 h-2 rounded-full transition-colors ${
+                                                index === currentSlide ? 'bg-gray-600' : 'bg-gray-300'
+                                            }`}
+                                            onClick={() => setCurrentSlide(index)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Dates */}
-                        <div className="space-y-3">
-                            <h4 className="font-medium text-gray-900">Important Dates</h4>
-                            <div className="space-y-2">
-                                {currentOffer.starts_at && (
-                                    <div className="flex items-center gap-3 text-sm">
-                                        <Calendar className="h-4 w-4 text-gray-500" />
-                                        <span className="text-gray-600">Starts:</span>
-                                        <span className="font-medium text-gray-900">{formatDateTime(currentOffer.starts_at)}</span>
+                        {/* Content */}
+                        <div className="space-y-2 sm:space-y-4">
+                            {/* Title and Description */}
+                            <div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                    {currentOffer.title}
+                                </h3>
+                                <p className="text-gray-600">
+                                    {currentOffer.description}
+                                </p>
+                            </div>
+
+                            {/* Status */}
+                            <div className="flex items-center gap-2">
+                                <span className={`px-3 py-1 text-sm rounded-full ${
+                                    isActive 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : promoStatus.status === 'upcoming'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : 'bg-red-100 text-red-800'
+                                }`}>
+                                    {promoStatus.message}
+                                </span>
+                            </div>
+
+                            {/* Promo Code */}
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-1">Promo Code</p>
+                                        <p className="text-lg font-mono font-semibold text-gray-900">
+                                            {currentOffer.code}
+                                        </p>
                                     </div>
-                                )}
-                                
-                                {currentOffer.ends_at && (
-                                    <div className="flex items-center gap-3 text-sm">
-                                        <Calendar className="h-4 w-4 text-gray-500" />
-                                        <span className="text-gray-600">Ends:</span>
-                                        <span className="font-medium text-gray-900">{formatDateTime(currentOffer.ends_at)}</span>
-                                    </div>
-                                )}
-                                
-                                {currentOffer.expires_at && (
-                                    <div className="flex items-center gap-3 text-sm">
-                                        <Clock className="h-4 w-4 text-gray-500" />
-                                        <span className="text-gray-600">Expires:</span>
-                                        <span className="font-medium text-gray-900">{formatDateTime(currentOffer.expires_at)}</span>
-                                    </div>
-                                )}
+                                    <Button
+                                        variant="outline"
+                                        onClick={handleCopy}
+                                        disabled={copied}
+                                        className="flex items-center gap-2"
+                                    >
+                                        {copied ? (
+                                            <>
+                                                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                                                Copied
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Copy className="h-4 w-4" />
+                                                Copy
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Dates */}
+                            <div className="space-y-3">
+                                <h4 className="font-medium text-gray-900">Important Dates</h4>
+                                <div className="space-y-2">
+                                    {currentOffer.starts_at && (
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <Calendar className="h-4 w-4 text-gray-500" />
+                                            <span className="text-gray-600">Starts:</span>
+                                            <span className="font-medium text-gray-900">{formatDateTime(currentOffer.starts_at)}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {currentOffer.ends_at && (
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <Calendar className="h-4 w-4 text-gray-500" />
+                                            <span className="text-gray-600">Ends:</span>
+                                            <span className="font-medium text-gray-900">{formatDateTime(currentOffer.ends_at)}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {currentOffer.expires_at && (
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <Clock className="h-4 w-4 text-gray-500" />
+                                            <span className="text-gray-600">Expires:</span>
+                                            <span className="font-medium text-gray-900">{formatDateTime(currentOffer.expires_at)}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <DialogFooter className="pt-6">
+                {/* Footer - Fixed at bottom with proper alignment */}
+                <DialogFooter className="pt-3 sm:pt-6 px-6 pb-6 bg-white border-t border-gray-100 flex-shrink-0 flex flex-row justify-end gap-2">
                     <DialogClose asChild>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-auto px-6">
                             Close
                         </Button>
                     </DialogClose>
