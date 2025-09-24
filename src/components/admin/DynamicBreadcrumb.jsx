@@ -14,6 +14,7 @@ const NAV = [
     { group: 'Menu', title: 'Rooms', url: '/admin/rooms' },
     { group: 'Menu', title: 'Bookings', url: '/admin/bookings' },
     { group: 'Menu', title: 'Amenities', url: '/admin/amenities' },
+    { group: 'Menu', title: 'Reviews', url: '/admin/reviews' },
     { group: 'Management', title: 'Users', url: '/admin/users' },
     { group: 'Management', title: 'Reports', url: '/admin/reports' },
     { group: 'Management', title: 'Images', url: '/admin/images' },

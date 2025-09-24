@@ -38,7 +38,7 @@ const TestimonialsSection = () => {
         queryKey: ["latestReviews"],
         queryFn: async () => {
             const res = await api.get(`${API_PREFIX}/reviews/testimonials`);
-            return res.data || [];
+            return res.data?.data || res.data || res || [];
         },
     });
 
