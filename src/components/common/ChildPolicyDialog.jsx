@@ -64,7 +64,6 @@ export const ChildPolicyDialog = ({ open, onOpenChange }) => {
         "They are allowed to share a bed with accompanying adults at no additional cost.",
         "3 years old and below are not required to avail of the buffet but may share food from the adults' plates.",
         "Final number of children and headcount must be confirmed one week before the booking schedule.",
-        "Drivers are included in the final head count.",
         "The resort reserves the right to verify age with valid identification if needed."
     ];
 

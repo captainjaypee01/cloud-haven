@@ -105,7 +105,6 @@ export const RESORT_POLICIES = {
         category: "Additional Child Policies",
         rules: [
           "Final number of children and headcount must be confirmed one week before the booking schedule.",
-          "Drivers are included in the final head count.",
           "The resort reserves the right to verify age with valid identification if needed.",
           "Children must be supervised by adults at all times, especially around water areas.",
           "Parents/guardians are responsible for their children's safety and conduct during the stay."
