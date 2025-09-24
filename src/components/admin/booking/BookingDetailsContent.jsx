@@ -212,7 +212,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             </div>
 
             {/* Header & Actions */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                 <div className="space-y-1">
                     <h2 className="text-2xl font-bold">
                         {booking.booking_type === 'day_tour' && <Badge variant="secondary" className="mr-2">Day Tour</Badge>}
@@ -220,7 +220,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     </h2>
                     <StatusBadge status={booking.status} />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     {/* Calendar View Button */}
                     <Button
                         className="cursor-pointer"
@@ -228,7 +228,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         onClick={() => navigate(`/admin/bookings/calendar?date=${booking.check_in_date}`)}
                     >
                         <Calendar className="h-4 w-4 mr-2" />
-                        Calendar View
+                        <span className="hidden sm:inline">Calendar View</span>
+                        <span className="sm:hidden">Calendar</span>
                     </Button>
                     {/* Cancellation Button - Only show if user can cancel and booking can be cancelled */}
                     {canCancel && ['pending', 'failed'].includes(booking.status) && (
@@ -238,7 +239,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             onClick={() => setShowCancellation(true)}
                         >
                             <AlertTriangle className="h-4 w-4 mr-2" />
-                            Cancel Booking
+                            <span className="hidden sm:inline">Cancel Booking</span>
+                            <span className="sm:hidden">Cancel</span>
                         </Button>
                     )}
                     {/* Delete Button - Show only for superadmin */}
@@ -249,7 +251,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             onClick={() => setShowDeletion(true)}
                         >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Booking
+                            <span className="hidden sm:inline">Delete Booking</span>
+                            <span className="sm:hidden">Delete</span>
                         </Button>
                     )}
                     <Button
