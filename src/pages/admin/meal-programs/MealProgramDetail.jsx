@@ -311,8 +311,7 @@ export default function MealProgramDetail() {
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
-                            <div>Adult: {tier.adult_extra_guest_fee || "—"}</div>
-                            <div>Child: {tier.child_extra_guest_fee || "—"}</div>
+                            {tier.extra_guest_fee || "—"}
                           </div>
                         </TableCell>
                         <TableCell>
