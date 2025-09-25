@@ -424,6 +424,40 @@ const Cart = () => {
                                             </span>
                                         </div>
                                     )}
+
+                                    {/* Extra Guest Fees (Buffet Days) - separate line */}
+                                    {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (() => {
+                                        // Calculate total extra guests across all rooms
+                                        const totalExtraGuests = summary.reduce((roomTotal, item) => {
+                                            const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
+                                            return roomTotal + extraGuestsInRoom;
+                                        }, 0);
+                                        
+                                        return (
+                                            <div className="flex justify-between text-sm font-medium">
+                                                <div className="flex flex-col">
+                                                    <span>
+                                                        Extra Guest ({totalExtraGuests}) (Buffet Days)
+                                                    </span>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                            .join(', ')
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <span className="text-purple-600">
+                                                    {formatCurrency(mealQuote.nights
+                                                        .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                                                        .reduce((total, night) => {
+                                                            return total + (totalExtraGuests * night.extra_guest_fee);
+                                                        }, 0)
+                                                    )}
+                                                </span>
+                                            </div>
+                                        );
+                                    })()}
                                 </>
                             )}
                             
@@ -459,7 +493,7 @@ const Cart = () => {
                                                         </div>
                                                         
                                                         {/* Buffet Breakdown Details */}
-                                                        <div className="ml-4 space-y-1 text-xs text-gray-600">
+                                                        {/* <div className="ml-4 space-y-1 text-xs text-gray-600">
                                                             {totalAdults > 0 && (
                                                                 <div className="flex justify-between">
                                                                     <span>{totalAdults} Adult{totalAdults > 1 ? 's' : ''} - {formatCurrency(night.adult_price || 0)} each</span>
@@ -472,7 +506,7 @@ const Cart = () => {
                                                                     <span className="font-medium">{formatCurrency(totalChildren * (night.child_price || 0))}</span>
                                                                 </div>
                                                             )}
-                                                        </div>
+                                                        </div> */}
                                                     </>
                                                 ) : (
                                                     /* Simplified Free Breakfast Display */
@@ -491,6 +525,51 @@ const Cart = () => {
                                                 )}
                                             </div>
                                         ))}
+                                        
+                                        {/* Extra Guest Fees (Buffet Days) */}
+                                        {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (() => {
+                                            // Calculate total extra guests across all rooms
+                                            const totalExtraGuests = summary.reduce((roomTotal, item) => {
+                                                const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
+                                                return roomTotal + extraGuestsInRoom;
+                                            }, 0);
+                                            
+                                            return (
+                                                <div className="space-y-3">
+                                                    {mealQuote.nights
+                                                        .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                                                        .map((night, index) => {
+                                                            const extraGuestFeeTotal = totalExtraGuests * night.extra_guest_fee;
+                                                            
+                                                            return (
+                                                                <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
+                                                                    {/* Date Header for Extra Guest Fee */}
+                                                                    <div className="flex justify-between items-center mb-2">
+                                                                        <span className="text-sm font-medium text-gray-700">
+                                                                            {new Date(night.date).toLocaleDateString('en-US', { 
+                                                                                weekday: 'short', 
+                                                                                month: 'short', 
+                                                                                day: 'numeric' 
+                                                                            })} - Extra Guest ({totalExtraGuests})
+                                                                        </span>
+                                                                        <span className="text-sm font-semibold text-gray-900">
+                                                                            {formatCurrency(extraGuestFeeTotal)}
+                                                                        </span>
+                                                                    </div>
+                                                                    
+                                                                    {/* Extra Guest Fee Breakdown Details */}
+                                                                    {/* <div className="ml-4 space-y-1 text-xs text-gray-600">
+                                                                        <div className="flex justify-between">
+                                                                            <span>{totalExtraGuests} Extra Guest{totalExtraGuests > 1 ? 's' : ''} - {formatCurrency(night.extra_guest_fee)} each</span>
+                                                                            <span className="font-medium">{formatCurrency(extraGuestFeeTotal)}</span>
+                                                                        </div>
+                                                                    </div> */}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                </div>
+                                            );
+                                        })()}
                                         
                                         {/* Total */}
                                         {/* <div className="pt-2">

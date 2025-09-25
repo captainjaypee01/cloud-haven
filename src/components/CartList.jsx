@@ -335,10 +335,76 @@ const CartList = ({
                     </div>
                 </div>
             )}
+
+            {/* Extra Guest Fee Breakdown - Only for buffet days */}
+            {!isDayTourCart && item.totalGuests > parseInt(item.maxGuests) && mealQuote?.nights?.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (
+                <div className="mt-3 p-3 bg-purple-50 rounded-lg">
+                    <h6 className="text-sm font-medium text-purple-700 mb-2">Extra Guest Fees (Buffet Days)</h6>
+                    <div className="space-y-2">
+                        {mealQuote.nights
+                            .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                            .map((night, index) => {
+                                const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
+                                const extraGuestFeeForThisRoom = extraGuestsInRoom * night.extra_guest_fee;
+                                
+                                return (
+                                    <div key={index} className="border-b border-purple-200 pb-2 last:border-b-0 last:pb-0">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-sm font-medium text-purple-700">
+                                                {new Date(night.date).toLocaleDateString('en-US', { 
+                                                    weekday: 'short', 
+                                                    month: 'short', 
+                                                    day: 'numeric' 
+                                                })} - Extra Guest Fee
+                                            </span>
+                                            <span className="text-sm font-semibold text-purple-900">
+                                                {formatCurrency(extraGuestFeeForThisRoom)}
+                                            </span>
+                                        </div>
+                                        <div className="ml-4 text-xs text-purple-600">
+                                            <div className="flex justify-between">
+                                                <span>{extraGuestsInRoom} Extra Guest{extraGuestsInRoom > 1 ? 's' : ''} at {formatCurrency(night.extra_guest_fee)} each</span>
+                                                <span className="font-medium">{formatCurrency(extraGuestFeeForThisRoom)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        
+                        {/* Total Extra Guest Fees */}
+                        <div className="pt-2">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm font-semibold text-purple-800">Total Extra Guest Fees:</span>
+                                <span className="text-sm font-bold text-purple-600">
+                                    {formatCurrency(
+                                        mealQuote.nights
+                                            .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                                            .reduce((total, night) => {
+                                                const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
+                                                return total + (extraGuestsInRoom * night.extra_guest_fee);
+                                            }, 0)
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             <div className="flex justify-between font-medium">
                 <span>Subtotal:</span>
-                <span>{formatCurrency(item.subtotal + (item.roomMealTotal || 0))}</span>
+                <span>
+                    {formatCurrency(
+                        item.subtotal + 
+                        (item.roomMealTotal || 0) + 
+                        (mealQuote?.nights
+                            ?.filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                            ?.reduce((total, night) => {
+                                const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
+                                return total + (extraGuestsInRoom * night.extra_guest_fee);
+                            }, 0) || 0)
+                    )}
+                </span>
             </div>
             <div className="flex justify-between text-sm">
                 <span>Total Guests:</span>

@@ -40,7 +40,7 @@ const CheckoutPage = () => {
     const { state: { items, checkIn, checkOut }, clear } = useCart();
     const { navigate } = useAppContext();
     const { show, hide } = useLoader();
-    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, roomTotalPrice, mealCost, extraGuestFeeTotal, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
     const api = useApi();
     const [dayTourMealData, setDayTourMealData] = useState(null);
@@ -498,6 +498,21 @@ const CheckoutPage = () => {
                                             </span>
                                         </div>
                                     )}
+
+                                    {/* Extra Guest Fees (Buffet Days) - separate line */}
+                                    {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (
+                                        <div className="flex justify-between text-sm font-medium">
+                                            <span>
+                                                Extra Guest Fees (Buffet Days)
+                                            </span>
+                                            <span className="text-purple-600">
+                                                {formatCurrency(mealQuote.nights
+                                                    .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                                                    .reduce((total, night) => total + (night.extra_guest_fee_total || 0), 0)
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
                                 </>
                             )}
                             
@@ -514,7 +529,7 @@ const CheckoutPage = () => {
                     {/* Subtotal - same for both booking types */}
                     <div className="flex justify-between text-sm font-medium">
                         <span>Subtotal:</span>
-                        <span>{formatCurrency(roomTotalPrice + mealCost)}</span>
+                        <span>{formatCurrency(roomTotalPrice + mealCost + extraGuestFeeTotal)}</span>
                     </div>
                     {promoInfo && promoInfo.discountAmount > 0 && (
                         <div className="flex justify-between text-sm font-medium text-green-600">

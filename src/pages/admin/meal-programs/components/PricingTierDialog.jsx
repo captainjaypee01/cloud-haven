@@ -40,8 +40,7 @@ const formSchema = z.object({
   child_dinner_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   adult_breakfast_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   child_breakfast_price: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
-  adult_extra_guest_fee: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
-  child_extra_guest_fee: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
+  extra_guest_fee: z.number().min(0, "Price must be positive").max(999999.99).optional().nullable(),
   effective_from: z.string().optional().nullable(),
   effective_to: z.string().optional().nullable(),
 }).refine((data) => {
@@ -69,8 +68,7 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
       child_dinner_price: tier?.child_dinner_price || null,
       adult_breakfast_price: tier?.adult_breakfast_price || null,
       child_breakfast_price: tier?.child_breakfast_price || null,
-      adult_extra_guest_fee: tier?.adult_extra_guest_fee || null,
-      child_extra_guest_fee: tier?.child_extra_guest_fee || null,
+      extra_guest_fee: tier?.extra_guest_fee || null,
       effective_from: tier?.effective_from || null,
       effective_to: tier?.effective_to || null,
     },
@@ -90,8 +88,7 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
         child_dinner_price: tier.child_dinner_price ? parseFloat(tier.child_dinner_price) : null,
         adult_breakfast_price: tier.adult_breakfast_price ? parseFloat(tier.adult_breakfast_price) : null,
         child_breakfast_price: tier.child_breakfast_price ? parseFloat(tier.child_breakfast_price) : null,
-        adult_extra_guest_fee: tier.adult_extra_guest_fee ? parseFloat(tier.adult_extra_guest_fee) : null,
-        child_extra_guest_fee: tier.child_extra_guest_fee ? parseFloat(tier.child_extra_guest_fee) : null,
+        extra_guest_fee: tier.extra_guest_fee ? parseFloat(tier.extra_guest_fee) : null,
         effective_from: tier.effective_from,
         effective_to: tier.effective_to,
       });
@@ -108,8 +105,7 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
         child_dinner_price: null,
         adult_breakfast_price: null,
         child_breakfast_price: null,
-        adult_extra_guest_fee: null,
-        child_extra_guest_fee: null,
+        extra_guest_fee: null,
         effective_from: null,
         effective_to: null,
       });
@@ -395,49 +391,26 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
                 <p className="text-xs text-gray-600 mb-3">
                   Additional fees for extra guests beyond room capacity on buffet days (entrance fees, extra mattresses, etc.)
                 </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="adult_extra_guest_fee"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Adult Extra Guest Fee</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            value={field.value || ""}
-                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
-                            placeholder="Optional"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="child_extra_guest_fee"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Child Extra Guest Fee</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            {...field}
-                            value={field.value || ""}
-                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
-                            placeholder="Optional"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                <FormField
+                  control={form.control}
+                  name="extra_guest_fee"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Extra Guest Fee</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          {...field}
+                          value={field.value || ""}
+                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                          placeholder="Optional"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
