@@ -316,24 +316,30 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             + Add Other Charge
                         </Button>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <div className="flex justify-between py-2">
-                            <span className="font-semibold">Room Price:</span>
-                            <span>{formatCurrency(booking.total_price)}</span>
+                    <div className="space-y-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold">Room Price:</span>
+                                <span>{formatCurrency(booking.total_price)}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold">Meal Price:</span>
+                                <span>{formatCurrency(booking.meal_price || 0)}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold">Extra Guest Fee:</span>
+                                <span>{formatCurrency(booking.extra_guest_fee || 0)}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold">Discount:</span>
+                                <span>-{formatCurrency(booking.discount_amount)}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold">Other Charges:</span>
+                                <span>{formatCurrency(otherCharges)}</span>
+                            </div>
                         </div>
-                        <div className="flex justify-between py-2">
-                            <span className="font-semibold">Meal Price:</span>
-                            <span>{formatCurrency(booking.meal_price || 0)}</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="font-semibold">Discount:</span>
-                            <span>-{formatCurrency(booking.discount_amount)}</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                            <span className="font-semibold">Other Charges:</span>
-                            <span>{formatCurrency(otherCharges)}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-t pt-2 font-bold text-base">
+                        <div className="flex justify-between py-3 border-t-2 border-gray-300 pt-3 font-bold text-lg">
                             <span>Total Payable:</span>
                             <span>{formatCurrency(totalPayable)}</span>
                         </div>

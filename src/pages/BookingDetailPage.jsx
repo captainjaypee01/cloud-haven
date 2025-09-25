@@ -163,6 +163,7 @@ const UnifiedBookingResultPage = () => {
                     <Separator />
                     <div className="flex justify-between"><span>Room Price</span><span>{formatCurrency(booking?.total_price)}</span></div>
                     <div className="flex justify-between"><span>Meal Price</span><span>{formatCurrency(booking?.meal_price)}</span></div>
+                    <div className="flex justify-between"><span>Extra Guest Fee</span><span>{formatCurrency(booking?.extra_guest_fee)}</span></div>
                     <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency((booking?.total_price || 0) + (booking?.meal_price || 0))}</span></div>
                     {booking?.discount_amount > 0 && (
                         <div className="flex justify-between text-green-600"><span>Promo Discount</span><span>-{formatCurrency(booking?.discount_amount)}</span></div>

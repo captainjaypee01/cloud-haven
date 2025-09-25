@@ -118,7 +118,7 @@ const PaymentPage = () => {
             </div>
         );
     }
-    
+
     if (["cancelled", "expired"].includes(booking.status)) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
@@ -142,7 +142,7 @@ const PaymentPage = () => {
         <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO title="Booking Payment" description="Pay for your Netania De Laiya booking." noindex={true} />
             <SeaWaveBg />
-            
+
             <div className="relative z-10 w-full max-w-4xl mt-20">
                 {/* Header */}
                 <div className="text-center mb-8">
@@ -160,7 +160,7 @@ const PaymentPage = () => {
                                 </div>
                                 <h2 className="text-xl font-semibold text-gray-900">Booking Summary</h2>
                             </div>
-                            
+
                             <div className="space-y-4">
                                 <div className="flex flex-col">
                                     <span className="text-sm font-medium text-gray-600 mb-1">Reference Number:</span>
@@ -173,12 +173,12 @@ const PaymentPage = () => {
                                         )}
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex flex-col">
                                     <span className="text-sm font-medium text-gray-600 mb-1">Guest:</span>
                                     <span className="font-medium text-gray-900 text-lg">{booking.guest_name}</span>
                                 </div>
-                                
+
                                 {booking.booking_type === 'day_tour' ? (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex flex-col">
@@ -202,7 +202,7 @@ const PaymentPage = () => {
                                         </div>
                                     </div>
                                 )}
-                                
+
                                 <div className="pt-4 border-t border-gray-200">
                                     <div className="space-y-2">
                                         <div className="flex justify-between">
@@ -215,6 +215,12 @@ const PaymentPage = () => {
                                             <span className="text-sm font-medium text-gray-600">Meal Total:</span>
                                             <span className="text-sm font-medium text-gray-900">{formatCurrency(booking.meal_price || 0)}</span>
                                         </div>
+                                        {booking?.extra_guest_count > 0 && booking?.extra_guest_fee > 0 && (
+                                            <div className="flex justify-between">
+                                                <span className="text-sm font-medium text-gray-600">Extra Guest Fee:</span>
+                                                <span className="text-sm font-medium text-gray-900">{formatCurrency(booking?.extra_guest_fee || 0)}</span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between">
                                             <span className="text-sm font-medium text-gray-600">Subtotal:</span>
                                             <span className="text-sm font-medium text-gray-900">{formatCurrency(subtotal)}</span>
@@ -233,7 +239,7 @@ const PaymentPage = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         {/* Payment Options */}
                         <div className="bg-white rounded-xl shadow-lg p-6">
                             <div className="flex items-center gap-3 mb-6">
@@ -242,7 +248,7 @@ const PaymentPage = () => {
                                 </div>
                                 <h3 className="text-xl font-semibold text-gray-900">Payment Options</h3>
                             </div>
-                            
+
                             {/* Show downpayment option only */}
                             {downpaymentPaid ? (
                                 <div className="space-y-4">
@@ -282,8 +288,8 @@ const PaymentPage = () => {
                                                         Pay now to secure your booking. Remaining balance will be settled at the resort during check-in.
                                                     </p>
                                                 </div>
-                                                <Button 
-                                                    onClick={() => handlePaymentClick(opt)} 
+                                                <Button
+                                                    onClick={() => handlePaymentClick(opt)}
                                                     className="w-full lg:w-auto px-8 py-3 text-lg font-semibold cursor-pointer bg-amber-600 hover:bg-amber-700"
                                                 >
                                                     Pay Downpayment
@@ -305,7 +311,7 @@ const PaymentPage = () => {
                                 </div>
                                 <h3 className="text-lg font-semibold text-gray-900">Bank Details</h3>
                             </div>
-                            
+
                             <div className="space-y-4">
                                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                                     <div className="space-y-3 text-sm">
@@ -323,15 +329,15 @@ const PaymentPage = () => {
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
                                     <div className="flex items-start gap-2">
                                         <Clock className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                                         <div>
                                             <h4 className="font-medium text-amber-900 mb-1">Payment Process</h4>
                                             <p className="text-amber-700 text-sm">
-                                                1. Transfer payment to the account above<br/>
-                                                2. Upload proof of payment<br/>
+                                                1. Transfer payment to the account above<br />
+                                                2. Upload proof of payment<br />
                                                 3. Wait for verification (usually within 24 hours)
                                             </p>
                                         </div>
@@ -344,9 +350,9 @@ const PaymentPage = () => {
 
                 {/* Bottom Actions */}
                 <div className="mt-8 flex justify-center">
-                    <Button 
-                        variant="outline" 
-                        onClick={() => navigate(`/booking/${refNo}`)} 
+                    <Button
+                        variant="outline"
+                        onClick={() => navigate(`/booking/${refNo}`)}
                         className="cursor-pointer px-8 py-3 text-lg"
                     >
                         <ArrowLeft className="h-5 w-5 mr-2" />
@@ -354,7 +360,7 @@ const PaymentPage = () => {
                     </Button>
                 </div>
             </div>
-            
+
             <ProofOfPaymentDialog
                 open={showProofDialog}
                 onOpenChange={setShowProofDialog}
