@@ -120,6 +120,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
     total_guests,
     room_price,
     meal_price,
+    extra_guest_fee,
     final_price,
     discount_amount,
     other_charges,
@@ -386,10 +387,22 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
                   <span className="text-sm text-gray-600">Meal Price:</span>
                   <span className="font-medium text-sm sm:text-base">{formatCurrency(meal_price || 0)}</span>
                 </div>
-                {other_charges > 0 && (
+                {(extra_guest_fee || 0) > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Extra Guest Fee:</span>
+                    <span className="font-medium text-sm sm:text-base">{formatCurrency(extra_guest_fee || 0)}</span>
+                  </div>
+                )}
+                {(discount_amount || 0) > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Discount:</span>
+                    <span className="font-medium text-sm sm:text-base text-green-600">-{formatCurrency(discount_amount || 0)}</span>
+                  </div>
+                )}
+                {(other_charges || 0) > 0 && (
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Other Charges:</span>
-                    <span className="font-medium text-sm sm:text-base">{formatCurrency(other_charges)}</span>
+                    <span className="font-medium text-sm sm:text-base">{formatCurrency(other_charges || 0)}</span>
                   </div>
                 )}
               </div>
@@ -400,7 +413,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-green-600">Total Paid:</span>
-                  <span className="font-semibold text-green-600 text-sm sm:text-base">{formatCurrency(total_paid)}</span>
+                  <span className="font-semibold text-green-600 text-sm sm:text-base">{formatCurrency(total_paid || 0)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2 border-t border-green-200">
                   <span className="font-semibold text-red-600 text-sm sm:text-base">Remaining Balance:</span>
