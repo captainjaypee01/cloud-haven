@@ -149,32 +149,36 @@ export default function MealProgramDetail() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{program.name}</h1>
-          <p className="text-muted-foreground mt-2">{getScopeDescription()}</p>
+    <div className="space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:justify-between sm:items-start sm:space-y-0">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold">{program.name}</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">{getScopeDescription()}</p>
           {program.date_start && program.date_end && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               Date Range: {format(new Date(program.date_start), 'MMM dd, yyyy')} - {format(new Date(program.date_end), 'MMM dd, yyyy')}
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
             onClick={() => navigate(`/admin/meal-programs/${id}/preview`)}
-            className="cursor-pointer"
+            className="cursor-pointer w-full sm:w-auto"
+            size="sm"
           >
             <Calendar className="w-4 h-4 mr-2" />
-            Preview Calendar
+            <span className="hidden sm:inline">Preview Calendar</span>
+            <span className="sm:hidden">Preview</span>
           </Button>
           <Button
             onClick={() => navigate(`/admin/meal-programs/${id}/edit`)}
-            className="cursor-pointer"
+            className="cursor-pointer w-full sm:w-auto"
+            size="sm"
           >
             <Edit className="w-4 h-4 mr-2" />
-            Edit Program
+            <span className="hidden sm:inline">Edit Program</span>
+            <span className="sm:hidden">Edit</span>
           </Button>
         </div>
       </div>
@@ -184,10 +188,10 @@ export default function MealProgramDetail() {
           <CardTitle>Program Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <dl className="grid grid-cols-2 gap-4">
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Status</dt>
-              <dd>
+              <dd className="mt-1">
                 <Badge variant={program.status === "active" ? "success" : "secondary"}>
                   {program.status}
                 </Badge>
@@ -195,28 +199,28 @@ export default function MealProgramDetail() {
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Scope Type</dt>
-              <dd className="capitalize">{program.scope_type.replace("_", " ")}</dd>
+              <dd className="mt-1 capitalize">{program.scope_type.replace("_", " ")}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Inactive Label</dt>
-              <dd>{program.inactive_label}</dd>
+              <dd className="mt-1 text-sm">{program.inactive_label}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-muted-foreground">Buffet Enabled</dt>
-              <dd>
+              <dd className="mt-1">
                 <Badge variant={program.buffet_enabled ? "success" : "secondary"}>
                   {program.buffet_enabled ? "Enabled" : "Disabled"}
                 </Badge>
               </dd>
             </div>
-            <div>
+            <div className="sm:col-span-2">
               <dt className="text-sm font-medium text-muted-foreground">Last Updated</dt>
-              <dd>{format(new Date(program.updated_at), "MMMM d, yyyy 'at' h:mm a")}</dd>
+              <dd className="mt-1 text-sm">{format(new Date(program.updated_at), "MMMM d, yyyy 'at' h:mm a")}</dd>
             </div>
             {program.notes && (
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <dt className="text-sm font-medium text-muted-foreground">Notes</dt>
-                <dd className="mt-1">{program.notes}</dd>
+                <dd className="mt-1 text-sm">{program.notes}</dd>
               </div>
             )}
           </dl>
@@ -224,23 +228,23 @@ export default function MealProgramDetail() {
       </Card>
 
       <Tabs defaultValue="pricing" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="pricing">Pricing Tiers</TabsTrigger>
-          <TabsTrigger value="overrides">Calendar Overrides</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="pricing" className="text-xs sm:text-sm">Pricing Tiers</TabsTrigger>
+          <TabsTrigger value="overrides" className="text-xs sm:text-sm">Calendar Overrides</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pricing">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Pricing Tiers</CardTitle>
+              <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                <CardTitle className="text-lg sm:text-xl">Pricing Tiers</CardTitle>
                 <Button
                   size="sm"
                   onClick={() => {
                     setSelectedTier(null);
                     setTierDialogOpen(true);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Tier
@@ -248,24 +252,26 @@ export default function MealProgramDetail() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Currency</TableHead>
-                    <TableHead>Full Buffet (Overnight)</TableHead>
-                    <TableHead>Lunch Price</TableHead>
-                    <TableHead>PM Snack Price</TableHead>
-                    <TableHead>Dinner Price</TableHead>
-                    <TableHead>Breakfast Price (Extra Guests)</TableHead>
-                    <TableHead>Effective From</TableHead>
-                    <TableHead>Effective To</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[80px]">Currency</TableHead>
+                      <TableHead className="min-w-[140px]">Full Buffet (Overnight)</TableHead>
+                      <TableHead className="min-w-[120px]">Lunch Price</TableHead>
+                      <TableHead className="min-w-[120px]">PM Snack Price</TableHead>
+                      <TableHead className="min-w-[120px]">Dinner Price</TableHead>
+                      <TableHead className="min-w-[160px]">Breakfast Price (Extra Guests)</TableHead>
+                      <TableHead className="min-w-[180px]">Extra Guest Fee (Buffet Days)</TableHead>
+                      <TableHead className="min-w-[120px]">Effective From</TableHead>
+                      <TableHead className="min-w-[120px]">Effective To</TableHead>
+                      <TableHead className="min-w-[100px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
                 <TableBody>
                   {program.pricing_tiers?.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center text-muted-foreground">
+                      <TableCell colSpan={10} className="text-center text-muted-foreground">
                         No pricing tiers defined. Add a tier to set meal prices.
                       </TableCell>
                     </TableRow>
@@ -304,13 +310,19 @@ export default function MealProgramDetail() {
                           </div>
                         </TableCell>
                         <TableCell>
+                          <div className="text-sm">
+                            <div>Adult: {tier.adult_extra_guest_fee || "—"}</div>
+                            <div>Child: {tier.child_extra_guest_fee || "—"}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
                           {tier.effective_from ? format(new Date(tier.effective_from), "MMM d, yyyy") : "—"}
                         </TableCell>
                         <TableCell>
                           {tier.effective_to ? format(new Date(tier.effective_to), "MMM d, yyyy") : "—"}
                         </TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1 sm:gap-2">
                             <Button
                               size="sm"
                               variant="outline"
@@ -318,9 +330,9 @@ export default function MealProgramDetail() {
                                 setSelectedTier(tier);
                                 setTierDialogOpen(true);
                               }}
-                              className="cursor-pointer"
+                              className="cursor-pointer p-1 sm:p-2"
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                             <Button
                               size="sm"
@@ -330,9 +342,9 @@ export default function MealProgramDetail() {
                                 setDeleteType("tier");
                                 setDeleteDialogOpen(true);
                               }}
-                              className="cursor-pointer"
+                              className="cursor-pointer p-1 sm:p-2"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -340,7 +352,8 @@ export default function MealProgramDetail() {
                     ))
                   )}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -348,15 +361,15 @@ export default function MealProgramDetail() {
         <TabsContent value="overrides">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Calendar Overrides</CardTitle>
+              <div className="flex flex-col space-y-3 sm:flex-row sm:justify-between sm:items-center sm:space-y-0">
+                <CardTitle className="text-lg sm:text-xl">Calendar Overrides</CardTitle>
                 <Button
                   size="sm"
                   onClick={() => {
                     setSelectedOverride(null);
                     setOverrideDialogOpen(true);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Override
@@ -364,16 +377,17 @@ export default function MealProgramDetail() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Date/Month</TableHead>
-                    <TableHead>Override</TableHead>
-                    <TableHead>Note</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[80px]">Type</TableHead>
+                      <TableHead className="min-w-[120px]">Date/Month</TableHead>
+                      <TableHead className="min-w-[120px]">Override</TableHead>
+                      <TableHead className="min-w-[100px]">Note</TableHead>
+                      <TableHead className="min-w-[100px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
                 <TableBody>
                   {program.calendar_overrides?.length === 0 ? (
                     <TableRow>
@@ -402,7 +416,7 @@ export default function MealProgramDetail() {
                         </TableCell>
                         <TableCell>{override.note || "—"}</TableCell>
                         <TableCell>
-                          <div className="flex gap-2">
+                          <div className="flex gap-1 sm:gap-2">
                             <Button
                               size="sm"
                               variant="outline"
@@ -410,9 +424,9 @@ export default function MealProgramDetail() {
                                 setSelectedOverride(override);
                                 setOverrideDialogOpen(true);
                               }}
-                              className="cursor-pointer"
+                              className="cursor-pointer p-1 sm:p-2"
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                             <Button
                               size="sm"
@@ -422,9 +436,9 @@ export default function MealProgramDetail() {
                                 setDeleteType("override");
                                 setDeleteDialogOpen(true);
                               }}
-                              className="cursor-pointer"
+                              className="cursor-pointer p-1 sm:p-2"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -432,7 +446,8 @@ export default function MealProgramDetail() {
                     ))
                   )}
                 </TableBody>
-              </Table>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
