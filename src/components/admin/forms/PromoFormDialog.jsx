@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
 import FormSelectField from '@/components/common/form/FormSelectField';
 import { useForm } from 'react-hook-form';
@@ -77,6 +78,8 @@ export default function PromoFormDialog({
             max_uses: '',
             active: 'inactive', // default new promo as inactive; can be changed by user
             exclusive: false,
+            excluded_days: [],
+            per_night_calculation: false,
         },
     });
     const { reset } = form;
@@ -106,6 +109,8 @@ export default function PromoFormDialog({
                     initialData.max_uses != null ? String(initialData.max_uses) : '',
                 active: initialData.active || 'inactive',
                 exclusive: !!initialData.exclusive,
+                excluded_days: initialData.excluded_days || [],
+                per_night_calculation: !!initialData.per_night_calculation,
             });
             setSelectedImageUrl(initialData.image_url || '');
         } else {
@@ -122,6 +127,8 @@ export default function PromoFormDialog({
                 max_uses: '',
                 active: 'inactive',
                 exclusive: false,
+                excluded_days: [],
+                per_night_calculation: false,
             });
             setSelectedImageUrl('');
         }
@@ -182,16 +189,27 @@ export default function PromoFormDialog({
 
     const onSubmit = async (values) => {
         setSubmitting(true);
+        
+        
         const payload = {
-            ...values,
-            discount_value: parseFloat(values.discount_value),  // ensure numeric
-            max_uses: values.max_uses === "" ? null : parseInt(values.max_uses),
-            exclusive: !!values.exclusive,
-            image_url: selectedImageUrl || null,
-            // Ensure starts_at and ends_at are properly formatted or null
+            code: values.code,
+            title: values.title,
+            description: values.description || null,
+            scope: values.scope,
+            discount_type: values.discount_type,
+            discount_value: parseFloat(values.discount_value),
             starts_at: values.starts_at || null,
             ends_at: values.ends_at || null,
+            expires_at: values.expires_at || null,
+            max_uses: values.max_uses === "" ? null : parseInt(values.max_uses),
+            image_url: selectedImageUrl || null,
+            exclusive: !!values.exclusive,
+            active: values.active,
+            // New fields for flexible promo logic - FIXED LOGIC
+            excluded_days: values.excluded_days && values.excluded_days.length > 0 ? values.excluded_days : null,
+            per_night_calculation: values.per_night_calculation === true,
         };
+        
         try {
             if (isEdit && promoId) {
                 await api.update(promoId, payload);
@@ -408,6 +426,72 @@ export default function PromoFormDialog({
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                name="per_night_calculation"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Per-Night Calculation?</FormLabel>
+                                        <FormControl>
+                                            <Switch
+                                                checked={!!field.value}
+                                                onCheckedChange={(checked) => field.onChange(checked)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                        <p className="text-sm text-gray-600">
+                                            Enable to apply discount per eligible night instead of entire booking
+                                        </p>
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="excluded_days"
+                                control={form.control}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Excluded Days of Week</FormLabel>
+                                        <FormControl>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[
+                                                    { value: 0, label: 'Sunday' },
+                                                    { value: 1, label: 'Monday' },
+                                                    { value: 2, label: 'Tuesday' },
+                                                    { value: 3, label: 'Wednesday' },
+                                                    { value: 4, label: 'Thursday' },
+                                                    { value: 5, label: 'Friday' },
+                                                    { value: 6, label: 'Saturday' },
+                                                ].map((day) => (
+                                                    <div key={day.value} className="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            id={`excluded-day-${day.value}`}
+                                                            checked={field.value?.includes(day.value) || false}
+                                                            onCheckedChange={(checked) => {
+                                                                const currentDays = field.value || [];
+                                                                if (checked) {
+                                                                    field.onChange([...currentDays, day.value]);
+                                                                } else {
+                                                                    field.onChange(currentDays.filter(d => d !== day.value));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <label 
+                                                            htmlFor={`excluded-day-${day.value}`}
+                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                                        >
+                                                            {day.label}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                        <p className="text-sm text-gray-600">
+                                            Select days of the week to exclude from promo discount
+                                        </p>
+                                    </FormItem>
+                                )}
+                            />
                             {/* Image selection */}
                             <div className="space-y-2">
                                 <FormLabel>Promo Image (optional)</FormLabel>
@@ -436,11 +520,15 @@ export default function PromoFormDialog({
                                         disabled={uploadingImage}
                                         className="hidden"
                                     />
-                                    <label htmlFor="promo-image-upload">
-                                        <Button type="button" variant="outline" size="sm" disabled={uploadingImage}>
-                                            Upload Image
-                                        </Button>
-                                    </label>
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        size="sm" 
+                                        disabled={uploadingImage}
+                                        onClick={() => document.getElementById('promo-image-upload')?.click()}
+                                    >
+                                        {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                                    </Button>
                                 </div>
                                 {showLibrary && (
                                     <div className="border rounded-md p-2 max-h-40 overflow-y-auto space-y-2">
