@@ -70,7 +70,7 @@ const Cart = () => {
             checkOut: checkOut,
             dayTourDate: isDayTourCart ? items.find(item => item.dayTourDate)?.dayTourDate : null
         };
-        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates);
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates, mealQuote);
     };
 
     const handleRemovePromo = () => {
@@ -390,7 +390,7 @@ const Cart = () => {
                                                 <div className="text-xs text-gray-500 mt-1">
                                                     {mealQuote.nights
                                                         .filter(night => night.type === 'free_breakfast')
-                                                        .map(night => formatMealDate(night.start_date))
+                                                        .map(night => formatMealDate(night.end_date))
                                                         .join(', ')
                                                     }
                                                 </div>
@@ -409,7 +409,7 @@ const Cart = () => {
                                                     <div className="text-xs text-gray-500 mt-1">
                                                         {mealQuote.nights
                                                             .filter(night => night.breakfast_total > 0)
-                                                            .map(night => formatMealDate(night.start_date))
+                                                            .map(night => formatMealDate(night.end_date))
                                                             .join(', ')
                                                         }
                                                     </div>
@@ -501,7 +501,7 @@ const Cart = () => {
                                                     /* Simplified Free Breakfast Display */
                                                     <div className="text-sm font-medium text-gray-700">
                                                         <div>
-                                                            {formatMealDate(night.start_date)} - Free Breakfast
+                                                            {formatMealDate(night.end_date)} - Free Breakfast
                                                         </div>
                                                         <div className="text-green-600 font-semibold">
                                                             {(night.adults || 0) + (night.children || 0)} Guest{((night.adults || 0) + (night.children || 0)) > 1 ? 's' : ''} Complimentary Breakfast (Plated)

@@ -110,7 +110,7 @@ export function CartPopup() {
             checkOut: checkOut,
             dayTourDate: isDayTourCart ? items.find(item => item.dayTourDate)?.dayTourDate : null
         };
-        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates);
+        await applyPromo(api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates, mealQuote);
     };
 
     const handleRemovePromo = () => {

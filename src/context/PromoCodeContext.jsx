@@ -115,7 +115,7 @@ export const PromoCodeProvider = ({ children }) => {
         dispatch({ type: 'CLEAR_PROMO' });
     };
 
-    // Helper function to calculate per-night discount
+    // Helper function to calculate per-night discount (legacy - simple division)
     const calculatePerNightDiscount = (promo, bookingDates, roomTotalPrice, mealCost, grandTotal) => {
         const checkIn = new Date(bookingDates.checkIn);
         const checkOut = new Date(bookingDates.checkOut);
@@ -168,7 +168,72 @@ export const PromoCodeProvider = ({ children }) => {
         };
     };
 
-    const applyPromo = async (api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates = {}) => {
+    // Helper function to calculate per-night discount using actual meal breakdown
+    const calculatePerNightDiscountWithMealBreakdown = (promo, bookingDates, roomTotalPrice, mealCost, grandTotal, mealQuote) => {
+        const checkIn = new Date(bookingDates.checkIn);
+        const checkOut = new Date(bookingDates.checkOut);
+        const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+        
+        const perNightRoom = roomTotalPrice / nights;
+        const perNightTotal = grandTotal / nights;
+        
+        let totalDiscount = 0;
+        const breakdown = [];
+        
+        for (let i = 0; i < nights; i++) {
+            const currentDate = new Date(checkIn);
+            currentDate.setDate(checkIn.getDate() + i);
+            const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            
+            const isEligible = !promo.excluded_days || !promo.excluded_days.includes(dayOfWeek);
+            
+            let nightDiscount = 0;
+            let baseAmount = 0;
+            
+            if (isEligible) {
+                if (promo.scope === 'room') {
+                    baseAmount = perNightRoom;
+                } else if (promo.scope === 'meal') {
+                    // Use actual meal breakdown for this night
+                    const mealNight = mealQuote?.nights?.find(night => {
+                        const mealDate = new Date(night.date);
+                        return mealDate.toDateString() === currentDate.toDateString();
+                    });
+                    
+                    if (mealNight) {
+                        // For meal scope, use the actual cost for this specific night
+                        baseAmount = mealNight.night_total || 0;
+                    }
+                } else {
+                    // 'total' scope
+                    baseAmount = perNightTotal;
+                }
+                
+                if (promo.discount_type === 'percentage') {
+                    nightDiscount = baseAmount * (promo.discount_value / 100);
+                } else {
+                    nightDiscount = Math.min(promo.discount_value, baseAmount);
+                }
+            }
+            
+            totalDiscount += nightDiscount;
+            
+            breakdown.push({
+                date: currentDate.toISOString().split('T')[0],
+                dayName: currentDate.toLocaleDateString('en-US', { weekday: 'long' }),
+                eligible: isEligible,
+                baseAmount: baseAmount,
+                discountAmount: nightDiscount
+            });
+        }
+        
+        return {
+            totalDiscount: Math.round(totalDiscount * 100) / 100,
+            breakdown
+        };
+    };
+
+    const applyPromo = async (api, promoCode, roomTotalPrice, mealCost, grandTotal, bookingDates = {}, mealQuote = null) => {
         setPromoError("");
         if (!promoCode) return;
         
@@ -193,8 +258,8 @@ export const PromoCodeProvider = ({ children }) => {
             let perNightBreakdown = null;
             
             if (promo.per_night_calculation && bookingDates.checkIn && bookingDates.checkOut) {
-                // Calculate per-night discount
-                const result = calculatePerNightDiscount(promo, bookingDates, roomTotalPrice, mealCost, grandTotal);
+                // Calculate per-night discount using actual meal breakdown
+                const result = calculatePerNightDiscountWithMealBreakdown(promo, bookingDates, roomTotalPrice, mealCost, grandTotal, mealQuote);
                 discountAmount = result.totalDiscount;
                 perNightBreakdown = result.breakdown;
             } else {

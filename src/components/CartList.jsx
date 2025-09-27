@@ -283,7 +283,7 @@ const CartList = ({
                                     <span className="text-sm font-medium text-blue-700">
                                         {mealNight.type === 'buffet' 
                                             ? `${formatBuffetDateRange(mealNight.startDate, mealNight.endDate)} - Buffet`
-                                            : `${formatMealDate(mealNight.date)} - Free Breakfast`
+                                            : `${formatMealDate(mealNight.endDate)} - Free Breakfast`
                                         }
                                     </span>
                                     <span className="text-sm font-semibold text-blue-900">
