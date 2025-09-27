@@ -10,13 +10,25 @@ const CartCtx = createContext();
 function reducer(state, action) {
     switch (action.type) {
         case 'SET_DATES':
-            return (action.from !== state.checkIn || action.to !== state.checkOut)
-                ? { ...state, checkIn: action.from, checkOut: action.to, dayTourDate: '', items: [] }
-                : state;
+            // Always clear promo codes when dates are being set (including clearing)
+            if (typeof action.clearPromoCodes === 'function') {
+                action.clearPromoCodes();
+            }
+            
+            if (action.from !== state.checkIn || action.to !== state.checkOut) {
+                return { ...state, checkIn: action.from, checkOut: action.to, dayTourDate: '', items: [] };
+            }
+            return state;
         case 'SET_DAY_TOUR_DATE':
-            return (action.date !== state.dayTourDate)
-                ? { ...state, dayTourDate: action.date, checkIn: '', checkOut: '', items: [] }
-                : state;
+            // Always clear promo codes when day tour date is being set (including clearing)
+            if (typeof action.clearPromoCodes === 'function') {
+                action.clearPromoCodes();
+            }
+            
+            if (action.date !== state.dayTourDate) {
+                return { ...state, dayTourDate: action.date, checkIn: '', checkOut: '', items: [] };
+            }
+            return state;
         case 'ADD':
             const addedAt = Date.now();
             const timestampId = `${action.room.roomId}-${addedAt}`;
@@ -35,6 +47,12 @@ function reducer(state, action) {
             return { checkIn: '', checkOut: '', dayTourDate: '', items: [] };
         case 'CLEAR_ITEMS_ONLY':
             return { ...state, items: [] };
+        case 'CLEAR_PROMO_CODES':
+            // Clear promo codes explicitly
+            if (typeof action.clearPromoCodes === 'function') {
+                action.clearPromoCodes();
+            }
+            return state;
         default:
             return state;
     }
@@ -47,6 +65,18 @@ export const CartProvider = ({ children }) => {
     );
     const { navigate } = useAppContext();
     const api = useApi();
+    
+    // Function to clear promo codes when dates change
+    const clearPromoCodes = () => {
+        console.log('CartContext: Clearing promo codes...');
+        localStorage.removeItem('cart_promo_code');
+        localStorage.removeItem('cart_promo_info');
+        localStorage.removeItem('checkout_promo_info');
+        
+        // Dispatch a custom event to notify PromoCodeContext
+        window.dispatchEvent(new CustomEvent('clearPromoCodes'));
+        console.log('CartContext: Custom event dispatched');
+    };
     
     // Day Tour specific data
     const [currentPricing, setCurrentPricing] = useState(null);
@@ -110,7 +140,12 @@ export const CartProvider = ({ children }) => {
     }, [state.dayTourDate]);
 
     const setDayTourDate = (date) => {
-        dispatch({ type: 'SET_DAY_TOUR_DATE', date });
+        dispatch({ type: 'SET_DAY_TOUR_DATE', date, clearPromoCodes });
+    };
+
+    // Method to set dates and clear promo codes
+    const setDates = (from, to) => {
+        dispatch({ type: 'SET_DATES', from, to, clearPromoCodes });
     };
 
     // Fetch Day Tour pricing for a specific date
@@ -165,15 +200,21 @@ export const CartProvider = ({ children }) => {
         dispatch({ type: 'CLEAR' });
     };
 
+    const clearPromoCodesOnly = () => {
+        dispatch({ type: 'CLEAR_PROMO_CODES', clearPromoCodes });
+    };
+
     return (
         <CartCtx.Provider value={{
             state, dispatch,
             updateItem,
             removeItem,
             addItem,
+            setDates,
             setDayTourDate,
             clear: clearAll,
             clearItemsOnly: () => dispatch({ type: 'CLEAR_ITEMS_ONLY' }),
+            clearPromoCodesOnly,
             // Day Tour specific data and functions
             currentPricing,
             mealProgram,

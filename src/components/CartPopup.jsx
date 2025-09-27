@@ -23,6 +23,7 @@ import { Link } from "react-router-dom";
 import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from "../utils/dateUtils";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
@@ -391,11 +392,10 @@ export function CartPopup() {
                                                     {/* Date Header */}
                                                     <div className="flex justify-between items-center mb-1">
                                                         <span className="text-xs font-medium text-blue-700">
-                                                            {new Date(mealNight.date).toLocaleDateString('en-US', { 
-                                                                weekday: 'short', 
-                                                                month: 'short', 
-                                                                day: 'numeric' 
-                                                            })} - {mealNight.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                                            {mealNight.type === 'buffet' 
+                                                                ? `${formatBuffetDateRange(mealNight.startDate, mealNight.endDate)} - Buffet`
+                                                                : `${formatMealDate(mealNight.date)} - Free Breakfast`
+                                                            }
                                                         </span>
                                                         <span className="text-xs font-semibold text-blue-900">
                                                             {formatCurrency(mealNight.cost)}
@@ -463,11 +463,7 @@ export function CartPopup() {
                                                         <div key={index} className="border-b border-purple-200 pb-1 last:border-b-0 last:pb-0">
                                                             <div className="flex justify-between items-center mb-0.5">
                                                                 <span className="text-xs font-medium text-purple-700">
-                                                                    {new Date(night.date).toLocaleDateString('en-US', { 
-                                                                        weekday: 'short', 
-                                                                        month: 'short', 
-                                                                        day: 'numeric' 
-                                                                    })} - Extra Guest Fee
+                                                                    {formatBuffetDate(night.date)} - Extra Guest Fee
                                                                 </span>
                                                                 <span className="text-xs font-semibold text-purple-900">
                                                                     {formatCurrency(extraGuestFeeForThisRoom)}
@@ -553,11 +549,7 @@ export function CartPopup() {
                                                         }
                                                     </span>
                                                     <div className="text-xs text-gray-500 mt-1">
-                                                        {mealQuote.nights
-                                                            .filter(night => night.type === 'buffet')
-                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                            .join(', ')
-                                                        }
+                                                        {formatBuffetSummaryDates(mealQuote.nights.filter(night => night.type === 'buffet'))}
                                                     </div>
                                                 </div>
                                                 <span>
@@ -580,7 +572,7 @@ export function CartPopup() {
                                                     <div className="text-xs text-gray-500 mt-1">
                                                         {mealQuote.nights
                                                             .filter(night => night.type === 'free_breakfast')
-                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                            .map(night => formatMealDate(night.start_date))
                                                             .join(', ')
                                                         }
                                                     </div>
@@ -599,7 +591,7 @@ export function CartPopup() {
                                                     <div className="text-xs text-gray-500 mt-1">
                                                         {mealQuote.nights
                                                             .filter(night => night.breakfast_total > 0)
-                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                            .map(night => formatMealDate(night.start_date))
                                                             .join(', ')
                                                         }
                                                     </div>
