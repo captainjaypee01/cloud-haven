@@ -12,6 +12,7 @@ import FormSelectField from '@/components/common/form/FormSelectField';
 import { useForm } from 'react-hook-form';
 import { usePromosApi } from '@/hooks/api/usePromosApi';
 import { useImagesApi } from '@/hooks/api/useImagesApi';
+import { useDebounce } from '@/hooks/useDebounce';
 import { toast } from 'sonner';
 import Loader from "@/components/common/Loader";
 
@@ -62,6 +63,7 @@ export default function PromoFormDialog({
     const [imageLibrary, setImageLibrary] = useState([]);
     const [showLibrary, setShowLibrary] = useState(false);
     const [imageSearch, setImageSearch] = useState('');
+    const debouncedImageSearch = useDebounce(imageSearch, 300);
     const [uploadingImage, setUploadingImage] = useState(false);
 
     const form = useForm({
@@ -135,23 +137,59 @@ export default function PromoFormDialog({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [initialData, open]);
 
-    // Fetch image library when toggled
+    // Fetch image library when toggled or search changes (debounced)
     useEffect(() => {
         if (!showLibrary) return;
         const fetchImages = async () => {
             try {
-                const res = await imagesApi.list({ search: imageSearch });
+                const res = await imagesApi.list({ search: debouncedImageSearch });
                 setImageLibrary(res.data || []);
             } catch {
                 toast.error('Failed to load images.');
             }
         };
         fetchImages();
-    }, [showLibrary, imageSearch]);
+    }, [showLibrary, debouncedImageSearch]);
 
     const handleImageSelect = (url) => {
         setSelectedImageUrl(url);
         setShowLibrary(false);
+    };
+
+    // Resize image file if too large (same as other modules)
+    const resizeImageFile = (file) => {
+        return new Promise(resolve => {
+            const img = new Image();
+            const url = URL.createObjectURL(file);
+            img.onload = () => {
+                let { width, height } = img;
+                const MAX_DIMENSION = 1920;
+                if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                    const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
+                    width = Math.floor(width * scale);
+                    height = Math.floor(height * scale);
+                }
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        const ext = file.type.includes("png") ? "png" : "jpg";
+                        const resizedFile = new File([blob], file.name, { type: `image/${ext}` });
+                        resolve(resizedFile);
+                    } else {
+                        resolve(file);
+                    }
+                    URL.revokeObjectURL(url);
+                }, file.type.includes("png") ? "image/png" : "image/jpeg", 0.8);
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                resolve(file);
+            };
+            img.src = url;
+        });
     };
 
     const handleImageUpload = async (event) => {
@@ -164,9 +202,11 @@ export default function PromoFormDialog({
         setUploadingImage(true);
         try {
             const formData = new FormData();
+            // Resize image if needed (same as other modules)
+            const fileToUpload = await resizeImageFile(file);
             // names[] is required by API even if only one file; use filename without extension
-            const name = file.name.replace(/\.[^/.]$/, '');
-            formData.append('files[]', file);
+            const name = file.name.replace(/\.[^/.]+$/, '');
+            formData.append('files[]', fileToUpload);
             formData.append('names[]', name);
             const res = await imagesApi.create(formData);
             const uploaded = Array.isArray(res.data)
