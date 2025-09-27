@@ -15,7 +15,7 @@ const SearchForm = () => {
 
     const location = useLocation()
     const { navigate } = useAppContext();
-    const { dispatch, state } = useCart();
+    const { setDates, state, clearPromoCodesOnly } = useCart();
     const { dateRanges, hasActivePrograms, loading: dateRangesLoading } = useMealDateRangesContext();
 
     const { control, handleSubmit, reset } = useForm({
@@ -34,7 +34,9 @@ const SearchForm = () => {
         
         // If dates are cleared, clear the cart state and reset form
         if (!from || !to) {
-            dispatch({ type: 'CLEAR' });
+            setDates('', '');
+            // Also explicitly clear promo codes
+            clearPromoCodesOnly();
             // Force form reset to ensure UI reflects cleared state
             reset({ dateRange: { from: null, to: null } });
             return;
@@ -79,7 +81,9 @@ const SearchForm = () => {
             }
         }
         
-        dispatch({ type: 'SET_DATES', from: format(from, "yyyy-MM-dd"), to: format(to, "yyyy-MM-dd") });
+        // Clear promo codes before setting new dates
+        clearPromoCodesOnly();
+        setDates(format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"));
         if(location.pathname !== "/rooms") navigate("/rooms");
     }
 

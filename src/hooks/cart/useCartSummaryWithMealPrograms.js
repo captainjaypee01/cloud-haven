@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../../context/CartContext";
-import { differenceInDays, parseISO } from "date-fns";
+import { differenceInDays, parseISO, addDays, format } from "date-fns";
 import { useApi } from "../useApi";
 import { API_PREFIX } from "../../constants/api";
 import { hasDayTourItems } from "../../utils/roomTypeUtils";
@@ -116,8 +116,18 @@ export function useCartSummaryWithMealPrograms() {
                 roomMealTotal += roomNightCost;
 
                 if (showBreakdown) {
+                    // Use start_date from API (represents when the meal is actually consumed)
+                    let displayDate;
+                    if (night.start_date) {
+                        // Use start_date from API (represents when they eat the meal)
+                        displayDate = night.start_date;
+                    } else {
+                        // Fallback: Use meal service date directly
+                        displayDate = night.date;
+                    }
+
                     roomMealBreakdown.push({
-                        date: night.date,
+                        date: displayDate, // Use start_date for display (when meal is consumed)
                         type: night.type,
                         cost: roomNightCost,
                         breakfastCost: roomBreakfastCost,
@@ -125,9 +135,24 @@ export function useCartSummaryWithMealPrograms() {
                         adultPrice: night.adult_price,
                         childPrice: night.child_price,
                         adultBreakfastPrice: night.adult_breakfast_price,
-                        childBreakfastPrice: night.child_breakfast_price
+                        childBreakfastPrice: night.child_breakfast_price,
+                        // Add check-in and check-out dates for buffet date formatting only
+                        checkIn: checkIn,
+                        checkOut: checkOut,
+                        // Keep the original meal service date for reference
+                        mealServiceDate: night.date,
+                        // Store start and end dates for flexibility
+                        startDate: night.start_date,
+                        endDate: night.end_date
                     });
                 }
+            });
+
+            // Sort meal breakdown by stay date to ensure correct order
+            roomMealBreakdown.sort((a, b) => {
+                const dateA = parseISO(a.date);
+                const dateB = parseISO(b.date);
+                return dateA - dateB;
             });
 
             return {
@@ -139,7 +164,7 @@ export function useCartSummaryWithMealPrograms() {
         });
 
         // Calculate overall breakdown for summary display
-        mealQuote.nights.forEach(night => {
+        mealQuote.nights.forEach((night, index) => {
             let nightTotal = 0;
             let breakfastTotal = 0;
             let extraGuestFeeTotal = 0;
@@ -189,7 +214,10 @@ export function useCartSummaryWithMealPrograms() {
                 extra_adults: extraAdults,
                 extra_children: extraChildren,
                 adults: totalAdults,
-                children: totalChildren
+                children: totalChildren,
+                // Add check-in and check-out dates for buffet date formatting only
+                checkIn: checkIn,
+                checkOut: checkOut
             });
         });
 

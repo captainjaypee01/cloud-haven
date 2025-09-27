@@ -1,131 +1,116 @@
-/**
- * Date utility functions for handling timezone conversion
- * Converts UTC dates to Asia/Singapore timezone (+8)
- */
+import { format, addDays, parseISO, differenceInDays } from 'date-fns';
 
 /**
- * Convert UTC date to Asia/Singapore timezone
- * @param {string|Date} date - UTC date string or Date object
- * @returns {Date} Date in Asia/Singapore timezone
+ * Format buffet date range - showing meal date to next day
+ * Buffet spans from meal date (dinner) to next day (breakfast/lunch)
+ * @param {string} mealDate - The actual meal date from API (YYYY-MM-DD)
+ * @returns {string} Formatted buffet date range string
  */
-export const convertToSingaporeTime = (date) => {
-    if (!date) return null;
-    
+export const formatBuffetDate = (mealDate) => {
     try {
-        const utcDate = new Date(date);
-        if (isNaN(utcDate.getTime())) return null;
+        const mealDateObj = parseISO(mealDate);
+        const nextDay = addDays(mealDateObj, 1);
         
-        // Convert to Singapore timezone (+8)
-        const singaporeOffset = 8 * 60; // 8 hours in minutes
-        const utcOffset = utcDate.getTimezoneOffset();
-        const singaporeTime = new Date(utcDate.getTime() + (utcOffset + singaporeOffset) * 60000);
+        // Format: "Oct 4 (Sat) - 5 (Sun)" or "Oct 31 (Fri) - Nov 1 (Sat)"
+        const mealDateStr = format(mealDateObj, 'MMM d (EEE)');
+        const nextDayStr = format(nextDay, 'd (EEE)');
         
-        return singaporeTime;
+        return `${mealDateStr} - ${nextDayStr}`;
     } catch (error) {
-        console.error('Error converting date to Singapore time:', error);
-        return null;
+        console.error('Error formatting buffet date:', error);
+        return '';
     }
 };
 
 /**
- * Format date for display in Singapore timezone
- * @param {string|Date} date - UTC date string or Date object
- * @param {Object} options - Intl.DateTimeFormat options
- * @returns {string} Formatted date string
+ * Format buffet dates for summary display - showing date ranges
+ * @param {Array} buffetNights - Array of buffet night objects
+ * @returns {string} Formatted buffet date ranges string
  */
-export const formatSingaporeDate = (date, options = {}) => {
-    const singaporeDate = convertToSingaporeTime(date);
-    if (!singaporeDate) return '—';
-    
-    const defaultOptions = {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        ...options
-    };
+export const formatBuffetSummaryDates = (buffetNights) => {
+    if (!buffetNights || buffetNights.length === 0) return '';
     
     try {
-        return singaporeDate.toLocaleDateString('en-SG', defaultOptions);
+        const dateRanges = buffetNights.map(night => {
+            const mealDateObj = parseISO(night.date);
+            const nextDay = addDays(mealDateObj, 1);
+            
+            // Format: "Oct 4-5" or "Oct 31-Nov 1"
+            const mealDateStr = format(mealDateObj, 'MMM d');
+            const nextDayStr = format(nextDay, 'd');
+            
+            return `${mealDateStr}-${nextDayStr}`;
+        });
+        
+        // If multiple date ranges, join with comma
+        return dateRanges.join(', ');
     } catch (error) {
-        console.error('Error formatting Singapore date:', error);
-        return '—';
+        console.error('Error formatting buffet summary dates:', error);
+        return '';
     }
 };
 
 /**
- * Format date and time for display in Singapore timezone
- * @param {string|Date} date - UTC date string or Date object
- * @param {Object} options - Intl.DateTimeFormat options
- * @returns {string} Formatted date and time string
+ * Format buffet date ranges for extra guest fees - showing date ranges
+ * @param {Array} buffetNights - Array of buffet night objects
+ * @returns {string} Formatted buffet date range string
  */
-export const formatSingaporeDateTime = (date, options = {}) => {
-    const singaporeDate = convertToSingaporeTime(date);
-    if (!singaporeDate) return '—';
-    
-    const defaultOptions = {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        ...options
-    };
+export const formatBuffetExtraGuestDates = (buffetNights) => {
+    if (!buffetNights || buffetNights.length === 0) return '';
     
     try {
-        return singaporeDate.toLocaleDateString('en-SG', defaultOptions);
+        const dateRanges = buffetNights.map(night => {
+            const mealDateObj = parseISO(night.date);
+            const nextDay = addDays(mealDateObj, 1);
+            
+            // Format: "Oct 4 (Sat) - 5 (Sun)" or "Oct 31 (Fri) - Nov 1 (Sat)"
+            const mealDateStr = format(mealDateObj, 'MMM d (EEE)');
+            const nextDayStr = format(nextDay, 'd (EEE)');
+            
+            return `${mealDateStr} - ${nextDayStr}`;
+        });
+        
+        // If multiple date ranges, join with comma
+        return dateRanges.join(', ');
     } catch (error) {
-        console.error('Error formatting Singapore date time:', error);
-        return '—';
+        console.error('Error formatting buffet extra guest dates:', error);
+        return '';
     }
 };
 
 /**
- * Get relative time (e.g., "2 hours ago") in Singapore timezone
- * @param {string|Date} date - UTC date string or Date object
- * @returns {string} Relative time string
+ * Format a single meal date consistently - showing date with weekday
+ * @param {string} date - The date string (YYYY-MM-DD)
+ * @returns {string} Formatted date string like "Oct 4 (Sat)"
  */
-export const getRelativeSingaporeTime = (date) => {
-    const singaporeDate = convertToSingaporeTime(date);
-    if (!singaporeDate) return '—';
-    
-    const now = new Date();
-    const diffInSeconds = Math.floor((now - singaporeDate) / 1000);
-    
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minute${Math.floor(diffInSeconds / 60) === 1 ? '' : 's'} ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hour${Math.floor(diffInSeconds / 3600) === 1 ? '' : 's'} ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} day${Math.floor(diffInSeconds / 86400) === 1 ? '' : ''} ago`;
-    
-    return formatSingaporeDate(date);
+export const formatMealDate = (date) => {
+    try {
+        const dateObj = parseISO(date);
+        return format(dateObj, 'MMM d (EEE)');
+    } catch (error) {
+        console.error('Error formatting meal date:', error);
+        return '';
+    }
 };
 
 /**
- * Check if a date is today in Singapore timezone
- * @param {string|Date} date - UTC date string or Date object
- * @returns {boolean} True if date is today
+ * Format buffet date range consistently - showing date range with weekdays
+ * @param {string} startDate - The start date string (YYYY-MM-DD)
+ * @param {string} endDate - The end date string (YYYY-MM-DD)
+ * @returns {string} Formatted date range string like "Oct 4 (Sat) - 5 (Sun)"
  */
-export const isTodayInSingapore = (date) => {
-    const singaporeDate = convertToSingaporeTime(date);
-    if (!singaporeDate) return false;
-    
-    const today = new Date();
-    const singaporeToday = convertToSingaporeTime(today);
-    
-    return singaporeDate.toDateString() === singaporeToday.toDateString();
-};
-
-/**
- * Check if a date is yesterday in Singapore timezone
- * @param {string|Date} date - UTC date string or Date object
- * @returns {boolean} True if date is yesterday
- */
-export const isYesterdayInSingapore = (date) => {
-    const singaporeDate = convertToSingaporeTime(date);
-    if (!singaporeDate) return false;
-    
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const singaporeYesterday = convertToSingaporeTime(yesterday);
-    
-    return singaporeDate.toDateString() === singaporeYesterday.toDateString();
+export const formatBuffetDateRange = (startDate, endDate) => {
+    try {
+        const startDateObj = parseISO(startDate);
+        const endDateObj = parseISO(endDate);
+        
+        // Format: "Oct 4 (Sat) - 5 (Sun)" or "Oct 31 (Fri) - Nov 1 (Sat)"
+        const startStr = format(startDateObj, 'MMM d (EEE)');
+        const endStr = format(endDateObj, 'd (EEE)');
+        
+        return `${startStr} - ${endStr}`;
+    } catch (error) {
+        console.error('Error formatting buffet date range:', error);
+        return '';
+    }
 };

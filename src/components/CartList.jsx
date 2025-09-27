@@ -8,6 +8,7 @@ import { QuickBookingDialog } from "./common/QuickBookingDialog";
 import { DayTourAddToCartDialog } from "./dayTour/DayTourAddToCartDialog";
 import { useCart } from "../context/CartContext";
 import { Checkbox } from "@/components/ui/checkbox";
+import { formatBuffetDate, formatMealDate, formatBuffetDateRange } from "../utils/dateUtils";
 
 const CartList = ({
     summary = [],
@@ -21,6 +22,7 @@ const CartList = ({
     mealQuote = null, // Add meal quote for checking free breakfast days
 }) => {
     const { state, updateItem, addItem, currentPricing, mealProgram } = useCart();
+    const { checkIn, checkOut } = state;
     const [showBookingDialog, setShowBookingDialog] = useState(false);
     const [selectedRoomForBooking, setSelectedRoomForBooking] = useState(null);
     const [showDayTourDialog, setShowDayTourDialog] = useState(false);
@@ -279,11 +281,10 @@ const CartList = ({
                                 {/* Date Header */}
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-sm font-medium text-blue-700">
-                                        {new Date(mealNight.date).toLocaleDateString('en-US', { 
-                                            weekday: 'short', 
-                                            month: 'short', 
-                                            day: 'numeric' 
-                                        })} - {mealNight.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                        {mealNight.type === 'buffet' 
+                                            ? `${formatBuffetDateRange(mealNight.startDate, mealNight.endDate)} - Buffet`
+                                            : `${formatMealDate(mealNight.date)} - Free Breakfast`
+                                        }
                                     </span>
                                     <span className="text-sm font-semibold text-blue-900">
                                         {formatCurrency(mealNight.cost)}
@@ -351,11 +352,7 @@ const CartList = ({
                                     <div key={index} className="border-b border-purple-200 pb-2 last:border-b-0 last:pb-0">
                                         <div className="flex justify-between items-center mb-1">
                                             <span className="text-sm font-medium text-purple-700">
-                                                {new Date(night.date).toLocaleDateString('en-US', { 
-                                                    weekday: 'short', 
-                                                    month: 'short', 
-                                                    day: 'numeric' 
-                                                })} - Extra Guest Fee
+                                                {formatBuffetDate(night.date)} - Extra Guest Fee
                                             </span>
                                             <span className="text-sm font-semibold text-purple-900">
                                                 {formatCurrency(extraGuestFeeForThisRoom)}

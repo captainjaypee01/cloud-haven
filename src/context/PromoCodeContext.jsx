@@ -49,6 +49,32 @@ export const PromoCodeProvider = ({ children }) => {
         }
     }, []);
 
+    // Listen for storage changes and custom events to clear promo when dates change
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            // If promo codes are removed from localStorage, clear the state
+            if (e.key === 'cart_promo_code' && e.newValue === null) {
+                dispatch({ type: 'CLEAR_PROMO' });
+            }
+            if (e.key === 'cart_promo_info' && e.newValue === null) {
+                dispatch({ type: 'CLEAR_PROMO' });
+            }
+        };
+
+        const handleClearPromoCodes = () => {
+            console.log('PromoCodeContext: Received clearPromoCodes event');
+            dispatch({ type: 'CLEAR_PROMO' });
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        window.addEventListener('clearPromoCodes', handleClearPromoCodes);
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('clearPromoCodes', handleClearPromoCodes);
+        };
+    }, []);
+
     // Save to localStorage whenever state changes
     useEffect(() => {
         if (state.promoCode) {
@@ -83,6 +109,10 @@ export const PromoCodeProvider = ({ children }) => {
         if (showToast) {
             toast.success("Promo code removed.");
         }
+    };
+
+    const clearPromoSilently = () => {
+        dispatch({ type: 'CLEAR_PROMO' });
     };
 
     // Helper function to calculate per-night discount
@@ -213,6 +243,7 @@ export const PromoCodeProvider = ({ children }) => {
         setPromoInfo,
         setPromoError,
         clearPromo,
+        clearPromoSilently,
         applyPromo
     };
 

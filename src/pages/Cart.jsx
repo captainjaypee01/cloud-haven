@@ -24,6 +24,7 @@ import { useLoader } from "@/context/LoaderContext";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
+import { formatBuffetDate, formatBuffetSummaryDates, formatBuffetExtraGuestDates, formatMealDate, formatBuffetDateRange } from "../utils/dateUtils";
 
 const Cart = () => {
     const api = useApi();
@@ -366,11 +367,7 @@ const Cart = () => {
                                                     }
                                                 </span>
                                                 <div className="text-xs text-gray-500 mt-1">
-                                                    {mealQuote.nights
-                                                        .filter(night => night.type === 'buffet')
-                                                        .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                        .join(', ')
-                                                    }
+                                                    {formatBuffetSummaryDates(mealQuote.nights.filter(night => night.type === 'buffet'))}
                                                 </div>
                                             </div>
                                             <span>
@@ -393,7 +390,7 @@ const Cart = () => {
                                                 <div className="text-xs text-gray-500 mt-1">
                                                     {mealQuote.nights
                                                         .filter(night => night.type === 'free_breakfast')
-                                                        .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
+                                                        .map(night => formatMealDate(night.start_date))
                                                         .join(', ')
                                                     }
                                                 </div>
@@ -409,13 +406,13 @@ const Cart = () => {
                                                 <span>
                                                     Extra Guest ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
                                                 </span>
-                                                <div className="text-xs text-gray-500 mt-1">
-                                                    {mealQuote.nights
-                                                        .filter(night => night.breakfast_total > 0)
-                                                        .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                        .join(', ')
-                                                    }
-                                                </div>
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.breakfast_total > 0)
+                                                            .map(night => formatMealDate(night.start_date))
+                                                            .join(', ')
+                                                        }
+                                                    </div>
                                             </div>
                                             <span className="text-orange-600">
                                                 {formatCurrency(mealQuote.nights
@@ -440,11 +437,7 @@ const Cart = () => {
                                                         Extra Guest ({totalExtraGuests}) (Buffet Days)
                                                     </span>
                                                     <div className="text-xs text-gray-500 mt-1">
-                                                        {mealQuote.nights
-                                                            .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                            .map(night => new Date(night.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))
-                                                            .join(', ')
-                                                        }
+                                                        {formatBuffetExtraGuestDates(mealQuote.nights.filter(night => night.type === 'buffet' && night.extra_guest_fee > 0))}
                                                     </div>
                                                 </div>
                                                 <span className="text-purple-600">
@@ -481,11 +474,7 @@ const Cart = () => {
                                                         {/* Date Header for Buffet */}
                                                         <div className="flex justify-between items-center mb-2">
                                                             <span className="text-sm font-medium text-gray-700">
-                                                                {new Date(night.date).toLocaleDateString('en-US', { 
-                                                                    weekday: 'short', 
-                                                                    month: 'short', 
-                                                                    day: 'numeric' 
-                                                                })} - Buffet
+                                                                {formatBuffetDateRange(night.start_date, night.end_date)} - Buffet
                                                             </span>
                                                             <span className="text-sm font-semibold text-gray-900">
                                                                 {formatCurrency(night.night_total)}
@@ -512,11 +501,7 @@ const Cart = () => {
                                                     /* Simplified Free Breakfast Display */
                                                     <div className="text-sm font-medium text-gray-700">
                                                         <div>
-                                                            {new Date(night.date).toLocaleDateString('en-US', { 
-                                                                weekday: 'short', 
-                                                                month: 'short', 
-                                                                day: 'numeric' 
-                                                            })}
+                                                            {formatMealDate(night.start_date)} - Free Breakfast
                                                         </div>
                                                         <div className="text-green-600 font-semibold">
                                                             {(night.adults || 0) + (night.children || 0)} Guest{((night.adults || 0) + (night.children || 0)) > 1 ? 's' : ''} Complimentary Breakfast (Plated)
@@ -546,11 +531,7 @@ const Cart = () => {
                                                                     {/* Date Header for Extra Guest Fee */}
                                                                     <div className="flex justify-between items-center mb-2">
                                                                         <span className="text-sm font-medium text-gray-700">
-                                                                            {new Date(night.date).toLocaleDateString('en-US', { 
-                                                                                weekday: 'short', 
-                                                                                month: 'short', 
-                                                                                day: 'numeric' 
-                                                                            })} - Extra Guest ({totalExtraGuests})
+                                                                            {formatBuffetDate(night.date)} - Extra Guest ({totalExtraGuests})
                                                                         </span>
                                                                         <span className="text-sm font-semibold text-gray-900">
                                                                             {formatCurrency(extraGuestFeeTotal)}
