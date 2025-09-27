@@ -96,6 +96,37 @@ export const promoColumns = ({ onEdit, onDelete, onStatusChange, onExclusiveChan
             ),
         },
         {
+            id: 'per_night_calculation',
+            header: 'Per-Night',
+            cell: ({ row }) => (
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                    row.original.per_night_calculation 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-gray-100 text-gray-600'
+                }`}>
+                    {row.original.per_night_calculation ? 'Yes' : 'No'}
+                </span>
+            ),
+        },
+        {
+            id: 'excluded_days',
+            header: 'Excluded Days',
+            cell: ({ row }) => {
+                const excludedDays = row.original.excluded_days || [];
+                if (excludedDays.length === 0) {
+                    return <span className="text-gray-500">None</span>;
+                }
+                
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const excludedDayNames = excludedDays.map(day => dayNames[day]).join(', ');
+                return (
+                    <span className="text-sm" title={excludedDayNames}>
+                        {excludedDayNames}
+                    </span>
+                );
+            },
+        },
+        {
             id: "active",
             header: "Status",
             cell: ({ row }) => (
