@@ -9,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { toast } from "sonner";
@@ -17,13 +19,16 @@ import BookingDetailsDialog from './BookingDetailsDialog';
 
 const RoomUnitCalendar = () => {
   const [calendarData, setCalendarData] = useState(null);
+  const [dayTourCalendarData, setDayTourCalendarData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [dayTourLoading, setDayTourLoading] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [selectedUnit, setSelectedUnit] = useState(null);
   const [loadingBooking, setLoadingBooking] = useState(null); // Store the specific cell being loaded
+  const [showDayTourUnits, setShowDayTourUnits] = useState(false);
   const api = useApi();
 
   // Generate year options (current year ± 2)
@@ -61,7 +66,7 @@ const RoomUnitCalendar = () => {
     return colors[status] || 'bg-gray-600 text-white hover:bg-gray-700';
   };
 
-  // Fetch calendar data
+  // Fetch overnight calendar data
   const fetchCalendarData = async () => {
     setLoading(true);
     try {
@@ -74,9 +79,28 @@ const RoomUnitCalendar = () => {
         setCalendarData(response.data.data);
       }
     } catch (error) {
-      toast.error("Failed to fetch calendar data");
+      toast.error("Failed to fetch overnight calendar data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch day tour calendar data
+  const fetchDayTourCalendarData = async () => {
+    setDayTourLoading(true);
+    try {
+      const response = await api.get(`${API_PREFIX}/admin/room-units/day-tour-calendar`, {
+        params: { year: selectedYear, month: selectedMonth },
+        requiresAuth: true,
+      });
+
+      if (response.data?.success) {
+        setDayTourCalendarData(response.data.data);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch day tour calendar data");
+    } finally {
+      setDayTourLoading(false);
     }
   };
 
@@ -100,10 +124,13 @@ const RoomUnitCalendar = () => {
   // Effect to fetch data when month/year changes
   useEffect(() => {
     fetchCalendarData();
-  }, [selectedYear, selectedMonth]);
+    if (showDayTourUnits) {
+      fetchDayTourCalendarData();
+    }
+  }, [selectedYear, selectedMonth, showDayTourUnits]);
 
   // Handle cell click to show booking details
-  const handleCellClick = async (dayStatus, unit, room) => {
+  const handleCellClick = async (dayStatus, unit, room, isDayTour = false) => {
     // Only fetch booking details for booked or pending dates
     if (!['booked', 'pending'].includes(dayStatus.status)) {
       return;
@@ -112,20 +139,22 @@ const RoomUnitCalendar = () => {
     const cellKey = `${unit.id}-${dayStatus.date}`;
     setLoadingBooking(cellKey);
     try {
-      const response = await api.get(
-        `${API_PREFIX}/admin/room-units/${unit.id}/booking-details`,
-        {
-          params: { date: dayStatus.date },
-          requiresAuth: true,
-        }
-      );
+      const endpoint = isDayTour 
+        ? `${API_PREFIX}/admin/room-units/${unit.id}/day-tour-booking-details`
+        : `${API_PREFIX}/admin/room-units/${unit.id}/booking-details`;
+        
+      const response = await api.get(endpoint, {
+        params: { date: dayStatus.date },
+        requiresAuth: true,
+      });
 
       if (response.data?.success) {
         setSelectedBooking(response.data.data);
         setSelectedUnit({
           room_name: room.room_name,
           unit_number: unit.unit_number,
-          date: dayStatus.date
+          date: dayStatus.date,
+          isDayTour: isDayTour
         });
         setShowBookingDialog(true);
       } else {
@@ -171,6 +200,84 @@ const RoomUnitCalendar = () => {
   }
 
   const currentMonthName = monthOptions.find(m => m.value === selectedMonth)?.label || '';
+
+  // Helper function to render calendar table
+  const renderCalendarTable = (data, title, isDayTour = false) => {
+    if (!data || data.rooms.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          No {isDayTour ? 'day tour' : 'overnight'} room units found
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="border border-gray-300 p-2 text-left font-medium min-w-[120px]">
+                Unit
+              </th>
+              {data.days.map(day => (
+                <th key={day} className="border border-gray-300 p-1 text-center font-medium w-8">
+                  {day}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.rooms.map(room => (
+              <React.Fragment key={room.room_id}>
+                {/* Room header */}
+                <tr className="bg-gray-100">
+                  <td
+                    colSpan={2 + data.days.length}
+                    className="border border-gray-300 p-2 font-semibold text-gray-800"
+                  >
+                    {room.room_name}
+                  </td>
+                </tr>
+                
+                {/* Room units */}
+                {room.units.map(unit => (
+                  <tr key={unit.id} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 p-2 font-medium">
+                      {unit.unit_number}
+                    </td>
+                    {unit.day_statuses.map(dayStatus => (
+                      <td 
+                        key={dayStatus.day} 
+                        className={`border border-gray-300 p-1 text-center transition-colors ${
+                          ['booked', 'pending'].includes(dayStatus.status) 
+                            ? 'cursor-pointer hover:opacity-80' 
+                            : 'cursor-default'
+                        } ${getStatusColor(dayStatus.status)}`}
+                        onClick={() => handleCellClick(dayStatus, unit, room, isDayTour)}
+                        title={
+                          ['booked', 'pending'].includes(dayStatus.status)
+                            ? `Click to view booking details - ${dayStatus.date}`
+                            : `${dayStatus.date}: ${dayStatus.status.charAt(0).toUpperCase() + dayStatus.status.slice(1)}`
+                        }
+                      >
+                        <div className="w-full h-6 flex items-center justify-center text-xs font-medium">
+                          {loadingBooking === `${unit.id}-${dayStatus.date}` ? (
+                            <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                          ) : (
+                            dayStatus.day
+                          )}
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
     <Card>
@@ -231,38 +338,62 @@ const RoomUnitCalendar = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={fetchCalendarData}
-                disabled={loading}
+                onClick={() => {
+                  fetchCalendarData();
+                  if (showDayTourUnits) {
+                    fetchDayTourCalendarData();
+                  }
+                }}
+                disabled={loading || dayTourLoading}
                 className="cursor-pointer"
                 title="Refresh calendar data"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${(loading || dayTourLoading) ? 'animate-spin' : ''}`} />
               </Button>
             </div>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 text-sm">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-green-600 rounded"></div>
-            <span>Available</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-green-600 rounded"></div>
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-blue-600 rounded"></div>
+              <span>Booked</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-yellow-600 rounded"></div>
+              <span>Pending</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-orange-600 rounded"></div>
+              <span>Maintenance</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-red-600 rounded"></div>
+              <span>Blocked</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-blue-600 rounded"></div>
-            <span>Booked</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-yellow-600 rounded"></div>
-            <span>Pending</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-orange-600 rounded"></div>
-            <span>Maintenance</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-red-600 rounded"></div>
-            <span>Blocked</span>
+          
+          {/* Day Tour Toggle */}
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="day-tour-toggle" className="text-sm font-medium">
+              Show Day Tour Units
+            </Label>
+            <Switch
+              id="day-tour-toggle"
+              checked={showDayTourUnits}
+              onCheckedChange={(checked) => {
+                setShowDayTourUnits(checked);
+                if (checked) {
+                  fetchDayTourCalendarData();
+                }
+              }}
+            />
           </div>
         </div>
       </CardHeader>
@@ -272,75 +403,35 @@ const RoomUnitCalendar = () => {
           {currentMonthName} {selectedYear}
         </div>
 
-        {/* Calendar Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="border border-gray-300 p-2 text-left font-medium min-w-[120px]">
-                  Unit
-                </th>
-                {calendarData.days.map(day => (
-                  <th key={day} className="border border-gray-300 p-1 text-center font-medium w-8">
-                    {day}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {calendarData.rooms.map(room => (
-                <React.Fragment key={room.room_id}>
-                  {/* Room header */}
-                  <tr className="bg-gray-100">
-                    <td
-                      colSpan={2 + calendarData.days.length}
-                      className="border border-gray-300 p-2 font-semibold text-gray-800"
-                    >
-                      {room.room_name}
-                    </td>
-                  </tr>
-                  
-                  {/* Room units */}
-                  {room.units.map(unit => (
-                    <tr key={unit.id} className="hover:bg-gray-50">
-                      <td className="border border-gray-300 p-2 font-medium">
-                        {unit.unit_number}
-                      </td>
-                      {unit.day_statuses.map(dayStatus => (
-                        <td 
-                          key={dayStatus.day} 
-                          className={`border border-gray-300 p-1 text-center transition-colors ${
-                            ['booked', 'pending'].includes(dayStatus.status) 
-                              ? 'cursor-pointer hover:opacity-80' 
-                              : 'cursor-default'
-                          } ${getStatusColor(dayStatus.status)}`}
-                          onClick={() => handleCellClick(dayStatus, unit, room)}
-                          title={
-                            ['booked', 'pending'].includes(dayStatus.status)
-                              ? `Click to view booking details - ${dayStatus.date}`
-                              : `${dayStatus.date}: ${dayStatus.status.charAt(0).toUpperCase() + dayStatus.status.slice(1)}`
-                          }
-                        >
-                          <div className="w-full h-6 flex items-center justify-center text-xs font-medium">
-                            {loadingBooking === `${unit.id}-${dayStatus.date}` ? (
-                              <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                              dayStatus.day
-                            )}
-                          </div>
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </table>
+        {/* Overnight Room Units Section */}
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold mb-4 text-blue-700">Overnight Room Units</h3>
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-center">
+                <Calendar className="h-6 w-6 mx-auto mb-2 text-muted-foreground animate-pulse" />
+                <p className="text-muted-foreground">Loading overnight calendar...</p>
+              </div>
+            </div>
+          ) : (
+            renderCalendarTable(calendarData, "Overnight Room Units", false)
+          )}
         </div>
 
-        {calendarData.rooms.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            No overnight room units found
+        {/* Day Tour Room Units Section */}
+        {showDayTourUnits && (
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4 text-green-700">Day Tour Room Units</h3>
+            {dayTourLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-center">
+                  <Calendar className="h-6 w-6 mx-auto mb-2 text-muted-foreground animate-pulse" />
+                  <p className="text-muted-foreground">Loading day tour calendar...</p>
+                </div>
+              </div>
+            ) : (
+              renderCalendarTable(dayTourCalendarData, "Day Tour Room Units", true)
+            )}
           </div>
         )}
       </CardContent>

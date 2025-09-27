@@ -36,7 +36,8 @@ import {
   RefreshCw,
   AlertTriangle,
   RotateCcw,
-  ExternalLink
+  ExternalLink,
+  Utensils
 } from 'lucide-react';
 
 const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBookingUpdate }) => {
@@ -127,7 +128,16 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
     total_paid,
     status,
     booking_type,
-    special_requests
+    special_requests,
+    // Day tour specific fields
+    include_lunch,
+    include_pm_snack,
+    include_dinner,
+    lunch_cost,
+    pm_snack_cost,
+    dinner_cost,
+    meal_cost,
+    base_price
   } = currentBookingData;
 
   // Calculate total_payable and remaining_balance consistently with BookingDetailsContent
@@ -348,25 +358,29 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
           <div className="space-y-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Stay Information
+              {booking_type === 'day_tour' ? 'Day Tour Information' : 'Stay Information'}
             </h3>
             <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">Check-in:</span>
+                  <span className="font-medium">Date:</span>
                   <span>{formatDate(check_in_date)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">Check-out:</span>
-                  <span>{formatDate(check_out_date)}</span>
-                </div>
+                {booking_type !== 'day_tour' && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium">Check-out:</span>
+                    <span>{formatDate(check_out_date)}</span>
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2 pt-2 border-t border-blue-200">
                 <Clock className="h-4 w-4 text-blue-600" />
                 <span className="font-medium">Duration:</span>
-                <span className="font-bold text-lg">{nights} {nights === 1 ? 'night' : 'nights'}</span>
+                <span className="font-bold text-lg">
+                  {booking_type === 'day_tour' ? 'Day Tour' : `${nights} ${nights === 1 ? 'night' : 'nights'}`}
+                </span>
               </div>
             </div>
           </div>
@@ -379,10 +393,17 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
             </h3>
             <div className="space-y-3 p-4 bg-green-50 rounded-lg">
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Room Price:</span>
-                  <span className="font-medium text-sm sm:text-base">{formatCurrency(room_price)}</span>
-                </div>
+                {booking_type === 'day_tour' ? (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Base Price:</span>
+                    <span className="font-medium text-sm sm:text-base">{formatCurrency(base_price || room_price)}</span>
+                  </div>
+                ) : (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Room Price:</span>
+                    <span className="font-medium text-sm sm:text-base">{formatCurrency(room_price)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Meal Price:</span>
                   <span className="font-medium text-sm sm:text-base">{formatCurrency(meal_price || 0)}</span>
@@ -422,6 +443,42 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
               </div>
             </div>
           </div>
+
+          {/* Day Tour Meal Options */}
+          {booking_type === 'day_tour' && (include_lunch || include_pm_snack || include_dinner) && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Utensils className="h-5 w-5" />
+                Meal Options
+              </h3>
+              <div className="space-y-3 p-4 bg-orange-50 rounded-lg">
+                <div className="space-y-2">
+                  {include_lunch && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Lunch:</span>
+                      <span className="font-medium text-sm sm:text-base">{formatCurrency(lunch_cost || 0)}</span>
+                    </div>
+                  )}
+                  {include_pm_snack && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">PM Snack:</span>
+                      <span className="font-medium text-sm sm:text-base">{formatCurrency(pm_snack_cost || 0)}</span>
+                    </div>
+                  )}
+                  {include_dinner && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Dinner:</span>
+                      <span className="font-medium text-sm sm:text-base">{formatCurrency(dinner_cost || 0)}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t border-orange-200">
+                  <span className="font-semibold text-sm sm:text-base">Total Meal Cost:</span>
+                  <span className="font-bold text-base sm:text-lg">{formatCurrency(meal_cost || 0)}</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Payment Status */}
           <div className="space-y-4">

@@ -114,3 +114,23 @@ export const formatBuffetDateRange = (startDate, endDate) => {
         return '';
     }
 };
+
+/**
+ * Format date and time in Singapore timezone
+ * @param {string|Date} date - The date to format
+ * @returns {string} Formatted date and time string in Singapore timezone
+ */
+export const formatSingaporeDateTime = (date) => {
+    try {
+        if (!date) return '-';
+        
+        // Create date object and format with date and time
+        const dateObj = new Date(date);
+        
+        // Format with date and time (will use local timezone)
+        return format(dateObj, 'MMM d, yyyy h:mm a');
+    } catch (error) {
+        console.error('Error formatting Singapore date time:', error);
+        return '-';
+    }
+};
