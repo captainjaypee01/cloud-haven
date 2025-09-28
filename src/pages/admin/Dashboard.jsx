@@ -9,12 +9,16 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { Users, CalendarCheck, DollarSign, Star, Calendar, Eye } from 'lucide-react';  // example icons
 import { useNavigate } from 'react-router-dom';
 import RoomUnitCalendar from '@/components/admin/calendar/RoomUnitCalendar';
+import { useUser } from '@clerk/clerk-react';
 // Recharts components
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 
 const Dashboard = () => {
     const api = useApi();
     const navigate = useNavigate();
+    const { user } = useUser();
+    const userRole = user?.publicMetadata?.role || 'user';
+    
     const [dashboardData, setDashboardData] = useState({
         metrics: { totalBookings: 0, totalRevenue: 0, totalGuests: 0, averageRating: null },
         top_rooms: [],
@@ -86,6 +90,11 @@ const Dashboard = () => {
         navigate(`/admin/bookings/${bookingId}`);
     };
 
+    // Determine what content to show based on user role
+    const isStaff = userRole === 'staff';
+    const isAdmin = userRole === 'admin';
+    const isSuperAdmin = userRole === 'superadmin';
+
     return (
         <div className="p-4">
             {/* Page title */}
@@ -93,46 +102,52 @@ const Dashboard = () => {
                 align="left"
                 font="outfit"
                 title="Dashboard"
-                subTitle="Monitor your room listings, track bookings, and analyze revenue — all in one place. Stay updated with real-time insights to ensure smooth operations."
+                subTitle={
+                    isStaff 
+                        ? "Monitor upcoming bookings and room availability for today and tomorrow."
+                        : "Monitor your room listings, track bookings, and analyze revenue — all in one place. Stay updated with real-time insights to ensure smooth operations."
+                }
             />
 
-            {/* Overview metric cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 my-6">
-                {/* Total Bookings */}
-                <Card className="flex items-center p-4">
-                    <CalendarCheck className="hidden sm:block text-primary w-8 h-8" />
-                    <div className="ml-3">
-                        <div className="text-sm text-muted-foreground">Total Bookings</div>
-                        <div className="text-2xl font-bold">{metrics.totalBookings}</div>
-                    </div>
-                </Card>
-                {/* Total Revenue */}
-                <Card className="flex items-center p-4">
-                    <DollarSign className="hidden sm:block text-primary w-8 h-8" />
-                    <div className="ml-3">
-                        <div className="text-sm text-muted-foreground">Total Revenue</div>
-                        <div className="text-2xl font-bold">{formatCurrency(metrics.totalRevenue)}</div>
-                    </div>
-                </Card>
-                {/* Total Guests */}
-                <Card className="flex items-center p-4">
-                    <Users className="hidden sm:block text-primary w-8 h-8" />
-                    <div className="ml-3">
-                        <div className="text-sm text-muted-foreground">Total Guests</div>
-                        <div className="text-2xl font-bold">{metrics.totalGuests}</div>
-                    </div>
-                </Card>
-                {/* Overall Rating */}
-                <Card className="flex items-center p-4">
-                    <Star className="hidden sm:block text-primary w-8 h-8" />
-                    <div className="ml-3">
-                        <div className="text-sm text-muted-foreground">Overall Rating</div>
-                        <div className="text-2xl font-bold">
-                            {metrics.averageRating !== null ? metrics.averageRating.toFixed(1) : 'N/A'}
+            {/* Overview metric cards - Only show for Admin and Superadmin */}
+            {!isStaff && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 my-6">
+                    {/* Total Bookings */}
+                    <Card className="flex items-center p-4">
+                        <CalendarCheck className="hidden sm:block text-primary w-8 h-8" />
+                        <div className="ml-3">
+                            <div className="text-sm text-muted-foreground">Total Bookings</div>
+                            <div className="text-2xl font-bold">{metrics.totalBookings}</div>
                         </div>
-                    </div>
-                </Card>
-            </div>
+                    </Card>
+                    {/* Total Revenue */}
+                    <Card className="flex items-center p-4">
+                        <DollarSign className="hidden sm:block text-primary w-8 h-8" />
+                        <div className="ml-3">
+                            <div className="text-sm text-muted-foreground">Total Revenue</div>
+                            <div className="text-2xl font-bold">{formatCurrency(metrics.totalRevenue)}</div>
+                        </div>
+                    </Card>
+                    {/* Total Guests */}
+                    <Card className="flex items-center p-4">
+                        <Users className="hidden sm:block text-primary w-8 h-8" />
+                        <div className="ml-3">
+                            <div className="text-sm text-muted-foreground">Total Guests</div>
+                            <div className="text-2xl font-bold">{metrics.totalGuests}</div>
+                        </div>
+                    </Card>
+                    {/* Overall Rating */}
+                    <Card className="flex items-center p-4">
+                        <Star className="hidden sm:block text-primary w-8 h-8" />
+                        <div className="ml-3">
+                            <div className="text-sm text-muted-foreground">Overall Rating</div>
+                            <div className="text-2xl font-bold">
+                                {metrics.averageRating !== null ? metrics.averageRating.toFixed(1) : 'N/A'}
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            )}
             {/* Upcoming Bookings Table */}
             <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xl font-semibold text-blue-950/70">Upcoming Bookings (Today &amp; Tomorrow)</h3>
@@ -216,75 +231,77 @@ const Dashboard = () => {
                 </table>
             </div>
 
-            {/* Charts section */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-8">
-
-                {/* Room Unit Calendar */}
-                <div className="mt-8 xl:col-span-2">
-                    <RoomUnitCalendar />
-                </div>
-                {/* Monthly Bookings & Guests (Line Chart) */}
-                <Card className="p-4">
-                    <h3 className="text-lg font-semibold mb-2">Monthly Bookings vs Guests</h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: -10 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" tickLine={false} />
-                            <YAxis tickLine={false} />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="bookings" name="Bookings" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} />
-                            <Line type="monotone" dataKey="guests" name="Guests" stroke={COLORS.secondary} strokeWidth={2} dot={{ r: 3 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </Card>
-
-                {/* Monthly Revenue (Line Chart) */}
-                <Card className="p-4">
-                    <h3 className="text-lg font-semibold mb-2">Monthly Revenue</h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: 60 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" tickLine={false} />
-                            <YAxis
-                                tickLine={false}
-                                tickFormatter={(value) => {
-                                    if (value >= 1000000) {
-                                        return `₱${(value / 1000000).toFixed(1)}M`;
-                                    } else if (value >= 1000) {
-                                        return `₱${(value / 1000).toFixed(0)}K`;
-                                    }
-                                    return `₱${value}`;
-                                }}
-                                width={60}
-                            />
-                            <Tooltip
-                                formatter={(value) => [formatCurrency(value), 'Revenue']}
-                                labelFormatter={(label) => `Month: ${label}`}
-                            />
-                            <Line type="monotone" dataKey="revenue" name="Revenue" stroke={COLORS.accent} strokeWidth={2} dot={{ r: 2 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </Card>
-
-                {/* Top 5 Rooms (Bar Chart) – span two columns on XL */}
-                <Card className="p-4 xl:col-span-2">
-                    <h3 className="text-lg font-semibold mb-2">Top 5 Rooms by Bookings</h3>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart layout="vertical" data={topRoomsData} margin={{ top: 5, right: 20, bottom: 5, left: 40 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" tickLine={false} />
-                            <YAxis type="category" dataKey="name" tickLine={false} width={150} />
-                            <Tooltip cursor={{ fill: 'rgba(0,0,0,0.1)' }} />
-                            <Bar dataKey="count" fill={COLORS.info} name="Bookings" barSize={20} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </Card>
+            {/* Room Unit Calendar - Show for all roles */}
+            <div className="mt-8">
+                <RoomUnitCalendar />
             </div>
 
+            {/* Charts section - Only show for Admin and Superadmin */}
+            {!isStaff && (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-8">
+                    {/* Monthly Bookings & Guests (Line Chart) */}
+                    <Card className="p-4">
+                        <h3 className="text-lg font-semibold mb-2">Monthly Bookings vs Guests</h3>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <LineChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: -10 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="month" tickLine={false} />
+                                <YAxis tickLine={false} />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="bookings" name="Bookings" stroke={COLORS.primary} strokeWidth={2} dot={{ r: 3 }} />
+                                <Line type="monotone" dataKey="guests" name="Guests" stroke={COLORS.secondary} strokeWidth={2} dot={{ r: 3 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </Card>
 
-            {/* Additional Analytics Charts */}
-            {(bookingStatusData.length > 0 || paymentStatusData.length > 0 || occupancyData.length > 0) && (
+                    {/* Monthly Revenue (Line Chart) */}
+                    <Card className="p-4">
+                        <h3 className="text-lg font-semibold mb-2">Monthly Revenue</h3>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <LineChart data={monthlyData} margin={{ top: 10, right: 20, bottom: 0, left: 60 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="month" tickLine={false} />
+                                <YAxis
+                                    tickLine={false}
+                                    tickFormatter={(value) => {
+                                        if (value >= 1000000) {
+                                            return `₱${(value / 1000000).toFixed(1)}M`;
+                                        } else if (value >= 1000) {
+                                            return `₱${(value / 1000).toFixed(0)}K`;
+                                        }
+                                        return `₱${value}`;
+                                    }}
+                                    width={60}
+                                />
+                                <Tooltip
+                                    formatter={(value) => [formatCurrency(value), 'Revenue']}
+                                    labelFormatter={(label) => `Month: ${label}`}
+                                />
+                                <Line type="monotone" dataKey="revenue" name="Revenue" stroke={COLORS.accent} strokeWidth={2} dot={{ r: 2 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </Card>
+
+                    {/* Top 5 Rooms (Bar Chart) – span two columns on XL */}
+                    <Card className="p-4 xl:col-span-2">
+                        <h3 className="text-lg font-semibold mb-2">Top 5 Rooms by Bookings</h3>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <BarChart layout="vertical" data={topRoomsData} margin={{ top: 5, right: 20, bottom: 5, left: 40 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" tickLine={false} />
+                                <YAxis type="category" dataKey="name" tickLine={false} width={150} />
+                                <Tooltip cursor={{ fill: 'rgba(0,0,0,0.1)' }} />
+                                <Bar dataKey="count" fill={COLORS.info} name="Bookings" barSize={20} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </Card>
+                </div>
+            )}
+
+
+            {/* Additional Analytics Charts - Only show for Admin and Superadmin */}
+            {!isStaff && (bookingStatusData.length > 0 || paymentStatusData.length > 0 || occupancyData.length > 0) && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
                     {/* Booking Status Distribution (Pie Chart) */}
                     {bookingStatusData.length > 0 && (
@@ -370,8 +387,8 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {/* Revenue vs Expenses Comparison (if data available) */}
-            {monthlyData.some(item => item.expenses !== undefined) && (
+            {/* Revenue vs Expenses Comparison (if data available) - Only show for Admin and Superadmin */}
+            {!isStaff && monthlyData.some(item => item.expenses !== undefined) && (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-8">
                     <Card className="p-4">
                         <h3 className="text-lg font-semibold mb-2">Revenue vs Expenses</h3>

@@ -45,6 +45,9 @@ const ListDayTourPricing = React.lazy(() => import('./pages/admin/day-tour-prici
 const ListPayment = React.lazy(() => import('./pages/admin/payments/ListPayment'));
 const ListReviews = React.lazy(() => import('./pages/admin/reviews/ListReviews'));
 
+// Role-based route protection
+const RoleBasedRoute = React.lazy(() => import('./components/admin/RoleBasedRoute'));
+
 // Meal Programs
 const MealProgramList = React.lazy(() => import('./pages/admin/meal-programs/index'));
 const MealProgramNew = React.lazy(() => import('./pages/admin/meal-programs/new'));
@@ -143,28 +146,113 @@ const App = () => {
                   path='/admin'
                   element={<Layout />}
                 >
-                  <Route index element={<Dashboard />} />
-                  <Route path="rooms" element={<ListRoom />} />
-                  <Route path="room-units/:roomId" element={<ListRoomUnits />} />
-                  <Route path="room-units/calendar" element={<RoomUnitCalendarPage />} />
-                  <Route path="bookings" element={<ListBooking />} />
-                  <Route path="bookings/calendar" element={<BookingsCalendarPage />} />
-                  <Route path="bookings/:id" element={<BookingDetails />} />
-                  <Route path="payments" element={<ListPayment />} />
-                  <Route path="amenities" element={<ListAmenity />} />
-                  <Route path="users" element={<ListUsers />} />
-                  <Route path="reports" element={<ListRoom />} />
-                  <Route path="images" element={<ManageImages />} />
-                  <Route path="promos" element={<ListPromos />} />
-                  <Route path="reviews" element={<ListReviews />} />
-                  <Route path="day-tour-pricing" element={<ListDayTourPricing />} />
+                  {/* Staff, Admin, Superadmin routes */}
+                  <Route index element={
+                    <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
+                      <Dashboard />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="bookings" element={
+                    <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
+                      <ListBooking />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="bookings/calendar" element={
+                    <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
+                      <BookingsCalendarPage />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="bookings/:id" element={
+                    <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
+                      <BookingDetails />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="room-units/calendar" element={
+                    <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
+                      <RoomUnitCalendarPage />
+                    </RoleBasedRoute>
+                  } />
 
-                  {/* Meal Programs */}
-                  <Route path="meal-programs" element={<MealProgramList />} />
-                  <Route path="meal-programs/new" element={<MealProgramNew />} />
-                  <Route path="meal-programs/:id/edit" element={<MealProgramEdit />} />
-                  <Route path="meal-programs/:id/preview" element={<MealProgramPreview />} />
-                  <Route path="meal-programs/:id" element={<MealProgramShow />} />
+                  {/* Admin, Superadmin routes */}
+                  <Route path="rooms" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <ListRoom />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="room-units/:roomId" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <ListRoomUnits />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="payments" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <ListPayment />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="amenities" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <ListAmenity />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="promos" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <ListPromos />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="reviews" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <ListReviews />
+                    </RoleBasedRoute>
+                  } />
+
+                  {/* Meal Programs - Admin, Superadmin */}
+                  <Route path="meal-programs" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <MealProgramList />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="meal-programs/new" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <MealProgramNew />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="meal-programs/:id/edit" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <MealProgramEdit />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="meal-programs/:id/preview" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <MealProgramPreview />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="meal-programs/:id" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <MealProgramShow />
+                    </RoleBasedRoute>
+                  } />
+
+                  {/* Superadmin only routes */}
+                  <Route path="users" element={
+                    <RoleBasedRoute allowedRoles={['superadmin']}>
+                      <ListUsers />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="reports" element={
+                    <RoleBasedRoute allowedRoles={['superadmin']}>
+                      <ListRoom />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="images" element={
+                    <RoleBasedRoute allowedRoles={['superadmin']}>
+                      <ManageImages />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="day-tour-pricing" element={
+                    <RoleBasedRoute allowedRoles={['superadmin']}>
+                      <ListDayTourPricing />
+                    </RoleBasedRoute>
+                  } />
                 </Route>
                 {/* 404 Route - Must be last */}
                 <Route path="*" element={<NotFound />} />
