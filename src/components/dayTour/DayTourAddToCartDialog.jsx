@@ -132,7 +132,7 @@ export function DayTourAddToCartDialog({
                                             Buffet Lunch
                                         </label>
                                         <p className="text-sm text-gray-600 mt-1">
-                                            Delicious buffet lunch with local and international cuisine
+                                            A delicious buffet lunch offering a wide variety of options.
                                         </p>
                                         <div className="flex gap-2 mt-2">
                                             <Badge variant="outline">
