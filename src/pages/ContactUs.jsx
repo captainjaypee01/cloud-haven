@@ -17,28 +17,67 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useApi } from "@/hooks/useApi";
+import { useState } from "react";
 
 const contactSchema = z.object({
-    name: z.string().min(1, "Name is required"),
+    name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Please enter a valid email address"),
-    message: z.string().min(1, "Message is required"),
+    message: z.string().min(10, "Message must be at least 10 characters"),
+    honeypot: z.string().max(0, "Invalid form submission").optional(),
+    form_load_time: z.number().min(0).optional(),
 });
 
 const ContactUsPage = () => {
     const images = HERO_CAROUSEL_IMAGES;
+    const api = useApi();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formLoadTime] = useState(Date.now());
+    
     const form = useForm({
         resolver: zodResolver(contactSchema),
         defaultValues: {
             name: "",
             email: "",
-            message: ""
+            message: "",
+            honeypot: "",
+            form_load_time: 0
         }
     });
 
-    const onSubmit = (values) => {
-        // Simulate successful submission (no backend yet)
-        toast.success("Thank you! Your message has been sent.");
-        form.reset();
+    const onSubmit = async (values) => {
+        setIsSubmitting(true);
+        
+        try {
+            // Calculate time since form load
+            const timeSinceLoad = Math.floor((Date.now() - formLoadTime) / 1000);
+            
+            const payload = {
+                name: values.name.trim(),
+                email: values.email.trim(),
+                message: values.message.trim(),
+                honeypot: values.honeypot || "",
+                form_load_time: timeSinceLoad
+            };
+
+            const response = await api.post('/api/v1/contact', payload);
+            
+            toast.success("Thank you! Your message has been sent successfully.");
+            form.reset();
+            
+        } catch (error) {
+            console.error('Contact form submission error:', error);
+            
+            if (error.response?.status === 429) {
+                toast.error("Too many submissions. Please try again later.");
+            } else if (error.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Failed to send message. Please try again.");
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -131,7 +170,25 @@ const ContactUsPage = () => {
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full mt-3">Send Message</Button>
+                            {/* Honeypot field - hidden from users */}
+                            <FormField
+                                control={form.control}
+                                name="honeypot"
+                                render={({ field }) => (
+                                    <FormItem style={{ display: 'none' }}>
+                                        <FormControl>
+                                            <Input type="text" {...field} />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                            <Button 
+                                type="submit" 
+                                className="w-full mt-3" 
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? "Sending..." : "Send Message"}
+                            </Button>
                         </form>
                     </Form>
                 </div>
