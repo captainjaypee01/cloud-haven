@@ -3,12 +3,14 @@ import Hero from '../components/Hero'
 import FeaturedRooms from '../components/FeaturedRooms'
 import ExclusiveOffers from '@/components/exclusive-offer/ExclusiveOffers'
 import ExclusiveOffersDialog from '@/components/exclusive-offer/ExclusiveOffersDialog'
+import ScamAwarenessDialog from '@/components/ScamAwarenessDialog'
 import NewsLetter from '../components/NewsLetter'
 import { TestimonialsSection } from '@/components/testimonials'
 import SEO from '@/components/SEO'
 
 const Home = () => {
     const [showOffersDialog, setShowOffersDialog] = useState(true);
+    const [showScamAwarenessDialog, setShowScamAwarenessDialog] = useState(true);
 
 
     return (
@@ -61,6 +63,12 @@ const Home = () => {
             <ExclusiveOffersDialog 
                 open={showOffersDialog} 
                 onOpenChange={setShowOffersDialog} 
+            />
+            
+            {/* Scam Awareness Dialog */}
+            <ScamAwarenessDialog 
+                open={showScamAwarenessDialog} 
+                onOpenChange={setShowScamAwarenessDialog} 
             />
         </>
     )
