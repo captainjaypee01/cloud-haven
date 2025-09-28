@@ -31,24 +31,33 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
         // More images can be added here as they become available
     ];
 
+    // Custom close handler that only allows closing via the "I Understand" button
+    const handleClose = () => {
+        onOpenChange(false);
+    };
+
     // Don't show dialog if no images available
     if (!open || scamImages.length === 0) {
         return null;
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[90vw] max-w-4xl h-[80vh] max-h-[80vh] sm:w-[95vw] sm:max-w-5xl sm:h-[85vh] sm:max-h-[85vh] mx-auto p-0 flex flex-col">
+        <Dialog open={open} onOpenChange={() => {}}>
+            <DialogContent 
+                className="w-[95vw] max-w-5xl h-[90vh] max-h-[90vh] sm:w-[98vw] sm:max-w-6xl sm:h-[95vh] sm:max-h-[95vh] mx-auto p-0 flex flex-col"
+                onPointerDownOutside={(e) => e.preventDefault()}
+                onEscapeKeyDown={(e) => e.preventDefault()}
+            >
                 {/* Header - Fixed at top */}
-                <DialogHeader className="text-center pb-4 sm:pb-6 px-6 pt-6 bg-white border-b border-gray-100 flex-shrink-0">
+                <DialogHeader className="text-center pb-4 sm:pb-6 px-6 pt-6 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200 flex-shrink-0">
                     <div className="flex items-center justify-center gap-3 mb-2">
-                        <AlertTriangle className="h-8 w-8 text-red-500" />
+                        <AlertTriangle className="h-8 w-8 text-red-500 animate-pulse" />
                         <DialogTitle className="text-2xl sm:text-3xl font-bold text-red-600">
                             Important Security Notice
                         </DialogTitle>
                     </div>
                     <DialogDescription className="text-gray-700 text-base sm:text-lg">
-                        Beware of fake Facebook pages impersonating our official account
+                        Please read this important information about fake Facebook pages
                     </DialogDescription>
                 </DialogHeader>
 
@@ -74,6 +83,16 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
 
                         {/* Image Carousel */}
                         <div className="relative">
+                            <div className="mb-3 text-center">
+                                <p className="text-sm text-gray-600">
+                                    <span className="inline-flex items-center gap-1">
+                                        <span>Click on the image to view in full size</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                        </svg>
+                                    </span>
+                                </p>
+                            </div>
                             <Carousel 
                                 opts={{ loop: true, align: "center" }} 
                                 className="w-full"
@@ -89,13 +108,14 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                             >
                                 <CarouselContent>
                                     {scamImages.map((image) => (
-                                        <CarouselItem key={image.id} className="h-64 sm:h-80 md:h-96">
+                                        <CarouselItem key={image.id} className="h-80 sm:h-96 md:h-[500px] lg:h-[600px]">
                                             <div className="relative w-full h-full rounded-lg overflow-hidden bg-gray-100">
                                                 <img
                                                     src={image.url}
                                                     alt={image.alt}
-                                                    className="w-full h-full object-contain"
+                                                    className="w-full h-full object-contain cursor-zoom-in"
                                                     loading="lazy"
+                                                    onClick={() => window.open(image.url, '_blank')}
                                                 />
                                             </div>
                                         </CarouselItem>
@@ -199,11 +219,13 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
 
                 {/* Footer - Fixed at bottom */}
                 <DialogFooter className="pt-4 sm:pt-6 px-6 pb-6 bg-white border-t border-gray-100 flex-shrink-0 flex flex-row justify-end gap-2">
-                    <DialogClose asChild>
-                        <Button variant="outline" className="w-auto px-6">
-                            I Understand
-                        </Button>
-                    </DialogClose>
+                    <Button 
+                        variant="outline" 
+                        className="w-auto px-6"
+                        onClick={handleClose}
+                    >
+                        I Understand
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
