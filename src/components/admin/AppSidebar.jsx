@@ -32,25 +32,30 @@ import NavManagement from "./NavManagement";
 
 import { NETANIA_LOGO } from "@/constants/AppConstant";
 import { Link } from "react-router-dom";
-const data = {
-    navMain: [
-        { title: "Dashboard", url: "/admin", icon: LayoutDashboardIcon },
-        { title: "Rooms", url: "/admin/rooms", icon: BedDouble },
-        { title: "Bookings", url: "/admin/bookings", icon: Book },
-        { title: "Calendar", url: "/admin/bookings/calendar", icon: LayoutDashboardIcon },
-        { title: "Payments", url: "/admin/payments", icon: CreditCard },
-        { title: "Amenities", url: "/admin/amenities", icon: Salad },
-        { title: "Meal Programs", url: "/admin/meal-programs", icon: Calendar },
-        { title: "Promos", url: "/admin/promos", icon: TicketIcon },
-        { title: "Reviews", url: "/admin/reviews", icon: Star },
-    ],
-    navManagement: [
-        { title: "Users", url: "/admin/users", icon: UsersIcon },
-        { title: "Reports", url: "/admin/reports", icon: ChartBarIcon },
-        { title: "Images", url: "/admin/images", icon: Image },
-        { title: "Day Tour Pricing", url: "/admin/day-tour-pricing", icon: DollarSign },
-    ],
-    navSecondary: [
+import { useUser } from "@clerk/clerk-react";
+
+// Define navigation items based on roles
+const getNavigationData = (userRole) => {
+    const allNavMain = [
+        { title: "Dashboard", url: "/admin", icon: LayoutDashboardIcon, roles: ['staff', 'admin', 'superadmin'] },
+        { title: "Rooms", url: "/admin/rooms", icon: BedDouble, roles: ['admin', 'superadmin'] },
+        { title: "Bookings", url: "/admin/bookings", icon: Book, roles: ['staff', 'admin', 'superadmin'] },
+        { title: "Calendar", url: "/admin/bookings/calendar", icon: Calendar, roles: ['staff', 'admin', 'superadmin'] },
+        { title: "Payments", url: "/admin/payments", icon: CreditCard, roles: ['admin', 'superadmin'] },
+        { title: "Amenities", url: "/admin/amenities", icon: Salad, roles: ['admin', 'superadmin'] },
+        { title: "Meal Programs", url: "/admin/meal-programs", icon: Calendar, roles: ['admin', 'superadmin'] },
+        { title: "Promos", url: "/admin/promos", icon: TicketIcon, roles: ['admin', 'superadmin'] },
+        { title: "Reviews", url: "/admin/reviews", icon: Star, roles: ['admin', 'superadmin'] },
+    ];
+
+    const allNavManagement = [
+        { title: "Users", url: "/admin/users", icon: UsersIcon, roles: ['superadmin'] },
+        { title: "Reports", url: "/admin/reports", icon: ChartBarIcon, roles: ['superadmin'] },
+        { title: "Images", url: "/admin/images", icon: Image, roles: ['superadmin'] },
+        { title: "Day Tour Pricing", url: "/admin/day-tour-pricing", icon: DollarSign, roles: ['superadmin'] },
+    ];
+
+    const navSecondary = [
         {
             title: "Settings",
             url: "#",
@@ -66,10 +71,24 @@ const data = {
             url: "#",
             icon: SearchIcon,
         },
-    ],
-}
+    ];
+
+    // Filter navigation items based on user role
+    const navMain = allNavMain.filter(item => item.roles.includes(userRole));
+    const navManagement = allNavManagement.filter(item => item.roles.includes(userRole));
+
+    return {
+        navMain,
+        navManagement,
+        navSecondary
+    };
+};
 
 export default function AppSidebar({ ...props }) {
+    const { user } = useUser();
+    const userRole = user?.publicMetadata?.role || 'user';
+    const data = getNavigationData(userRole);
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -90,7 +109,7 @@ export default function AppSidebar({ ...props }) {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />
-                <NavManagement items={data.navManagement} />
+                {data.navManagement.length > 0 && <NavManagement items={data.navManagement} />}
                 <NavSecondary items={data.navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
