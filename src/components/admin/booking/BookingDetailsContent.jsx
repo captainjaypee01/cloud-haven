@@ -213,11 +213,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
 
             {/* Header & Actions */}
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                <div className="space-y-1">
-                    <h2 className="text-2xl font-bold">
-                        {booking.booking_type === 'day_tour' && <Badge variant="secondary" className="mr-2">Day Tour</Badge>}
-                        Booking #{booking.reference_number}
-                    </h2>
+                <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
+                        {booking.booking_type === 'day_tour' && (
+                            <Badge variant="secondary" className="w-fit">Day Tour</Badge>
+                        )}
+                        <h2 className="text-2xl font-bold">
+                            Booking #{booking.reference_number}
+                        </h2>
+                    </div>
                     <StatusBadge status={booking.status} />
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -276,6 +280,20 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <div><span className="font-semibold">Total Guests:</span> {booking.total_guests}</div>
                         <div><span className="font-semibold">Special Requests:</span> {booking.special_requests || '-'}</div>
                         <div><span className="font-semibold">User ID:</span> {booking.user_id || '-'}</div>
+                        <div><span className="font-semibold">Promo Used:</span> {booking.promo ? (
+                            <span className="ml-1">
+                                <Badge variant="secondary" className="mr-1">
+                                    {booking.promo.code}
+                                </Badge>
+                                <span className="text-sm text-gray-600">
+                                    {booking.promo.discount_type === 'percentage' 
+                                        ? `${booking.promo.discount_value}% off` 
+                                        : `${formatCurrency(booking.promo.discount_value)} off`
+                                    }
+                                </span>
+                            </span>
+                        ) : '-'}</div>
+                        <div><span className="font-semibold">Booked At:</span> {formatDateTime(booking.local_created_at)}</div>
                     </div>
                     <div>
                         {booking.booking_type === 'day_tour' ? (
@@ -332,8 +350,14 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             </div>
                             <div className="flex justify-between py-2">
                                 <span className="font-semibold">Discount:</span>
-                                <span>-{formatCurrency(booking.discount_amount)}</span>
+                                <span className="text-red-600 font-medium">-{formatCurrency(booking.discount_amount)}</span>
                             </div>
+                            {booking.promo && (
+                                <div className="flex justify-between py-2 text-sm text-gray-600">
+                                    <span>Promo: {booking.promo.code} ({booking.promo.discount_type === 'percentage' ? `${booking.promo.discount_value}%` : formatCurrency(booking.promo.discount_value)})</span>
+                                    <span className="text-xs">{booking.promo.title}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between py-2">
                                 <span className="font-semibold">Other Charges:</span>
                                 <span>{formatCurrency(otherCharges)}</span>
