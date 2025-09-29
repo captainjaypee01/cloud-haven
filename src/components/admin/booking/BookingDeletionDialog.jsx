@@ -128,129 +128,135 @@ const BookingDeletionDialog = ({ open, onOpenChange, booking, onSuccess }) => {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Trash2 className="h-5 w-5 text-destructive" />
-                        Delete Booking
-                    </DialogTitle>
-                </DialogHeader>
+            <DialogContent className="max-w-xl max-h-[80vh] sm:max-h-[90vh] overflow-y-auto p-0">
+                <div className="relative p-6">
+                    <DialogHeader className="pb-4">
+                        <DialogTitle className="flex items-center gap-2">
+                            <Trash2 className="h-5 w-5 text-destructive" />
+                            Delete Booking
+                        </DialogTitle>
+                    </DialogHeader>
 
-                {/* Warning Alert */}
-                <Alert className="border-destructive/50 bg-destructive/10">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                        <strong>This action is permanent and cannot be undone!</strong> The booking will be soft deleted from the system, status will be set to cancelled, and the guest will be notified via email.
-                        <br />
-                        <em className="text-xs text-destructive/80 mt-1 block">Note: This feature is only available to Superadmin users.</em>
-                    </AlertDescription>
-                </Alert>
+                    <div className="space-y-4">
+                        {/* Warning Alert */}
+                        <Alert className="border-destructive/50 bg-destructive/10">
+                            <AlertTriangle className="h-4 w-4" />
+                            <AlertDescription>
+                                <strong>This action is permanent and cannot be undone!</strong> The booking will be soft deleted from the system, status will be set to cancelled, and the guest will be notified via email.
+                                <br />
+                                <em className="text-xs text-destructive/80 mt-1 block">Note: This feature is only available to Superadmin users.</em>
+                            </AlertDescription>
+                        </Alert>
 
-                {/* Booking Info */}
-                {booking && (
-                    <div className="rounded-lg border p-3 bg-muted/50">
-                        <h4 className="font-medium mb-2">Booking Details</h4>
-                        <div className="space-y-1 text-sm">
-                            <p><span className="font-medium">Reference:</span> {booking.reference_number}</p>
-                            <p><span className="font-medium">Guest:</span> {booking.guest_name}</p>
-                            <p><span className="font-medium">Status:</span> 
-                                <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-                                    booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    booking.status === 'failed' ? 'bg-red-100 text-red-800' :
-                                    booking.status === 'paid' ? 'bg-green-100 text-green-800' :
-                                    booking.status === 'downpayment' ? 'bg-blue-100 text-blue-800' :
-                                    booking.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
-                                    'bg-gray-100 text-gray-800'
-                                }`}>
-                                    {booking.status}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-                )}
-
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-2">
-                        <FormSelectField
-                            name="reason"
-                            control={form.control}
-                            label="Deletion Reason"
-                            options={deletionReasons}
-                            loading={loadingReasons}
-                            placeholder="Select a reason for deletion"
-                        />
-
-                        {/* Reference Number Confirmation */}
-                        <FormField
-                            name="reference_confirmation"
-                            control={form.control}
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-destructive">
-                                        Confirm Deletion by Typing Reference Number
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            placeholder={`Type "${booking?.reference_number}" to confirm`}
-                                            {...field}
-                                            className="border-destructive/50 focus:border-destructive"
-                                        />
-                                    </FormControl>
-                                    <p className="text-xs text-muted-foreground">
-                                        Enter the booking reference number <strong>{booking?.reference_number}</strong> to confirm deletion
+                        {/* Booking Info */}
+                        {booking && (
+                            <div className="rounded-lg border p-3 bg-muted/50">
+                                <h4 className="font-medium mb-2">Booking Details</h4>
+                                <div className="space-y-1 text-sm">
+                                    <p className="break-all"><span className="font-medium">Reference:</span> {booking.reference_number}</p>
+                                    <p className="break-words"><span className="font-medium">Guest:</span> {booking.guest_name}</p>
+                                    <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                        <span className="font-medium">Status:</span> 
+                                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium w-fit ${
+                                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            booking.status === 'failed' ? 'bg-red-100 text-red-800' :
+                                            booking.status === 'paid' ? 'bg-green-100 text-green-800' :
+                                            booking.status === 'downpayment' ? 'bg-blue-100 text-blue-800' :
+                                            booking.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
+                                            'bg-gray-100 text-gray-800'
+                                        }`}>
+                                            {booking.status}
+                                        </span>
                                     </p>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                </div>
+                            </div>
+                        )}
 
-                        <FormField
-                            name="confirm_deletion"
-                            control={form.control}
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl>
-                                        <Checkbox
-                                            checked={field.value}
-                                            onCheckedChange={field.onChange}
-                                        />
-                                    </FormControl>
-                                    <div className="space-y-1 leading-none">
-                                        <FormLabel className="text-destructive">
-                                            I understand this action is permanent and cannot be undone
-                                        </FormLabel>
-                                        <p className="text-xs text-muted-foreground">
-                                            The booking will be soft deleted, status changed to cancelled, and the guest will be notified
-                                        </p>
-                                    </div>
-                                </FormItem>
-                            )}
-                        />
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                                <FormSelectField
+                                    name="reason"
+                                    control={form.control}
+                                    label="Deletion Reason"
+                                    options={deletionReasons}
+                                    loading={loadingReasons}
+                                    placeholder="Select a reason for deletion"
+                                />
 
-                        <DialogFooter className="gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => onOpenChange(false)}
-                                disabled={form.formState.isSubmitting}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                className="cursor-pointer"
-                                disabled={
-                                    form.formState.isSubmitting || 
-                                    !form.watch('confirm_deletion') ||
-                                    form.watch('reference_confirmation') !== booking?.reference_number
-                                }
-                            >
-                                {form.formState.isSubmitting ? 'Deleting...' : 'Delete Booking'}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
+                                {/* Reference Number Confirmation */}
+                                <FormField
+                                    name="reference_confirmation"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-destructive">
+                                                Confirm Deletion by Typing Reference Number
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    placeholder={`Type "${booking?.reference_number}" to confirm`}
+                                                    {...field}
+                                                    className="border-destructive/50 focus:border-destructive"
+                                                />
+                                            </FormControl>
+                                            <p className="text-xs text-muted-foreground">
+                                                Enter the booking reference number <strong>{booking?.reference_number}</strong> to confirm deletion
+                                            </p>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    name="confirm_deletion"
+                                    control={form.control}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={field.onChange}
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel className="text-destructive">
+                                                    I understand this action is permanent and cannot be undone
+                                                </FormLabel>
+                                                <p className="text-xs text-muted-foreground">
+                                                    The booking will be soft deleted, status changed to cancelled, and the guest will be notified
+                                                </p>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => onOpenChange(false)}
+                                        disabled={form.formState.isSubmitting}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        variant="destructive"
+                                        className="cursor-pointer w-full sm:w-auto"
+                                        disabled={
+                                            form.formState.isSubmitting || 
+                                            !form.watch('confirm_deletion') ||
+                                            form.watch('reference_confirmation') !== booking?.reference_number
+                                        }
+                                    >
+                                        {form.formState.isSubmitting ? 'Deleting...' : 'Delete Booking'}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     );
