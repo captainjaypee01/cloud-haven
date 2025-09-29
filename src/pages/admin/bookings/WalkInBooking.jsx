@@ -18,6 +18,19 @@ import { formatCurrency } from '@/lib/format';
 import { Plus, Minus, X, Users, Bed, Calendar, Clock, Trash } from 'lucide-react';
 import Title from '@/components/Title';
 import { fetchDayTourAvailability } from '@/services/dayTour';
+import { useWalkInMealCalculation } from '@/hooks/walkin/useWalkInMealCalculation';
+import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from '@/utils/dateUtils';
+import { addDays, format } from 'date-fns';
+import { usePromoCode } from '@/context/PromoCodeContext';
+
+// Helper function to get consistent local date in YYYY-MM-DD format
+const getLocalDateString = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
 
 // Form validation schema
 const FormSchema = z.object({
@@ -65,6 +78,19 @@ const WalkInBooking = () => {
     const bookingType = form.watch('booking_type');
     const nights = form.watch('nights');
 
+    // Promo code state
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
+    const [promoCodeInput, setPromoCodeInput] = useState('');
+
+    // Use the meal calculation hook for overnight bookings
+    const { 
+        mealQuote, 
+        mealCost, 
+        extraGuestFeeTotal, 
+        summaryWithMealBreakdown,
+        mealLoading: mealCalculationLoading
+    } = useWalkInMealCalculation(bookingType, nights, selectedRooms);
+
     // Update form rooms field when selectedRooms changes
     useEffect(() => {
         const roomsData = selectedRooms.map(roomItem => ({
@@ -75,6 +101,14 @@ const WalkInBooking = () => {
         }));
         form.setValue('rooms', roomsData);
     }, [selectedRooms, form]);
+
+    // Clear promo code when booking type or nights change
+    useEffect(() => {
+        if (promoInfo) {
+            clearPromo();
+            setPromoCodeInput('');
+        }
+    }, [bookingType, nights]);
 
     // Fetch meal data and pricing based on booking type
     useEffect(() => {
@@ -99,7 +133,7 @@ const WalkInBooking = () => {
     const fetchAvailableRooms = async () => {
         setAvailabilityLoading(true);
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             let response;
 
             if (bookingType === 'day_tour') {
@@ -113,7 +147,7 @@ const WalkInBooking = () => {
                 // For overnight bookings, use the regular rooms endpoint with availability
                 let checkOutDate;
                 if (nights) {
-                    checkOutDate = new Date(Date.now() + (nights * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+                    checkOutDate = format(addDays(new Date(), nights), 'yyyy-MM-dd');
                 } else {
                     checkOutDate = today;
                 }
@@ -134,7 +168,7 @@ const WalkInBooking = () => {
     const fetchDayTourMealData = async () => {
         setMealLoading(true);
         try {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateString();
             const mealData = await fetchDayTourAvailability(api, today);
             setDayTourMealData(mealData);
         } catch (error) {
@@ -147,8 +181,8 @@ const WalkInBooking = () => {
 
     const fetchDayTourPricing = async () => {
         try {
-            const today = new Date().toISOString().split('T')[0];
-            const response = await api.get(`${API_PREFIX}/day-tours/pricing`, {
+            const today = getLocalDateString();
+            const response = await api.get(`${API_PREFIX}/day-tour-pricing/current`, {
                 params: { date: today }
             });
             setDayTourPricing(response.data);
@@ -161,8 +195,8 @@ const WalkInBooking = () => {
     const fetchOvernightMealQuote = async () => {
         setMealLoading(true);
         try {
-            const today = new Date().toISOString().split('T')[0];
-            const checkOutDate = new Date(Date.now() + (nights * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
+            const today = getLocalDateString();
+            const checkOutDate = format(addDays(new Date(), nights), 'yyyy-MM-dd');
             
             const response = await api.post(`${API_PREFIX}/meals/quote`, {
                 check_in: today,
@@ -180,7 +214,9 @@ const WalkInBooking = () => {
 
     const addRoom = (room) => {
         // Check availability before adding room
-        const availableUnits = room.available_units || 0;
+        const availableUnits = bookingType === 'day_tour' 
+            ? (room.available_units || 0)
+            : (room.available_count || 0);
         if (availableUnits <= 0) {
             toast.error("This room is not available");
             return;
@@ -202,12 +238,12 @@ const WalkInBooking = () => {
         const roomName = room.name;
         const roomPrice = bookingType === 'day_tour' 
             ? (dayTourPricing?.price_per_pax || room.price_per_pax || room.base_price) 
-            : room.price_per_night;
+            : (room.price || room.price_per_night);
         
         // Use correct guest limits based on booking type
         const defaultAdults = bookingType === 'day_tour' 
             ? Math.min(room.min_guests || 2, room.max_guests || 10)
-            : (room.max_occupancy || 2);
+            : Math.min(room.max_guests || 2);
         
         const newRoomItem = {
             uniqueId,
@@ -218,14 +254,21 @@ const WalkInBooking = () => {
             children: 0,
             total_guests: defaultAdults,
             addedAt: new Date(addedAt),
-            // Store room limits for validation
+            // Store room limits for validation (following guest-side cart implementation)
             min_guests: room.min_guests || 1,
-            max_guests: room.max_guests || 10,
-            max_guests_range: room.max_guests_range || room.max_guests || 10,
+            max_guests: bookingType === 'day_tour' 
+                ? (room.max_guests || 10)
+                : (room.max_guests || 2), // Base max guests (e.g., 6)
+            extra_guests: bookingType === 'day_tour'
+                ? 0
+                : (room.extra_guests || 0), // Additional capacity (e.g., 2)
+            max_guests_range: bookingType === 'day_tour' 
+                ? (room.max_guests_range || room.max_guests || 10)
+                : ((room.max_guests || 2) + (room.extra_guests || 0)), // Total capacity (e.g., 8)
             available_units: availableUnits
         };
         setSelectedRooms(prev => [...prev, newRoomItem]);
-        toast.success(`Added ${roomName} to booking`);
+        toast.success(`Added ${roomName} to ${bookingType === 'day_tour' ? 'facilities' : 'booking'}`);
     };
 
     const removeRoom = (uniqueId) => {
@@ -233,11 +276,20 @@ const WalkInBooking = () => {
     };
 
     const updateRoomGuests = (uniqueId, field, value) => {
-        setSelectedRooms(prev => prev.map(r => 
-            r.uniqueId === uniqueId 
-                ? { ...r, [field]: value, total_guests: (field === 'adults' ? value : r.adults) + (field === 'children' ? value : r.children) }
-                : r
-        ));
+        setSelectedRooms(prev => prev.map(r => {
+            if (r.uniqueId === uniqueId) {
+                const newAdults = field === 'adults' ? value : r.adults;
+                const newChildren = field === 'children' ? value : r.children;
+                const newTotalGuests = newAdults + newChildren;
+                
+                return { 
+                    ...r, 
+                    [field]: value, 
+                    total_guests: newTotalGuests
+                };
+            }
+            return r;
+        }));
     };
 
     const calculateTotal = () => {
@@ -246,8 +298,9 @@ const WalkInBooking = () => {
 
         selectedRooms.forEach(roomItem => {
             if (bookingType === 'day_tour') {
-                // For day tours, use the stored room price
-                roomTotal += roomItem.room_price;
+                // For day tours, calculate: pricePerPax * totalGuests
+                const totalGuests = roomItem.adults + roomItem.children;
+                roomTotal += roomItem.room_price * totalGuests;
             } else {
                 // For overnight bookings, use per night pricing
                 roomTotal += roomItem.room_price * numNights;
@@ -255,50 +308,23 @@ const WalkInBooking = () => {
         });
 
         let mealTotal = 0;
-        if (dayTourMealData && selectedRooms.length > 0) {
-            if (bookingType === 'day_tour') {
-                // For day tours, calculate meal costs based on selected meals
-                selectedRooms.forEach(roomItem => {
-                    const totalGuests = roomItem.adults + roomItem.children;
-                    // Add lunch and PM snack costs if available
-                    if (dayTourMealData.lunch_prices && roomItem.include_lunch) {
-                        mealTotal += dayTourMealData.lunch_prices.adult * roomItem.adults + 
-                                    dayTourMealData.lunch_prices.child * roomItem.children;
-                    }
-                    if (dayTourMealData.pm_snack_prices && roomItem.include_pm_snack) {
-                        mealTotal += dayTourMealData.pm_snack_prices.adult * roomItem.adults + 
-                                    dayTourMealData.pm_snack_prices.child * roomItem.children;
-                    }
-                });
-            } else if (bookingType === 'overnight') {
-                // For overnight bookings, use the meal quote API data
-                if (dayTourMealData.nights && Array.isArray(dayTourMealData.nights)) {
-                    dayTourMealData.nights.forEach(night => {
-                        let nightTotal = 0;
-                        
-                        if (night.type === 'buffet') {
-                            // Buffet: charge all guests
-                            selectedRooms.forEach(roomItem => {
-                                nightTotal += (roomItem.adults * (night.adult_price || 0)) + 
-                                             (roomItem.children * (night.child_price || 0));
-                            });
-                        } else if (night.type === 'free_breakfast') {
-                            // Free breakfast: charge extra guests only
-                            selectedRooms.forEach(roomItem => {
-                                const totalGuestsInRoom = roomItem.adults + roomItem.children;
-                                const maxGuests = roomItem.max_guests || 2;
-                                const extraGuestsInRoom = Math.max(0, totalGuestsInRoom - maxGuests);
-                                
-                                if (extraGuestsInRoom > 0) {
-                                    nightTotal += extraGuestsInRoom * (night.adult_breakfast_price || 0);
-                                }
-                            });
-                        }
-                        
-                        mealTotal += nightTotal;
-                    });
+        if (bookingType === 'day_tour' && dayTourMealData && selectedRooms.length > 0) {
+            // For day tours, calculate meal costs based on selected meals
+            selectedRooms.forEach(roomItem => {
+                const totalGuests = roomItem.adults + roomItem.children;
+                // Add lunch and PM snack costs if available
+                if (dayTourMealData.lunch_prices && roomItem.include_lunch) {
+                    mealTotal += dayTourMealData.lunch_prices.adult * roomItem.adults + 
+                                dayTourMealData.lunch_prices.child * roomItem.children;
                 }
-            }
+                if (dayTourMealData.pm_snack_prices && roomItem.include_pm_snack) {
+                    mealTotal += dayTourMealData.pm_snack_prices.adult * roomItem.adults + 
+                                dayTourMealData.pm_snack_prices.child * roomItem.children;
+                }
+            });
+        } else if (bookingType === 'overnight') {
+            // For overnight bookings, use the meal calculation from the hook
+            mealTotal = mealCost + extraGuestFeeTotal;
         }
 
         return {
@@ -309,12 +335,41 @@ const WalkInBooking = () => {
         };
     };
 
+    // Handle promo code application
+    const handleApplyPromo = async () => {
+        if (!promoCodeInput.trim()) return;
+        
+        const bookingDates = {
+            checkIn: getLocalDateString(),
+            checkOut: bookingType === 'overnight' && nights 
+                ? format(addDays(new Date(), nights), 'yyyy-MM-dd')
+                : getLocalDateString(),
+            dayTourDate: bookingType === 'day_tour' ? getLocalDateString() : null
+        };
+        
+        await applyPromo(
+            api, 
+            promoCodeInput, 
+            totals.roomTotal, 
+            totals.mealTotal, 
+            totals.total, 
+            bookingDates, 
+            mealQuote
+        );
+        
+        // If successful, update the promo code state
+        const promoInfoFromContext = promoInfo;
+        if (promoInfoFromContext) {
+            setPromoCode(promoCodeInput);
+        }
+    };
+
     const onSubmit = async (data) => {
         console.log('Form submitted with data:', data);
         console.log('Selected rooms:', selectedRooms);
         
         if (selectedRooms.length === 0) {
-            toast.error("Please select at least one room");
+            toast.error(`Please select at least one ${bookingType === 'day_tour' ? 'facility' : 'room'}`);
             return;
         }
 
@@ -373,6 +428,8 @@ const WalkInBooking = () => {
             const formData = {
                 ...data,
                 rooms: roomsData,
+                local_date: getLocalDateString(), // Send the local date to avoid timezone issues
+                ...(promoInfo && promoInfo.id && { promo_id: promoInfo.id }), // Include promo if applied
             };
 
             const response = await api.post(`${API_PREFIX}/admin/bookings/walk-in`, formData, {
@@ -392,7 +449,7 @@ const WalkInBooking = () => {
     };
 
     const totals = calculateTotal();
-    const today = new Date().toLocaleDateString();
+    const today = getLocalDateString();
 
     return (
         <div className="space-y-6">
@@ -413,11 +470,14 @@ const WalkInBooking = () => {
                                 Booking Details
                             </CardTitle>
                             <CardDescription>
-                                Booking for today only: {today}
+                                {bookingType === 'day_tour' 
+                                    ? `Day Tour for today: ${today}`
+                                    : `Check-in: ${today}${nights ? `, Check-out: ${format(addDays(new Date(), nights), 'yyyy-MM-dd')}` : ''}`
+                                }
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <form id="walkin-booking-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                 {/* Booking Type */}
                                 <div className="space-y-2">
                                     <Label htmlFor="booking_type">Booking Type *</Label>
@@ -527,11 +587,13 @@ const WalkInBooking = () => {
                                 {/* Room Selection */}
                                 <Separator />
                                 <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold">Room Selection</h3>
+                                    <h3 className="text-lg font-semibold">
+                                        {bookingType === 'day_tour' ? 'Facility Selection' : 'Room Selection'}
+                                    </h3>
                                     
                                     {availabilityLoading ? (
                                         <div className="text-center py-4">
-                                            <p>Loading available rooms...</p>
+                                            <p>Loading available {bookingType === 'day_tour' ? 'facilities' : 'rooms'}...</p>
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -540,10 +602,27 @@ const WalkInBooking = () => {
                                                 // For day tour: room_id, for overnight: slug
                                                 const roomId = room.room_id || room.roomId || room.slug || room.id || `room-${index}`;
                                                 const roomName = room.name;
+                                                // For overnight: display total capacity (max_guests + extra_guests)
+                                                const baseMaxGuests = room.max_guests || 2;
+                                                const extraGuests = room.extra_guests || 0;
                                                 const maxGuests = bookingType === 'day_tour' 
                                                     ? (room.max_guests_range || room.max_guests)
-                                                    : room.max_occupancy;
-                                                const totalAvailableUnits = room.available_units || 0;
+                                                    : (baseMaxGuests + extraGuests);
+                                                const totalAvailableUnits = bookingType === 'day_tour' 
+                                                    ? (room.available_units || 0)
+                                                    : (room.available_count || 0);
+                                                
+                                                // Debug logging for overnight bookings
+                                                if (bookingType === 'overnight') {
+                                                    console.log('Room availability debug:', {
+                                                        roomName: room.name,
+                                                        available_count: room.available_count,
+                                                        pending_count: room.pending_count,
+                                                        total_units: room.total_units,
+                                                        totalAvailableUnits,
+                                                        room
+                                                    });
+                                                }
                                                 const minGuests = room.min_guests || 1;
                                                 
                                                 // Calculate remaining available units after current selections
@@ -556,12 +635,12 @@ const WalkInBooking = () => {
                                                             <div className="flex justify-between items-start mb-2">
                                                                 <div>
                                                                     <h4 className="font-semibold">{roomName}</h4>
-                                                                    <p className="text-sm text-gray-600">{room.description || 'Day Tour facility'}</p>
+                                                                    <p className="text-sm text-gray-600">{room.short_description || room.description || (bookingType === 'day_tour' ? 'Day Tour facility' : 'Overnight accommodation')}</p>
                                                                 </div>
                                                                 <Badge variant="secondary">
                                                                     {bookingType === 'day_tour' 
                                                                         ? formatCurrency(dayTourPricing?.price_per_pax || room.price_per_pax || room.base_price)
-                                                                        : `${formatCurrency(room.price_per_night)}/night`
+                                                                        : `${formatCurrency(room.price || room.price_per_night)}/night`
                                                                     }
                                                                 </Badge>
                                                             </div>
@@ -571,7 +650,15 @@ const WalkInBooking = () => {
                                                                     <Users className="h-4 w-4" />
                                                                     {bookingType === 'day_tour' 
                                                                         ? `${minGuests}-${maxGuests} guests`
-                                                                        : `Max ${maxGuests} guests`
+                                                                        : (
+                                                                            <span>Up to {baseMaxGuests} guests
+                                                                                {extraGuests > 0 && (
+                                                                                    <span className="text-xs ml-1">
+                                                                                        (+{extraGuests} extra)
+                                                                                    </span>
+                                                                                )}
+                                                                            </span>
+                                                                        )
                                                                     }
                                                                 </div>
                                                                 <div className="flex items-center gap-1">
@@ -581,7 +668,10 @@ const WalkInBooking = () => {
                                                                 <div className="flex items-center gap-1">
                                                                     <Calendar className="h-4 w-4" />
                                                                     <span className={remainingUnits <= 0 ? 'text-red-600 font-medium' : ''}>
-                                                                        {remainingUnits} of {totalAvailableUnits} available
+                                                                        {bookingType === 'overnight' && room.pending_count > 0 
+                                                                            ? `${remainingUnits} of ${totalAvailableUnits} available, ${room.pending_count} pending`
+                                                                            : `${remainingUnits} of ${totalAvailableUnits} available`
+                                                                        }
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -594,7 +684,7 @@ const WalkInBooking = () => {
                                                                 disabled={remainingUnits <= 0}
                                                             >
                                                                 <Plus className="h-4 w-4 mr-2" />
-                                                                {remainingUnits <= 0 ? 'Not Available' : 'Add Room'}
+                                                                {remainingUnits <= 0 ? 'Not Available' : (bookingType === 'day_tour' ? 'Add Facility' : 'Add Room')}
                                                             </Button>
                                                         </CardContent>
                                                     </Card>
@@ -607,7 +697,9 @@ const WalkInBooking = () => {
                                 {/* Selected Rooms - Following Cart Implementation */}
                                 {selectedRooms.length > 0 && (
                                     <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold">Selected Rooms ({selectedRooms.length})</h3>
+                                        <h3 className="text-lg font-semibold">
+                                            {bookingType === 'day_tour' ? 'Selected Facilities' : 'Selected Rooms'} ({selectedRooms.length})
+                                        </h3>
                                         {selectedRooms.map((roomItem, index) => (
                                             <div
                                                 key={roomItem.uniqueId}
@@ -622,7 +714,12 @@ const WalkInBooking = () => {
                                                                 : `${formatCurrency(roomItem.room_price)} / night • ${nights} night${nights > 1 ? "s" : ""}`
                                                             }
                                                         </p>
-                                                        <p className="text-xs text-gray-500">Max {roomItem.max_guests_range || roomItem.max_guests} guests</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {bookingType === 'day_tour' 
+                                                                ? `Max ${roomItem.max_guests_range || roomItem.max_guests} guests`
+                                                                : `Max ${roomItem.max_guests} guests${roomItem.extra_guests > 0 ? ` (+${roomItem.extra_guests} extra)` : ''}`
+                                                            }
+                                                        </p>
                                                     </div>
                                                     <Button
                                                         type="button"
@@ -667,6 +764,19 @@ const WalkInBooking = () => {
                                                         }
                                                     </span>
                                                 </div>
+                                                
+                                                {/* Extra Guest Warning for Overnight Bookings - Only show if exceeds base capacity */}
+                                                {bookingType === 'overnight' && roomItem.total_guests > parseInt(roomItem.max_guests) && (
+                                                    <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+                                                        ⚠️ You have {roomItem.total_guests - parseInt(roomItem.max_guests)} extra guest{roomItem.total_guests - parseInt(roomItem.max_guests) > 1 ? 's' : ''}.
+                                                        {mealQuote?.nights?.some(night => night.type === 'buffet') && (
+                                                            <> Extra guest fees will apply on buffet days.</>
+                                                        )}
+                                                        {mealQuote?.nights?.some(night => night.type === 'free_breakfast') && (
+                                                            <> Additional breakfast fees may apply on free breakfast days.</>
+                                                        )}
+                                                    </div>
+                                                )}
 
                                                 {/* Day Tour Meal Options - Following Cart Implementation */}
                                                 {bookingType === 'day_tour' && dayTourMealData && (
@@ -764,15 +874,18 @@ const WalkInBooking = () => {
                                                 )}
 
                                                 {/* Overnight Meal Information */}
-                                                {bookingType === 'overnight' && dayTourMealData && (
+                                                {bookingType === 'overnight' && mealQuote && mealQuote.nights && (
                                                     <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                                                         <h6 className="text-sm font-medium text-blue-700 mb-2">Meal Programs for Selected Dates</h6>
                                                         <div className="space-y-2">
-                                                            {dayTourMealData.nights && dayTourMealData.nights.length > 0 ? (
-                                                                dayTourMealData.nights.map((night, index) => (
+                                                            {mealQuote.nights.length > 0 ? (
+                                                                mealQuote.nights.map((night, index) => (
                                                                     <div key={`night-${index}-${night.date}`} className="text-xs text-blue-600">
                                                                         {night.type === 'buffet' ? 'Buffet meals' : 'Free breakfast'} 
-                                                                        {night.date && ` (${night.date})`}
+                                                                        {night.type === 'buffet' 
+                                                                            ? (night.date && ` (${night.date})`)
+                                                                            : (night.end_date && ` (${night.end_date})`)
+                                                                        }
                                                                     </div>
                                                                 ))
                                                             ) : (
@@ -842,29 +955,6 @@ const WalkInBooking = () => {
                                     </div>
                                 )}
 
-                                <div className="flex gap-4 pt-4">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => navigate('/admin/bookings')}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        disabled={loading || selectedRooms.length === 0 || (() => {
-                                            // Check if any room has validation errors
-                                            return selectedRooms.some(roomItem => {
-                                                const totalGuests = roomItem.adults + roomItem.children;
-                                                const minGuests = roomItem.min_guests || 1;
-                                                const maxGuests = roomItem.max_guests_range || roomItem.max_guests || 10;
-                                                return totalGuests < minGuests || totalGuests > maxGuests;
-                                            });
-                                        })()}
-                                    >
-                                        {loading ? 'Creating Booking...' : 'Create Walk-In Booking'}
-                                    </Button>
-                                </div>
                             </form>
                         </CardContent>
                     </Card>
@@ -900,8 +990,17 @@ const WalkInBooking = () => {
                                     <span className="text-sm font-medium">{today}</span>
                                 </div>
 
+                                {bookingType === 'overnight' && nights && (
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">Check-out Date:</span>
+                                        <span className="text-sm font-medium">{format(addDays(new Date(), nights), 'yyyy-MM-dd')}</span>
+                                    </div>
+                                )}
+
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Total Rooms:</span>
+                                    <span className="text-sm text-gray-600">
+                                        {bookingType === 'day_tour' ? 'Facilities:' : 'Total Rooms:'}
+                                    </span>
                                     <span className="text-sm font-medium">{selectedRooms.length}</span>
                                 </div>
 
@@ -917,7 +1016,9 @@ const WalkInBooking = () => {
 
                             <div className="space-y-2">
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Room Total:</span>
+                                    <span className="text-sm text-gray-600">
+                                        {bookingType === 'day_tour' ? 'Day Tour Total:' : 'Room Total:'}
+                                    </span>
                                     <span className="text-sm font-medium">
                                         {formatCurrency(totals.roomTotal)}
                                     </span>
@@ -932,11 +1033,198 @@ const WalkInBooking = () => {
                                     </div>
                                 )}
 
+                                {/* Detailed Meal Breakdown for Overnight Bookings */}
+                                {bookingType === 'overnight' && mealQuote && mealQuote.nights && !mealCalculationLoading && (
+                                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                                        <h4 className="text-sm font-semibold text-gray-800 mb-3">Meal Breakdown</h4>
+                                        <div className="space-y-4">
+                                            {mealQuote.nights.map((night, index) => (
+                                                <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
+                                                    {night.type === 'buffet' ? (
+                                                        <>
+                                                            {/* Date Header for Buffet */}
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <span className="text-sm font-medium text-gray-700">
+                                                                    {formatBuffetDateRange(night.start_date, night.end_date)} - Buffet
+                                                                </span>
+                                                                <span className="text-sm font-semibold text-gray-900">
+                                                                    {formatCurrency(night.night_total)}
+                                                                </span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        /* Simplified Free Breakfast Display */
+                                                        <div className="text-sm font-medium text-gray-700">
+                                                            <div>
+                                                                {formatMealDate(night.end_date)} - Free Breakfast
+                                                            </div>
+                                                            <div className="text-green-600 font-semibold">
+                                                                {(night.adults || 0) + (night.children || 0)} Guest{((night.adults || 0) + (night.children || 0)) > 1 ? 's' : ''} Complimentary Breakfast (Plated)
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                            
+                                            {/* Extra Guest Fees (Buffet Days) */}
+                                            {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (() => {
+                                                // Calculate total extra guests across all rooms
+                                                const totalExtraGuests = selectedRooms.reduce((roomTotal, item) => {
+                                                    const extraGuestsInRoom = Math.max(0, (item.adults + item.children) - parseInt(item.max_guests));
+                                                    return roomTotal + extraGuestsInRoom;
+                                                }, 0);
+                                                
+                                                return (
+                                                    <div className="space-y-3">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
+                                                            .map((night, index) => {
+                                                                const extraGuestFeeTotal = totalExtraGuests * night.extra_guest_fee;
+                                                                
+                                                                return (
+                                                                    <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
+                                                                        {/* Date Header for Extra Guest Fee */}
+                                                                        <div className="flex justify-between items-center mb-2">
+                                                                            <span className="text-sm font-medium text-gray-700">
+                                                                                {formatBuffetDate(night.date)} - Extra Guest ({totalExtraGuests})
+                                                                            </span>
+                                                                            <span className="text-sm font-semibold text-gray-900">
+                                                                                {formatCurrency(extraGuestFeeTotal)}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+                                )}
+
                                 <Separator />
 
-                                <div className="flex justify-between text-lg font-semibold">
-                                    <span>Total Amount:</span>
-                                    <span>{formatCurrency(totals.total)}</span>
+                                {/* Promo Code Section */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            type="text"
+                                            placeholder="Promo code"
+                                            value={promoCodeInput}
+                                            onChange={(e) => setPromoCodeInput(e.target.value)}
+                                            className="flex-1"
+                                        />
+                                        {promoInfo ? (
+                                            <Button 
+                                                type="button" 
+                                                variant="outline" 
+                                                size="sm"
+                                                onClick={() => {
+                                                    clearPromo();
+                                                    setPromoCodeInput('');
+                                                }}
+                                            >
+                                                Remove
+                                            </Button>
+                                        ) : (
+                                            <Button 
+                                                type="button" 
+                                                size="sm"
+                                                onClick={() => handleApplyPromo()}
+                                                disabled={!promoCodeInput.trim()}
+                                            >
+                                                Apply
+                                            </Button>
+                                        )}
+                                    </div>
+                                    
+                                    {promoError && (
+                                        <p className="text-xs text-red-600">{promoError}</p>
+                                    )}
+                                    
+                                    {promoInfo && (
+                                        <div className="space-y-2">
+                                            <p className="text-sm text-green-600">
+                                                Promo "{promoInfo.code}" applied – {promoInfo.discount_type === 'percentage'
+                                                    ? `${promoInfo.discount_value}% off`
+                                                    : `${formatCurrency(promoInfo.discount_value)} off`}
+                                                {promoInfo.scope !== 'total' && ` (${promoInfo.scope} only)`}
+                                            </p>
+                                            
+                                            {/* Per-night breakdown for promos with excluded days */}
+                                            {promoInfo.perNightBreakdown && bookingType === 'overnight' && (
+                                                <div className="mt-2 p-2 bg-blue-50 rounded text-xs space-y-1">
+                                                    <p className="font-medium text-blue-800">Per-night discount breakdown:</p>
+                                                    {promoInfo.perNightBreakdown.map((night, idx) => (
+                                                        <div key={idx} className="flex justify-between text-blue-700">
+                                                            <span>
+                                                                {night.dayName} ({night.date})
+                                                                {!night.eligible && <span className="text-orange-600 ml-1">(excluded)</span>}
+                                                            </span>
+                                                            <span className={night.eligible ? 'text-green-600' : 'text-gray-400'}>
+                                                                {night.eligible ? formatCurrency(night.discountAmount) : '—'}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Separator />
+
+                                <div className="space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">Subtotal:</span>
+                                        <span className="text-sm font-medium">{formatCurrency(totals.total)}</span>
+                                    </div>
+                                    
+                                    {promoInfo && promoInfo.discountAmount > 0 && (
+                                        <div className="flex justify-between text-sm text-green-600">
+                                            <span>Promo Discount ({promoInfo.code}):</span>
+                                            <span>-{formatCurrency(promoInfo.discountAmount)}</span>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="flex justify-between text-lg font-semibold">
+                                        <span>Total Amount:</span>
+                                        <span>
+                                            {formatCurrency(
+                                                promoInfo && promoInfo.discountAmount
+                                                    ? Math.max(0, totals.total - promoInfo.discountAmount)
+                                                    : totals.total
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-4 pt-4">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => navigate('/admin/bookings')}
+                                        className="flex-1"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        form="walkin-booking-form"
+                                        disabled={loading || selectedRooms.length === 0 || (() => {
+                                            // Check if any room has validation errors
+                                            return selectedRooms.some(roomItem => {
+                                                const totalGuests = roomItem.adults + roomItem.children;
+                                                const minGuests = roomItem.min_guests || 1;
+                                                const maxGuests = roomItem.max_guests_range || roomItem.max_guests || 10;
+                                                return totalGuests < minGuests || totalGuests > maxGuests;
+                                            });
+                                        })()}
+                                        className="flex-1"
+                                    >
+                                        {loading ? 'Creating Booking...' : 'Create Walk-In Booking'}
+                                    </Button>
                                 </div>
                             </div>
 
@@ -948,6 +1236,7 @@ const WalkInBooking = () => {
                         </CardContent>
                     </Card>
                 </div>
+
             </div>
         </div>
     );

@@ -10,21 +10,11 @@ const CartCtx = createContext();
 function reducer(state, action) {
     switch (action.type) {
         case 'SET_DATES':
-            // Always clear promo codes when dates are being set (including clearing)
-            if (typeof action.clearPromoCodes === 'function') {
-                action.clearPromoCodes();
-            }
-            
             if (action.from !== state.checkIn || action.to !== state.checkOut) {
                 return { ...state, checkIn: action.from, checkOut: action.to, dayTourDate: '', items: [] };
             }
             return state;
         case 'SET_DAY_TOUR_DATE':
-            // Always clear promo codes when day tour date is being set (including clearing)
-            if (typeof action.clearPromoCodes === 'function') {
-                action.clearPromoCodes();
-            }
-            
             if (action.date !== state.dayTourDate) {
                 return { ...state, dayTourDate: action.date, checkIn: '', checkOut: '', items: [] };
             }
@@ -47,12 +37,6 @@ function reducer(state, action) {
             return { checkIn: '', checkOut: '', dayTourDate: '', items: [] };
         case 'CLEAR_ITEMS_ONLY':
             return { ...state, items: [] };
-        case 'CLEAR_PROMO_CODES':
-            // Clear promo codes explicitly
-            if (typeof action.clearPromoCodes === 'function') {
-                action.clearPromoCodes();
-            }
-            return state;
         default:
             return state;
     }
@@ -128,6 +112,11 @@ export const CartProvider = ({ children }) => {
     // Persist cart too
     useEffect(() => localStorage.setItem('cart', JSON.stringify(state)), [state]);
 
+    // Clear promo codes when dates change
+    useEffect(() => {
+        clearPromoCodes();
+    }, [state.checkIn, state.checkOut, state.dayTourDate]);
+
     // Fetch Day Tour data when Day Tour date changes
     useEffect(() => {
         if (state.dayTourDate) {
@@ -140,12 +129,12 @@ export const CartProvider = ({ children }) => {
     }, [state.dayTourDate]);
 
     const setDayTourDate = (date) => {
-        dispatch({ type: 'SET_DAY_TOUR_DATE', date, clearPromoCodes });
+        dispatch({ type: 'SET_DAY_TOUR_DATE', date });
     };
 
     // Method to set dates and clear promo codes
     const setDates = (from, to) => {
-        dispatch({ type: 'SET_DATES', from, to, clearPromoCodes });
+        dispatch({ type: 'SET_DATES', from, to });
     };
 
     // Fetch Day Tour pricing for a specific date
@@ -201,7 +190,7 @@ export const CartProvider = ({ children }) => {
     };
 
     const clearPromoCodesOnly = () => {
-        dispatch({ type: 'CLEAR_PROMO_CODES', clearPromoCodes });
+        clearPromoCodes();
     };
 
     return (
