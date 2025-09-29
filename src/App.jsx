@@ -37,6 +37,7 @@ const RoomUnitCalendarPage = React.lazy(() => import('./pages/admin/room-units/R
 const ListBooking = React.lazy(() => import('./pages/admin/bookings/ListBooking'));
 const BookingsCalendarPage = React.lazy(() => import('./pages/admin/bookings/BookingsCalendarPage'));
 const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
+const WalkInBooking = React.lazy(() => import('./pages/admin/bookings/WalkInBooking'));
 const ListAmenity = React.lazy(() => import('./pages/admin/amenities/ListAmenity'));
 const ListPromos = React.lazy(() => import('./pages/admin/promos/ListPromos'));
 const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
@@ -165,6 +166,11 @@ const App = () => {
                   <Route path="bookings/:id" element={
                     <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
                       <BookingDetails />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="bookings/walk-in" element={
+                    <RoleBasedRoute allowedRoles={['staff', 'admin', 'superadmin']}>
+                      <WalkInBooking />
                     </RoleBasedRoute>
                   } />
                   <Route path="room-units/calendar" element={

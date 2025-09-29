@@ -215,6 +215,12 @@ const ListBooking = () => {
             <p className='text-gray-500 mt-8'>All Bookings</p>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">Bookings</h2>
+                <Button
+                    onClick={() => navigate('/admin/bookings/walk-in')}
+                    className="bg-green-600 hover:bg-green-700"
+                >
+                    Create Walk-In Booking
+                </Button>
             </div>
             <ControlsToolbar
                 search={search}
