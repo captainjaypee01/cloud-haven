@@ -550,7 +550,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             {booking.meal_quote_data?.nights ? (
                                 // We have detailed meal data (newer bookings)
                                 <>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-blue-50 rounded-lg">
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-blue-600">
                                                 {booking.meal_quote_data.buffet_nights || 0}
@@ -562,6 +562,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                 {booking.meal_quote_data.free_breakfast_nights || 0}
                                             </div>
                                             <div className="text-sm text-gray-600">Free Breakfast Nights</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold text-orange-600">
+                                                {booking.extra_guest_count || 0}
+                                            </div>
+                                            <div className="text-sm text-gray-600">Extra Guests</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-purple-600">
@@ -578,40 +584,108 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                 <tr>
                                                     <th className="py-2 pr-4 font-medium">Date</th>
                                                     <th className="py-2 pr-4 font-medium">Meal Type</th>
-                                                    <th className="py-2 pr-4 font-medium">Adults</th>
-                                                    <th className="py-2 pr-4 font-medium">Children</th>
-                                                    <th className="py-2 pr-4 font-medium">Adult Price</th>
-                                                    <th className="py-2 pr-4 font-medium">Child Price</th>
+                                                    <th className="py-2 pr-4 font-medium">Guest Breakdown</th>
+                                                    <th className="py-2 pr-4 font-medium">Pricing</th>
                                                     <th className="py-2 pr-4 font-medium">Total</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {booking.meal_quote_data.nights.map((night, idx) => (
-                                                    <tr key={idx} className="border-b last:border-b-0">
-                                                        <td className="py-2 pr-4">{formatDate(night.date)}</td>
-                                                        <td className="py-2 pr-4">
-                                                            <Badge 
-                                                                variant={night.type === 'buffet' ? 'default' : 'secondary'}
-                                                                className={night.type === 'buffet' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}
-                                                            >
-                                                                {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
-                                                            </Badge>
-                                                        </td>
-                                                        <td className="py-2 pr-4">{booking.adults}</td>
-                                                        <td className="py-2 pr-4">{booking.children}</td>
-                                                        <td className="py-2 pr-4">
-                                                            {night.type === 'buffet' ? formatCurrency(night.adult_price || 0) : 'Free'}
-                                                        </td>
-                                                        <td className="py-2 pr-4">
-                                                            {night.type === 'buffet' ? formatCurrency(night.child_price || 0) : 'Free'}
-                                                        </td>
-                                                        <td className="py-2 pr-4 font-medium">
-                                                            {formatCurrency((booking.adults * night.adult_price) + (booking.children * night.child_price) || 0)}
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {booking.meal_quote_data.nights.map((night, idx) => {
+                                                    // Calculate extra guests for this room
+                                                    const roomMaxGuests = booking.booking_rooms?.[0]?.room?.max_guests || 6;
+                                                    const totalGuests = booking.total_guests;
+                                                    const extraGuests = Math.max(0, totalGuests - roomMaxGuests);
+                                                    
+                                                    return (
+                                                        <tr key={idx} className="border-b last:border-b-0">
+                                                            <td className="py-2 pr-4">{formatDate(night.date)}</td>
+                                                            <td className="py-2 pr-4">
+                                                                <Badge 
+                                                                    variant={night.type === 'buffet' ? 'default' : 'secondary'}
+                                                                    className={night.type === 'buffet' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}
+                                                                >
+                                                                    {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                                                </Badge>
+                                                            </td>
+                                                            <td className="py-2 pr-4">
+                                                                <div className="space-y-1">
+                                                                    <div className="text-xs">
+                                                                        <span className="font-medium">{totalGuests} Total Guests</span>
+                                                                    </div>
+                                                                    {night.type === 'buffet' ? (
+                                                                        <div className="text-xs text-gray-600">
+                                                                            <div>• All guests pay buffet price</div>
+                                                                            {extraGuests > 0 && (
+                                                                                <div>• {extraGuests} extra guests: Additional entrance/amenity fee</div>
+                                                                            )}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="text-xs text-gray-600">
+                                                                            <div>• {roomMaxGuests} guests: Free breakfast + amenities</div>
+                                                                            {extraGuests > 0 && (
+                                                                                <div>• {extraGuests} extra guests: All-inclusive fee (breakfast + entrance + amenities)</div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-2 pr-4">
+                                                                {night.type === 'buffet' ? (
+                                                                    <div className="text-xs">
+                                                                        <div>Buffet - Adult: {formatCurrency(night.adult_price || 0)}</div>
+                                                                        <div>Buffet - Child: {formatCurrency(night.child_price || 0)}</div>
+                                                                        {extraGuests > 0 && (
+                                                                            <div className="text-orange-600">Extra guest fee: {formatCurrency(night.extra_guest_fee || 0)}</div>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-xs">
+                                                                        <div>Free breakfast: {roomMaxGuests} guests</div>
+                                                                        {extraGuests > 0 && (
+                                                                            <div className="text-orange-600">All-inclusive fee: {formatCurrency(night.extra_guest_fee || 0)}</div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td className="py-2 pr-4 font-medium">
+                                                                {night.type === 'buffet' ? (
+                                                                    <div className="text-xs">
+                                                                        <div>Buffet: {formatCurrency((booking.adults * (night.adult_price || 0)) + (booking.children * (night.child_price || 0)))}</div>
+                                                                        {extraGuests > 0 && (
+                                                                            <div className="text-orange-600">Extra fee: {formatCurrency(extraGuests * (night.extra_guest_fee || 0))}</div>
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="text-xs">
+                                                                        <div className="text-green-600">Free: {formatCurrency(0)}</div>
+                                                                        {extraGuests > 0 && (
+                                                                            <div className="text-orange-600">All-inclusive: {formatCurrency(extraGuests * (night.extra_guest_fee || 0))}</div>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
+                                        
+                                        {/* Extra Guest Fee Summary */}
+                                        {booking.extra_guest_fee > 0 && (
+                                            <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <div className="font-medium text-orange-800">Extra Guest Fees (Buffet Days)</div>
+                                                        <div className="text-sm text-orange-600">
+                                                            {booking.extra_guest_count} extra guest{booking.extra_guest_count > 1 ? 's' : ''} - entrance fee, amenities, and additional services
+                                                        </div>
+                                                    </div>
+                                                    <div className="font-bold text-orange-800">
+                                                        {formatCurrency(booking.extra_guest_fee)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </>
                             ) : (
