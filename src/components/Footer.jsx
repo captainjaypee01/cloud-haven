@@ -2,7 +2,7 @@ import React from 'react'
 import { assets } from '@/assets/assets'
 import { Link } from "react-router-dom";
 import { NETANIA_LOGO } from '@/constants/AppConstant';
-import { SUPPORT_ADDRESS, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_LANDLINE } from '@/constants/AppConstant';
+import { SUPPORT_ADDRESS, SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_ALT, SUPPORT_LANDLINE } from '@/constants/AppConstant';
 
 const Footer = () => {
     return (
@@ -58,7 +58,8 @@ const Footer = () => {
                         Telephone: {SUPPORT_LANDLINE}
                     </p>
                     <p className='mt-3 text-sm'>
-                        Phone: {SUPPORT_PHONE}
+                        Phone: {SUPPORT_PHONE} <br/>
+                        <span className='ml-[46px]'>{SUPPORT_PHONE_ALT}</span>
                     </p>
                     <p className='mt-3 text-sm'>
                         Email: {SUPPORT_EMAIL}
