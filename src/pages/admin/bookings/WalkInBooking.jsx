@@ -22,6 +22,8 @@ import { useWalkInMealCalculation } from '@/hooks/walkin/useWalkInMealCalculatio
 import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from '@/utils/dateUtils';
 import { addDays, format } from 'date-fns';
 import { usePromoCode } from '@/context/PromoCodeContext';
+import { useAppContext } from '@/context/AppContext';
+import { WalkInDayTourDatePicker, WalkInDateRangePicker } from '@/components/WalkInDatePicker';
 
 // Helper function to get consistent local date in YYYY-MM-DD format
 const getLocalDateString = () => {
@@ -37,7 +39,7 @@ const FormSchema = z.object({
     booking_type: z.enum(['day_tour', 'overnight'], {
         required_error: "Please select a booking type",
     }),
-    nights: z.number().min(1).max(5).optional(),
+    nights: z.number().min(1).max(5).optional(), // For staff users only
     guest_name: z.string().min(1, "Guest name is required"),
     guest_email: z.string().email("Please provide a valid email address"),
     guest_phone: z.string().min(1, "Guest phone is required"),
@@ -48,11 +50,15 @@ const FormSchema = z.object({
         adults: z.number().min(1),
         children: z.number().min(0),
     })).min(1, "At least one room must be selected"),
+    // Date fields for admin/superadmin
+    check_in_date: z.string().optional(),
+    day_tour_date: z.string().optional(),
 });
 
 const WalkInBooking = () => {
     const navigate = useNavigate();
     const api = useApi();
+    const { userRole } = useAppContext();
     
     const [loading, setLoading] = useState(false);
     const [rooms, setRooms] = useState([]);
@@ -62,21 +68,73 @@ const WalkInBooking = () => {
     const [mealLoading, setMealLoading] = useState(false);
     const [availabilityLoading, setAvailabilityLoading] = useState(false);
     
+    // Date selection state for admin/superadmin
+    const [selectedCheckInDate, setSelectedCheckInDate] = useState(null);
+    const [selectedDayTourDate, setSelectedDayTourDate] = useState(null);
+    const [selectedDateRange, setSelectedDateRange] = useState({ from: null, to: null });
+    
+    // Check if user can select dates (admin or superadmin)
+    const canSelectDates = userRole === 'admin' || userRole === 'superadmin';
+    
     const form = useForm({
         resolver: zodResolver(FormSchema),
         defaultValues: {
             booking_type: 'day_tour',
-            nights: 1,
+            nights: 1, // Default for staff users
             guest_name: '',
             guest_email: '',
             guest_phone: '',
             special_requests: '',
             rooms: [],
+            check_in_date: '',
+            day_tour_date: '',
         }
     });
 
     const bookingType = form.watch('booking_type');
-    const nights = form.watch('nights');
+    const formNights = form.watch('nights');
+
+    // Calculate nights based on user role
+    const calculateNights = () => {
+        if (bookingType === 'overnight') {
+            if (canSelectDates && selectedDateRange.from && selectedDateRange.to) {
+                // For admin/superadmin: calculate from date range
+                const checkIn = new Date(selectedDateRange.from);
+                const checkOut = new Date(selectedDateRange.to);
+                const diffTime = checkOut - checkIn;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return Math.max(1, diffDays); // Minimum 1 night
+            } else {
+                // For staff users: use form nights value
+                return formNights || 1;
+            }
+        }
+        return 0; // Day tours have 0 nights
+    };
+
+    const nights = calculateNights();
+
+    // Helper functions to get current date based on user role and selections
+    const getCurrentDate = () => {
+        if (canSelectDates) {
+            if (bookingType === 'day_tour' && selectedDayTourDate) {
+                return format(selectedDayTourDate, 'yyyy-MM-dd');
+            } else if (bookingType === 'overnight' && selectedDateRange.from) {
+                return format(selectedDateRange.from, 'yyyy-MM-dd');
+            }
+        }
+        return getLocalDateString();
+    };
+
+    const getCheckOutDate = () => {
+        if (canSelectDates && bookingType === 'overnight' && selectedDateRange.to) {
+            return format(selectedDateRange.to, 'yyyy-MM-dd');
+        } else if (bookingType === 'overnight') {
+            // For staff users, calculate check-out based on 1 night default
+            return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+        }
+        return getLocalDateString();
+    };
 
     // Promo code state
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo, recalculatePromo } = usePromoCode();
@@ -106,10 +164,10 @@ const WalkInBooking = () => {
         form.setValue('rooms', roomsData);
     }, [selectedRooms, form]);
 
-    // Clear promo code when booking type or nights change
+    // Clear promo code when booking type, dates, or nights change
     useEffect(() => {
         if (promoInfo) {
-            console.log('WalkIn: Clearing promo due to booking type or nights change', { bookingType, nights });
+            console.log('WalkIn: Clearing promo due to booking type, dates, or nights change', { bookingType, selectedDayTourDate, selectedDateRange, formNights });
             isClearingPromo.current = true;
             clearPromo();
             setPromoCodeInput('');
@@ -119,7 +177,7 @@ const WalkInBooking = () => {
                 isClearingPromo.current = false;
             }, 100);
         }
-    }, [bookingType, nights]);
+    }, [bookingType, selectedDayTourDate, selectedDateRange, formNights]);
 
     // Auto-recalculate promo when cart contents change
     useEffect(() => {
@@ -136,11 +194,9 @@ const WalkInBooking = () => {
             
             const totals = calculateTotal();
             const bookingDates = {
-                checkIn: getLocalDateString(),
-                checkOut: bookingType === 'overnight' && nights 
-                    ? format(addDays(new Date(), nights), 'yyyy-MM-dd')
-                    : getLocalDateString(),
-                dayTourDate: bookingType === 'day_tour' ? getLocalDateString() : null
+                checkIn: getCurrentDate(),
+                checkOut: getCheckOutDate(),
+                dayTourDate: bookingType === 'day_tour' ? getCurrentDate() : null
             };
             
             // Recalculate promo discount with new totals
@@ -165,45 +221,40 @@ const WalkInBooking = () => {
         if (bookingType === 'day_tour') {
             fetchDayTourMealData();
             fetchDayTourPricing();
-        } else if (bookingType === 'overnight' && nights) {
+        } else if (bookingType === 'overnight' && nights > 0) {
             fetchOvernightMealQuote();
         } else {
             setDayTourMealData(null);
             setDayTourPricing(null);
         }
-    }, [bookingType, nights]);
+    }, [bookingType, nights, selectedDayTourDate, selectedDateRange, formNights]);
 
-    // Fetch available rooms when booking type or nights change
+    // Fetch available rooms when booking type, dates, or nights change
     useEffect(() => {
         fetchAvailableRooms();
         // Clear selected rooms when booking type changes
         setSelectedRooms([]);
-    }, [bookingType, nights]);
+    }, [bookingType, nights, selectedDayTourDate, selectedDateRange, formNights]);
 
     const fetchAvailableRooms = async () => {
         setAvailabilityLoading(true);
         try {
-            const today = getLocalDateString();
+            const checkInDate = getCurrentDate();
             let response;
 
             if (bookingType === 'day_tour') {
                 // For day tours, use the day tour availability endpoint
                 response = await api.get(`${API_PREFIX}/day-tours/availability`, {
-                    params: { date: today }
+                    params: { date: checkInDate }
                 });
                 // The response structure is different for day tour availability
                 setRooms(response?.data?.rooms || []);
             } else {
                 // For overnight bookings, use the regular rooms endpoint with availability
-                let checkOutDate;
-                if (nights) {
-                    checkOutDate = format(addDays(new Date(), nights), 'yyyy-MM-dd');
-                } else {
-                    checkOutDate = today;
-                }
+                const checkOutDate = getCheckOutDate();
 
                 response = await api.get(`${API_PREFIX}/rooms`, {
-                    params: { check_in: today, check_out: checkOutDate }
+                    params: { check_in: checkInDate, check_out: checkOutDate }
                 });
                 setRooms(response?.data?.data || []);
             }
@@ -218,8 +269,8 @@ const WalkInBooking = () => {
     const fetchDayTourMealData = async () => {
         setMealLoading(true);
         try {
-            const today = getLocalDateString();
-            const mealData = await fetchDayTourAvailability(api, today);
+            const selectedDate = getCurrentDate();
+            const mealData = await fetchDayTourAvailability(api, selectedDate);
             setDayTourMealData(mealData);
         } catch (error) {
             console.error('Failed to fetch Day Tour meal data:', error);
@@ -231,9 +282,9 @@ const WalkInBooking = () => {
 
     const fetchDayTourPricing = async () => {
         try {
-            const today = getLocalDateString();
+            const selectedDate = getCurrentDate();
             const response = await api.get(`${API_PREFIX}/day-tour-pricing/current`, {
-                params: { date: today }
+                params: { date: selectedDate }
             });
             setDayTourPricing(response.data);
         } catch (error) {
@@ -245,11 +296,11 @@ const WalkInBooking = () => {
     const fetchOvernightMealQuote = async () => {
         setMealLoading(true);
         try {
-            const today = getLocalDateString();
-            const checkOutDate = format(addDays(new Date(), nights), 'yyyy-MM-dd');
+            const checkInDate = getCurrentDate();
+            const checkOutDate = getCheckOutDate();
             
             const response = await api.post(`${API_PREFIX}/meals/quote`, {
-                check_in: today,
+                check_in: checkInDate,
                 check_out: checkOutDate
             });
             
@@ -390,11 +441,9 @@ const WalkInBooking = () => {
         if (!promoCodeInput.trim()) return;
         
         const bookingDates = {
-            checkIn: getLocalDateString(),
-            checkOut: bookingType === 'overnight' && nights 
-                ? format(addDays(new Date(), nights), 'yyyy-MM-dd')
-                : getLocalDateString(),
-            dayTourDate: bookingType === 'day_tour' ? getLocalDateString() : null
+            checkIn: getCurrentDate(),
+            checkOut: getCheckOutDate(),
+            dayTourDate: bookingType === 'day_tour' ? getCurrentDate() : null
         };
         
         await applyPromo(
@@ -478,7 +527,8 @@ const WalkInBooking = () => {
             const formData = {
                 ...data,
                 rooms: roomsData,
-                local_date: getLocalDateString(), // Send the local date to avoid timezone issues
+                local_date: getCurrentDate(), // Send the selected date to avoid timezone issues
+                nights: nights, // Include calculated nights
                 ...(promoInfo && promoInfo.id && { promo_id: promoInfo.id }), // Include promo if applied
             };
 
@@ -499,7 +549,7 @@ const WalkInBooking = () => {
     };
 
     const totals = calculateTotal();
-    const today = getLocalDateString();
+    const today = getCurrentDate();
 
     return (
         <div className="space-y-6">
@@ -521,9 +571,14 @@ const WalkInBooking = () => {
                             </CardTitle>
                             <CardDescription>
                                 {bookingType === 'day_tour' 
-                                    ? `Day Tour for today: ${today}`
-                                    : `Check-in: ${today}${nights ? `, Check-out: ${format(addDays(new Date(), nights), 'yyyy-MM-dd')}` : ''}`
+                                    ? `Day Tour for ${canSelectDates && selectedDayTourDate ? format(selectedDayTourDate, 'yyyy-MM-dd') : today}`
+                                    : `Check-in: ${today}${nights ? `, Check-out: ${getCheckOutDate()}` : ''}`
                                 }
+                                {!canSelectDates && (
+                                    <span className="block text-xs text-gray-500 mt-1">
+                                        Staff can only create bookings for today
+                                    </span>
+                                )}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -550,12 +605,54 @@ const WalkInBooking = () => {
                                     )}
                                 </div>
 
-                                {/* Nights Selection (for overnight only) */}
-                                {bookingType === 'overnight' && (
+                                {/* Date Selection (for admin/superadmin only) */}
+                                {canSelectDates && (
+                                    <div className="space-y-4">
+                                        <Separator />
+                                        <h3 className="text-lg font-semibold">Booking Dates</h3>
+                                        
+                                        {bookingType === 'day_tour' ? (
+                                            <div className="space-y-2">
+                                                <Label htmlFor="day_tour_date">Day Tour Date *</Label>
+                                                <WalkInDayTourDatePicker
+                                                    date={selectedDayTourDate}
+                                                    onChange={(date) => {
+                                                        setSelectedDayTourDate(date);
+                                                        form.setValue('day_tour_date', date ? format(date, 'yyyy-MM-dd') : '');
+                                                    }}
+                                                />
+                                                {form.formState.errors.day_tour_date && (
+                                                    <p className="text-sm text-red-600">
+                                                        {form.formState.errors.day_tour_date.message}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2">
+                                                <Label htmlFor="check_in_date">Check-in & Check-out Dates *</Label>
+                                                <WalkInDateRangePicker
+                                                    range={selectedDateRange}
+                                                    onChange={(range) => {
+                                                        setSelectedDateRange(range);
+                                                        form.setValue('check_in_date', range.from ? format(range.from, 'yyyy-MM-dd') : '');
+                                                    }}
+                                                />
+                                                {form.formState.errors.check_in_date && (
+                                                    <p className="text-sm text-red-600">
+                                                        {form.formState.errors.check_in_date.message}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Nights Selection (for staff users only) */}
+                                {!canSelectDates && bookingType === 'overnight' && (
                                     <div className="space-y-2">
                                         <Label htmlFor="nights">Number of Nights *</Label>
                                         <Select
-                                            value={nights?.toString()}
+                                            value={formNights?.toString()}
                                             onValueChange={(value) => form.setValue('nights', parseInt(value))}
                                         >
                                             <SelectTrigger>
@@ -1028,7 +1125,7 @@ const WalkInBooking = () => {
                                     </Badge>
                                 </div>
                                 
-                                {bookingType === 'overnight' && (
+                                {bookingType === 'overnight' && nights > 0 && (
                                     <div className="flex justify-between">
                                         <span className="text-sm text-gray-600">Nights:</span>
                                         <span className="text-sm font-medium">{nights} night{nights > 1 ? 's' : ''}</span>
@@ -1036,14 +1133,16 @@ const WalkInBooking = () => {
                                 )}
 
                                 <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Check-in Date:</span>
+                                    <span className="text-sm text-gray-600">
+                                        {bookingType === 'day_tour' ? 'Day Tour Date:' : 'Check-in Date:'}
+                                    </span>
                                     <span className="text-sm font-medium">{today}</span>
                                 </div>
 
                                 {bookingType === 'overnight' && nights && (
                                     <div className="flex justify-between">
                                         <span className="text-sm text-gray-600">Check-out Date:</span>
-                                        <span className="text-sm font-medium">{format(addDays(new Date(), nights), 'yyyy-MM-dd')}</span>
+                                        <span className="text-sm font-medium">{getCheckOutDate()}</span>
                                     </div>
                                 )}
 
