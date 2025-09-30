@@ -55,7 +55,7 @@ const RoomUnitCalendar = () => {
   ];
 
   // Status colors mapping - darker colors with full cell shading
-  const getStatusColor = (status) => {
+  const getStatusColor = (status, bookingSource = null) => {
     const colors = {
       available: 'bg-green-600 text-white hover:bg-green-700',
       booked: 'bg-blue-600 text-white hover:bg-blue-700',
@@ -63,7 +63,16 @@ const RoomUnitCalendar = () => {
       maintenance: 'bg-orange-600 text-white hover:bg-orange-700',
       blocked: 'bg-red-600 text-white hover:bg-red-700',
     };
-    return colors[status] || 'bg-gray-600 text-white hover:bg-gray-700';
+    
+    let baseColor = colors[status] || 'bg-gray-600 text-white hover:bg-gray-700';
+    
+    // Add walk-in indicator for booked/pending statuses
+    if ((status === 'booked' || status === 'pending') && bookingSource === 'walkin') {
+      // Add a subtle border or pattern to indicate walk-in
+      baseColor += ' border-2 border-orange-300';
+    }
+    
+    return baseColor;
   };
 
   // Fetch overnight calendar data
@@ -252,19 +261,24 @@ const RoomUnitCalendar = () => {
                           ['booked', 'pending'].includes(dayStatus.status) 
                             ? 'cursor-pointer hover:opacity-80' 
                             : 'cursor-default'
-                        } ${getStatusColor(dayStatus.status)}`}
+                        } ${getStatusColor(dayStatus.status, dayStatus.booking_source)}`}
                         onClick={() => handleCellClick(dayStatus, unit, room, isDayTour)}
                         title={
                           ['booked', 'pending'].includes(dayStatus.status)
-                            ? `Click to view booking details - ${dayStatus.date}`
+                            ? `Click to view booking details - ${dayStatus.date}${dayStatus.booking_source === 'walkin' ? ' (Walk-in)' : ''}`
                             : `${dayStatus.date}: ${dayStatus.status.charAt(0).toUpperCase() + dayStatus.status.slice(1)}`
                         }
                       >
-                        <div className="w-full h-6 flex items-center justify-center text-xs font-medium">
+                        <div className="w-full h-6 flex items-center justify-center text-xs font-medium relative">
                           {loadingBooking === `${unit.id}-${dayStatus.date}` ? (
                             <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
                           ) : (
-                            dayStatus.day
+                            <>
+                              {dayStatus.day}
+                              {dayStatus.booking_source === 'walkin' && ['booked', 'pending'].includes(dayStatus.status) && (
+                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full border border-white"></div>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
@@ -363,7 +377,13 @@ const RoomUnitCalendar = () => {
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-blue-600 rounded"></div>
-              <span>Booked</span>
+              <span>Booked (Online)</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-blue-600 border border-orange-300 rounded relative">
+                <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
+              </div>
+              <span>Booked (Walk-in)</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-yellow-600 rounded"></div>
