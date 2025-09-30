@@ -130,8 +130,9 @@ const WalkInBooking = () => {
         if (canSelectDates && bookingType === 'overnight' && selectedDateRange.to) {
             return format(selectedDateRange.to, 'yyyy-MM-dd');
         } else if (bookingType === 'overnight') {
-            // For staff users, calculate check-out based on 1 night default
-            return format(addDays(new Date(), 1), 'yyyy-MM-dd');
+            // For staff users, calculate check-out based on selected nights
+            const selectedNights = formNights || 1;
+            return format(addDays(new Date(), selectedNights), 'yyyy-MM-dd');
         }
         return getLocalDateString();
     };
