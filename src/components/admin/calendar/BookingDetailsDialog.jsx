@@ -290,6 +290,16 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
               <Badge className={getStatusColor(status)}>
                 {status.charAt(0).toUpperCase() + status.slice(1)}
               </Badge>
+              <Badge 
+                variant={currentBookingData.booking_source === 'walkin' ? 'default' : 'outline'}
+                className={`${
+                  currentBookingData.booking_source === 'walkin' 
+                    ? 'bg-orange-100 text-orange-800 border-orange-200' 
+                    : 'bg-purple-100 text-purple-800 border-purple-200'
+                }`}
+              >
+                {currentBookingData.booking_source === 'walkin' ? 'Walk-in' : 'Online'}
+              </Badge>
               <span className="text-sm text-muted-foreground">
                 {booking_type === 'day_tour' ? 'Day Tour' : 'Overnight Stay'}
               </span>
@@ -736,6 +746,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
         }}
         payment={editPayment}
         isEdit={!!editPayment}
+        booking={currentBookingData}
       />
     </Dialog>
   );

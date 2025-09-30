@@ -20,6 +20,7 @@ const ListBooking = () => {
     const [sorting, setSorting] = useState([]);
     const [status, setStatus] = useState("all");
     const [bookingType, setBookingType] = useState("all");
+    const [bookingSource, setBookingSource] = useState("all");
     const [bookingDate, setBookingDate] = useState("");
     const [bookingFromDate, setBookingFromDate] = useState("");
     const [bookingToDate, setBookingToDate] = useState("");
@@ -58,6 +59,23 @@ const ListBooking = () => {
                             : 'bg-green-100 text-green-800'
                     }`}>
                         {type === 'day_tour' ? 'Day Tour' : 'Overnight'}
+                    </span>
+                );
+            },
+        },
+        {
+            id: "booking_source",
+            header: "Source",
+            accessorKey: "booking_source",
+            cell: ({ row }) => {
+                const source = row.original.booking_source || 'online';
+                return (
+                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                        source === 'walkin' 
+                            ? 'bg-orange-100 text-orange-800' 
+                            : 'bg-purple-100 text-purple-800'
+                    }`}>
+                        {source === 'walkin' ? 'Walk-in' : 'Online'}
                     </span>
                 );
             },
@@ -169,6 +187,7 @@ const ListBooking = () => {
                 : 'created_at|desc',
             status: status === 'all' ? undefined : status,
             booking_type: bookingType === 'all' ? undefined : bookingType,
+            booking_source: bookingSource === 'all' ? undefined : bookingSource,
             created_date: bookingDate || undefined,
             created_from: bookingFromDate || undefined,
             created_to: bookingToDate || undefined,
@@ -194,6 +213,7 @@ const ListBooking = () => {
             search: debouncedSearch, 
             status, 
             booking_type: bookingType,
+            booking_source: bookingSource,
             created_date: bookingDate,
             created_from: bookingFromDate,
             created_to: bookingToDate,
@@ -202,7 +222,7 @@ const ListBooking = () => {
             date_to: checkinCheckoutToDate
         });
         // eslint-disable-next-line
-    }, [debouncedSearch, sorting, status, bookingType, bookingDate, bookingFromDate, bookingToDate, checkinCheckoutDate, checkinCheckoutFromDate, checkinCheckoutToDate, pagination]);
+    }, [debouncedSearch, sorting, status, bookingType, bookingSource, bookingDate, bookingFromDate, bookingToDate, checkinCheckoutDate, checkinCheckoutFromDate, checkinCheckoutToDate, pagination]);
 
     return (
         <div>
@@ -243,6 +263,14 @@ const ListBooking = () => {
                             { value: "all", label: "All" },
                             { value: "overnight", label: "Overnight" },
                             { value: "day_tour", label: "Day Tour" },
+                        ]
+                    },
+                    {
+                        key: "booking_source", label: "Source", value: bookingSource, onChange: setBookingSource,
+                        options: [
+                            { value: "all", label: "All" },
+                            { value: "online", label: "Online" },
+                            { value: "walkin", label: "Walk-in" },
                         ]
                     }
                 ]}
@@ -362,6 +390,7 @@ const ListBooking = () => {
                             setCheckinCheckoutFromDate("");
                             setCheckinCheckoutToDate("");
                             setBookingType("all");
+                            setBookingSource("all");
                             setStatus("all");
                         }}
                         className="text-red-600 hover:text-red-700"
