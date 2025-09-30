@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
     Popover,
     PopoverTrigger,
@@ -78,9 +78,12 @@ export function CartPopup() {
     };
     const { control, clearErrors, reset } = useForm();
     const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
-    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo, recalculatePromo } = usePromoCode();
     const api = useApi();
     useSyncCartForm(items, reset);
+    
+    // Ref to prevent infinite loops during promo recalculation
+    const isRecalculating = useRef(false);
 
     // Fetch Day Tour meal program data when there are Day Tour items
     useEffect(() => {
@@ -103,6 +106,34 @@ export function CartPopup() {
 
         fetchDayTourMealData();
     }, [isDayTourCart, items, api]);
+
+    // Auto-recalculate promo when cart contents change
+    useEffect(() => {
+        if (promoInfo && items.length > 0 && !isRecalculating.current) {
+            isRecalculating.current = true;
+            
+            const bookingDates = {
+                checkIn: checkIn,
+                checkOut: checkOut,
+                dayTourDate: isDayTourCart ? items.find(item => item.dayTourDate)?.dayTourDate : null
+            };
+            
+            // Recalculate promo discount with new totals
+            recalculatePromo(
+                api, 
+                roomTotalPrice, 
+                mealCost, 
+                grandTotal, 
+                bookingDates, 
+                mealQuote
+            );
+            
+            // Reset the flag after a short delay
+            setTimeout(() => {
+                isRecalculating.current = false;
+            }, 100);
+        }
+    }, [items, roomTotalPrice, mealCost, grandTotal, mealQuote]); // Remove promoInfo dependency to prevent infinite loops
 
     const handleApplyPromo = async () => {
         const bookingDates = {

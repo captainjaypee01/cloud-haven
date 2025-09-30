@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -79,8 +79,12 @@ const WalkInBooking = () => {
     const nights = form.watch('nights');
 
     // Promo code state
-    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo, recalculatePromo } = usePromoCode();
     const [promoCodeInput, setPromoCodeInput] = useState('');
+    
+    // Ref to prevent infinite loops during promo recalculation
+    const isRecalculating = useRef(false);
+    const isClearingPromo = useRef(false);
 
     // Use the meal calculation hook for overnight bookings
     const { 
@@ -105,10 +109,56 @@ const WalkInBooking = () => {
     // Clear promo code when booking type or nights change
     useEffect(() => {
         if (promoInfo) {
+            console.log('WalkIn: Clearing promo due to booking type or nights change', { bookingType, nights });
+            isClearingPromo.current = true;
             clearPromo();
             setPromoCodeInput('');
+            
+            // Reset the clearing flag after a short delay
+            setTimeout(() => {
+                isClearingPromo.current = false;
+            }, 100);
         }
     }, [bookingType, nights]);
+
+    // Auto-recalculate promo when cart contents change
+    useEffect(() => {
+        console.log('WalkIn: Auto-recalc useEffect triggered', {
+            hasPromoInfo: !!promoInfo,
+            selectedRoomsCount: selectedRooms.length,
+            isRecalculating: isRecalculating.current,
+            isClearingPromo: isClearingPromo.current
+        });
+        
+        if (promoInfo && selectedRooms.length > 0 && !isRecalculating.current && !isClearingPromo.current) {
+            console.log('WalkIn: Proceeding with promo recalculation');
+            isRecalculating.current = true;
+            
+            const totals = calculateTotal();
+            const bookingDates = {
+                checkIn: getLocalDateString(),
+                checkOut: bookingType === 'overnight' && nights 
+                    ? format(addDays(new Date(), nights), 'yyyy-MM-dd')
+                    : getLocalDateString(),
+                dayTourDate: bookingType === 'day_tour' ? getLocalDateString() : null
+            };
+            
+            // Recalculate promo discount with new totals
+            recalculatePromo(
+                api, 
+                totals.roomTotal, 
+                totals.mealTotal, 
+                totals.total, 
+                bookingDates, 
+                mealQuote
+            );
+            
+            // Reset the flag after a short delay
+            setTimeout(() => {
+                isRecalculating.current = false;
+            }, 100);
+        }
+    }, [selectedRooms, mealQuote]); // Remove promoInfo dependency to prevent infinite loops
 
     // Fetch meal data and pricing based on booking type
     useEffect(() => {

@@ -105,6 +105,7 @@ export const PromoCodeProvider = ({ children }) => {
     };
 
     const clearPromo = (showToast = true) => {
+        console.log('PromoCodeContext: clearPromo called', { showToast });
         dispatch({ type: 'CLEAR_PROMO' });
         if (showToast) {
             toast.success("Promo code removed.");
@@ -133,7 +134,30 @@ export const PromoCodeProvider = ({ children }) => {
             currentDate.setDate(checkIn.getDate() + i);
             const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
             
-            const isEligible = !promo.excluded_days || !promo.excluded_days.includes(dayOfWeek);
+            // Check if date is eligible based on promo period and excluded days
+            let isEligible = true;
+            
+            // Check if date falls within promo period
+            if (promo.starts_at) {
+                const promoStartDate = new Date(promo.starts_at);
+                promoStartDate.setHours(0, 0, 0, 0);
+                if (currentDate < promoStartDate) {
+                    isEligible = false;
+                }
+            }
+            
+            if (promo.ends_at) {
+                const promoEndDate = new Date(promo.ends_at);
+                promoEndDate.setHours(0, 0, 0, 0);
+                if (currentDate > promoEndDate) {
+                    isEligible = false;
+                }
+            }
+            
+            // Check excluded days of the week
+            if (isEligible && promo.excluded_days && promo.excluded_days.includes(dayOfWeek)) {
+                isEligible = false;
+            }
             
             let nightDiscount = 0;
             if (isEligible) {
@@ -185,7 +209,30 @@ export const PromoCodeProvider = ({ children }) => {
             currentDate.setDate(checkIn.getDate() + i);
             const dayOfWeek = currentDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
             
-            const isEligible = !promo.excluded_days || !promo.excluded_days.includes(dayOfWeek);
+            // Check if date is eligible based on promo period and excluded days
+            let isEligible = true;
+            
+            // Check if date falls within promo period
+            if (promo.starts_at) {
+                const promoStartDate = new Date(promo.starts_at);
+                promoStartDate.setHours(0, 0, 0, 0);
+                if (currentDate < promoStartDate) {
+                    isEligible = false;
+                }
+            }
+            
+            if (promo.ends_at) {
+                const promoEndDate = new Date(promo.ends_at);
+                promoEndDate.setHours(0, 0, 0, 0);
+                if (currentDate > promoEndDate) {
+                    isEligible = false;
+                }
+            }
+            
+            // Check excluded days of the week
+            if (isEligible && promo.excluded_days && promo.excluded_days.includes(dayOfWeek)) {
+                isEligible = false;
+            }
             
             let nightDiscount = 0;
             let baseAmount = 0;
@@ -290,6 +337,7 @@ export const PromoCodeProvider = ({ children }) => {
                 discountAmount,
                 perNightBreakdown 
             });
+            setPromoCode(promoCode); // Set the promo code in state
             toast.success(`Promo code "${promo.code}" applied successfully!`);
         } catch (err) {
             console.error(err);
@@ -302,6 +350,61 @@ export const PromoCodeProvider = ({ children }) => {
         }
     };
 
+    // Function to recalculate promo discount when cart contents change
+    const recalculatePromo = async (api, roomTotalPrice, mealCost, grandTotal, bookingDates = {}, mealQuote = null) => {
+        // Only recalculate if we have an active promo
+        if (!state.promoInfo) {
+            return;
+        }
+
+        const promo = state.promoInfo;
+        
+        try {
+            // Compute discount based on promo.scope and per-night calculation
+            let discountAmount = 0;
+            let perNightBreakdown = null;
+            
+            if (promo.per_night_calculation && bookingDates.checkIn && bookingDates.checkOut) {
+                // Calculate per-night discount using actual meal breakdown
+                const result = calculatePerNightDiscountWithMealBreakdown(promo, bookingDates, roomTotalPrice, mealCost, grandTotal, mealQuote);
+                discountAmount = result.totalDiscount;
+                perNightBreakdown = result.breakdown;
+            } else {
+                // Traditional calculation (entire booking)
+                if (promo.discount_type === 'percentage') {
+                    if (promo.scope === 'room') {
+                        discountAmount = roomTotalPrice * (promo.discount_value / 100);
+                    } else if (promo.scope === 'meal') {
+                        discountAmount = mealCost * (promo.discount_value / 100);
+                    } else { // 'total'
+                        discountAmount = grandTotal * (promo.discount_value / 100);
+                    }
+                } else if (promo.discount_type === 'fixed') {
+                    if (promo.scope === 'room') {
+                        discountAmount = Math.min(promo.discount_value, roomTotalPrice);
+                    } else if (promo.scope === 'meal') {
+                        discountAmount = Math.min(promo.discount_value, mealCost);
+                    } else {
+                        discountAmount = Math.min(promo.discount_value, grandTotal);
+                    }
+                }
+            }
+            
+            discountAmount = Math.round(discountAmount * 100) / 100; // round to 2 decimals
+
+            // Update promo info with new discount amount (silently, no toast)
+            setPromoInfo({
+                ...promo,
+                discountAmount,
+                perNightBreakdown
+            });
+        } catch (error) {
+            console.error('Promo recalculation error:', error);
+            // If recalculation fails, we could optionally clear the promo
+            // clearPromo(false); // false = no toast
+        }
+    };
+
     const value = {
         ...state,
         setPromoCode,
@@ -309,7 +412,8 @@ export const PromoCodeProvider = ({ children }) => {
         setPromoError,
         clearPromo,
         clearPromoSilently,
-        applyPromo
+        applyPromo,
+        recalculatePromo
     };
 
     return (

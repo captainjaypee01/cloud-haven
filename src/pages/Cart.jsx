@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SEO from "@/components/SEO";
 import { useCart } from "../context/CartContext";
 import { usePromoCode } from "../context/PromoCodeContext";
@@ -37,8 +37,11 @@ const Cart = () => {
     const [unavailable, setUnavailable] = useState([]);
     const [dayTourMealData, setDayTourMealData] = useState(null);
     const { navigate } = useAppContext();
+    
+    // Ref to prevent infinite loops during promo recalculation
+    const isRecalculating = useRef(false);
     const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
-    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo } = usePromoCode();
+    const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo, recalculatePromo } = usePromoCode();
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
 
@@ -63,6 +66,34 @@ const Cart = () => {
 
         fetchDayTourMealData();
     }, [isDayTourCart, items, api]);
+
+    // Auto-recalculate promo when cart contents change
+    useEffect(() => {
+        if (promoInfo && summary.length > 0 && !isRecalculating.current) {
+            isRecalculating.current = true;
+            
+            const bookingDates = {
+                checkIn: checkIn,
+                checkOut: checkOut,
+                dayTourDate: isDayTourCart ? items.find(item => item.dayTourDate)?.dayTourDate : null
+            };
+            
+            // Recalculate promo discount with new totals
+            recalculatePromo(
+                api, 
+                roomTotalPrice, 
+                mealCost, 
+                grandTotal, 
+                bookingDates, 
+                mealQuote
+            );
+            
+            // Reset the flag after a short delay
+            setTimeout(() => {
+                isRecalculating.current = false;
+            }, 100);
+        }
+    }, [summary, roomTotalPrice, mealCost, grandTotal, mealQuote]); // Remove promoInfo dependency to prevent infinite loops
 
     const handleApplyPromo = async () => {
         const bookingDates = {
