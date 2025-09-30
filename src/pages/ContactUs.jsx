@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { HERO_CAROUSEL_IMAGES } from "@/constants/contact-us";
-import { SUPPORT_EMAIL, SUPPORT_LANDLINE, SUPPORT_PHONE } from "@/constants/AppConstant";
+import { SUPPORT_EMAIL, SUPPORT_LANDLINE, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from "@/constants/AppConstant";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -84,7 +84,7 @@ const ContactUsPage = () => {
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
                 title="Contact Us - Netania De Laiya Resort"
-                description="Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Contact our beachfront resort in Laiya, Batangas at +63 949 798 9831. We're here to help plan your perfect beach getaway."
+                description="Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Contact our beachfront resort in Laiya, Batangas at +63 949 798 9831 or +63 945 663 0848. We're here to help plan your perfect beach getaway."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://www.netaniadelaiya.com/contact-us'}
                 og={{ url: 'https://www.netaniadelaiya.com/contact-us' }}
                 jsonLd={{
@@ -92,7 +92,7 @@ const ContactUsPage = () => {
                   '@type': 'LodgingBusiness',
                   name: 'Netania De Laiya',
                   url: 'https://www.netaniadelaiya.com/contact-us',
-                  telephone: '+63 949 798 9831',
+                  telephone: '+63 949 798 9831, +63 945 663 0848',
                   email: SUPPORT_EMAIL,
                   address: {
                     '@type': 'PostalAddress',
@@ -196,7 +196,10 @@ const ContactUsPage = () => {
                 <div className="text-gray-800">
                     <h2 className="text-2xl font-semibold mb-4">Contact Information</h2>
                     <p className="mb-2"><strong>Tel:</strong> {SUPPORT_LANDLINE}</p>
-                    <p className="mb-2"><strong>Phone:</strong> {SUPPORT_PHONE}</p>
+                    <p className="mb-2">
+                        <strong>Phone:</strong> {SUPPORT_PHONE} <br/>
+                        <span className="ml-[54px]">{SUPPORT_PHONE_ALT}</span>
+                    </p>
                     <p className="mb-2"><strong>Email:</strong> {SUPPORT_EMAIL}</p>
                     <p className="mb-2"><strong>Address:</strong> Laiya-Aplaya,San Juan,Batangas, Batangas City, Philippines</p>
                     <p className="mb-2"><strong>Facebook:</strong> <a href="https://www.facebook.com/profile.php?id=100064182843841" target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">Follow Us on Facebook</a></p>

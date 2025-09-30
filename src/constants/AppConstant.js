@@ -6,5 +6,6 @@ export const NETANIA_LOGO = "https://res.cloudinary.com/dm3gsotk5/image/upload/v
 
 export const SUPPORT_EMAIL = "netaniadelaiya@gmail.com";
 export const SUPPORT_PHONE = "+63 949 798 9831";
+export const SUPPORT_PHONE_ALT = "+63 945 663 0848";
 export const SUPPORT_LANDLINE = "043 332 0569";
 export const SUPPORT_ADDRESS = "Laiya-Aplaya, San Juan, Batangas, Philippines";
