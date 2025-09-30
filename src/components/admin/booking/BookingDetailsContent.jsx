@@ -50,6 +50,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     // Permission checks
     const canCancel = ['admin', 'superadmin'].includes(userRole);
     const canDelete = userRole === 'superadmin';
+    const canAddPayments = ['staff', 'admin', 'superadmin'].includes(userRole);
+    const canAddCharges = ['staff', 'admin', 'superadmin'].includes(userRole);
 
     const resetForm = useForm({
         defaultValues: { reason: '' }
@@ -213,17 +215,29 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
 
             {/* Header & Actions */}
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                <div className="space-y-2">
-                    <div className="flex flex-col gap-2">
-                        {booking.booking_type === 'day_tour' && (
-                            <Badge variant="secondary" className="w-fit">Day Tour</Badge>
-                        )}
-                        <h2 className="text-2xl font-bold">
-                            Booking #{booking.reference_number}
-                        </h2>
+                    <div className="space-y-2">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                                {booking.booking_type === 'day_tour' && (
+                                    <Badge variant="secondary" className="w-fit">Day Tour</Badge>
+                                )}
+                                <Badge 
+                                    variant={booking.booking_source === 'walkin' ? 'default' : 'outline'}
+                                    className={`w-fit ${
+                                        booking.booking_source === 'walkin' 
+                                            ? 'bg-orange-100 text-orange-800 border-orange-200' 
+                                            : 'bg-purple-100 text-purple-800 border-purple-200'
+                                    }`}
+                                >
+                                    {booking.booking_source === 'walkin' ? 'Walk-in' : 'Online'}
+                                </Badge>
+                            </div>
+                            <h2 className="text-2xl font-bold">
+                                Booking #{booking.reference_number}
+                            </h2>
+                        </div>
+                        <StatusBadge status={booking.status} />
                     </div>
-                    <StatusBadge status={booking.status} />
-                </div>
                 <div className="flex flex-wrap gap-2">
                     {/* Calendar View Button */}
                     <Button
@@ -280,6 +294,18 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <div><span className="font-semibold">Total Guests:</span> {booking.total_guests}</div>
                         <div><span className="font-semibold">Special Requests:</span> {booking.special_requests || '-'}</div>
                         <div><span className="font-semibold">User ID:</span> {booking.user_id || '-'}</div>
+                        <div><span className="font-semibold">Booking Source:</span> 
+                            <Badge 
+                                variant={booking.booking_source === 'walkin' ? 'default' : 'outline'}
+                                className={`ml-2 ${
+                                    booking.booking_source === 'walkin' 
+                                        ? 'bg-orange-100 text-orange-800 border-orange-200' 
+                                        : 'bg-purple-100 text-purple-800 border-purple-200'
+                                }`}
+                            >
+                                {booking.booking_source === 'walkin' ? 'Walk-in' : 'Online'}
+                            </Badge>
+                        </div>
                         <div><span className="font-semibold">Promo Used:</span> {booking.promo ? (
                             <span className="ml-1">
                                 <Badge variant="secondary" className="mr-1">
@@ -325,14 +351,16 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-3">
                         <div className="text-lg font-semibold">Price Breakdown</div>
-                        <Button
-                            size="sm"
-                            className="cursor-pointer"
-                            variant="secondary"
-                            onClick={() => setShowAddOtherCharge(true)}
-                        >
-                            + Add Other Charge
-                        </Button>
+                        {canAddCharges && (
+                            <Button
+                                size="sm"
+                                className="cursor-pointer"
+                                variant="secondary"
+                                onClick={() => setShowAddOtherCharge(true)}
+                            >
+                                + Add Other Charge
+                            </Button>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -677,14 +705,16 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                         </td>
                                         <td className="py-2 pr-4 text-center">
                                             <div className="flex flex-col gap-1">
-                                                <Button
-                                                    size="sm"
-                                                    variant="secondary"
-                                                    className="cursor-pointer text-xs"
-                                                    onClick={() => { setEditPayment(p); setShowAddPayment(true) }}
-                                                >
-                                                    Edit
-                                                </Button>
+                                                {canAddPayments && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="secondary"
+                                                        className="cursor-pointer text-xs"
+                                                        onClick={() => { setEditPayment(p); setShowAddPayment(true) }}
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                )}
                                                 
                                                 {/* Proof management buttons */}
                                                 <Button
@@ -728,14 +758,16 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         </table>
                     </div>
                     {/* Add Manual Payment Button */}
-                    <div className="mt-4 flex justify-end">
-                        <Button
-                            className="cursor-pointer"
-                            onClick={() => setShowAddPayment(true)}
-                        >
-                            + Add Manual Payment
-                        </Button>
-                    </div>
+                    {canAddPayments && (
+                        <div className="mt-4 flex justify-end">
+                            <Button
+                                className="cursor-pointer"
+                                onClick={() => setShowAddPayment(true)}
+                            >
+                                + Add Manual Payment
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -785,6 +817,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 }}
                 payment={editPayment}
                 isEdit={!!editPayment}
+                booking={booking}
             />
             <DeleteDialog
                 open={deleteDialogOpen}
