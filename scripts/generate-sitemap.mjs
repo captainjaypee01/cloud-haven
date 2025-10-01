@@ -23,7 +23,7 @@ async function fetchRoomSlugs() {
     const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
     return list.map((r) => r.slug || r.room_slug || r.id).filter(Boolean);
   } catch (error) {
-    console.log('Failed to fetch room slugs:', error.message);
+    console.error('Failed to fetch room slugs:', error.message);
     return [];
   }
 }
@@ -43,7 +43,7 @@ async function fetchDayTourRoomSlugs() {
     const list = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
     return list.map((r) => r.slug || r.room_slug || r.id).filter(Boolean);
   } catch (error) {
-    console.log('Failed to fetch day tour room slugs:', error.message);
+    console.error('Failed to fetch day tour room slugs:', error.message);
     return [];
   }
 }

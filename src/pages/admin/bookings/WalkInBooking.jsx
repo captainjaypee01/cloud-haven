@@ -119,33 +119,27 @@ const WalkInBooking = () => {
         if (canSelectDates) {
             if (bookingType === 'day_tour' && selectedDayTourDate) {
                 const date = format(selectedDayTourDate, 'yyyy-MM-dd');
-                console.log('WalkIn: getCurrentDate (day tour, admin)', { selectedDayTourDate, date });
                 return date;
             } else if (bookingType === 'overnight' && selectedDateRange.from) {
                 const date = format(selectedDateRange.from, 'yyyy-MM-dd');
-                console.log('WalkIn: getCurrentDate (overnight, admin)', { selectedDateRange, date });
                 return date;
             }
         }
         const date = getLocalDateString();
-        console.log('WalkIn: getCurrentDate (staff/default)', { canSelectDates, bookingType, date });
         return date;
     };
 
     const getCheckOutDate = () => {
         if (canSelectDates && bookingType === 'overnight' && selectedDateRange.to) {
             const date = format(selectedDateRange.to, 'yyyy-MM-dd');
-            console.log('WalkIn: getCheckOutDate (admin)', { selectedDateRange, date });
             return date;
         } else if (bookingType === 'overnight') {
             // For staff users, calculate check-out based on selected nights
             const selectedNights = formNights || 1;
             const date = format(addDays(new Date(), selectedNights), 'yyyy-MM-dd');
-            console.log('WalkIn: getCheckOutDate (staff)', { selectedNights, date });
             return date;
         }
         const date = getLocalDateString();
-        console.log('WalkIn: getCheckOutDate (default)', { bookingType, date });
         return date;
     };
 
@@ -180,7 +174,6 @@ const WalkInBooking = () => {
     // Clear promo code when booking type, dates, or nights change
     useEffect(() => {
         if (promoInfo) {
-            console.log('WalkIn: Clearing promo due to booking type, dates, or nights change', { bookingType, selectedDayTourDate, selectedDateRange, formNights });
             isClearingPromo.current = true;
             clearPromo();
             setPromoCodeInput('');
@@ -194,15 +187,7 @@ const WalkInBooking = () => {
 
     // Auto-recalculate promo when cart contents change
     useEffect(() => {
-        console.log('WalkIn: Auto-recalc useEffect triggered', {
-            hasPromoInfo: !!promoInfo,
-            selectedRoomsCount: selectedRooms.length,
-            isRecalculating: isRecalculating.current,
-            isClearingPromo: isClearingPromo.current
-        });
-        
         if (promoInfo && selectedRooms.length > 0 && !isRecalculating.current && !isClearingPromo.current) {
-            console.log('WalkIn: Proceeding with promo recalculation');
             isRecalculating.current = true;
             
             const totals = calculateTotal();
@@ -311,8 +296,6 @@ const WalkInBooking = () => {
         try {
             const checkInDate = getCurrentDate();
             const checkOutDate = getCheckOutDate();
-            
-            console.log('WalkIn: Fetching overnight meal quote with dates:', { checkInDate, checkOutDate, nights });
             
             const response = await api.post(`${API_PREFIX}/meals/quote`, {
                 check_in: checkInDate,
@@ -479,9 +462,6 @@ const WalkInBooking = () => {
     };
 
     const onSubmit = async (data) => {
-        console.log('Form submitted with data:', data);
-        console.log('Selected rooms:', selectedRooms);
-        
         if (selectedRooms.length === 0) {
             toast.error(`Please select at least one ${bookingType === 'day_tour' ? 'facility' : 'room'}`);
             return;
@@ -775,17 +755,6 @@ const WalkInBooking = () => {
                                                     ? (room.available_units || 0)
                                                     : (room.available_count || 0);
                                                 
-                                                // Debug logging for overnight bookings
-                                                if (bookingType === 'overnight') {
-                                                    console.log('Room availability debug:', {
-                                                        roomName: room.name,
-                                                        available_count: room.available_count,
-                                                        pending_count: room.pending_count,
-                                                        total_units: room.total_units,
-                                                        totalAvailableUnits,
-                                                        room
-                                                    });
-                                                }
                                                 const minGuests = room.min_guests || 1;
                                                 
                                                 // Calculate remaining available units after current selections

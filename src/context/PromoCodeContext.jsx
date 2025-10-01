@@ -62,7 +62,6 @@ export const PromoCodeProvider = ({ children }) => {
         };
 
         const handleClearPromoCodes = () => {
-            console.log('PromoCodeContext: Received clearPromoCodes event');
             dispatch({ type: 'CLEAR_PROMO' });
         };
 
@@ -105,7 +104,6 @@ export const PromoCodeProvider = ({ children }) => {
     };
 
     const clearPromo = (showToast = true) => {
-        console.log('PromoCodeContext: clearPromo called', { showToast });
         dispatch({ type: 'CLEAR_PROMO' });
         if (showToast) {
             toast.success("Promo code removed.");
