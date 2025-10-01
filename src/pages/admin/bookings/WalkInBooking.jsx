@@ -118,23 +118,35 @@ const WalkInBooking = () => {
     const getCurrentDate = () => {
         if (canSelectDates) {
             if (bookingType === 'day_tour' && selectedDayTourDate) {
-                return format(selectedDayTourDate, 'yyyy-MM-dd');
+                const date = format(selectedDayTourDate, 'yyyy-MM-dd');
+                console.log('WalkIn: getCurrentDate (day tour, admin)', { selectedDayTourDate, date });
+                return date;
             } else if (bookingType === 'overnight' && selectedDateRange.from) {
-                return format(selectedDateRange.from, 'yyyy-MM-dd');
+                const date = format(selectedDateRange.from, 'yyyy-MM-dd');
+                console.log('WalkIn: getCurrentDate (overnight, admin)', { selectedDateRange, date });
+                return date;
             }
         }
-        return getLocalDateString();
+        const date = getLocalDateString();
+        console.log('WalkIn: getCurrentDate (staff/default)', { canSelectDates, bookingType, date });
+        return date;
     };
 
     const getCheckOutDate = () => {
         if (canSelectDates && bookingType === 'overnight' && selectedDateRange.to) {
-            return format(selectedDateRange.to, 'yyyy-MM-dd');
+            const date = format(selectedDateRange.to, 'yyyy-MM-dd');
+            console.log('WalkIn: getCheckOutDate (admin)', { selectedDateRange, date });
+            return date;
         } else if (bookingType === 'overnight') {
             // For staff users, calculate check-out based on selected nights
             const selectedNights = formNights || 1;
-            return format(addDays(new Date(), selectedNights), 'yyyy-MM-dd');
+            const date = format(addDays(new Date(), selectedNights), 'yyyy-MM-dd');
+            console.log('WalkIn: getCheckOutDate (staff)', { selectedNights, date });
+            return date;
         }
-        return getLocalDateString();
+        const date = getLocalDateString();
+        console.log('WalkIn: getCheckOutDate (default)', { bookingType, date });
+        return date;
     };
 
     // Promo code state
@@ -152,7 +164,7 @@ const WalkInBooking = () => {
         extraGuestFeeTotal, 
         summaryWithMealBreakdown,
         mealLoading: mealCalculationLoading
-    } = useWalkInMealCalculation(bookingType, nights, selectedRooms);
+    } = useWalkInMealCalculation(bookingType, nights, selectedRooms, getCurrentDate(), getCheckOutDate());
 
     // Update form rooms field when selectedRooms changes
     useEffect(() => {
@@ -299,6 +311,8 @@ const WalkInBooking = () => {
         try {
             const checkInDate = getCurrentDate();
             const checkOutDate = getCheckOutDate();
+            
+            console.log('WalkIn: Fetching overnight meal quote with dates:', { checkInDate, checkOutDate, nights });
             
             const response = await api.post(`${API_PREFIX}/meals/quote`, {
                 check_in: checkInDate,

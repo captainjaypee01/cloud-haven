@@ -3,7 +3,7 @@ import { useApi } from "../useApi";
 import { API_PREFIX } from "../../constants/api";
 import { parseISO, addDays, format } from "date-fns";
 
-export function useWalkInMealCalculation(bookingType, nights, selectedRooms) {
+export function useWalkInMealCalculation(bookingType, nights, selectedRooms, checkInDate = null, checkOutDate = null) {
     const [mealQuote, setMealQuote] = useState(null);
     const [loading, setLoading] = useState(false);
     const api = useApi();
@@ -14,27 +14,29 @@ export function useWalkInMealCalculation(bookingType, nights, selectedRooms) {
         } else {
             setMealQuote(null);
         }
-    }, [bookingType, nights, selectedRooms]);
+    }, [bookingType, nights, selectedRooms, checkInDate, checkOutDate]);
 
     const fetchMealQuote = async () => {
         try {
             setLoading(true);
             
-            // Get current date properly, accounting for timezone
+            // Use provided dates or fallback to current date calculation
             const now = new Date();
-            const today = format(now, 'yyyy-MM-dd');
-            const checkOutDate = format(addDays(now, nights), 'yyyy-MM-dd');
+            const today = checkInDate || format(now, 'yyyy-MM-dd');
+            const checkoutDate = checkOutDate || format(addDays(now, nights), 'yyyy-MM-dd');
             
             console.log('WalkIn Meal Quote API call:', { 
                 check_in: today, 
-                check_out: checkOutDate, 
+                check_out: checkoutDate, 
                 nights,
+                providedCheckIn: checkInDate,
+                providedCheckOut: checkOutDate,
                 currentTime: now.toISOString()
             });
             
             const response = await api.post(`${API_PREFIX}/meals/quote`, {
                 check_in: today,
-                check_out: checkOutDate
+                check_out: checkoutDate
             });
             
             if (response.data) {
@@ -62,8 +64,8 @@ export function useWalkInMealCalculation(bookingType, nights, selectedRooms) {
 
         // Get the dates for the booking (use same logic as API call)
         const now = new Date();
-        const today = format(now, 'yyyy-MM-dd');
-        const checkOutDate = format(addDays(now, nights), 'yyyy-MM-dd');
+        const today = checkInDate || format(now, 'yyyy-MM-dd');
+        const checkoutDate = checkOutDate || format(addDays(now, nights), 'yyyy-MM-dd');
 
         // Transform selectedRooms to match the summary structure used in guest cart
         const summary = selectedRooms.map(roomItem => ({
