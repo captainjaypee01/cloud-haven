@@ -39,6 +39,11 @@ const paymentStatusOptions = [
     { value: 'failed', label: 'Failed' },
 ];
 
+const downpaymentStatusOptions = [
+    { value: 'none', label: 'None' },
+    { value: 'downpayment', label: 'Downpayment' },
+];
+
 // Resize image file if too large (same as ProofOfPaymentDialog)
 const resizeImageFile = (file) => {
     return new Promise(resolve => {
@@ -115,6 +120,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
         amount: z.coerce.number().min(0.01, 'Amount is required'),
         provider: z.string().min(1, 'Provider is required'),
         status: z.string().min(1, 'Status is required'),
+        downpayment_status: z.string().optional(),
         transaction_id: z.string().optional(),
         remarks: z.string().optional(),
         notify_guest: z.boolean().default(true),
@@ -127,37 +133,38 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
             amount: '',
             provider: 'cash',
             status: 'paid',
+            downpayment_status: 'none',
             transaction_id: '',
             remarks: '',
             notify_guest: true,
             proof_file: null,
         },
-        values: payment ? {
-            amount: payment.amount || '',
-            provider: payment.provider || 'cash',
-            status: payment.status || 'paid',
-            transaction_id: payment.transaction_id || '',
-            remarks: payment.remarks || '',
-            notify_guest: true,
-            proof_file: null,
-        } : undefined,
     });
     const { setError, reset, watch } = form;
     
     const selectedProvider = watch('provider');
     const requiresProof = ['gcash', 'bank_bdo'].includes(selectedProvider);
+    
+    // Check if booking already has a downpayment (excluding the current payment being edited)
+    const hasExistingDownpayment = booking?.payments?.some(p => 
+        p.downpayment_status === 'downpayment' && 
+        (!isEdit || p.id !== payment?.id)
+    );
+    
+    // Show downpayment option if:
+    // 1. No existing downpayment in the booking, OR
+    // 2. We're editing the existing downpayment (to allow changing it)
+    const canSetDownpayment = !hasExistingDownpayment || (isEdit && payment?.downpayment_status === 'downpayment');
+    
+    // Filter downpayment options based on availability
+    const availableDownpaymentOptions = canSetDownpayment 
+        ? downpaymentStatusOptions 
+        : downpaymentStatusOptions.filter(option => option.value === 'none');
 
     useEffect(() => {
         if (!open) {
-            reset(payment ? {
-                amount: payment.amount || '',
-                provider: payment.provider || 'cash',
-                status: payment.status || 'paid',
-                transaction_id: payment.transaction_id || '',
-                remarks: payment.remarks || '',
-                notify_guest: true,
-                proof_file: null,
-            } : undefined);
+            // Reset form when dialog closes
+            reset();
             setProofFile(null);
             // Clean up preview URL
             if (proofPreview && proofPreview.startsWith('blob:')) {
@@ -167,7 +174,46 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
             setIsDragging(false);
         }
         // eslint-disable-next-line
-    }, [open, payment]);
+    }, [open]);
+
+    // Separate effect for handling form data when dialog is open
+    useEffect(() => {
+        if (open) {
+            if (payment && isEdit) {
+                // Editing existing payment
+                reset({
+                    amount: payment.amount || '',
+                    provider: payment.provider || 'cash',
+                    status: payment.status || 'paid',
+                    downpayment_status: payment.downpayment_status || 'none',
+                    transaction_id: payment.transaction_id || '',
+                    remarks: payment.remarks || '',
+                    notify_guest: true,
+                    proof_file: null,
+                });
+            } else {
+                // Adding new payment - always reset to defaults
+                reset({
+                    amount: '',
+                    provider: 'cash',
+                    status: 'paid',
+                    downpayment_status: 'none',
+                    transaction_id: '',
+                    remarks: '',
+                    notify_guest: true,
+                    proof_file: null,
+                });
+            }
+        }
+        // eslint-disable-next-line
+    }, [open, payment, isEdit, reset]);
+
+    // Auto-set downpayment_status to 'none' if not available (only for new payments, not when editing)
+    useEffect(() => {
+        if (!canSetDownpayment && !isEdit && form.getValues('downpayment_status') === 'downpayment') {
+            form.setValue('downpayment_status', 'none');
+        }
+    }, [canSetDownpayment, isEdit, form]);
 
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
@@ -264,6 +310,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                     formData.append('amount', values.amount);
                     formData.append('provider', values.provider);
                     formData.append('status', values.status);
+                    formData.append('downpayment_status', values.downpayment_status || 'none');
                     formData.append('transaction_id', values.transaction_id || '');
                     formData.append('remarks', values.remarks || '');
                     formData.append('notify_guest', values.notify_guest ? '1' : '0');
@@ -295,6 +342,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                 formData.append('amount', values.amount);
                 formData.append('provider', values.provider);
                 formData.append('status', values.status);
+                formData.append('downpayment_status', values.downpayment_status || 'none');
                 formData.append('transaction_id', values.transaction_id || '');
                 formData.append('remarks', values.remarks || '');
                 formData.append('notify_guest', values.notify_guest ? '1' : '0');
@@ -342,12 +390,13 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
-                <DialogHeader>
+            <DialogContent className="max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogHeader className="flex-shrink-0">
                     <DialogTitle>{isEdit ? 'Edit Payment' : 'Add Manual Payment'}</DialogTitle>
                 </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-2">
+                <div className="flex-1 overflow-y-auto px-1">
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-2">
                         <FormField name="amount" control={form.control} render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Amount</FormLabel>
@@ -381,6 +430,31 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                             label="Status"
                             options={paymentStatusOptions}
                         />
+                        <FormSelectField
+                            name="downpayment_status"
+                            control={form.control}
+                            label="Downpayment Status"
+                            options={availableDownpaymentOptions}
+                        />
+                        
+                        {/* Show info message when downpayment option is not available */}
+                        {!canSetDownpayment && (
+                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="flex items-start gap-2">
+                                    <div className="text-blue-600 mt-0.5 flex-shrink-0">
+                                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h4 className="text-sm font-medium text-blue-900">Downpayment Status</h4>
+                                        <p className="text-sm text-blue-700 mt-1">
+                                            This booking already has a downpayment. Additional payments cannot be marked as downpayment.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         
                         {/* Proof of Payment Upload - Only show when allowed */}
                         {showProofUpload && (
@@ -394,7 +468,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                                             <div className="space-y-4">
                                                 {!proofFile ? (
                                                     <div
-                                                        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200 ${
+                                                        className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-all duration-200 ${
                                                             isDragging 
                                                                 ? 'border-primary bg-primary/5 scale-105' 
                                                                 : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50'
@@ -455,7 +529,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                                                                     <img
                                                                         src={proofPreview}
                                                                         alt="Payment proof preview"
-                                                                        className="w-full max-h-32 object-contain border rounded-md bg-white"
+                                                                        className="w-full max-h-24 sm:max-h-32 object-contain border rounded-md bg-white"
                                                                         onLoad={() => {
                                                                         }}
                                                                         onError={(e) => {
@@ -499,7 +573,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                 <div className="flex items-start gap-2">
                                     <FileImage className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                                    <div>
+                                    <div className="min-w-0">
                                         <h4 className="text-sm font-medium text-blue-900">Proof of Payment</h4>
                                         <p className="text-sm text-blue-700 mt-1">
                                             {payment.proof_uploaded_by === 'guest' 
@@ -536,17 +610,19 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                                 </FormItem>
                             )}
                         />
-                        <DialogFooter>
-                            <Button
-                                type="submit"
-                                className="cursor-pointer"
-                                disabled={form.formState.isSubmitting}
-                            >
-                                {form.formState.isSubmitting ? (isEdit ? 'Saving...' : 'Saving...') : (isEdit ? 'Update Payment' : 'Add Payment')}
-                            </Button>
-                        </DialogFooter>
-                    </form>
-                </Form>
+                        </form>
+                    </Form>
+                </div>
+                <DialogFooter className="flex-shrink-0 border-t pt-4 mt-4">
+                    <Button
+                        type="submit"
+                        className="cursor-pointer w-full sm:w-auto"
+                        disabled={form.formState.isSubmitting}
+                        onClick={form.handleSubmit(handleSubmit)}
+                    >
+                        {form.formState.isSubmitting ? (isEdit ? 'Saving...' : 'Saving...') : (isEdit ? 'Update Payment' : 'Add Payment')}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
