@@ -131,15 +131,15 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-xl max-h-[80vh] sm:max-h-[90vh] overflow-y-auto p-0">
-                <div className="relative p-6">
-                    <DialogHeader className="pb-4">
-                        <DialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-destructive" />
-                            Cancel Booking
-                        </DialogTitle>
-                    </DialogHeader>
+            <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col p-0">
+                <DialogHeader className="flex-shrink-0 p-6 pb-4">
+                    <DialogTitle className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        Cancel Booking
+                    </DialogTitle>
+                </DialogHeader>
 
+                <div className="flex-1 overflow-y-auto px-6">
                     <div className="space-y-4">
                         {/* Warning Alert */}
                         <Alert className="border-destructive/50 bg-destructive/10">
@@ -231,29 +231,6 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
                                         )}
                                     />
 
-                                    <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 pt-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => onOpenChange(false)}
-                                            disabled={form.formState.isSubmitting}
-                                            className="w-full sm:w-auto"
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            variant="destructive"
-                                            className="cursor-pointer w-full sm:w-auto"
-                                            disabled={
-                                                form.formState.isSubmitting || 
-                                                !form.watch('confirm_cancellation') ||
-                                                form.watch('reference_confirmation') !== booking?.reference_number
-                                            }
-                                        >
-                                            {form.formState.isSubmitting ? 'Cancelling...' : 'Cancel Booking'}
-                                        </Button>
-                                    </DialogFooter>
                                 </form>
                             </Form>
                         ) : (
@@ -264,21 +241,48 @@ const BookingCancellationDialog = ({ open, onOpenChange, booking, onSuccess }) =
                                 </AlertDescription>
                             </Alert>
                         )}
-
-                        {!canCancel && (
-                            <DialogFooter className="pt-4">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => onOpenChange(false)}
-                                    className="w-full sm:w-auto"
-                                >
-                                    Close
-                                </Button>
-                            </DialogFooter>
-                        )}
                     </div>
                 </div>
+
+                {canCancel ? (
+                    <DialogFooter className="flex-shrink-0 border-t pt-4 px-6 pb-6">
+                        <div className="flex flex-col-reverse sm:flex-row gap-2 w-full">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => onOpenChange(false)}
+                                disabled={form.formState.isSubmitting}
+                                className="w-full sm:w-auto"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="destructive"
+                                className="cursor-pointer w-full sm:w-auto"
+                                disabled={
+                                    form.formState.isSubmitting || 
+                                    !form.watch('confirm_cancellation') ||
+                                    form.watch('reference_confirmation') !== booking?.reference_number
+                                }
+                                onClick={form.handleSubmit(handleSubmit)}
+                            >
+                                {form.formState.isSubmitting ? 'Cancelling...' : 'Cancel Booking'}
+                            </Button>
+                        </div>
+                    </DialogFooter>
+                ) : (
+                    <DialogFooter className="flex-shrink-0 border-t pt-4 px-6 pb-6">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                            className="w-full sm:w-auto"
+                        >
+                            Close
+                        </Button>
+                    </DialogFooter>
+                )}
             </DialogContent>
         </Dialog>
     );

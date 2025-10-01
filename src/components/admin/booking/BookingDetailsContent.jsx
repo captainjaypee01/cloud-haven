@@ -736,6 +736,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <th className="py-2 pr-4 font-medium">Provider</th>
                                     <th className="py-2 pr-4 font-medium">Amount</th>
                                     <th className="py-2 pr-4 font-medium">Status</th>
+                                    <th className="py-2 pr-4 font-medium">Downpayment Status</th>
                                     <th className="py-2 pr-4 font-medium">Transaction ID</th>
                                     <th className="py-2 pr-4 font-medium">Error Code</th>
                                     <th className="py-2 pr-4 font-medium">Error Message</th>
@@ -747,7 +748,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             <tbody>
                                 {booking.payments?.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} className="py-3 text-center text-muted">No payments found.</td>
+                                        <td colSpan={8} className="py-3 text-center text-muted">No payments found.</td>
                                     </tr>
                                 )}
                                 {booking.payments?.map((p, idx) => (
@@ -756,6 +757,13 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                         <td className="py-2 pr-4">{getPaymentProviderLabel(p.provider)}</td>
                                         <td className="py-2 pr-4">{formatCurrency(p.amount)}</td>
                                         <td className="py-2 pr-4"><StatusBadge status={p.status} /></td>
+                                        <td className="py-2 pr-4">
+                                            {p.downpayment_status === 'downpayment' ? (
+                                                <Badge variant="warning" className="text-xs">Downpayment</Badge>
+                                            ) : (
+                                                '-'
+                                            )}
+                                        </td>
                                         <td className="py-2 pr-4">{p.transaction_id || '-'}</td>
                                         <td className="py-2 pr-4">{p.error_code || '-'}</td>
                                         <td className="py-2 pr-4">{p.error_message || '-'}</td>
@@ -843,7 +851,10 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <div className="mt-4 flex justify-end">
                             <Button
                                 className="cursor-pointer"
-                                onClick={() => setShowAddPayment(true)}
+                                onClick={() => {
+                                    setEditPayment(null);
+                                    setShowAddPayment(true);
+                                }}
                             >
                                 + Add Manual Payment
                             </Button>
