@@ -11,6 +11,7 @@ import ProofImageDialog from './ProofImageDialog';
 import BookingCancellationDialog from './BookingCancellationDialog';
 import BookingDeletionDialog from './BookingDeletionDialog';
 import ChangeRoomUnitDialog from './ChangeRoomUnitDialog';
+import BookingPrintButton from './BookingPrintButton';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3 } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
@@ -239,6 +240,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <StatusBadge status={booking.status} />
                     </div>
                 <div className="flex flex-wrap gap-2">
+                    {/* Print Receipt Button */}
+                    <BookingPrintButton 
+                        booking={booking}
+                        className="cursor-pointer"
+                        variant="outline"
+                    />
                     {/* Calendar View Button */}
                     <Button
                         className="cursor-pointer"
