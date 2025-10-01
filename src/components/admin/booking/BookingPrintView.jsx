@@ -23,7 +23,7 @@ const BookingPrintView = ({ booking, sections = {} }) => {
 
     // Calculate totals
     const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
-    const actualFinalPrice = Number(booking.final_price) - Number(booking.discount_amount || 0);
+    const actualFinalPrice = Number(booking.final_price) - Number(booking.discount_amount || 0) - Number(booking.pwd_senior_discount || 0);
     const otherCharges = booking.other_charges || 0;
     const totalPayable = actualFinalPrice + Number(otherCharges);
     const remainingBalance = Math.max(totalPayable - totalPaid, 0);
@@ -387,6 +387,12 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                             <span class="print-label">Discount:</span>
                             <span class="print-value print-amount-negative">-${formatCurrency(booking.discount_amount)}</span>
                         </div>
+                        ${booking.pwd_senior_discount > 0 ? `
+                        <div class="print-item">
+                            <span class="print-label">PWD/Senior Discount:</span>
+                            <span class="print-value print-amount-negative">-${formatCurrency(booking.pwd_senior_discount)}</span>
+                        </div>
+                        ` : ''}
                         <div class="print-item">
                             <span class="print-label">Other Charges:</span>
                             <span class="print-value">${formatCurrency(otherCharges)}</span>

@@ -141,7 +141,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
   } = currentBookingData;
 
   // Calculate total_payable and remaining_balance consistently with BookingDetailsContent
-  const actualFinalPrice = Number(final_price) - Number(discount_amount || 0);
+  const actualFinalPrice = Number(final_price) - Number(discount_amount || 0) - Number(currentBookingData.pwd_senior_discount || 0);
   const totalPayable = actualFinalPrice + Number(other_charges || 0);
   const remainingBalance = Math.max(totalPayable - Number(total_paid || 0), 0);
 
@@ -428,6 +428,12 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Discount:</span>
                     <span className="font-medium text-sm sm:text-base text-green-600">-{formatCurrency(discount_amount || 0)}</span>
+                  </div>
+                )}
+                {(currentBookingData.pwd_senior_discount || 0) > 0 && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">PWD/Senior Discount:</span>
+                    <span className="font-medium text-sm sm:text-base text-green-600">-{formatCurrency(currentBookingData.pwd_senior_discount || 0)}</span>
                   </div>
                 )}
                 {(other_charges || 0) > 0 && (
