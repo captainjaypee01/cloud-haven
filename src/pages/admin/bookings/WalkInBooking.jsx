@@ -39,7 +39,7 @@ const FormSchema = z.object({
     booking_type: z.enum(['day_tour', 'overnight'], {
         required_error: "Please select a booking type",
     }),
-    nights: z.number().min(1).max(5).optional(), // For staff users only
+    nights: z.number().min(1).max(5).optional(), // For staff users only - only validated when present
     guest_name: z.string().min(1, "Guest name is required"),
     guest_email: z.string().email("Please provide a valid email address"),
     guest_phone: z.string().min(1, "Guest phone is required"),
@@ -529,7 +529,8 @@ const WalkInBooking = () => {
                 ...data,
                 rooms: roomsData,
                 local_date: getCurrentDate(), // Send the selected date to avoid timezone issues
-                nights: nights, // Include calculated nights
+                // Only include nights for overnight bookings
+                ...(bookingType === 'overnight' && { nights: nights }),
                 ...(promoInfo && promoInfo.id && { promo_id: promoInfo.id }), // Include promo if applied
             };
 
