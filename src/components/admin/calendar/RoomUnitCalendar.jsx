@@ -222,14 +222,14 @@ const RoomUnitCalendar = () => {
 
     return (
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full border-collapse border border-gray-300 min-w-[600px]">
           <thead>
             <tr className="bg-gray-50">
-              <th className="border border-gray-300 p-2 text-left font-medium min-w-[120px]">
+              <th className="border border-gray-300 p-2 text-left font-medium min-w-[120px] sticky left-0 bg-gray-50 z-10">
                 Unit
               </th>
               {data.days.map(day => (
-                <th key={day} className="border border-gray-300 p-1 text-center font-medium w-8">
+                <th key={day} className="border border-gray-300 p-1 text-center font-medium w-8 min-w-[32px]">
                   {day}
                 </th>
               ))}
@@ -242,7 +242,7 @@ const RoomUnitCalendar = () => {
                 <tr className="bg-gray-100">
                   <td
                     colSpan={2 + data.days.length}
-                    className="border border-gray-300 p-2 font-semibold text-gray-800"
+                    className="border border-gray-300 p-2 font-semibold text-gray-800 sticky left-0 bg-gray-100 z-10"
                   >
                     {room.room_name}
                   </td>
@@ -251,7 +251,7 @@ const RoomUnitCalendar = () => {
                 {/* Room units */}
                 {room.units.map(unit => (
                   <tr key={unit.id} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 p-2 font-medium">
+                    <td className="border border-gray-300 p-2 font-medium sticky left-0 bg-white z-10">
                       {unit.unit_number}
                     </td>
                     {unit.day_statuses.map(dayStatus => (
@@ -303,10 +303,10 @@ const RoomUnitCalendar = () => {
           </CardTitle>
           
           {/* Month/Year Controls */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                <SelectTrigger className="w-24">
+                <SelectTrigger className="w-20 sm:w-24">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -319,7 +319,7 @@ const RoomUnitCalendar = () => {
               </Select>
 
               <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-28 sm:w-32">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -332,7 +332,7 @@ const RoomUnitCalendar = () => {
               </Select>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 w-full sm:w-auto justify-center sm:justify-start">
               <Button
                 variant="outline"
                 size="sm"
@@ -369,38 +369,38 @@ const RoomUnitCalendar = () => {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4 text-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:items-center gap-2 lg:gap-4 text-sm">
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-green-600 rounded"></div>
-              <span>Available</span>
+              <div className="w-3 h-3 bg-green-600 rounded flex-shrink-0"></div>
+              <span className="text-xs sm:text-sm">Available</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-600 rounded"></div>
-              <span>Booked (Online)</span>
+              <div className="w-3 h-3 bg-blue-600 rounded flex-shrink-0"></div>
+              <span className="text-xs sm:text-sm">Booked (Online)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-600 border border-orange-300 rounded relative">
+              <div className="w-3 h-3 bg-blue-600 border border-orange-300 rounded relative flex-shrink-0">
                 <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
               </div>
-              <span>Booked (Walk-in)</span>
+              <span className="text-xs sm:text-sm">Booked (Walk-in)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-yellow-600 rounded"></div>
-              <span>Pending</span>
+              <div className="w-3 h-3 bg-yellow-600 rounded flex-shrink-0"></div>
+              <span className="text-xs sm:text-sm">Pending</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-orange-600 rounded"></div>
-              <span>Maintenance</span>
+              <div className="w-3 h-3 bg-orange-600 rounded flex-shrink-0"></div>
+              <span className="text-xs sm:text-sm">Maintenance</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-red-600 rounded"></div>
-              <span>Blocked</span>
+              <div className="w-3 h-3 bg-red-600 rounded flex-shrink-0"></div>
+              <span className="text-xs sm:text-sm">Blocked</span>
             </div>
           </div>
           
           {/* Day Tour Toggle */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center lg:justify-end space-x-2">
             <Label htmlFor="day-tour-toggle" className="text-sm font-medium">
               Show Day Tour Units
             </Label>

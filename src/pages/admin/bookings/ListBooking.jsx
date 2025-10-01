@@ -276,39 +276,40 @@ const ListBooking = () => {
                 ]}
             />
             <div className="mb-4 space-y-4">
-                {/* Date Filters - One line on larger screens */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Date Filters - Responsive layout */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     {/* Booking Creation Date Filters */}
                     <div className="space-y-2">
                         <h4 className="text-sm font-semibold text-gray-700">Filter by Booking Creation Date</h4>
-                        <div className="flex gap-4 items-end">
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium mb-1">Date Range</label>
-                                <div className="flex gap-2 items-center">
+                        <div className="space-y-3">
+                            <div className="flex flex-col space-y-2">
+                                <label className="text-sm font-medium">Date Range</label>
+                                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                                     <Input
                                         type="date"
                                         value={bookingFromDate}
                                         onChange={(e) => setBookingFromDate(e.target.value)}
-                                        className="w-36"
+                                        className="w-full sm:w-36"
                                         placeholder="From date"
                                     />
-                                    <span className="text-gray-500">to</span>
+                                    <span className="text-gray-500 text-sm hidden sm:inline">to</span>
+                                    <span className="text-gray-500 text-sm sm:hidden">to</span>
                                     <Input
                                         type="date"
                                         value={bookingToDate}
                                         onChange={(e) => setBookingToDate(e.target.value)}
-                                        className="w-36"
+                                        className="w-full sm:w-36"
                                         placeholder="To date"
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium mb-1">Or specific date</label>
+                            <div className="flex flex-col space-y-2">
+                                <label className="text-sm font-medium">Or specific date</label>
                                 <Input
                                     type="date"
                                     value={bookingDate}
                                     onChange={(e) => setBookingDate(e.target.value)}
-                                    className="w-36"
+                                    className="w-full sm:w-36"
                                     placeholder="Select date"
                                 />
                             </div>
@@ -321,7 +322,7 @@ const ListBooking = () => {
                                 setBookingToDate("");
                                 setBookingDate("");
                             }}
-                            className="text-xs"
+                            className="text-xs w-full sm:w-auto"
                         >
                             Clear Booking Date
                         </Button>
@@ -330,34 +331,35 @@ const ListBooking = () => {
                     {/* Check-in/Check-out Date Filters */}
                     <div className="space-y-2">
                         <h4 className="text-sm font-semibold text-gray-700">Filter by Check-in/Check-out Date</h4>
-                        <div className="flex gap-4 items-end">
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium mb-1">Date Range</label>
-                                <div className="flex gap-2 items-center">
+                        <div className="space-y-3">
+                            <div className="flex flex-col space-y-2">
+                                <label className="text-sm font-medium">Date Range</label>
+                                <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                                     <Input
                                         type="date"
                                         value={checkinCheckoutFromDate}
                                         onChange={(e) => setCheckinCheckoutFromDate(e.target.value)}
-                                        className="w-36"
+                                        className="w-full sm:w-36"
                                         placeholder="From date"
                                     />
-                                    <span className="text-gray-500">to</span>
+                                    <span className="text-gray-500 text-sm hidden sm:inline">to</span>
+                                    <span className="text-gray-500 text-sm sm:hidden">to</span>
                                     <Input
                                         type="date"
                                         value={checkinCheckoutToDate}
                                         onChange={(e) => setCheckinCheckoutToDate(e.target.value)}
-                                        className="w-36"
+                                        className="w-full sm:w-36"
                                         placeholder="To date"
                                     />
                                 </div>
                             </div>
-                            <div className="flex flex-col">
-                                <label className="text-sm font-medium mb-1">Or specific date</label>
+                            <div className="flex flex-col space-y-2">
+                                <label className="text-sm font-medium">Or specific date</label>
                                 <Input
                                     type="date"
                                     value={checkinCheckoutDate}
                                     onChange={(e) => setCheckinCheckoutDate(e.target.value)}
-                                    className="w-36"
+                                    className="w-full sm:w-36"
                                     placeholder="Select date"
                                 />
                             </div>
@@ -370,7 +372,7 @@ const ListBooking = () => {
                                 setCheckinCheckoutToDate("");
                                 setCheckinCheckoutDate("");
                             }}
-                            className="text-xs"
+                            className="text-xs w-full sm:w-auto"
                         >
                             Clear Check-in/Check-out Date
                         </Button>
@@ -378,7 +380,7 @@ const ListBooking = () => {
                 </div>
 
                 {/* Clear All Filters */}
-                <div className="flex justify-end">
+                <div className="flex justify-center sm:justify-end">
                     <Button
                         variant="outline"
                         size="sm"
@@ -393,7 +395,7 @@ const ListBooking = () => {
                             setBookingSource("all");
                             setStatus("all");
                         }}
-                        className="text-red-600 hover:text-red-700"
+                        className="text-red-600 hover:text-red-700 w-full sm:w-auto"
                     >
                         Clear All Filters
                     </Button>
