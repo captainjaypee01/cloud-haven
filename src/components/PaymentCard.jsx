@@ -34,7 +34,9 @@ const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
     
     // Determine if user can upload based on count, status, and booking status
     const isBookingCancelled = booking?.status === 'cancelled';
+    const isPaymentPaid = payment.status === 'paid';
     const canUpload = !isBookingCancelled && 
+                     !isPaymentPaid &&
                      currentUploads < maxUploads && 
                      (proofStatus === 'none' || proofStatus === 'rejected');
 
@@ -64,6 +66,8 @@ const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
         if (!canUpload) {
             if (isBookingCancelled) {
                 toast.error('Cannot upload proof - booking has been cancelled.');
+            } else if (isPaymentPaid) {
+                toast.info('Payment is already completed - no proof upload needed.');
             } else if (proofStatus === 'accepted') {
                 toast.info('This payment proof has already been accepted by admin.');
             } else if (proofStatus === 'pending') {
@@ -97,6 +101,8 @@ const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
         if (!canUpload) {
             if (isBookingCancelled) {
                 toast.error('Cannot upload proof - booking has been cancelled.');
+            } else if (isPaymentPaid) {
+                toast.info('Payment is already completed - no proof upload needed.');
             } else if (proofStatus === 'accepted') {
                 toast.info('This payment proof has already been accepted by admin.');
             } else if (proofStatus === 'pending') {
@@ -197,6 +203,13 @@ const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
                     <div className="flex items-center justify-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg">
                         <XCircle className="h-5 w-5 text-red-600" />
                         <span className="text-sm font-medium text-red-700">Booking cancelled - proof uploads not allowed</span>
+                    </div>
+                );
+            } else if (isPaymentPaid) {
+                return (
+                    <div className="flex items-center justify-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                        <span className="text-sm font-medium text-green-700">Payment completed - no proof upload needed</span>
                     </div>
                 );
             } else if (proofStatus === 'accepted') {
