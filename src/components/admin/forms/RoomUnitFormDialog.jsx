@@ -55,7 +55,7 @@ const RoomUnitFormDialog = ({ open, onOpenChange, initialData, onSuccess }) => {
         return date.toISOString().split('T')[0];
       }
     } catch (error) {
-      console.warn('Failed to parse date:', dateValue);
+      // Date parsing failed, will use default value
     }
     
     return '';
@@ -113,8 +113,6 @@ const RoomUnitFormDialog = ({ open, onOpenChange, initialData, onSuccess }) => {
     }
 
     setLoading(true);
-    
-    console.log('Submitting form data:', formData);
     
     try {
       const response = await api.patch(

@@ -25,22 +25,12 @@ export function useWalkInMealCalculation(bookingType, nights, selectedRooms, che
             const today = checkInDate || format(now, 'yyyy-MM-dd');
             const checkoutDate = checkOutDate || format(addDays(now, nights), 'yyyy-MM-dd');
             
-            console.log('WalkIn Meal Quote API call:', { 
-                check_in: today, 
-                check_out: checkoutDate, 
-                nights,
-                providedCheckIn: checkInDate,
-                providedCheckOut: checkOutDate,
-                currentTime: now.toISOString()
-            });
-            
             const response = await api.post(`${API_PREFIX}/meals/quote`, {
                 check_in: today,
                 check_out: checkoutDate
             });
             
             if (response.data) {
-                console.log('WalkIn Meal Quote API response:', response.data);
                 setMealQuote(response.data);
             }
         } catch (error) {

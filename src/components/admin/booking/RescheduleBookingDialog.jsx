@@ -246,7 +246,6 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (err) {
-            console.log('error', err);
             if (err.response?.status === 422 && err.response.data?.errors) {
                 Object.entries(err.response.data.errors).forEach(([field, messages]) => {
                     setError(field, { type: "manual", message: messages.join(", ") });

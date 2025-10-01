@@ -52,14 +52,12 @@ export const CartProvider = ({ children }) => {
     
     // Function to clear promo codes when dates change
     const clearPromoCodes = () => {
-        console.log('CartContext: Clearing promo codes...');
         localStorage.removeItem('cart_promo_code');
         localStorage.removeItem('cart_promo_info');
         localStorage.removeItem('checkout_promo_info');
         
         // Dispatch a custom event to notify PromoCodeContext
         window.dispatchEvent(new CustomEvent('clearPromoCodes'));
-        console.log('CartContext: Custom event dispatched');
     };
     
     // Day Tour specific data

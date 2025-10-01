@@ -40,7 +40,6 @@ const BookingPrintExample = ({ booking }) => {
     const handleGetHTML = () => {
         // Get HTML content (useful for email templates, etc.)
         const htmlContent = getBookingReceiptHTML(booking, PRINT_PRESETS.CUSTOMER);
-        console.log('HTML Content:', htmlContent);
         
         // You could use this HTML for:
         // - Email templates

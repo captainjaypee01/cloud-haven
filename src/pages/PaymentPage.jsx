@@ -37,14 +37,6 @@ const PaymentPage = () => {
             // Handle different API response structures
             const data = response.data?.data || response.data?.booking || response.data;
             if (data) {
-                // Debug: Log the booking data to see what we're receiving
-                console.log('PaymentPage - Booking data received:', {
-                    reference_number: data.reference_number,
-                    total_price: data.total_price,
-                    meal_price: data.meal_price,
-                    final_price: data.final_price,
-                    discount_amount: data.discount_amount
-                });
                 setBooking(data);
             } else {
                 toast.error("Failed to fetch booking details");
@@ -94,7 +86,6 @@ const PaymentPage = () => {
     const downpaymentAmount = booking.downpayment_amount || (actualFinalPrice * 0.5);
     const remainingBalance = Math.max(0, actualFinalPrice - paidAmount);
     const subtotal = ((booking.total_price || 0) + (booking.meal_price || 0));
-    console.log('subtotal', subtotal);
     // Check if downpayment has been paid (total paid amount >= downpayment amount)
     const downpaymentPaid = paidAmount >= downpaymentAmount;
     // Check if full payment has been made
