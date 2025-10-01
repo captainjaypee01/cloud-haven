@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/carousel';
 import { AlertTriangle, X } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay";
-import { SUPPORT_EMAIL, SUPPORT_PHONE } from '@/constants/AppConstant';
+import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from '@/constants/AppConstant';
 
 const ScamAwarenessDialog = ({ open, onOpenChange }) => {
     // Array of scam awareness images - can be easily expanded
@@ -197,6 +197,12 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                                     className="text-green-600 hover:text-green-800 underline"
                                 >
                                     {SUPPORT_PHONE}
+                                </a></p>
+                                <p><a 
+                                    href={`tel:${SUPPORT_PHONE_ALT.replace(/\s/g, '')}`}
+                                    className="text-green-600 hover:text-green-800 underline ml-[56px]"
+                                >
+                                    {SUPPORT_PHONE_ALT}
                                 </a></p>
                                 <p><strong>Website:</strong> <a 
                                     href="https://www.netaniadelaiya.com" 
