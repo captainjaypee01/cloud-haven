@@ -135,19 +135,19 @@ export const PromoCodeProvider = ({ children }) => {
             // Check if date is eligible based on promo period and excluded days
             let isEligible = true;
             
-            // Check if date falls within promo period
+            // Check if date falls within promo period (simple date string comparison)
+            const currentDateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+            
             if (promo.starts_at) {
-                const promoStartDate = new Date(promo.starts_at);
-                promoStartDate.setHours(0, 0, 0, 0);
-                if (currentDate < promoStartDate) {
+                const promoStartStr = promo.starts_at.split('T')[0]; // YYYY-MM-DD format
+                if (currentDateStr < promoStartStr) {
                     isEligible = false;
                 }
             }
             
             if (promo.ends_at) {
-                const promoEndDate = new Date(promo.ends_at);
-                promoEndDate.setHours(0, 0, 0, 0);
-                if (currentDate > promoEndDate) {
+                const promoEndStr = promo.ends_at.split('T')[0]; // YYYY-MM-DD format
+                if (currentDateStr > promoEndStr) {
                     isEligible = false;
                 }
             }
@@ -210,19 +210,19 @@ export const PromoCodeProvider = ({ children }) => {
             // Check if date is eligible based on promo period and excluded days
             let isEligible = true;
             
-            // Check if date falls within promo period
+            // Check if date falls within promo period (simple date string comparison)
+            const currentDateStr = currentDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+            
             if (promo.starts_at) {
-                const promoStartDate = new Date(promo.starts_at);
-                promoStartDate.setHours(0, 0, 0, 0);
-                if (currentDate < promoStartDate) {
+                const promoStartStr = promo.starts_at.split('T')[0]; // YYYY-MM-DD format
+                if (currentDateStr < promoStartStr) {
                     isEligible = false;
                 }
             }
             
             if (promo.ends_at) {
-                const promoEndDate = new Date(promo.ends_at);
-                promoEndDate.setHours(0, 0, 0, 0);
-                if (currentDate > promoEndDate) {
+                const promoEndStr = promo.ends_at.split('T')[0]; // YYYY-MM-DD format
+                if (currentDateStr > promoEndStr) {
                     isEligible = false;
                 }
             }
@@ -298,12 +298,12 @@ export const PromoCodeProvider = ({ children }) => {
             // Note: Day Tour scope validation is now handled by the backend API
             // The backend will return an error if a non-total scope promo is used for Day Tour bookings
             
-            // Compute discount based on promo.scope and per-night calculation
+            // For per-night calculation promos, use backend calculation
             let discountAmount = 0;
             let perNightBreakdown = null;
             
             if (promo.per_night_calculation && bookingDates.checkIn && bookingDates.checkOut) {
-                // Calculate per-night discount using actual meal breakdown
+                // Use frontend calculation for per-night promos (backend API removed)
                 const result = calculatePerNightDiscountWithMealBreakdown(promo, bookingDates, roomTotalPrice, mealCost, grandTotal, mealQuote);
                 discountAmount = result.totalDiscount;
                 perNightBreakdown = result.breakdown;

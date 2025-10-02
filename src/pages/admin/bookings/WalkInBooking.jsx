@@ -454,11 +454,8 @@ const WalkInBooking = () => {
             mealQuote
         );
         
-        // If successful, update the promo code state
-        const promoInfoFromContext = promoInfo;
-        if (promoInfoFromContext) {
-            setPromoCode(promoCodeInput);
-        }
+        // The applyPromo function from PromoCodeContext already handles setting the promo code
+        // No need to manually set it here
     };
 
     const onSubmit = async (data) => {
