@@ -133,11 +133,8 @@ const ListBooking = () => {
             header: "Total Amount",
             accessorKey: "total_payable",
             cell: ({ row }) => {
-                // Calculate the actual total amount including other charges
-                const actualFinalPrice = (row.original.final_price || 0) - (row.original.discount_amount || 0);
-                const otherCharges = row.original.other_charges || 0;
-                const totalAmount = actualFinalPrice + otherCharges;
-                return formatCurrency(totalAmount);
+                // Use pre-calculated value from API
+                return formatCurrency(row.original.total_payable || 0);
             },
         },
         {
