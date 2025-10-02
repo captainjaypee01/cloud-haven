@@ -188,12 +188,10 @@ const Dashboard = () => {
                     </thead>
                     <tbody className="text-gray-700">
                         {(bookings_today_tomorrow || []).map((booking) => {
-
-                            const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
-
-                            // Remaining balance = (final price + other charges) - total paid (never negative)
-                            const totalPayable = Number(booking.final_price) + Number(booking.other_charges);
-                            const remainingBalance = Math.max(booking.final_price - totalPaid, 0);
+                            // Use pre-calculated values from backend API
+                            const totalPayable = booking.total_payable || 0;
+                            const remainingBalance = booking.remaining_balance || 0;
+                            
                             return (
                                 <tr key={booking.id} className="border-t border-gray-300">
                                     <td className="py-2 px-4">{booking.guest_name}</td>
