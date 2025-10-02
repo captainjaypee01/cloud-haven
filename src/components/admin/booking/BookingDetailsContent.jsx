@@ -55,6 +55,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const canDelete = userRole === 'superadmin';
     const canAddPayments = ['staff', 'admin', 'superadmin'].includes(userRole);
     const canAddCharges = ['staff', 'admin', 'superadmin'].includes(userRole);
+    const canChangeRoomUnit = ['staff', 'admin', 'superadmin'].includes(userRole);
 
     const resetForm = useForm({
         defaultValues: { reason: '' }
@@ -559,16 +560,18 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             </>
                                         )}
                                         <td className="py-2 pr-4">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="cursor-pointer"
-                                                onClick={() => handleChangeRoomUnit(br)}
-                                                title="Change room unit"
-                                            >
-                                                <Edit3 className="h-3 w-3 mr-1" />
-                                                Change Unit
-                                            </Button>
+                                            {canChangeRoomUnit && (
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="cursor-pointer"
+                                                    onClick={() => handleChangeRoomUnit(br)}
+                                                    title="Change room unit"
+                                                >
+                                                    <Edit3 className="h-3 w-3 mr-1" />
+                                                    Change Unit
+                                                </Button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
