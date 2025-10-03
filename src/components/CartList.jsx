@@ -153,6 +153,7 @@ const CartList = ({
                         render={({ field }) => (
                             <GuestSelector
                                 name={field.name}
+                                minGuests={item.roomType === 'day_tour' ? 1 : 0}
                                 maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                 value={field.value ?? ""}
                                 onChange={v => handleChange(item, "adults", v)}
@@ -168,6 +169,7 @@ const CartList = ({
                         render={({ field }) => (
                             <GuestSelector
                                 name={field.name}
+                                minGuests={0}
                                 maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                 value={field.value ?? ""}
                                 onChange={v => handleChange(item, "children", v)}

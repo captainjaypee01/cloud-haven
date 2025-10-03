@@ -158,6 +158,15 @@ export function CartPopup() {
             toast.error("At least one guest required.");
             return;
         }
+        
+        // For Day Tour items, validate minimum guest requirement
+        if (item.roomType === 'day_tour' && item.minGuests) {
+            if (total < parseInt(item.minGuests)) {
+                toast.error(`Minimum ${item.minGuests} guests required for this Day Tour facility.`);
+                return;
+            }
+        }
+        
         if (total > parseInt(item.maxGuests) + parseInt(item.extraGuests)) {
             toast.error(`Only up to ${parseInt(item.maxGuests) + parseInt(item.extraGuests)} guests can stay in this room.`);
             return;
@@ -288,6 +297,7 @@ export function CartPopup() {
                                             render={({ field }) => (
                                                 <GuestSelector
                                                     name={field.name}
+                                                    minGuests={item.roomType === 'day_tour' ? 1 : 0}
                                                     maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                                     value={field.value}
                                                     onChange={v => handleChange(item, "adults", v)}
@@ -307,6 +317,7 @@ export function CartPopup() {
                                             render={({ field }) => (
                                                 <GuestSelector
                                                     name={field.name}
+                                                    minGuests={0}
                                                     maxGuests={parseInt(item.maxGuests) + parseInt(item.extraGuests)}
                                                     value={field.value}
                                                     onChange={v => handleChange(item, "children", v)}
