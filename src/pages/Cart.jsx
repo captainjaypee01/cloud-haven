@@ -199,6 +199,15 @@ const Cart = () => {
             toast.error("At least one guest required.");
             return;
         }
+        
+        // For Day Tour items, validate minimum guest requirement
+        if (item.roomType === 'day_tour' && item.minGuests) {
+            if (total < parseInt(item.minGuests)) {
+                toast.error(`Minimum ${item.minGuests} guests required for this Day Tour facility.`);
+                return;
+            }
+        }
+        
         if (total > parseInt(item.maxGuests) + parseInt(item.extraGuests)) {
             toast.error(`Only up to ${parseInt(item.maxGuests) + parseInt(item.extraGuests)} guests can stay in this room.`);
             return;
