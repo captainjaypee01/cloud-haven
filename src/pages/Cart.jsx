@@ -366,6 +366,9 @@ const Cart = () => {
                                         <div className="flex justify-between">
                                             <span>
                                                 PM Snack
+                                                {dayTourMealData?.pm_snack_policy === 'optional' && (
+                                                    <span className="ml-1 text-xs bg-orange-100 text-gray-500 px-1 py-0.5 rounded">Optional</span>
+                                                )}
                                                 {dayTourMealData?.pm_snack_policy === 'required' && (
                                                     <span className="ml-1 text-xs bg-orange-100 text-orange-700 px-1 py-0.5 rounded">Required</span>
                                                 )}

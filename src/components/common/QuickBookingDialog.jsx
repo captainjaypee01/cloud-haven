@@ -417,6 +417,9 @@ export const QuickBookingDialog = ({
                                     <div>
                                         <label htmlFor="quick-pmSnack" className="text-sm font-medium text-gray-700 cursor-pointer">
                                             PM Snack
+                                            {mealProgram.pm_snack_policy === 'optional' && (
+                                                <span className="ml-2 text-xs text-gray-500">(Optional)</span>
+                                            )}
                                             {mealProgram.pm_snack_policy === 'hidden' && (
                                                 <span className="ml-2 text-xs text-gray-500">(Not available)</span>
                                             )}

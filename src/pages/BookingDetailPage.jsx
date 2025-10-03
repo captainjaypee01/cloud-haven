@@ -161,10 +161,21 @@ const UnifiedBookingResultPage = () => {
                     <div className="flex justify-between"><span>Adults</span><span>{booking.adults}</span></div>
                     <div className="flex justify-between"><span>Children</span><span>{booking.children}</span></div>
                     <Separator />
-                    <div className="flex justify-between"><span>Room Price</span><span>{formatCurrency(booking?.total_price)}</span></div>
-                    <div className="flex justify-between"><span>Meal Price</span><span>{formatCurrency(booking?.meal_price)}</span></div>
-                    <div className="flex justify-between"><span>Extra Guest Fee</span><span>{formatCurrency(booking?.extra_guest_fee)}</span></div>
-                    <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency((booking?.total_price || 0) + (booking?.meal_price || 0))}</span></div>
+                    {booking.booking_type === 'day_tour' ? (
+                        <>
+                            <div className="flex justify-between"><span>Guest Price</span><span>{formatCurrency(booking?.total_price)}</span></div>
+                            <div className="flex justify-between"><span>Meal Price</span><span>{formatCurrency(booking?.meal_price)}</span></div>
+                            <div className="flex justify-between"><span>Extra Guest Fee</span><span>{formatCurrency(booking?.extra_guest_fee)}</span></div>
+                            <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency((booking?.total_price || 0) + (booking?.meal_price || 0))}</span></div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex justify-between"><span>Room Price</span><span>{formatCurrency(booking?.total_price)}</span></div>
+                            <div className="flex justify-between"><span>Meal Price</span><span>{formatCurrency(booking?.meal_price)}</span></div>
+                            <div className="flex justify-between"><span>Extra Guest Fee</span><span>{formatCurrency(booking?.extra_guest_fee)}</span></div>
+                            <div className="flex justify-between"><span>Subtotal</span><span>{formatCurrency((booking?.total_price || 0) + (booking?.meal_price || 0))}</span></div>
+                        </>
+                    )}
                     {booking?.discount_amount > 0 && (
                         <div className="flex justify-between text-green-600"><span>Promo Discount</span><span>-{formatCurrency(booking?.discount_amount)}</span></div>
                     )}
@@ -174,7 +185,7 @@ const UnifiedBookingResultPage = () => {
                     <div className="flex justify-between font-medium text-base mt-2"><span>Total</span><span>{formatCurrency(booking?.final_price - (booking?.discount_amount || 0) - (booking?.pwd_senior_discount || 0))}</span></div>
                 </div>
                 <div className="mb-4">
-                    <b>Rooms:</b>
+                    <b>{booking.booking_type === 'day_tour' ? 'Day Tour Packages:' : 'Rooms:'}</b>
                     <ul className="list-disc ml-6 mt-1 text-sm">
                         {(booking.booking_rooms || []).map((br, idx) => {
                             const room = br.room || br;
@@ -191,7 +202,7 @@ const UnifiedBookingResultPage = () => {
                     {roomsInBookingRaw.length === 1 && firstRoom && (
                         <div className="mt-3">
                             <Button variant="outline" size="sm" onClick={handleViewRoomDetails} className="cursor-pointer">
-                                <Eye className="w-4 h-4 mr-1" /> View Room Details
+                                <Eye className="w-4 h-4 mr-1" /> {booking.booking_type === 'day_tour' ? 'View Package Details' : 'View Room Details'}
                             </Button>
                         </div>
                     )}
@@ -200,7 +211,7 @@ const UnifiedBookingResultPage = () => {
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="outline" size="sm" className="cursor-pointer">
-                                        <List className="w-4 h-4 mr-1" /> View Rooms
+                                        <List className="w-4 h-4 mr-1" /> {booking.booking_type === 'day_tour' ? 'View Packages' : 'View Rooms'}
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="start">

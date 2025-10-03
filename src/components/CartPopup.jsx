@@ -374,6 +374,9 @@ export function CartPopup() {
                                                         <div>
                                                             <label htmlFor={`popup-pmSnack-${item.uniqueId}`} className="text-xs font-medium text-gray-700 cursor-pointer">
                                                                 PM Snack
+                                                                {dayTourMealData?.pm_snack_policy === 'optional' && (
+                                                                    <span className="ml-1 text-xs text-gray-500">(Optional)</span>
+                                                                )}
                                                                 {dayTourMealData?.pm_snack_policy === 'hidden' && (
                                                                     <span className="ml-1 text-xs text-gray-500">(Not available)</span>
                                                                 )}

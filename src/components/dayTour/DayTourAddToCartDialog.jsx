@@ -166,7 +166,10 @@ export function DayTourAddToCartDialog({
                                             }`}
                                         >
                                             PM Snack
-                                            {availability.pm_snack_policy === 'required' && (
+                                            {availability?.pm_snack_policy === 'optional' && (
+                                                <span className="ml-2 text-xs text-gray-500">(Optional)</span>
+                                            )}
+                                            {availability?.pm_snack_policy === 'required' && (
                                                 <Badge variant="secondary" className="ml-2">Required</Badge>
                                             )}
                                         </label>

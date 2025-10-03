@@ -241,6 +241,9 @@ const CartList = ({
                             <div>
                                 <label htmlFor={`pmSnack-${item.uniqueId}`} className="text-sm font-medium text-gray-700 cursor-pointer">
                                     PM Snack
+                                    {dayTourMealData?.pm_snack_policy === 'optional' && (
+                                        <span className="ml-2 text-xs text-gray-500">(Optional)</span>
+                                    )}
                                     {dayTourMealData?.pm_snack_policy === 'hidden' && (
                                         <span className="ml-2 text-xs text-gray-500">(Not available)</span>
                                     )}
