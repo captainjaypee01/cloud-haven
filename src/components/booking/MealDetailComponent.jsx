@@ -69,7 +69,7 @@ const MealDetailComponent = ({
                             {selection.include_pm_snack ? (
                                 <div className="flex items-center gap-2 text-green-600">
                                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                    <span>PM Snack: </span>
+                                    <span>PM Snack (Optional): </span>
                                     <span className="text-gray-700">
                                         {selection.adults > 0 && selection.children > 0 ? (
                                             `${selection.adults} adults × ${formatCurrency(selection.pm_snack_adult_price || 0)} + ${selection.children} children × ${formatCurrency(selection.pm_snack_child_price || 0)} = ${formatCurrency(selection.pm_snack_cost)}`

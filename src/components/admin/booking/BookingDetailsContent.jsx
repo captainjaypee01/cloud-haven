@@ -638,10 +638,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             </thead>
                                             <tbody>
                                                 {booking.meal_quote_data.nights.map((night, idx) => {
-                                                    // Calculate extra guests for this room
-                                                    const roomMaxGuests = booking.booking_rooms?.[0]?.room?.max_guests || 6;
+                                                    // Calculate total room capacity across all rooms
+                                                    const totalRoomCapacity = booking.booking_rooms?.reduce((total, br) => {
+                                                        return total + (br.room?.max_guests || 6) * (br.quantity || 1);
+                                                    }, 0) || 0;
                                                     const totalGuests = booking.total_guests;
-                                                    const extraGuests = Math.max(0, totalGuests - roomMaxGuests);
+                                                    const extraGuests = Math.max(0, totalGuests - totalRoomCapacity);
                                                     
                                                     return (
                                                         <tr key={idx} className="border-b last:border-b-0">
@@ -668,7 +670,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                         </div>
                                                                     ) : (
                                                                         <div className="text-xs text-gray-600">
-                                                                            <div>• {roomMaxGuests} guests: Free breakfast + amenities</div>
+                                                                            <div>• {totalRoomCapacity} guests: Free breakfast + amenities</div>
                                                                             {extraGuests > 0 && (
                                                                                 <div>• {extraGuests} extra guests: All-inclusive fee (breakfast + entrance + amenities)</div>
                                                                             )}
@@ -687,7 +689,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                     </div>
                                                                 ) : (
                                                                     <div className="text-xs">
-                                                                        <div>Free breakfast: {roomMaxGuests} guests</div>
+                                                                        <div>Free breakfast: {totalRoomCapacity} guests</div>
                                                                         {extraGuests > 0 && (
                                                                             <div className="text-orange-600">All-inclusive fee: {formatCurrency(night.extra_guest_fee || 0)}</div>
                                                                         )}
