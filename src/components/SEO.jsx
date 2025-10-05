@@ -21,9 +21,9 @@ export default function SEO({
   
   // Default SEO values
   const defaultTitle = 'Netania De Laiya - Beachfront Resort in Laiya, Batangas';
-  const defaultDescription = 'Beachfront resort in Laiya, San Juan, Batangas with pool and hotel-like rooms. Book Netania De Laiya today for your perfect beach getaway.';
-  const defaultImage = `${SITE_URL}/og-home.jpg`;
-  const defaultKeywords = 'Netania De Laiya, Laiya resort, Batangas resort, beachfront resort, beach hotel, Philippines resort, San Juan Batangas, pool resort';
+  const defaultDescription = 'Luxury beachfront resort in Laiya, San Juan, Batangas with pool and hotel rooms. Book your perfect beach getaway today.';
+  const defaultImage = `${SITE_URL}/logo.jpg`;
+  const defaultKeywords = 'Netania De Laiya, Laiya resort, Batangas resort, beachfront resort, beach hotel, Philippines resort, San Juan Batangas, pool resort, luxury accommodation, family vacation, romantic getaway';
   
   const siteName = 'Netania De Laiya';
   const locale = 'en_PH';
@@ -74,10 +74,26 @@ export default function SEO({
       <meta name="keywords" content={finalKeywords} />
       <meta name="author" content={author} />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+          }
+          * {
+            box-sizing: border-box;
+          }
+        `
+      }} />
       <meta name="theme-color" content="#0ea5e9" />
       
       {/* Canonical URL */}
       <link rel="canonical" href={canonical} />
+      
+      {/* Hreflang tags for international SEO */}
+      <link rel="alternate" hrefLang="en-ph" href={canonical} />
+      <link rel="alternate" hrefLang="en" href={canonical} />
+      <link rel="alternate" hrefLang="x-default" href={canonical} />
 
       {/* Open Graph / Facebook */}
       <meta property="og:type" content={type} />
@@ -115,10 +131,20 @@ export default function SEO({
         }}
       />
       
+      {/* PWA Manifest */}
+      <link rel="manifest" href="/manifest.json" />
+      
       {/* Preconnect to external domains for performance */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+      
+      {/* Additional performance optimizations */}
+      <meta name="format-detection" content="telephone=no" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+      <meta name="apple-mobile-web-app-title" content="Netania De Laiya" />
     </>
   );
 }

@@ -1,0 +1,14 @@
+{
+  "name": "Netania De Laiya - Beachfront Resort",
+  "short_name": "Netania De Laiya",
+  "description": "Luxury beachfront resort in Laiya, San Juan, Batangas with pool and hotel rooms. Perfect for families and romantic getaways.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "orientation": "portrait-primary",
+  "categories": ["travel", "lifestyle", "business"],
+  "lang": "en-PH",
+  "dir": "ltr",
+  "scope": "/"
+}

@@ -6,6 +6,12 @@ import ExclusiveOffersDialog from '@/components/exclusive-offer/ExclusiveOffersD
 import ScamAwarenessDialog from '@/components/ScamAwarenessDialog'
 import NewsLetter from '../components/NewsLetter'
 import { TestimonialsSection } from '@/components/testimonials'
+import SEOContent from '../components/SEOContent'
+import AboutSection from '../components/AboutSection'
+import SocialMediaLinks from '../components/SocialMediaLinks'
+import FAQSection from '../components/FAQSection'
+import PerformanceOptimizer from '../components/PerformanceOptimizer'
+import MobileFix from '../components/MobileFix'
 import SEO from '@/components/SEO'
 
 const Home = () => {
@@ -17,7 +23,7 @@ const Home = () => {
         <>
       <SEO
         title="Beachfront Resort in Laiya, San Juan, Batangas"
-        description="Experience luxury beachfront accommodations at Netania De Laiya. Enjoy our pristine pool, hotel-quality rooms, and stunning ocean views in San Juan, Batangas. Perfect for families and romantic getaways."
+        description="Luxury beachfront resort in Laiya, San Juan, Batangas with pool and hotel rooms. Perfect for families and romantic getaways."
         canonical={typeof window !== 'undefined' ? window.location.origin + '/' : 'https://www.netaniadelaiya.com/'}
         og={{
           title: 'Beachfront Resort in Laiya, San Juan, Batangas',
@@ -33,7 +39,7 @@ const Home = () => {
           '@type': 'Resort',
           name: 'Netania De Laiya',
           url: 'https://www.netaniadelaiya.com/',
-          image: 'https://www.netaniadelaiya.com/og-home.jpg',
+          image: 'https://www.netaniadelaiya.com/logo.jpg',
           telephone: '+63 949 798 9831',
           address: {
             '@type': 'PostalAddress',
@@ -53,8 +59,14 @@ const Home = () => {
           ]
         }}
       />
+            <PerformanceOptimizer />
+            <MobileFix />
             <Hero />
+            <SEOContent />
             <FeaturedRooms />
+            <AboutSection />
+            <SocialMediaLinks />
+            <FAQSection />
             <ExclusiveOffers />
             <TestimonialsSection />
             <NewsLetter />

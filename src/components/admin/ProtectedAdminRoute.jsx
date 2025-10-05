@@ -2,46 +2,29 @@ import React, { useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import Loader from '@/components/common/Loader';
+import AdminNotFound from './AdminNotFound';
 
 const ProtectedAdminRoute = ({ children }) => {
     const { user, isLoaded } = useUser();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (isLoaded) {
-            // If user is not logged in, redirect to homepage
-            if (!user) {
-                navigate('/');
-                return;
-            }
-
-            // Check if user has admin role
-            const userRole = user?.publicMetadata?.role || 'user';
-            const allowedRoles = ['admin', 'staff', 'superadmin'];
-            
-            if (!allowedRoles.includes(userRole)) {
-                // User doesn't have admin privileges, redirect to homepage
-                navigate('/');
-                return;
-            }
-        }
-    }, [user, isLoaded, navigate]);
 
     // Show loader while checking authentication and role
     if (!isLoaded) {
         return <Loader />;
     }
 
-    // If user is not logged in or doesn't have admin role, don't render children
+    // If user is not logged in, show 404 (security: don't reveal admin routes exist)
     if (!user) {
-        return null;
+        return <AdminNotFound />;
     }
 
+    // Check if user has admin role
     const userRole = user?.publicMetadata?.role || 'user';
     const allowedRoles = ['admin', 'staff', 'superadmin'];
     
+    // If user doesn't have admin privileges, show 404 (security: don't reveal admin routes exist)
     if (!allowedRoles.includes(userRole)) {
-        return null;
+        return <AdminNotFound />;
     }
 
     // User is authenticated and has admin role, render the protected content
