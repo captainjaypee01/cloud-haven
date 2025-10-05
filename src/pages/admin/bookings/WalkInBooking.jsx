@@ -97,7 +97,7 @@ const WalkInBooking = () => {
     // Calculate nights based on user role
     const calculateNights = () => {
         if (bookingType === 'overnight') {
-            if (canSelectDates && selectedDateRange.from && selectedDateRange.to) {
+            if (canSelectDates && selectedDateRange && selectedDateRange.from && selectedDateRange.to) {
                 // For admin/superadmin: calculate from date range
                 const checkIn = new Date(selectedDateRange.from);
                 const checkOut = new Date(selectedDateRange.to);
@@ -120,7 +120,7 @@ const WalkInBooking = () => {
             if (bookingType === 'day_tour' && selectedDayTourDate) {
                 const date = format(selectedDayTourDate, 'yyyy-MM-dd');
                 return date;
-            } else if (bookingType === 'overnight' && selectedDateRange.from) {
+            } else if (bookingType === 'overnight' && selectedDateRange && selectedDateRange.from) {
                 const date = format(selectedDateRange.from, 'yyyy-MM-dd');
                 return date;
             }
@@ -130,7 +130,7 @@ const WalkInBooking = () => {
     };
 
     const getCheckOutDate = () => {
-        if (canSelectDates && bookingType === 'overnight' && selectedDateRange.to) {
+        if (canSelectDates && bookingType === 'overnight' && selectedDateRange && selectedDateRange.to) {
             const date = format(selectedDateRange.to, 'yyyy-MM-dd');
             return date;
         } else if (bookingType === 'overnight') {
@@ -565,7 +565,7 @@ const WalkInBooking = () => {
                             <CardDescription>
                                 {bookingType === 'day_tour' 
                                     ? `Day Tour for ${canSelectDates && selectedDayTourDate ? format(selectedDayTourDate, 'yyyy-MM-dd') : today}`
-                                    : `Check-in: ${today}${nights ? `, Check-out: ${getCheckOutDate()}` : ''}`
+                                    : `Check-in: ${today}${nights > 0 ? `, Check-out: ${getCheckOutDate()}` : ''}`
                                 }
                                 {!canSelectDates && (
                                     <span className="block text-xs text-gray-500 mt-1">
@@ -627,7 +627,7 @@ const WalkInBooking = () => {
                                                     range={selectedDateRange}
                                                     onChange={(range) => {
                                                         setSelectedDateRange(range);
-                                                        form.setValue('check_in_date', range.from ? format(range.from, 'yyyy-MM-dd') : '');
+                                                        form.setValue('check_in_date', range && range.from ? format(range.from, 'yyyy-MM-dd') : '');
                                                     }}
                                                 />
                                                 {form.formState.errors.check_in_date && (
@@ -1121,7 +1121,7 @@ const WalkInBooking = () => {
                                     <span className="text-sm font-medium">{today}</span>
                                 </div>
 
-                                {bookingType === 'overnight' && nights && (
+                                {bookingType === 'overnight' && nights > 0 && (
                                     <div className="flex justify-between">
                                         <span className="text-sm text-gray-600">Check-out Date:</span>
                                         <span className="text-sm font-medium">{getCheckOutDate()}</span>
