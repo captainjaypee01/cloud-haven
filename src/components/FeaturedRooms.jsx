@@ -27,7 +27,7 @@ const FeaturedRooms = () => {
     }
 
     return (
-        <div className="flex flex-col items-center px-6 md:px-16 lg:px-24 bg-slate-50">
+        <div className="flex flex-col items-center px-6 md:px-16 lg:px-24 bg-white">
             <Title
             className="mt-50"
                 title="Featured Rooms"

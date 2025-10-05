@@ -1,8 +1,24 @@
 User-agent: *
 Allow: /
 
-# Disallow admin dashboard from indexing 
-Disallow: /admin
-
-# Production sitemap
+# Sitemap
 Sitemap: https://www.netaniadelaiya.com/sitemap.xml
+
+# Crawl-delay for better server performance
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /booking/
+Disallow: /user/
+Disallow: /my-bookings
+
+# Allow important pages (based on actual routes)
+Allow: /
+Allow: /rooms
+Allow: /day-tour
+Allow: /policy
+Allow: /contact-us

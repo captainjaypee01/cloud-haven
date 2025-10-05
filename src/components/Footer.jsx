@@ -9,9 +9,9 @@ const Footer = () => {
         <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
             <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
                 <div className='max-w-80'>
-                    <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-8 md:h-9' />
+                    <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-6 logo' />
                     <p className='text-sm'>
-                        Discover the world's most extraordinary place to stay, from botique hotels to luxury villas and private islands.
+                    A refined and exhilarating escape awaits
                     </p>
                     <div className='flex items-center gap-3 mt-4'>
                         {/* Instagram */}
