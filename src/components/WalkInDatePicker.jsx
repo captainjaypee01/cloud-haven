@@ -67,7 +67,7 @@ export function WalkInDayTourDatePicker({ date, onChange }) {
 export function WalkInDateRangePicker({ range, onChange }) {
     const [open, setOpen] = useState(false);
     
-    const formatted = range.from && range.to
+    const formatted = range && range.from && range.to
         ? `${format(range.from, "MMM d, yyyy")} – ${format(range.to, "MMM d, yyyy")}`
         : "Select dates";
 
@@ -83,8 +83,8 @@ export function WalkInDateRangePicker({ range, onChange }) {
         setOpen(false);
     };
 
-    const hasSelection = range?.from || range?.to;
-    const isComplete = range?.from && range?.to;
+    const hasSelection = range && (range.from || range.to);
+    const isComplete = range && range.from && range.to;
 
     // Create disabled function that only disables past dates (not today) and enforces 5-day limit
     const isDateDisabled = (date) => {
@@ -95,7 +95,7 @@ export function WalkInDateRangePicker({ range, onChange }) {
         }
 
         // If we have a check-in date selected, enforce 5-day maximum limit
-        if (range?.from) {
+        if (range && range.from) {
             const checkInDate = new Date(range.from);
             const daysDifference = Math.ceil((date - checkInDate) / (1000 * 60 * 60 * 24));
             
