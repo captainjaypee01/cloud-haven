@@ -10,7 +10,7 @@ const AboutSection = () => {
                         About Netania De Laiya Resort
                     </h2>
                     <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                        Located in the heart of Laiya, San Juan, Batangas, our resort has been providing exceptional beachfront hospitality for discerning travelers seeking the perfect blend of luxury and natural beauty.
+                        Located in the heart of Laiya, San Juan, Batangas, our resort has been providing exceptional beachfront hospitality for discerning travelers seeking the perfect blend of premium comfort and natural beauty.
                     </p>
                 </div>
                 
@@ -21,7 +21,7 @@ const AboutSection = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Beachfront Location</h3>
                         <p className="text-gray-600">
-                            Direct access to Laiya's pristine white sand beaches, perfect for swimming, sunbathing, and water activities.
+                            Direct beachfront access with pristine white sand, perfect for swimming, sunbathing, and water activities.
                         </p>
                     </div>
                     
@@ -31,7 +31,7 @@ const AboutSection = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Premium Accommodations</h3>
                         <p className="text-gray-600">
-                            Spacious, well-appointed rooms with modern amenities, air conditioning, and stunning ocean or garden views.
+                            Premium hotel-quality rooms with refined amenities, exceptional service, and stunning ocean or pool views.
                         </p>
                     </div>
                     
@@ -41,7 +41,7 @@ const AboutSection = () => {
                         </div>
                         <h3 className="text-xl font-bold text-gray-900 mb-3">Dining Excellence</h3>
                         <p className="text-gray-600">
-                            Fresh cuisine prepared by our skilled chefs, featuring delicious meals and regional specialties.
+                            In-house restaurant serving a wide range of flavorful dishes prepared by our skilled chefs.
                         </p>
                     </div>
                 </div>
