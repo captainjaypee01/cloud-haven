@@ -29,7 +29,7 @@ const AboutSection = () => {
                         <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                             <span className="text-2xl"><HotelIcon /></span>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-3">Luxury Accommodations</h3>
+                        <h3 className="text-xl font-bold text-gray-900 mb-3">Premium Accommodations</h3>
                         <p className="text-gray-600">
                             Spacious, well-appointed rooms with modern amenities, air conditioning, and stunning ocean or garden views.
                         </p>
@@ -70,7 +70,7 @@ const AboutSection = () => {
                         <div>
                             <h4 className="text-lg font-semibold text-gray-900 mb-2">Special Events</h4>
                             <p className="text-gray-600 mb-4">
-                                Celebrate life's special moments with us. From intimate weddings to milestone birthdays, our resort provides the perfect backdrop for your most important celebrations.
+                                Our beautiful beachfront setting provides the perfect backdrop for prenup photography sessions. We welcome couples to use our resort as a venue for their special pre-wedding photoshoots.
                             </p>
                         </div>
                     </div>
