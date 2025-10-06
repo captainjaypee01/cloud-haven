@@ -10,10 +10,10 @@ const SEOContent = () => {
                             Discover Paradise at Netania De Laiya
                         </h2>
                         <p className="text-lg text-gray-700 mb-6">
-                            Nestled along the pristine shores of Laiya, San Juan, Batangas, Netania De Laiya offers an unparalleled beachfront resort experience. Our luxury accommodations combine modern comfort with breathtaking ocean views, creating the perfect setting for your dream vacation.
+                        Nestled along the pristine shores of Laiya, San Juan, Batangas, Netania De Laiya offers an unparalleled beachfront resort experience. Our premium accommodations combine modern comfort with scenic ocean and pool views, creating the perfect setting for your dream vacation.
                         </p>
                         <p className="text-lg text-gray-700 mb-6">
-                            Whether you're planning a romantic getaway, family vacation, or corporate retreat, our resort provides the ideal backdrop for unforgettable memories. With direct beach access, a stunning swimming pool, and world-class amenities, we ensure every guest experiences the ultimate in relaxation and luxury.
+                        Whether you’re planning a romantic getaway, family vacation, or corporate retreat, our resort is the ideal destination for unforgettable memories. With direct beach access, a stunning infinity pool, and premium amenities, we take pride in delivering an experience focused on your comfort and satisfaction.
                         </p>
                     </div>
                     <div className="bg-gradient-to-br from-blue-50 to-amber-50 p-8 rounded-2xl">
@@ -25,19 +25,23 @@ const SEOContent = () => {
                             </li>
                             <li className="flex items-start">
                                 <span className="text-amber-500 mr-3">✓</span>
-                                <span className="text-gray-700">Luxury hotel-quality rooms with modern amenities</span>
+                                <span className="text-gray-700">Iconic ocean-view infinity pool and exclusive pool-access rooms</span>
                             </li>
                             <li className="flex items-start">
                                 <span className="text-amber-500 mr-3">✓</span>
-                                <span className="text-gray-700">Crystal-clear swimming pool with ocean views</span>
+                                <span className="text-gray-700">Premium hotel-quality rooms, refined amenities, and exceptional service</span>
                             </li>
                             <li className="flex items-start">
                                 <span className="text-amber-500 mr-3">✓</span>
-                                <span className="text-gray-700">On-site restaurant serving fresh cuisine</span>
+                                <span className="text-gray-700">In-house restaurant serving a wide range of flavorful dishes</span>
                             </li>
                             <li className="flex items-start">
                                 <span className="text-amber-500 mr-3">✓</span>
-                                <span className="text-gray-700">Free WiFi and modern conveniences</span>
+                                <span className="text-gray-700">Free WiFi access in every room and throughout the resort’s common areas</span>
+                            </li>
+                            <li className="flex items-start">
+                                <span className="text-amber-500 mr-3">✓</span>
+                                <span className="text-gray-700">Pet-friendly</span>
                             </li>
                         </ul>
                     </div>

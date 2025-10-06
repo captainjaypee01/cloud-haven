@@ -10,32 +10,40 @@ const FAQSection = () => {
         },
         {
             question: "What types of accommodations do you offer?",
-            answer: "We offer luxury hotel-quality rooms with modern amenities including air conditioning, private bathrooms, and beautiful ocean or garden views. Our accommodations are perfect for families, couples, and business travelers."
+            answer: "We offer premium accommodations with refined amenities, available in three room types: Beach View, Pool Access, and Garden View. Each room is designed for comfort and convenience, with options suitable for 2 pax and our largest units accommodating 4 to 6 pax."
         },
         {
             question: "Do you have a swimming pool?",
-            answer: "Yes, we have a beautiful swimming pool with crystal-clear water and stunning ocean views. The pool area is perfect for relaxation and recreation, offering a great alternative to beach activities."
+            answer: "Yes, our iconic dark blue infinity pool, featuring crystal-clear water and stunning ocean views, is a favorite spot for guests to capture their most Instagram-worthy moments."
         },
         {
             question: "Is there a restaurant on-site?",
-            answer: "Yes, we have an on-site restaurant that serves fresh cuisine and regional specialties. Our skilled chefs prepare delicious meals using quality ingredients, ensuring a memorable dining experience."
+            answer: "We have an in-house restaurant, offering a range of food options, including starters, main courses and desserts. Guests can order food anytime between 7:00 AM and 7:00 PM."
         },
         {
             question: "What activities are available at the resort?",
-            answer: "Guests can enjoy beach activities, swimming in our pool, dining at our restaurant, and relaxing in our beautiful surroundings. We're also close to various attractions in Batangas for day trips and excursions."
+            answer: "Guests may indulge in our infinity pool, engage in water activities, experience body massages, enjoy beverages at the bar, or simply relax while appreciating the scenery."
         },
         {
             question: "Is WiFi available?",
-            answer: "Yes, we provide free WiFi throughout the resort, ensuring you can stay connected during your visit. The WiFi is available in all rooms and common areas."
+            answer: "Yes, we provide WiFi in all rooms and throughout the resort’s common areas, perfect for guests working remotely or those who simply wish to stay connected."
         },
         {
             question: "How do I make a reservation?",
-            answer: "You can make a reservation through our website by selecting your dates and room preferences. Our booking system is secure and easy to use, and you'll receive instant confirmation of your reservation."
+            answer: "Reservations can be made through our official website. A 50% down payment is required to confirm and secure your booking. \nFor corporate inquiries and bookings, please send your details to netaniadelaiya@gmail.com. "
         },
         {
-            question: "What is your rescheduling policy?",
-            answer: "We offer rescheduling options for your booking. You can reschedule your stay within 30 days of your original check-in date. Please contact us to arrange your new dates, subject to availability."
-        }
+            question: "What is your cancellation policy?",
+            answer: "Rescheduling requests must be made at least 7 days prior to the original check-in date.\n\nPlease note that payments are strictly non-refundable. However, guests may reschedule their stay within 30 days of the original booking date, subject to availability."
+        },
+        {
+            question: "Are you pet-friendly?",
+            answer: "Yes, we allow pets inside the resort, provided they meet the requirements of our pet policy."
+        },
+        {
+            question: "Are we allowed to bring food and drinks?",
+            answer: "Day tour guests may bring outside food and drinks at no extra charge. For overnight stays, main meals are not permitted as we encourage dining at our in-house restaurant. However, light snacks and drinks are allowed free of charge. Kindly note that a corkage fee applies should you wish to bring lechon."
+        },
     ]
 
     const toggleFAQ = (index) => {
