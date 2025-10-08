@@ -365,7 +365,7 @@ const RoomDetails = () => {
                 </div>
             </div>
 
-            <div className='flex flex-col md:flex-row items-center md:items-center justify-between p-6 rounded-xl mx-auto mt-16 max-w-1xl md:max-w-2xl'>
+            <div className='flex flex-col md:flex-row items-center md:items-center justify-between p-6 rounded-xl mx-auto mt-16 w-full max-w-none md:max-w-2xl'>
                 {/* <SearchForm /> */}
                 <form
                     onSubmit={handleSubmit(handleAddRoom)}
@@ -377,7 +377,7 @@ const RoomDetails = () => {
                 xl:grid-cols-2
                 gap-4
                 items-end
-                bg-white p-6 rounded-lg shadow-lg max-w-full
+                bg-white p-6 rounded-lg shadow-lg w-full
             "
                 >
 

@@ -21,11 +21,11 @@ const BookingPrintView = ({ booking, sections = {} }) => {
 
     const enabledSections = { ...defaultSections, ...sections };
 
-    // Calculate totals
+    // Calculate totals with proper null checks
     const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
-    const actualFinalPrice = Number(booking.final_price) - Number(booking.discount_amount || 0) - Number(booking.pwd_senior_discount || 0) - Number(booking.special_discount || 0);
-    const otherCharges = booking.other_charges || 0;
-    const totalPayable = actualFinalPrice + Number(otherCharges);
+    const actualFinalPrice = Number(booking.final_price || 0) - Number(booking.discount_amount || 0) - Number(booking.pwd_senior_discount || 0) - Number(booking.special_discount || 0);
+    const otherCharges = Number(booking.other_charges || 0);
+    const totalPayable = actualFinalPrice + otherCharges;
     const remainingBalance = Math.max(totalPayable - totalPaid, 0);
 
     const printStyles = `
@@ -173,6 +173,56 @@ const BookingPrintView = ({ booking, sections = {} }) => {
             .print-meal-cost {
                 font-weight: bold;
                 color: #28a745;
+            }
+            .print-pricing-section {
+                margin-bottom: 20px;
+                padding: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 6px;
+                background-color: #fafafa;
+            }
+            .print-pricing-section-title {
+                font-weight: bold;
+                margin-bottom: 10px;
+                padding-bottom: 5px;
+                border-bottom: 1px solid #ddd;
+            }
+            .print-summary-box {
+                background-color: #f8f9fa;
+                border: 2px solid #333;
+                border-radius: 8px;
+                padding: 20px;
+                margin-top: 20px;
+            }
+            .print-summary-title {
+                font-weight: bold;
+                font-size: 18px;
+                margin-bottom: 15px;
+                text-align: center;
+                color: #333;
+            }
+            .print-summary-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+            .print-summary-row:last-child {
+                border-top: 2px solid #333;
+                padding-top: 10px;
+                margin-top: 10px;
+                margin-bottom: 0;
+            }
+            .print-summary-label {
+                font-weight: bold;
+                font-size: 16px;
+            }
+            .print-summary-value {
+                font-weight: bold;
+                font-size: 18px;
+            }
+            .print-summary-final {
+                font-size: 20px;
             }
         </style>
     `;
@@ -367,62 +417,98 @@ const BookingPrintView = ({ booking, sections = {} }) => {
         return `
             <div class="print-section">
                 <div class="print-section-title">Price Breakdown</div>
-                <div class="print-grid-3">
-                    <div>
-                        <div class="print-item">
-                            <span class="print-label">Room Price:</span>
-                            <span class="print-value">${formatCurrency(booking.total_price)}</span>
+                
+                <!-- Base Pricing -->
+                <div class="print-pricing-section">
+                    <div class="print-pricing-section-title" style="color: #333;">Base Pricing</div>
+                    <div class="print-grid">
+                        <div>
+                            <div class="print-item">
+                                <span class="print-label">Room Price:</span>
+                                <span class="print-value">${formatCurrency(Number(booking.total_price || 0))}</span>
+                            </div>
+                            <div class="print-item">
+                                <span class="print-label">Meal Price:</span>
+                                <span class="print-value">${formatCurrency(Number(booking.meal_price || 0))}</span>
+                            </div>
+                            <div class="print-item">
+                                <span class="print-label">Extra Guest Fee:</span>
+                                <span class="print-value">${formatCurrency(Number(booking.extra_guest_fee || 0))}</span>
+                            </div>
                         </div>
-                        <div class="print-item">
-                            <span class="print-label">Meal Price:</span>
-                            <span class="print-value">${formatCurrency(booking.meal_price || 0)}</span>
-                        </div>
-                        <div class="print-item">
-                            <span class="print-label">Extra Guest Fee:</span>
-                            <span class="print-value">${formatCurrency(booking.extra_guest_fee || 0)}</span>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="print-item">
-                            <span class="print-label">Discount:</span>
-                            <span class="print-value print-amount-negative">-${formatCurrency(booking.discount_amount)}</span>
-                        </div>
-                        ${booking.pwd_senior_discount > 0 ? `
-                        <div class="print-item">
-                            <span class="print-label">PWD/Senior Discount:</span>
-                            <span class="print-value print-amount-negative">-${formatCurrency(booking.pwd_senior_discount)}</span>
-                        </div>
-                        ` : ''}
-                        ${booking.special_discount > 0 ? `
-                        <div class="print-item">
-                            <span class="print-label">Special Discount:</span>
-                            <span class="print-value print-amount-negative">-${formatCurrency(booking.special_discount)}</span>
-                        </div>
-                        ${booking.special_discount_reason ? `
-                        <div class="print-item print-reason">
-                            <span class="print-label">Special Discount Reason:</span>
-                            <span class="print-value">${booking.special_discount_reason}</span>
-                        </div>
-                        ` : ''}
-                        ` : ''}
-                        <div class="print-item">
-                            <span class="print-label">Other Charges:</span>
-                            <span class="print-value">${formatCurrency(otherCharges)}</span>
-                        </div>
-                        <div class="print-item">
-                            <span class="print-label">Total Paid:</span>
-                            <span class="print-value print-amount">${formatCurrency(totalPaid)}</span>
+                        <div>
+                            <div class="print-item">
+                                <span class="print-label">Subtotal:</span>
+                                <span class="print-value print-amount">${formatCurrency(Number(booking.total_price || 0) + Number(booking.meal_price || 0) + Number(booking.extra_guest_fee || 0))}</span>
+                            </div>
                         </div>
                     </div>
-                    <div>
-                        <div class="print-item">
-                            <span class="print-label">Total Payable:</span>
-                            <span class="print-value print-amount">${formatCurrency(totalPayable)}</span>
+                </div>
+
+                <!-- Discounts -->
+                ${(Number(booking.discount_amount || 0) > 0 || Number(booking.pwd_senior_discount || 0) > 0 || Number(booking.special_discount || 0) > 0) ? `
+                <div class="print-pricing-section">
+                    <div class="print-pricing-section-title" style="color: #dc3545;">Discounts Applied</div>
+                    <div class="print-grid">
+                        <div>
+                            ${Number(booking.discount_amount || 0) > 0 ? `
+                            <div class="print-item">
+                                <span class="print-label">Promo Discount:</span>
+                                <span class="print-value print-amount-negative">-${formatCurrency(Number(booking.discount_amount || 0))}</span>
+                            </div>
+                            ` : ''}
+                            ${Number(booking.pwd_senior_discount || 0) > 0 ? `
+                            <div class="print-item">
+                                <span class="print-label">PWD/Senior Discount:</span>
+                                <span class="print-value print-amount-negative">-${formatCurrency(Number(booking.pwd_senior_discount || 0))}</span>
+                            </div>
+                            ` : ''}
+                            ${Number(booking.special_discount || 0) > 0 ? `
+                            <div class="print-item">
+                                <span class="print-label">Special Discount:</span>
+                                <span class="print-value print-amount-negative">-${formatCurrency(Number(booking.special_discount || 0))}</span>
+                            </div>
+                            ` : ''}
                         </div>
-                        <div class="print-item">
-                            <span class="print-label">Remaining Balance:</span>
-                            <span class="print-value print-amount">${formatCurrency(remainingBalance)}</span>
+                        <div>
+                            <div class="print-item">
+                                <span class="print-label">Total Discounts:</span>
+                                <span class="print-value print-amount-negative">-${formatCurrency(Number(booking.discount_amount || 0) + Number(booking.pwd_senior_discount || 0) + Number(booking.special_discount || 0))}</span>
+                            </div>
                         </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Other Charges -->
+                ${Number(otherCharges || 0) > 0 ? `
+                <div class="print-pricing-section">
+                    <div class="print-pricing-section-title" style="color: #f57c00;">Additional Charges</div>
+                    <div class="print-grid">
+                        <div>
+                            <div class="print-item">
+                                <span class="print-label">Other Charges:</span>
+                                <span class="print-value print-amount">${formatCurrency(Number(otherCharges || 0))}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Final Summary -->
+                <div class="print-summary-box">
+                    <div class="print-summary-title">PAYMENT SUMMARY</div>
+                    <div class="print-summary-row">
+                        <span class="print-summary-label">Total Payable:</span>
+                        <span class="print-summary-value" style="color: #2c5530;">${formatCurrency(totalPayable)}</span>
+                    </div>
+                    <div class="print-summary-row">
+                        <span class="print-summary-label" style="color: #28a745;">Total Paid:</span>
+                        <span class="print-summary-value" style="color: #28a745;">${formatCurrency(totalPaid)}</span>
+                    </div>
+                    <div class="print-summary-row">
+                        <span class="print-summary-label print-summary-final" style="color: ${remainingBalance > 0 ? '#dc3545' : '#28a745'};">${remainingBalance > 0 ? 'Remaining Balance:' : 'Fully Paid'}</span>
+                        <span class="print-summary-value print-summary-final" style="color: ${remainingBalance > 0 ? '#dc3545' : '#28a745'};">${remainingBalance > 0 ? formatCurrency(remainingBalance) : '✓'}</span>
                     </div>
                 </div>
                 ${booking.other_charges_list && Array.isArray(booking.other_charges_list) && booking.other_charges_list.length > 0 ? `

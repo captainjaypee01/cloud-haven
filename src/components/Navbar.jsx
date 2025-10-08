@@ -57,7 +57,7 @@ const Navbar = () => {
 
             {/* Logo */}
             <Link to="/" onClick={() => {window.scrollTo(0, 0);}}>
-                <img src={NETANIA_LOGO} alt="logo" className={`h-6 logo`} />
+                <img src={NETANIA_LOGO} alt="logo" className={`h-10 logo`} />
             </Link>
 
             {/* Desktop Nav */}
