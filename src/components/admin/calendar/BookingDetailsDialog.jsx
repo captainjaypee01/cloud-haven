@@ -141,7 +141,7 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
   } = currentBookingData;
 
   // Calculate total_payable and remaining_balance consistently with BookingDetailsContent
-  const actualFinalPrice = Number(final_price) - Number(discount_amount || 0) - Number(currentBookingData.pwd_senior_discount || 0);
+  const actualFinalPrice = Number(final_price) - Number(discount_amount || 0) - Number(currentBookingData.pwd_senior_discount || 0) - Number(currentBookingData.special_discount || 0);
   const totalPayable = actualFinalPrice + Number(other_charges || 0);
   const remainingBalance = Math.max(totalPayable - Number(total_paid || 0), 0);
 
@@ -434,6 +434,19 @@ const BookingDetailsDialog = ({ open, onOpenChange, bookingData, unitInfo, onBoo
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">PWD/Senior Discount:</span>
                     <span className="font-medium text-sm sm:text-base text-green-600">-{formatCurrency(currentBookingData.pwd_senior_discount || 0)}</span>
+                  </div>
+                )}
+                {(currentBookingData.special_discount || 0) > 0 && (
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Special Discount:</span>
+                      <span className="font-medium text-sm sm:text-base text-green-600">-{formatCurrency(currentBookingData.special_discount || 0)}</span>
+                    </div>
+                    {currentBookingData.special_discount_reason && (
+                      <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded border-l-2 border-gray-300 ml-2">
+                        <strong>Reason:</strong> {currentBookingData.special_discount_reason}
+                      </div>
+                    )}
                   </div>
                 )}
                 {(other_charges || 0) > 0 && (

@@ -12,6 +12,7 @@ import BookingCancellationDialog from './BookingCancellationDialog';
 import BookingDeletionDialog from './BookingDeletionDialog';
 import ChangeRoomUnitDialog from './ChangeRoomUnitDialog';
 import PwdSeniorDiscountDialog from './PwdSeniorDiscountDialog';
+import SpecialDiscountDialog from './SpecialDiscountDialog';
 import BookingPrintButton from './BookingPrintButton';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3 } from 'lucide-react'; // Icon for delete
@@ -46,6 +47,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [selectedBookingRoom, setSelectedBookingRoom] = useState(null);
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const [showPwdSeniorDiscount, setShowPwdSeniorDiscount] = useState(false);
+    const [showSpecialDiscount, setShowSpecialDiscount] = useState(false);
     const api = useApi();
     const navigate = useNavigate();
     const { userRole } = useAppContext();
@@ -77,7 +79,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     // Total paid from payments with status 'paid'
     const totalPaid = booking.payments?.filter(p => p.status === 'paid').reduce((sum, p) => sum + Number(p.amount || 0), 0) || 0;
     // Calculate actual final price after discount and PWD/Senior discount
-    const actualFinalPrice = Number(booking.final_price) - Number(booking.discount_amount || 0) - Number(booking.pwd_senior_discount || 0);
+    const actualFinalPrice = Number(booking.final_price) - Number(booking.discount_amount || 0) - Number(booking.pwd_senior_discount || 0) - Number(booking.special_discount || 0);
     // Remaining balance = (actual final price + other charges) - total paid (never negative)
     const otherCharges = booking.other_charges || 0;
     const totalPayable = actualFinalPrice + Number(otherCharges);
@@ -402,6 +404,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <span className="text-red-600 font-medium">-{formatCurrency(booking.pwd_senior_discount)}</span>
                                 </div>
                             )}
+                            {(booking.special_discount || 0) > 0 && (
+                                <div className="flex justify-between py-2">
+                                    <span className="font-semibold">Special Discount:</span>
+                                    <span className="text-red-600 font-medium">-{formatCurrency(booking.special_discount)}</span>
+                                </div>
+                            )}
                             <div className="flex justify-between py-2">
                                 <span className="font-semibold">Other Charges:</span>
                                 <span>{formatCurrency(otherCharges)}</span>
@@ -445,32 +453,58 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 </CardContent>
             </Card>
 
-            {/* PWD/Senior Discount Management */}
+            {/* Other Discounts Management */}
             <Card>
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-3">
-                        <div className="text-lg font-semibold">PWD/Senior Discount</div>
+                        <div className="text-lg font-semibold">Other Discounts</div>
                         {canAddCharges && (
-                            <Button
-                                size="sm"
-                                className="cursor-pointer"
-                                variant="secondary"
-                                onClick={() => setShowPwdSeniorDiscount(true)}
-                            >
-                                {booking.pwd_senior_discount > 0 ? 'Edit Discount' : 'Add Discount'}
-                            </Button>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="sm"
+                                    className="cursor-pointer"
+                                    variant="secondary"
+                                    onClick={() => setShowPwdSeniorDiscount(true)}
+                                >
+                                    {booking.pwd_senior_discount > 0 ? 'Edit PWD/Senior' : 'Add PWD/Senior'}
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    className="cursor-pointer"
+                                    variant="secondary"
+                                    onClick={() => setShowSpecialDiscount(true)}
+                                >
+                                    {booking.special_discount > 0 ? 'Edit Special' : 'Add Special'}
+                                </Button>
+                            </div>
                         )}
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         <div className="flex justify-between py-2">
-                            <span className="font-semibold">PWD/Senior Discount Amount:</span>
+                            <span className="font-semibold">PWD/Senior Discount:</span>
                             <span className={booking.pwd_senior_discount > 0 ? "text-red-600 font-medium" : "text-gray-500"}>
                                 {booking.pwd_senior_discount > 0 ? `-${formatCurrency(booking.pwd_senior_discount)}` : 'No discount applied'}
                             </span>
                         </div>
-                        {booking.pwd_senior_discount > 0 && (
+                        {booking.pwd_senior_discount > 0 && booking.pwd_senior_discount_reason && (
+                            <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded border-l-4 border-gray-300 ml-4">
+                                <strong>Reason:</strong> {booking.pwd_senior_discount_reason}
+                            </div>
+                        )}
+                        <div className="flex justify-between py-2">
+                            <span className="font-semibold">Special Discount:</span>
+                            <span className={booking.special_discount > 0 ? "text-red-600 font-medium" : "text-gray-500"}>
+                                {booking.special_discount > 0 ? `-${formatCurrency(booking.special_discount)}` : 'No discount applied'}
+                            </span>
+                        </div>
+                        {booking.special_discount > 0 && booking.special_discount_reason && (
+                            <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded border-l-4 border-gray-300 ml-4">
+                                <strong>Reason:</strong> {booking.special_discount_reason}
+                            </div>
+                        )}
+                        {(booking.pwd_senior_discount > 0 || booking.special_discount > 0) && (
                             <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                                <strong>Note:</strong> This discount is applied in addition to any promo discounts and reduces the total payable amount.
+                                <strong>Note:</strong> These discounts are applied in addition to any promo discounts and reduce the total payable amount.
                             </div>
                         )}
                     </div>
@@ -1119,6 +1153,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 booking={booking}
                 onSuccess={() => {
                     setShowPwdSeniorDiscount(false);
+                    if (fetchBooking) fetchBooking();
+                }}
+            />
+
+            {/* Special Discount Dialog */}
+            <SpecialDiscountDialog
+                open={showSpecialDiscount}
+                onOpenChange={setShowSpecialDiscount}
+                booking={booking}
+                onSuccess={() => {
+                    setShowSpecialDiscount(false);
                     if (fetchBooking) fetchBooking();
                 }}
             />

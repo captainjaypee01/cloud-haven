@@ -86,7 +86,7 @@ const UnifiedBookingResultPage = () => {
     const { user } = useUser();
     if (!booking) return null;
     const paidAmount = getPaidAmount(booking.payments || []);
-    const actualFinalPrice = (booking.final_price || 0) - (booking.discount_amount || 0) - (booking.pwd_senior_discount || 0);
+    const actualFinalPrice = (booking.final_price || 0) - (booking.discount_amount || 0) - (booking.pwd_senior_discount || 0) - (booking.special_discount || 0);
     const remainingBalance = Math.max(0, actualFinalPrice - paidAmount);
     const roomsInBookingRaw = (booking.booking_rooms || []).map((br) => br.room || br).filter(Boolean);
     const uniqueRooms = Array.from(new Map(roomsInBookingRaw.map(r => [(r?.slug || r?.id || r?.room_id || r?.name), r])).values());
@@ -182,7 +182,10 @@ const UnifiedBookingResultPage = () => {
                     {booking?.pwd_senior_discount > 0 && (
                         <div className="flex justify-between text-green-600"><span>PWD/Senior Discount</span><span>-{formatCurrency(booking?.pwd_senior_discount)}</span></div>
                     )}
-                    <div className="flex justify-between font-medium text-base mt-2"><span>Total</span><span>{formatCurrency(booking?.final_price - (booking?.discount_amount || 0) - (booking?.pwd_senior_discount || 0))}</span></div>
+                    {booking?.special_discount > 0 && (
+                        <div className="flex justify-between text-green-600"><span>Special Discount</span><span>-{formatCurrency(booking?.special_discount)}</span></div>
+                    )}
+                    <div className="flex justify-between font-medium text-base mt-2"><span>Total</span><span>{formatCurrency(booking?.final_price - (booking?.discount_amount || 0) - (booking?.pwd_senior_discount || 0) - (booking?.special_discount || 0))}</span></div>
                 </div>
                 <div className="mb-4">
                     <b>{booking.booking_type === 'day_tour' ? 'Day Tour Packages:' : 'Rooms:'}</b>
