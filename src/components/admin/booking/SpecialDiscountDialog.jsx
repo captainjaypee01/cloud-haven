@@ -1,4 +1,4 @@
-// components/admin/booking/PwdSeniorDiscountDialog.jsx
+// components/admin/booking/SpecialDiscountDialog.jsx
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -16,13 +16,13 @@ import { API_PREFIX } from '@/constants/api';
 import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/format';
 
-const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => {
+const SpecialDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const api = useApi();
 
   const form = useForm({
     defaultValues: {
-      pwd_senior_discount: booking?.pwd_senior_discount || 0,
+      special_discount: booking?.special_discount || 0,
       discount_reason: ''
     }
   });
@@ -30,7 +30,7 @@ const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => 
   useEffect(() => {
     if (open && booking) {
       form.reset({
-        pwd_senior_discount: booking.pwd_senior_discount || 0,
+        special_discount: booking.special_discount || 0,
         discount_reason: ''
       });
     }
@@ -40,19 +40,19 @@ const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     setLoading(true);
     try {
       await api.patch(
-        `${API_PREFIX}/admin/bookings/${booking.id}/pwd-senior-discount`,
+        `${API_PREFIX}/admin/bookings/${booking.id}/special-discount`,
         {
-          pwd_senior_discount: parseFloat(data.pwd_senior_discount) || 0,
+          special_discount: parseFloat(data.special_discount) || 0,
           discount_reason: data.discount_reason
         },
         { requiresAuth: true }
       );
       
-      toast.success('PWD/Senior discount updated successfully');
+      toast.success('Special discount updated successfully');
       onSuccess();
     } catch (error) {
-      console.error('Error updating PWD/Senior discount:', error);
-      toast.error('Failed to update PWD/Senior discount');
+      console.error('Error updating special discount:', error);
+      toast.error('Failed to update special discount');
     } finally {
       setLoading(false);
     }
@@ -62,19 +62,19 @@ const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     setLoading(true);
     try {
       await api.patch(
-        `${API_PREFIX}/admin/bookings/${booking.id}/pwd-senior-discount`,
+        `${API_PREFIX}/admin/bookings/${booking.id}/special-discount`,
         {
-          pwd_senior_discount: 0,
+          special_discount: 0,
           discount_reason: ''
         },
         { requiresAuth: true }
       );
       
-      toast.success('PWD/Senior discount removed successfully');
+      toast.success('Special discount removed successfully');
       onSuccess();
     } catch (error) {
-      console.error('Error removing PWD/Senior discount:', error);
-      toast.error('Failed to remove PWD/Senior discount');
+      console.error('Error removing special discount:', error);
+      toast.error('Failed to remove special discount');
     } finally {
       setLoading(false);
     }
@@ -84,35 +84,35 @@ const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Manage PWD/Senior Discount</DialogTitle>
+          <DialogTitle>Manage Special Discount</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="pwd_senior_discount">Discount Amount (₱)</Label>
+            <Label htmlFor="special_discount">Discount Amount (₱)</Label>
             <Input
-              id="pwd_senior_discount"
+              id="special_discount"
               type="number"
               step="0.01"
               min="0"
               placeholder="0.00"
-              {...form.register('pwd_senior_discount', {
+              {...form.register('special_discount', {
                 required: 'Discount amount is required',
                 min: { value: 0, message: 'Discount amount must be 0 or greater' }
               })}
             />
-            {form.formState.errors.pwd_senior_discount && (
+            {form.formState.errors.special_discount && (
               <p className="text-sm text-red-600">
-                {form.formState.errors.pwd_senior_discount.message}
+                {form.formState.errors.special_discount.message}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="discount_reason">Reason for Discount *</Label>
+            <Label htmlFor="discount_reason">Reason *</Label>
             <Textarea
               id="discount_reason"
-              placeholder="Enter reason for PWD/Senior discount..."
+              placeholder="Enter reason for this special discount..."
               {...form.register('discount_reason', {
                 required: 'Discount reason is required',
                 minLength: { value: 3, message: 'Reason must be at least 3 characters long' }
@@ -125,35 +125,44 @@ const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             )}
           </div>
 
-          <div className="bg-blue-50 p-3 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> This discount will be applied in addition to any existing promo discounts. 
-              The total discount cannot exceed the booking amount. A reason is required for all discount applications.
-            </p>
+          <div className="flex justify-between items-center pt-4">
+            <div className="text-sm text-gray-600">
+              {booking?.special_discount > 0 && (
+                <div className="mb-2">
+                  <strong>Current discount:</strong> {formatCurrency(booking.special_discount)}
+                </div>
+              )}
+              <div>
+                <strong>Note:</strong> This discount is applied in addition to any promo discounts and reduces the total payable amount. A reason is required for all discount applications.
+              </div>
+            </div>
           </div>
 
-          <div className="flex justify-between">
-            <div className="flex gap-2">
+          <div className="flex gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className="flex-1 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            {booking?.special_discount > 0 && (
               <Button
                 type="button"
-                variant="outline"
-                onClick={onOpenChange}
+                variant="destructive"
+                onClick={handleRemoveDiscount}
                 disabled={loading}
+                className="flex-1 cursor-pointer"
               >
-                Cancel
+                {loading ? 'Removing...' : 'Remove Discount'}
               </Button>
-              {booking?.pwd_senior_discount > 0 && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={handleRemoveDiscount}
-                  disabled={loading}
-                >
-                  Remove Discount
-                </Button>
-              )}
-            </div>
-            <Button type="submit" disabled={loading}>
+            )}
+            <Button
+              type="submit"
+              disabled={loading}
+              className="flex-1 cursor-pointer"
+            >
               {loading ? 'Saving...' : 'Save Discount'}
             </Button>
           </div>
@@ -163,4 +172,4 @@ const PwdSeniorDiscountDialog = ({ open, onOpenChange, booking, onSuccess }) => 
   );
 };
 
-export default PwdSeniorDiscountDialog;
+export default SpecialDiscountDialog;
