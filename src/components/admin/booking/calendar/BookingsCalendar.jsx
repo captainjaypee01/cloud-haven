@@ -407,6 +407,11 @@ const getMealInfoPerRoom = (booking, room) => {
           nights: event.nights,
           final_price: event.final_price,
           remaining_balance: event.remaining_balance,
+          discount_amount: event.discount_amount,
+          pwd_senior_discount: event.pwd_senior_discount,
+          special_discount: event.special_discount,
+          other_charges: event.other_charges,
+          total_payable: event.total_payable,
           booking_adults: event.booking_adults,
           booking_children: event.booking_children,
           booking_type: event.booking_type || 'overnight',
@@ -497,8 +502,8 @@ const getMealInfoPerRoom = (booking, room) => {
                     <td>${booking.start}</td>
                     <td>${booking.end}</td>
                     <td>${booking.nights}</td>
-                    <td>${formatCurrency(booking.final_price || 0).replace('₱', 'PHP ')}</td>
-                    <td>${formatCurrency(booking.remaining_balance || 0).replace('₱', 'PHP ')}</td>
+                    <td>${formatCurrency(Number(booking.total_payable) || Number(booking.final_price) || 0).replace('₱', 'PHP ')}</td>
+                    <td>${formatCurrency(Number(booking.remaining_balance) || 0).replace('₱', 'PHP ')}</td>
                     <td>${booking.booking_adults + booking.booking_children} (${booking.booking_adults}A, ${booking.booking_children}C)</td>
                     <td>${breakfastInfo || '-'}</td>
                   </tr>
@@ -565,6 +570,11 @@ const getMealInfoPerRoom = (booking, room) => {
           booking_children: event.booking_children,
           booking_type: event.booking_type || 'overnight',
           meal_quote_data: event.meal_quote_data,
+          discount_amount: event.discount_amount,
+          pwd_senior_discount: event.pwd_senior_discount,
+          special_discount: event.special_discount,
+          other_charges: event.other_charges,
+          total_payable: event.total_payable,
           rooms: []
         });
       }
@@ -602,7 +612,7 @@ const getMealInfoPerRoom = (booking, room) => {
 
     groupedBookings.forEach(booking => {
       const { typeDisplay, breakfastInfo } = getBookingTypeInfo(booking);
-      
+      console.log('total payable', booking.total_payable)
       // Add booking header row
       csvRows.push([
         booking.reference_number,
@@ -613,8 +623,8 @@ const getMealInfoPerRoom = (booking, room) => {
         booking.start,
         booking.end,
         booking.nights,
-        formatCurrency(booking.final_price || 0).replace('₱', 'PHP '),
-        formatCurrency(booking.remaining_balance || 0).replace('₱', 'PHP '),
+        formatCurrency(Number(booking.total_payable) || Number(booking.final_price) || 0).replace('₱', 'PHP '),
+        formatCurrency(Number(booking.remaining_balance) || 0).replace('₱', 'PHP '),
         `${booking.booking_adults + booking.booking_children} (${booking.booking_adults}A, ${booking.booking_children}C)`,
         breakfastInfo || '-'
       ]);

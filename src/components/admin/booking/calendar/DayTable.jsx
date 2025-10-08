@@ -201,6 +201,11 @@ export default function DayTable({ date, events }) {
           booking_total_guests: event.booking_total_guests,
           booking_type: event.booking_type,
           meal_quote_data: event.meal_quote_data,
+          discount_amount: event.discount_amount,
+          pwd_senior_discount: event.pwd_senior_discount,
+          special_discount: event.special_discount,
+          other_charges: event.other_charges,
+          total_payable: event.total_payable,
           rooms: []
         });
       }
@@ -374,18 +379,23 @@ export default function DayTable({ date, events }) {
                   </TableCell>
                   
                   <TableCell className="text-sm">
-                    <div>{formatCurrency(booking.final_price || 0)}</div>
+                    <div>{formatCurrency(Number(booking.final_price) || 0)}</div>
                     <div className="text-xs text-muted-foreground">
                       {booking.booking_type === 'day_tour' 
                         ? 'Day Tour'
                         : `${booking.nights} night${booking.nights !== 1 ? 's' : ''}`
                       }
                     </div>
+                    {((Number(booking.discount_amount) || 0) > 0 || (Number(booking.pwd_senior_discount) || 0) > 0 || (Number(booking.special_discount) || 0) > 0) && (
+                      <div className="text-xs text-green-600">
+                        Discounts: {formatCurrency((Number(booking.discount_amount) || 0) + (Number(booking.pwd_senior_discount) || 0) + (Number(booking.special_discount) || 0))}
+                      </div>
+                    )}
                   </TableCell>
                   
                   <TableCell className="text-sm">
-                    <div className={booking.remaining_balance > 0 ? 'text-amber-600 font-medium' : 'text-green-600 font-medium'}>
-                      {formatCurrency(booking.remaining_balance || 0)}
+                    <div className={(Number(booking.remaining_balance) || 0) > 0 ? 'text-amber-600 font-medium' : 'text-green-600 font-medium'}>
+                      {formatCurrency(Number(booking.remaining_balance) || 0)}
                     </div>
                   </TableCell>
                   

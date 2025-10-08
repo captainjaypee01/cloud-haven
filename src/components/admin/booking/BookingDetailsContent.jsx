@@ -415,9 +415,23 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                 <span>{formatCurrency(otherCharges)}</span>
                             </div>
                         </div>
-                        <div className="flex justify-between py-3 border-t-2 border-gray-300 pt-3 font-bold text-lg">
-                            <span>Total Payable:</span>
-                            <span>{formatCurrency(totalPayable)}</span>
+                        <div className="space-y-2 border-t-2 border-gray-300 pt-3">
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold">Total Payable:</span>
+                                <span className="font-bold text-lg">{formatCurrency(totalPayable)}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
+                                <span className="font-semibold text-green-600">Total Paid:</span>
+                                <span className="font-bold text-lg text-green-600">{formatCurrency(totalPaid)}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-t border-gray-200 pt-2">
+                                <span className={`font-semibold text-lg ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    {remainingBalance > 0 ? 'Remaining Balance:' : 'Fully Paid'}
+                                </span>
+                                <span className={`font-bold text-xl ${remainingBalance > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    {remainingBalance > 0 ? formatCurrency(remainingBalance) : '✓'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                     {/* List all individual other charges with remarks and delete action: */}

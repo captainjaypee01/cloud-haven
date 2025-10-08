@@ -9,7 +9,7 @@ const Footer = () => {
         <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
             <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
                 <div className='max-w-80'>
-                    <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-6 logo' />
+                    <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-10 logo' />
                     <p className='text-sm'>
                     A refined and exhilarating escape awaits
                     </p>

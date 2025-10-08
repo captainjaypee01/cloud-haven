@@ -170,13 +170,18 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
 
                     {/* CTA */}
                     <div className="mt-auto flex space-x-3">
-                        <Link
-                            to={`/rooms/${room.slug}`}
-                            onClick={handleViewDetailsClick}
-                            className="inline-block px-6 py-2 font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700"
+                        <Button
+                            asChild
+                            variant="default"
+                            className="bg-sky-600 hover:bg-sky-700"
                         >
-                            View Details
-                        </Link>
+                            <Link
+                                to={`/rooms/${room.slug}`}
+                                onClick={handleViewDetailsClick}
+                            >
+                                View Details
+                            </Link>
+                        </Button>
                         {state.checkIn && state.checkOut && (
                             <Button 
                                 variant={isUnavailable ? "secondary" : "outline"} 
