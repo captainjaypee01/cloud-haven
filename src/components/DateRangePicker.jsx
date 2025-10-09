@@ -13,6 +13,19 @@ export function DateRangePicker({ range, onChange, disabledRanges = [] }) {
         : "Select dates";
 
     const handleDateSelect = (selectedRange) => {
+        // If we have both dates selected, check if they're the same
+        if (selectedRange?.from && selectedRange?.to) {
+            const fromStr = format(selectedRange.from, 'yyyy-MM-dd');
+            const toStr = format(selectedRange.to, 'yyyy-MM-dd');
+            
+            // If check-in and check-out are the same date, set check-out to next day
+            if (fromStr === toStr) {
+                const nextDay = new Date(selectedRange.from);
+                nextDay.setDate(nextDay.getDate() + 1);
+                selectedRange = { from: selectedRange.from, to: nextDay };
+            }
+        }
+        
         onChange(selectedRange);
     };
 

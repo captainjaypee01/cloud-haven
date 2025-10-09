@@ -32,7 +32,7 @@ const SearchForm = () => {
     const handleDateSelection = ({ dateRange }) => {
         const { from, to } = dateRange;
         
-        // If dates are cleared, clear the cart state and reset form
+        // If dates are cleared or incomplete, clear the cart state and reset form
         if (!from || !to) {
             setDates('', '');
             // Also explicitly clear promo codes
@@ -44,6 +44,12 @@ const SearchForm = () => {
         
         // Only proceed when both dates are selected
         if (from && to) {
+            // Validate that check-in date is before check-out date
+            if (from >= to) {
+                toast.warning("Check-in date must be before check-out date.");
+                return;
+            }
+            
             // Validate that dates are within available meal program ranges (if any)
             if (hasActivePrograms && dateRanges.length > 0) {
                 const fromStr = format(from, "yyyy-MM-dd");
@@ -65,7 +71,7 @@ const SearchForm = () => {
             // Clear promo codes before setting new dates
             clearPromoCodesOnly();
             setDates(format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"));
-            if(location.pathname !== "/rooms") navigate("/rooms");
+            // Don't automatically navigate - let the user click Search button
         }
     }
 
@@ -75,6 +81,12 @@ const SearchForm = () => {
         // Validate that dates are selected before submitting
         if (!from || !to) {
             toast.warning("Please select both check-in and check-out dates.");
+            return;
+        }
+        
+        // Validate that check-in date is before check-out date
+        if (from >= to) {
+            toast.warning("Check-in date must be before check-out date.");
             return;
         }
         
