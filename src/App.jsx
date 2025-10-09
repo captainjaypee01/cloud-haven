@@ -8,6 +8,7 @@ import ResortPolicyDialog from './components/common/ResortPolicyDialog';
 import SEO from './components/SEO';
 import Loader from './components/common/Loader';
 import NoIndexEnvironments from './components/UATNoIndex';
+import FacebookMessengerButton from './components/FacebookMessengerButton';
 
 // Lazy load pages for better performance
 const Home = React.lazy(() => import('./pages/Home'));
@@ -266,6 +267,7 @@ const App = () => {
             </Suspense>
           </div>
           {!isAdminPath && <Footer />}
+          {!isAdminPath && <FacebookMessengerButton />}
         </div>
       )
       }
