@@ -611,7 +611,17 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                             <div style="font-size: 12px; color: #666;">Free Breakfast Nights</div>
                         </div>
                         <div style="text-align: center; padding: 15px; background-color: #fff3e0; border-radius: 4px;">
-                            <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${booking.extra_guest_count || 0}</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #f57c00;">${(() => {
+                                // Calculate total extra guests across all days (both free breakfast and buffet)
+                                let totalExtraGuests = 0;
+                                booking.booking_rooms?.forEach(br => {
+                                    const roomCapacity = br.room?.max_guests || 6;
+                                    const roomGuests = br.total_guests || 0;
+                                    const extraGuestsInRoom = Math.max(0, roomGuests - roomCapacity);
+                                    totalExtraGuests += extraGuestsInRoom;
+                                });
+                                return totalExtraGuests;
+                            })()}</div>
                             <div style="font-size: 12px; color: #666;">Extra Guests</div>
                         </div>
                     </div>
@@ -627,9 +637,21 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                         </thead>
                         <tbody>
                             ${booking.meal_quote_data.nights.map((night, idx) => {
-                                const roomMaxGuests = booking.booking_rooms?.[0]?.room?.max_guests || 6;
                                 const totalGuests = booking.total_guests;
-                                const extraGuests = Math.max(0, totalGuests - roomMaxGuests);
+                                
+                                // Calculate extra guests per room based on room capacity
+                                let totalExtraGuests = 0;
+                                let totalRoomCapacity = 0;
+                                
+                                booking.booking_rooms?.forEach(br => {
+                                    const roomCapacity = br.room?.max_guests || 6;
+                                    const roomGuests = br.total_guests || 0;
+                                    const extraGuestsInRoom = Math.max(0, roomGuests - roomCapacity);
+                                    totalExtraGuests += extraGuestsInRoom;
+                                    totalRoomCapacity += roomCapacity;
+                                });
+                                
+                                const totalBookedGuests = totalGuests - totalExtraGuests;
                                 
                                 return `
                                     <tr>
@@ -644,10 +666,10 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                                                 <div><strong>${totalGuests} Total Guests</strong></div>
                                                 ${night.type === 'buffet' ? `
                                                     <div>• All guests pay buffet price</div>
-                                                    ${extraGuests > 0 ? `<div>• ${extraGuests} extra guests: Additional entrance/amenity fee</div>` : ''}
+                                                    ${totalExtraGuests > 0 ? `<div>• ${totalExtraGuests} extra guests: Additional entrance/amenity fee</div>` : ''}
                                                 ` : `
-                                                    <div>• ${roomMaxGuests} guests: Free breakfast + amenities</div>
-                                                    ${extraGuests > 0 ? `<div>• ${extraGuests} extra guests: All-inclusive fee (breakfast + entrance + amenities)</div>` : ''}
+                                                    <div>• ${totalBookedGuests} guests: Complimentary breakfast + amenities</div>
+                                                    ${totalExtraGuests > 0 ? `<div>• ${totalExtraGuests} extra guests: All-inclusive fee (breakfast + entrance + amenities)</div>` : ''}
                                                 `}
                                             </div>
                                         </td>
@@ -656,10 +678,14 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                                                 ${night.type === 'buffet' ? `
                                                     <div>Buffet - Adult: ${formatCurrency(night.adult_price || 0)}</div>
                                                     <div>Buffet - Child: ${formatCurrency(night.child_price || 0)}</div>
-                                                    ${extraGuests > 0 ? `<div style="color: #f57c00;">Extra guest fee: ${formatCurrency(night.extra_guest_fee || 0)}</div>` : ''}
+                                                    ${totalExtraGuests > 0 ? `<div style="color: #f57c00;">Extra guest fee: ${formatCurrency(night.extra_guest_fee || 0)}</div>` : ''}
                                                 ` : `
-                                                    <div>Free breakfast: ${roomMaxGuests} guests</div>
-                                                    ${extraGuests > 0 ? `<div style="color: #f57c00;">All-inclusive fee: ${formatCurrency(night.extra_guest_fee || 0)}</div>` : ''}
+                                                    ${totalExtraGuests > 0 ? `
+                                                        <div>Complimentary breakfast: ${totalBookedGuests} guests</div>
+                                                        <div style="color: #f57c00;">All-inclusive fee: ${formatCurrency(night.adult_breakfast_price || 0)}</div>
+                                                    ` : `
+                                                        <div>Complimentary breakfast: ${totalBookedGuests} guests</div>
+                                                    `}
                                                 `}
                                             </div>
                                         </td>
@@ -667,10 +693,15 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                                             <div style="font-size: 12px;">
                                                 ${night.type === 'buffet' ? `
                                                     <div>Buffet: ${formatCurrency((booking.adults * (night.adult_price || 0)) + (booking.children * (night.child_price || 0)))}</div>
-                                                    ${extraGuests > 0 ? `<div style="color: #f57c00;">Extra fee: ${formatCurrency(extraGuests * (night.extra_guest_fee || 0))}</div>` : ''}
+                                                    ${totalExtraGuests > 0 ? `<div style="color: #f57c00;">Extra fee: ${formatCurrency(totalExtraGuests * (night.extra_guest_fee || 0))}</div>` : ''}
                                                 ` : `
-                                                    <div style="color: #388e3c;">Free: ${formatCurrency(0)}</div>
-                                                    ${extraGuests > 0 ? `<div style="color: #f57c00;">All-inclusive: ${formatCurrency(extraGuests * (night.extra_guest_fee || 0))}</div>` : ''}
+                                                    ${totalExtraGuests > 0 ? `
+                                                        <div style="color: #388e3c;">Complimentary: ${formatCurrency(0)}</div>
+                                                        <div style="color: #f57c00;">All-inclusive: ${formatCurrency(totalExtraGuests * (night.adult_breakfast_price || 0))}</div>
+                                                        <div style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 3px; margin-top: 3px;">Total: ${formatCurrency(totalExtraGuests * (night.adult_breakfast_price || 0))}</div>
+                                                    ` : `
+                                                        <div style="color: #388e3c;">Complimentary: ${formatCurrency(0)}</div>
+                                                    `}
                                                 `}
                                             </div>
                                         </td>

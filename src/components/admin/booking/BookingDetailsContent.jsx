@@ -659,11 +659,21 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             <div className="text-2xl font-bold text-green-600">
                                                 {booking.meal_quote_data.free_breakfast_nights || 0}
                                             </div>
-                                            <div className="text-sm text-gray-600">Free Breakfast Nights</div>
+                                            <div className="text-sm text-gray-600">Complimentary Breakfast Nights</div>
                                         </div>
                                         <div className="text-center">
                                             <div className="text-2xl font-bold text-orange-600">
-                                                {booking.extra_guest_count || 0}
+                                                {(() => {
+                                                    // Calculate total extra guests across all days (both free breakfast and buffet)
+                                                    let totalExtraGuests = 0;
+                                                    booking.booking_rooms?.forEach(br => {
+                                                        const roomCapacity = br.room?.max_guests || 6;
+                                                        const roomGuests = br.total_guests || 0;
+                                                        const extraGuestsInRoom = Math.max(0, roomGuests - roomCapacity);
+                                                        totalExtraGuests += extraGuestsInRoom;
+                                                    });
+                                                    return totalExtraGuests;
+                                                })()}
                                             </div>
                                             <div className="text-sm text-gray-600">Extra Guests</div>
                                         </div>
@@ -689,12 +699,21 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             </thead>
                                             <tbody>
                                                 {booking.meal_quote_data.nights.map((night, idx) => {
-                                                    // Calculate total room capacity across all rooms
-                                                    const totalRoomCapacity = booking.booking_rooms?.reduce((total, br) => {
-                                                        return total + (br.room?.max_guests || 6) * (br.quantity || 1);
-                                                    }, 0) || 0;
                                                     const totalGuests = booking.total_guests;
-                                                    const extraGuests = Math.max(0, totalGuests - totalRoomCapacity);
+                                                    
+                                                    // Calculate extra guests per room based on room capacity
+                                                    let totalExtraGuests = 0;
+                                                    let totalRoomCapacity = 0;
+                                                    
+                                                    booking.booking_rooms?.forEach(br => {
+                                                        const roomCapacity = br.room?.max_guests || 6;
+                                                        const roomGuests = br.total_guests || 0;
+                                                        const extraGuestsInRoom = Math.max(0, roomGuests - roomCapacity);
+                                                        totalExtraGuests += extraGuestsInRoom;
+                                                        totalRoomCapacity += roomCapacity;
+                                                    });
+                                                    
+                                                    const totalBookedGuests = totalGuests - totalExtraGuests;
                                                     
                                                     return (
                                                         <tr key={idx} className="border-b last:border-b-0">
@@ -704,7 +723,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                     variant={night.type === 'buffet' ? 'default' : 'secondary'}
                                                                     className={night.type === 'buffet' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}
                                                                 >
-                                                                    {night.type === 'buffet' ? 'Buffet' : 'Free Breakfast'}
+                                                                    {night.type === 'buffet' ? 'Buffet' : 'Complimentary Breakfast'}
                                                                 </Badge>
                                                             </td>
                                                             <td className="py-2 pr-4">
@@ -715,15 +734,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                     {night.type === 'buffet' ? (
                                                                         <div className="text-xs text-gray-600">
                                                                             <div>• All guests pay buffet price</div>
-                                                                            {extraGuests > 0 && (
-                                                                                <div>• {extraGuests} extra guests: Additional entrance/amenity fee</div>
+                                                                            {totalExtraGuests > 0 && (
+                                                                                <div>• {totalExtraGuests} extra guests: Additional entrance/amenity fee</div>
                                                                             )}
                                                                         </div>
                                                                     ) : (
                                                                         <div className="text-xs text-gray-600">
-                                                                            <div>• {totalRoomCapacity} guests: Free breakfast + amenities</div>
-                                                                            {extraGuests > 0 && (
-                                                                                <div>• {extraGuests} extra guests: All-inclusive fee (breakfast + entrance + amenities)</div>
+                                                                            <div>• {totalBookedGuests} guests: Complimentary breakfast + amenities</div>
+                                                                            {totalExtraGuests > 0 && (
+                                                                                <div>• {totalExtraGuests} extra guests: All-inclusive fee (breakfast + entrance + amenities)</div>
                                                                             )}
                                                                         </div>
                                                                     )}
@@ -734,15 +753,19 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                     <div className="text-xs">
                                                                         <div>Buffet - Adult: {formatCurrency(night.adult_price || 0)}</div>
                                                                         <div>Buffet - Child: {formatCurrency(night.child_price || 0)}</div>
-                                                                        {extraGuests > 0 && (
+                                                                        {totalExtraGuests > 0 && (
                                                                             <div className="text-orange-600">Extra guest fee: {formatCurrency(night.extra_guest_fee || 0)}</div>
                                                                         )}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="text-xs">
-                                                                        <div>Free breakfast: {totalRoomCapacity} guests</div>
-                                                                        {extraGuests > 0 && (
-                                                                            <div className="text-orange-600">All-inclusive fee: {formatCurrency(night.extra_guest_fee || 0)}</div>
+                                                                        {totalExtraGuests > 0 ? (
+                                                                            <>
+                                                                                <div>Complimentary breakfast: {totalBookedGuests} guests</div>
+                                                                                <div className="text-orange-600">All-inclusive fee: {formatCurrency(night.adult_breakfast_price || 0)}</div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <div>Complimentary breakfast: {totalBookedGuests} guests</div>
                                                                         )}
                                                                     </div>
                                                                 )}
@@ -751,15 +774,20 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                                 {night.type === 'buffet' ? (
                                                                     <div className="text-xs">
                                                                         <div>Buffet: {formatCurrency((booking.adults * (night.adult_price || 0)) + (booking.children * (night.child_price || 0)))}</div>
-                                                                        {extraGuests > 0 && (
-                                                                            <div className="text-orange-600">Extra fee: {formatCurrency(extraGuests * (night.extra_guest_fee || 0))}</div>
+                                                                        {totalExtraGuests > 0 && (
+                                                                            <div className="text-orange-600">Extra fee: {formatCurrency(totalExtraGuests * (night.extra_guest_fee || 0))}</div>
                                                                         )}
                                                                     </div>
                                                                 ) : (
                                                                     <div className="text-xs">
-                                                                        <div className="text-green-600">Free: {formatCurrency(0)}</div>
-                                                                        {extraGuests > 0 && (
-                                                                            <div className="text-orange-600">All-inclusive: {formatCurrency(extraGuests * (night.extra_guest_fee || 0))}</div>
+                                                                        {totalExtraGuests > 0 ? (
+                                                                            <>
+                                                                                <div className="text-green-600">Complimentary: {formatCurrency(0)}</div>
+                                                                                <div className="text-orange-600">All-inclusive: {formatCurrency(totalExtraGuests * (night.adult_breakfast_price || 0))}</div>
+                                                                                <div className="font-medium pt-1 border-t border-gray-200">Total: {formatCurrency(totalExtraGuests * (night.adult_breakfast_price || 0))}</div>
+                                                                            </>
+                                                                        ) : (
+                                                                            <div className="text-green-600">Complimentary: {formatCurrency(0)}</div>
                                                                         )}
                                                                     </div>
                                                                 )}
