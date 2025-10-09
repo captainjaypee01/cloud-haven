@@ -43,7 +43,7 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
     return (
         <Dialog open={open} onOpenChange={() => {}}>
             <DialogContent 
-                className="w-[85vw] max-w-[85vw] h-[80vh] max-h-[80vh] sm:w-[95vw] sm:max-w-4xl sm:h-auto sm:max-h-[85vh] mx-auto p-0 flex flex-col overflow-hidden"
+                className="w-[80vw] max-w-[80vw] h-[80vh] max-h-[80vh] sm:w-[95vw] sm:max-w-5xl sm:h-auto sm:max-h-[90vh] mx-auto p-0 flex flex-col overflow-hidden"
                 onPointerDownOutside={(e) => e.preventDefault()}
                 onEscapeKeyDown={(e) => e.preventDefault()}
                 showCloseButton={false}

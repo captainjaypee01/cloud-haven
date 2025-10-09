@@ -184,6 +184,15 @@ export const QuickBookingDialog = ({
                 onOpenChange(false);
                 return;
             }
+            
+            // Validate that check-in date is before check-out date
+            const checkInDate = new Date(state.checkIn);
+            const checkOutDate = new Date(state.checkOut);
+            if (checkInDate >= checkOutDate) {
+                toast.error('Check-in date must be before check-out date.');
+                onOpenChange(false);
+                return;
+            }
         }
 
         if (isUnavailable) {
