@@ -72,7 +72,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
         ? "group relative flex flex-col items-start justify-between gap-3 p-6 rounded-xl text-white bg-no-repeat bg-cover bg-center min-h-[260px] cursor-pointer"
         : "group relative flex flex-col items-start justify-between gap-3 p-6 rounded-xl text-gray-800 bg-gray-100 border min-h-[260px] cursor-pointer";
     const overlayClass = hasImage
-        ? "absolute inset-0 rounded-xl bg-black/50 pointer-events-none"
+        ? "absolute inset-0 rounded-xl bg-black/65 pointer-events-none"
         : "";
 
     return (

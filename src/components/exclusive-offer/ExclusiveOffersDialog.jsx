@@ -124,9 +124,9 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[75vw] max-w-[75vw] h-[70vh] max-h-[70vh] sm:w-[90vw] sm:max-w-2xl sm:h-auto sm:max-h-[80vh] mx-auto p-0 flex flex-col">
+            <DialogContent className="w-[75vw] max-w-[75vw] h-[70vh] max-h-[70vh] sm:w-[90vw] sm:max-w-2xl sm:h-auto sm:max-h-[80vh] mx-auto p-0 flex flex-col overflow-hidden">
                 {/* Header - Fixed at top */}
-                <DialogHeader className="text-center pb-3 sm:pb-6 px-6 pt-6 bg-white border-b border-gray-100 flex-shrink-0">
+                <DialogHeader className="text-center pb-4 px-6 pt-6 bg-white border-b border-gray-100 flex-shrink-0">
                     <DialogTitle className="text-2xl font-semibold text-gray-900">
                         Exclusive Offers
                     </DialogTitle>
@@ -136,7 +136,7 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
                 </DialogHeader>
 
                 {/* Body - Scrollable content */}
-                <div className="flex-1 overflow-y-auto px-6 py-4">
+                <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
                     <div className="space-y-3 sm:space-y-6">
                         {/* Image Carousel */}
                         <div className="relative">
@@ -300,7 +300,7 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
                 </div>
 
                 {/* Footer - Fixed at bottom with proper alignment */}
-                <DialogFooter className="pt-3 sm:pt-6 px-6 pb-6 bg-white border-t border-gray-100 flex-shrink-0 flex flex-row justify-end gap-2">
+                <DialogFooter className="pt-4 px-6 pb-6 bg-white border-t border-gray-100 flex-shrink-0 flex flex-row justify-end gap-2">
                     <DialogClose asChild>
                         <Button variant="outline" className="w-auto px-6">
                             Close

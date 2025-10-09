@@ -9,9 +9,11 @@ const Footer = () => {
         <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
             <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
                 <div className='max-w-80'>
-                    <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-10 logo' />
+                    <Link to="/" onClick={() => { window.scrollTo(0, 0); }}>
+                        <img src={NETANIA_LOGO} alt="logo" className='mb-4 h-10 logo' />
+                    </Link>
                     <p className='text-sm'>
-                    A refined and exhilarating escape awaits
+                        A refined and exhilarating escape awaits
                     </p>
                     <div className='flex items-center gap-3 mt-4'>
                         {/* Instagram */}
@@ -28,11 +30,14 @@ const Footer = () => {
                 <div>
                     <p className='font-playfair text-lg text-gray-800'>Netania De Laiya</p>
                     <ul className='mt-3 flex flex-col gap-2 text-sm'>
-                        <li>
+                        {/* <li>
                             <Link to={`/about-us`}>About</Link>
-                        </li>
+                        </li> */}
                         <li>
                             <Link to={`/rooms`}>Accommodations</Link>
+                        </li>
+                        <li>
+                            <Link to={`/day-tour`}>Day Tour</Link>
                         </li>
                         <li>
                             <Link to={`/policy`}>Resort Policy</Link>
@@ -58,7 +63,7 @@ const Footer = () => {
                         Telephone: {SUPPORT_LANDLINE}
                     </p>
                     <p className='mt-3 text-sm'>
-                        Phone: {SUPPORT_PHONE} <br/>
+                        Phone: {SUPPORT_PHONE} <br />
                         <span className='ml-[46px]'>{SUPPORT_PHONE_ALT}</span>
                     </p>
                     <p className='mt-3 text-sm'>

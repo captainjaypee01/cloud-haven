@@ -57,8 +57,8 @@ const Policies = () => {
         return (
             <div className="space-y-6">
                 {policyData.policies.map((category, index) => (
-                    <Card key={`${policyData.title}-${index}`} className="border-l-4 border-l-blue-500">
-                        <CardHeader className="pb-3">
+                    <Card key={`${policyData.title}-${index}`} className="border-l-4 border-l-blue-500 gap-3">
+                        <CardHeader className="pb-1">
                             <CardTitle className="text-lg text-blue-700">
                                 {category.category}
                             </CardTitle>
@@ -154,7 +154,7 @@ const Policies = () => {
                             >
                                 <div className="space-y-6">
                                     <div className="text-center mb-8">
-                                        <h3 className="text-3xl font-bold text-gray-800 mb-2">
+                                        <h3 className="text-3xl font-bold text-gray-800 mb-1">
                                             {policy.title}
                                         </h3>
                                         <p className="text-gray-600 text-lg">

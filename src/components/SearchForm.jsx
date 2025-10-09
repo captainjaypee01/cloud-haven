@@ -42,49 +42,31 @@ const SearchForm = () => {
             return;
         }
         
-        // Validate that dates are not in the past
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time to start of day
-        
-        if (from < today) {
-            toast.warning("Check-in date cannot be in the past.");
-            return;
-        }
-        
-        if (to <= from) {
-            toast.warning("Check-out date must be after check-in date.");
-            return;
-        }
-        
-        // Check for 5-day maximum limit for overnight bookings
-        const nights = Math.ceil((to - from) / (1000 * 60 * 60 * 24));
-        if (nights > 5) {
-            toast.warning("Overnight bookings are limited to a maximum of 5 days.");
-            return;
-        }
-        
-        // Validate that dates are within available meal program ranges (if any)
-        if (hasActivePrograms && dateRanges.length > 0) {
-            const fromStr = format(from, "yyyy-MM-dd");
-            const toStr = format(to, "yyyy-MM-dd");
-            
-            const isFromValid = dateRanges.some(range => 
-                fromStr >= range.start && fromStr <= range.end
-            );
-            const isToValid = dateRanges.some(range => 
-                toStr >= range.start && toStr <= range.end
-            );
-            
-            if (!isFromValid || !isToValid) {
-                toast.warning("Selected dates are not available. Please choose dates within the available meal program periods.");
-                return;
+        // Only proceed when both dates are selected
+        if (from && to) {
+            // Validate that dates are within available meal program ranges (if any)
+            if (hasActivePrograms && dateRanges.length > 0) {
+                const fromStr = format(from, "yyyy-MM-dd");
+                const toStr = format(to, "yyyy-MM-dd");
+                
+                const isFromValid = dateRanges.some(range => 
+                    fromStr >= range.start && fromStr <= range.end
+                );
+                const isToValid = dateRanges.some(range => 
+                    toStr >= range.start && toStr <= range.end
+                );
+                
+                if (!isFromValid || !isToValid) {
+                    toast.warning("Selected dates are not available. Please choose dates within the available meal program periods.");
+                    return;
+                }
             }
+            
+            // Clear promo codes before setting new dates
+            clearPromoCodesOnly();
+            setDates(format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"));
+            if(location.pathname !== "/rooms") navigate("/rooms");
         }
-        
-        // Clear promo codes before setting new dates
-        clearPromoCodesOnly();
-        setDates(format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"));
-        if(location.pathname !== "/rooms") navigate("/rooms");
     }
 
     const handleFormSubmit = ({ dateRange }) => {
