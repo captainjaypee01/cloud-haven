@@ -8,7 +8,7 @@ import { QuickBookingDialog } from "./common/QuickBookingDialog";
 import { DayTourAddToCartDialog } from "./dayTour/DayTourAddToCartDialog";
 import { useCart } from "../context/CartContext";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatBuffetDate, formatMealDate, formatBuffetDateRange } from "../utils/dateUtils";
+import { formatBuffetDate, formatMealDate, formatBuffetDateRange, getBuffetMealLabels } from "../utils/dateUtils";
 
 const CartList = ({
     summary = [],
@@ -284,13 +284,21 @@ const CartList = ({
                         {item.mealBreakdown.map((mealNight, index) => (
                             <div key={index} className="border-b border-blue-200 pb-3 last:border-b-0 last:pb-0">
                                 {/* Date Header */}
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-blue-700">
-                                        {mealNight.type === 'buffet' 
-                                            ? `${formatBuffetDateRange(mealNight.startDate, mealNight.endDate)} - Buffet`
-                                            : `${formatMealDate(mealNight.endDate)} - Free Breakfast`
-                                        }
-                                    </span>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium text-blue-700">
+                                            {mealNight.type === 'buffet' 
+                                                ? formatBuffetDateRange(mealNight.startDate, mealNight.endDate)
+                                                : formatMealDate(mealNight.endDate)
+                                            }
+                                        </span>
+                                        <span className="text-xs text-blue-600 font-medium">
+                                            {mealNight.type === 'buffet' 
+                                                ? getBuffetMealLabels(mealNight.startDate, mealNight.endDate)
+                                                : 'Free Breakfast (Plated)'
+                                            }
+                                        </span>
+                                    </div>
                                     <span className="text-sm font-semibold text-blue-900">
                                         {formatCurrency(mealNight.cost)}
                                     </span>

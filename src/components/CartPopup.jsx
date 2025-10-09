@@ -23,7 +23,7 @@ import { Link } from "react-router-dom";
 import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
 import { Checkbox } from "@/components/ui/checkbox";
-import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from "../utils/dateUtils";
+import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange, getBuffetMealLabels } from "../utils/dateUtils";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
@@ -435,15 +435,23 @@ export function CartPopup() {
                                             {item.mealBreakdown.map((mealNight, index) => (
                                                 <div key={index} className="border-b border-blue-200 pb-2 last:border-b-0 last:pb-0">
                                                     {/* Date Header */}
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <span className="text-xs font-medium text-blue-700">
+                                                    <div className="flex flex-col gap-0.5 mb-1">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs font-medium text-blue-700">
+                                                                {mealNight.type === 'buffet' 
+                                                                    ? formatBuffetDateRange(mealNight.startDate, mealNight.endDate)
+                                                                    : formatMealDate(mealNight.date)
+                                                                }
+                                                            </span>
+                                                            <span className="text-xs font-semibold text-blue-900">
+                                                                {formatCurrency(mealNight.cost)}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-xs text-blue-600 font-medium">
                                                             {mealNight.type === 'buffet' 
-                                                                ? `${formatBuffetDateRange(mealNight.startDate, mealNight.endDate)} - Buffet`
-                                                                : `${formatMealDate(mealNight.date)} - Free Breakfast`
+                                                                ? getBuffetMealLabels(mealNight.startDate, mealNight.endDate)
+                                                                : 'Free Breakfast (Plated)'
                                                             }
-                                                        </span>
-                                                        <span className="text-xs font-semibold text-blue-900">
-                                                            {formatCurrency(mealNight.cost)}
                                                         </span>
                                                     </div>
                                                     
@@ -593,8 +601,20 @@ export function CartPopup() {
                                                             "Buffet Available"
                                                         }
                                                     </span>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {formatBuffetSummaryDates(mealQuote.nights.filter(night => night.type === 'buffet'))}
+                                                    <div className="text-xs text-gray-500 mt-1 space-y-1">
+                                                        {mealQuote.nights
+                                                            .filter(night => night.type === 'buffet')
+                                                            .map((night, index) => (
+                                                                <div key={index}>
+                                                                    <div className="font-medium">
+                                                                        {formatBuffetDateRange(night.start_date, night.end_date)}
+                                                                    </div>
+                                                                    <div className="text-blue-600">
+                                                                        {getBuffetMealLabels(night.start_date, night.end_date)}
+                                                                    </div>
+                                                                </div>
+                                                            ))
+                                                        }
                                                     </div>
                                                 </div>
                                                 <span>

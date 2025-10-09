@@ -24,7 +24,7 @@ import { useLoader } from "@/context/LoaderContext";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
-import { formatBuffetDate, formatBuffetSummaryDates, formatBuffetExtraGuestDates, formatMealDate, formatBuffetDateRange } from "../utils/dateUtils";
+import { formatBuffetDate, formatBuffetSummaryDates, formatBuffetExtraGuestDates, formatMealDate, formatBuffetDateRange, formatBuffetDateRangeWithLabels, getBuffetMealLabels } from "../utils/dateUtils";
 
 const Cart = () => {
     const api = useApi();
@@ -409,8 +409,22 @@ const Cart = () => {
                                                         "Buffet Available"
                                                     }
                                                 </span>
-                                                <div className="text-xs text-gray-500 mt-1">
-                                                    {formatBuffetSummaryDates(mealQuote.nights.filter(night => night.type === 'buffet'))}
+                                                <div className="text-xs text-gray-500 mt-1 space-y-1">
+                                                    {mealQuote.nights
+                                                        .filter(night => night.type === 'buffet')
+                                                        .map((night, index) => (
+                                                            <div key={index} className="block sm:hidden">
+                                                                {/* Mobile: Stack date and meals */}
+                                                                <div className="whitespace-pre-line">
+                                                                    {formatBuffetDateRangeWithLabels(night.start_date, night.end_date, true)}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    }
+                                                    <div className="hidden sm:block">
+                                                        {/* Desktop: Show summary dates */}
+                                                        {formatBuffetSummaryDates(mealQuote.nights.filter(night => night.type === 'buffet'))}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <span>
@@ -515,10 +529,15 @@ const Cart = () => {
                                                 {night.type === 'buffet' ? (
                                                     <>
                                                         {/* Date Header for Buffet */}
-                                                        <div className="flex justify-between items-center mb-2">
-                                                            <span className="text-sm font-medium text-gray-700">
-                                                                {formatBuffetDateRange(night.start_date, night.end_date)} - Buffet
-                                                            </span>
+                                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
+                                                            <div className="flex flex-col">
+                                                                <span className="text-sm font-medium text-gray-700">
+                                                                    {formatBuffetDateRange(night.start_date, night.end_date)}
+                                                                </span>
+                                                                <span className="text-xs text-blue-600 font-medium">
+                                                                    {getBuffetMealLabels(night.start_date, night.end_date)}
+                                                                </span>
+                                                            </div>
                                                             <span className="text-sm font-semibold text-gray-900">
                                                                 {formatCurrency(night.night_total)}
                                                             </span>
