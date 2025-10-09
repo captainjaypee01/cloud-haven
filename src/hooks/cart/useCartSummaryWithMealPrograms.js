@@ -43,13 +43,13 @@ export function useCartSummaryWithMealPrograms() {
     const roomTotalPrice = summary.reduce((acc, item) => acc + item.subtotal, 0);
 
     useEffect(() => {
-        // Only fetch meal quotes for overnight bookings, not Day Tour
-        if (!isDayTourCart && checkIn && checkOut) {
+        // Only fetch meal quotes for overnight bookings, not Day Tour, and only if there are items in cart
+        if (!isDayTourCart && checkIn && checkOut && items.length > 0) {
             fetchMealQuote();
         } else {
             setMealQuote(null);
         }
-    }, [isDayTourCart, checkIn, checkOut]);
+    }, [isDayTourCart, checkIn, checkOut, items.length]);
 
     const fetchMealQuote = async () => {
         try {

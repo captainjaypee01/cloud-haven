@@ -116,6 +116,61 @@ export const formatBuffetDateRange = (startDate, endDate) => {
 };
 
 /**
+ * Get meal labels for buffet dates - showing what meals are included
+ * @param {string} startDate - The start date string (YYYY-MM-DD)
+ * @param {string} endDate - The end date string (YYYY-MM-DD)
+ * @returns {string} Formatted meal labels like "Dinner, Breakfast, Lunch"
+ */
+export const getBuffetMealLabels = (startDate, endDate) => {
+    try {
+        const startDateObj = parseISO(startDate);
+        const endDateObj = parseISO(endDate);
+        
+        // If it's the same day, it's just dinner
+        if (startDateObj.getTime() === endDateObj.getTime()) {
+            return 'Dinner';
+        }
+        
+        // If it spans to the next day, it includes dinner, breakfast, and lunch
+        const nextDay = addDays(startDateObj, 1);
+        if (endDateObj.getTime() === nextDay.getTime()) {
+            return 'Dinner, Breakfast, Lunch';
+        }
+        
+        // For longer periods, show the range
+        return 'Multi-day Buffet';
+    } catch (error) {
+        console.error('Error getting buffet meal labels:', error);
+        return 'Buffet';
+    }
+};
+
+/**
+ * Format buffet date range with meal labels - mobile friendly
+ * @param {string} startDate - The start date string (YYYY-MM-DD)
+ * @param {string} endDate - The end date string (YYYY-MM-DD)
+ * @param {boolean} isMobile - Whether to use mobile-friendly format
+ * @returns {string} Formatted date range with meal labels
+ */
+export const formatBuffetDateRangeWithLabels = (startDate, endDate, isMobile = false) => {
+    try {
+        const dateRange = formatBuffetDateRange(startDate, endDate);
+        const mealLabels = getBuffetMealLabels(startDate, endDate);
+        
+        if (isMobile) {
+            // Mobile: Stack date and meals on separate lines
+            return `${dateRange}\n${mealLabels}`;
+        } else {
+            // Desktop: Show date and meals on same line
+            return `${dateRange} - ${mealLabels}`;
+        }
+    } catch (error) {
+        console.error('Error formatting buffet date range with labels:', error);
+        return '';
+    }
+};
+
+/**
  * Format date and time in Singapore timezone
  * @param {string|Date} date - The date to format
  * @returns {string} Formatted date and time string in Singapore timezone

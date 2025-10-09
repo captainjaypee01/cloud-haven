@@ -88,8 +88,19 @@ export const CartProvider = ({ children }) => {
     }
 
     const removeItem = (uniqueId) => {
-        dispatch({ type: 'REMOVE', uniqueId });
-        toast.success('Removed from cart');
+        // Check if this is the last item in the cart
+        const currentItems = state.items;
+        const willBeEmpty = currentItems.length === 1 && currentItems.some(item => item.uniqueId === uniqueId);
+        
+        if (willBeEmpty) {
+            // If removing the last item, clear items but keep dates
+            dispatch({ type: 'CLEAR_ITEMS_ONLY' });
+            toast.success('Removed from cart');
+        } else {
+            // Otherwise, just remove the item
+            dispatch({ type: 'REMOVE', uniqueId });
+            toast.success('Removed from cart');
+        }
     }
 
     const addItem = room => {
