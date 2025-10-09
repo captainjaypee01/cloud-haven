@@ -45,6 +45,17 @@ export function DateRangePicker({ range, onChange, disabledRanges = [] }) {
             }
         }
 
+        // If we have a check-out date selected, enforce 5-day maximum limit from that date
+        if (range?.to) {
+            const checkOutDate = new Date(range.to);
+            const daysDifference = Math.ceil((checkOutDate - date) / (1000 * 60 * 60 * 24));
+            
+            // Disable dates more than 5 days before check-out
+            if (daysDifference > 5) {
+                return true;
+            }
+        }
+
         // If no meal program ranges are provided, only apply above rules
         if (disabledRanges.length === 0) {
             return false;

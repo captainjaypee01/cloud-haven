@@ -5,8 +5,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogFooter,
-    DialogClose
+    DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +15,7 @@ import {
     CarouselPrevious,
     CarouselNext,
 } from '@/components/ui/carousel';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay";
 import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from '@/constants/AppConstant';
 
@@ -44,12 +43,13 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
     return (
         <Dialog open={open} onOpenChange={() => {}}>
             <DialogContent 
-                className="w-[95vw] max-w-5xl h-[90vh] max-h-[90vh] sm:w-[98vw] sm:max-w-6xl sm:h-[95vh] sm:max-h-[95vh] mx-auto p-0 flex flex-col"
+                className="w-[85vw] max-w-[85vw] h-[80vh] max-h-[80vh] sm:w-[95vw] sm:max-w-4xl sm:h-auto sm:max-h-[85vh] mx-auto p-0 flex flex-col overflow-hidden"
                 onPointerDownOutside={(e) => e.preventDefault()}
                 onEscapeKeyDown={(e) => e.preventDefault()}
+                showCloseButton={false}
             >
                 {/* Header - Fixed at top */}
-                <DialogHeader className="text-center pb-4 sm:pb-6 px-6 pt-6 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200 flex-shrink-0">
+                <DialogHeader className="text-center pb-4 px-6 pt-6 bg-gradient-to-r from-red-50 to-orange-50 border-b border-red-200 flex-shrink-0">
                     <div className="flex items-center justify-center gap-3 mb-2">
                         <AlertTriangle className="h-8 w-8 text-red-500 animate-pulse" />
                         <DialogTitle className="text-2xl sm:text-3xl font-bold text-red-600">
@@ -62,10 +62,10 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                 </DialogHeader>
 
                 {/* Body - Scrollable content */}
-                <div className="flex-1 overflow-y-auto px-6 py-4">
-                    <div className="space-y-6">
+                <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
+                    <div className="space-y-4">
                         {/* Warning Message */}
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6">
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                             <div className="flex items-start gap-3">
                                 <AlertTriangle className="h-6 w-6 text-red-500 flex-shrink-0 mt-0.5" />
                                 <div>
@@ -145,7 +145,7 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                         </div>
 
                         {/* Safety Tips */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-6">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <h3 className="font-semibold text-blue-800 mb-3">
                                 How to Identify Our Official Page:
                             </h3>
@@ -184,7 +184,7 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                         </div>
 
                         {/* Contact Information */}
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 sm:p-6">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                             <h3 className="font-semibold text-green-800 mb-3">
                                 Need Help or Have Questions?
                             </h3>
@@ -224,7 +224,7 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                 </div>
 
                 {/* Footer - Fixed at bottom */}
-                <DialogFooter className="pt-4 sm:pt-6 px-6 pb-6 bg-white border-t border-gray-100 flex-shrink-0 flex flex-row justify-end gap-2">
+                <DialogFooter className="pt-4 px-6 pb-6 bg-white border-t border-gray-100 flex-shrink-0 flex flex-row justify-end gap-2">
                     <Button 
                         variant="outline" 
                         className="w-auto px-6"

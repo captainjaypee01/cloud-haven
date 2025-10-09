@@ -9,7 +9,7 @@ import {
     DialogClose
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Copy, CheckCircle2, X, Calendar, Clock } from 'lucide-react';
+import { Copy, CheckCircle2, Calendar, Clock, Tag, Percent, X } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
 
 const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
@@ -33,79 +33,177 @@ const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
         });
     };
 
+    const isPromoActive = () => {
+        const now = new Date();
+        const startDate = offer.starts_at ? new Date(offer.starts_at) : null;
+        const endDate = offer.ends_at ? new Date(offer.ends_at) : null;
+        const expiryDate = offer.expires_at ? new Date(offer.expires_at) : null;
+
+        if (startDate && now < startDate) return false;
+        if (endDate && now > endDate) return false;
+        if (expiryDate && now > expiryDate) return false;
+        
+        return true;
+    };
+
+    const getPromoStatus = () => {
+        const now = new Date();
+        const startDate = offer.starts_at ? new Date(offer.starts_at) : null;
+        const endDate = offer.ends_at ? new Date(offer.ends_at) : null;
+        const expiryDate = offer.expires_at ? new Date(offer.expires_at) : null;
+
+        if (startDate && now < startDate) {
+            return { status: 'upcoming', message: `Starts ${formatDateTime(offer.starts_at)}` };
+        }
+        
+        if (endDate && now > endDate) {
+            return { status: 'ended', message: `Ended ${formatDateTime(offer.ends_at)}` };
+        }
+        
+        if (expiryDate && now > expiryDate) {
+            return { status: 'expired', message: `Expired ${formatDateTime(offer.expires_at)}` };
+        }
+        
+        return { status: 'active', message: 'Active now' };
+    };
+
+    const discountLabel = offer.discount_type === "percentage"
+        ? `${offer.discount_value}% OFF`
+        : `${formatCurrency(offer.discount_value)} OFF`;
+
+    const promoStatus = getPromoStatus();
+    const isActive = isPromoActive();
+    const offerImage = offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg';
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md w-full">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        {offer.title}
-                        {offer.discount_type === 'percentage'
-                            ? <span className="ml-2 px-2 py-1 text-xs rounded bg-green-100 text-green-800">{offer.discount_value}% OFF</span>
-                            : <span className="ml-2 px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">{formatCurrency(offer.discount_value)} OFF</span>
-                        }
-                    </DialogTitle>
-                    <DialogDescription>
-                        {offer.description}
-                    </DialogDescription>
-                </DialogHeader>
-
-                {/* Promo Code with Copy */}
-                <div className="flex items-center gap-3 mt-4 bg-gray-100 rounded px-3 py-2">
-                    <span className="text-lg font-mono tracking-wider">{offer.code}</span>
-                    <Button
-                        variant="ghost"
-                        className="flex items-center gap-2 cursor-pointer"
-                        onClick={handleCopy}
-                        type="button"
-                        disabled={copied}
+            <DialogContent 
+                className="w-[95vw] max-w-5xl h-[90vh] max-h-[90vh] sm:w-[90vw] sm:max-w-4xl sm:h-[85vh] sm:max-h-[85vh] mx-auto p-0 flex flex-col overflow-hidden"
+                showCloseButton={false}
+            >
+                {/* Hero Section with Background Image */}
+                <div className="relative flex-1 overflow-hidden">
+                    {/* Background Image */}
+                    <div 
+                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                        style={{ backgroundImage: `url(${offerImage})` }}
                     >
-                        {copied
-                            ? <><CheckCircle2 className="text-green-600" size={18} /> Copied</>
-                            : <><Copy className="text-gray-500" size={18} /> Copy Code</>
-                        }
-                    </Button>
-                </div>
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
+                    </div>
 
-                {/* Date Information */}
-                <div className="mt-4 space-y-3">
-                    {offer.starts_at && (
-                        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-                            <Calendar className="h-4 w-4 text-blue-600" />
-                            <div>
-                                <p className="font-medium text-blue-900">Starts</p>
-                                <p className="text-blue-700 text-sm">{formatDateTime(offer.starts_at)}</p>
+                    {/* Content Overlay */}
+                    <div className="relative z-10 h-full flex flex-col">
+                        {/* Header with Close Button */}
+                        <div className="flex justify-between items-start p-6">
+                            <div className="flex flex-col gap-2">
+                                {/* Status Badge */}
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium w-fit ${
+                                    isActive 
+                                        ? 'bg-green-500 text-white' 
+                                        : promoStatus.status === 'upcoming'
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-red-500 text-white'
+                                }`}>
+                                    {promoStatus.message}
+                                </span>
+                                
+                                {/* Discount Badge */}
+                                <span className="inline-flex items-center px-4 py-2 rounded-full text-lg font-bold bg-white/90 text-gray-900 w-fit shadow-lg">
+                                    {discountLabel}
+                                </span>
                             </div>
+                            
+                            <DialogClose asChild>
+                                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </DialogClose>
                         </div>
-                    )}
-                    
-                    {offer.ends_at && (
-                        <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg">
-                            <Calendar className="h-4 w-4 text-orange-600" />
-                            <div>
-                                <p className="font-medium text-orange-900">Ends</p>
-                                <p className="text-orange-700 text-sm">{formatDateTime(offer.ends_at)}</p>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {offer.expires_at && (
-                        <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
-                            <Clock className="h-4 w-4 text-red-600" />
-                            <div>
-                                <p className="font-medium text-red-900">Expires</p>
-                                <p className="text-red-700 text-sm">{formatDateTime(offer.expires_at)}</p>
-                            </div>
-                        </div>
-                    )}
-                </div>
 
-                <DialogFooter className="mt-6 flex justify-end gap-2">
-                    <DialogClose asChild>
-                        <Button variant="outline" className="cursor-pointer">
-                            <X size={16} className="mr-1" /> Close
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
+                        {/* Main Content */}
+                        <div className="flex-1 flex flex-col justify-center px-6 pb-6">
+                            <div className="max-w-2xl">
+                                {/* Title */}
+                                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
+                                    {offer.title}
+                                </h1>
+                                
+                                {/* Description */}
+                                <p className="text-xl sm:text-2xl text-white/90 mb-8 leading-relaxed">
+                                    {offer.description}
+                                </p>
+
+                                {/* Promo Code Section - Hero Style */}
+                                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-white/20">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="p-2 bg-gray-100 rounded-lg">
+                                            <Tag className="h-5 w-5 text-gray-600" />
+                                        </div>
+                                        <h3 className="text-lg font-semibold text-gray-900">Your Promo Code</h3>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between bg-gray-50 rounded-xl p-4 border-2 border-dashed border-gray-300">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-3xl font-mono font-bold tracking-wider text-gray-900">
+                                                {offer.code}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            size="lg"
+                                            className={`flex items-center gap-2 font-semibold transition-all ${
+                                                copied 
+                                                    ? 'bg-green-600 hover:bg-green-700 text-white' 
+                                                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                                            }`}
+                                            onClick={handleCopy}
+                                            disabled={copied}
+                                        >
+                                            {copied ? (
+                                                <>
+                                                    <CheckCircle2 className="h-5 w-5" />
+                                                    Copied!
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy className="h-5 w-5" />
+                                                    Copy Code
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                    
+                                    <p className="text-sm text-gray-600 mt-3 text-center">
+                                        Click the button above to copy the code to your clipboard
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Bottom Info Bar */}
+                        <div className="bg-white/10 backdrop-blur-sm border-t border-white/20 p-4">
+                            <div className="flex flex-wrap items-center justify-center gap-6 text-white/90 text-sm">
+                                {offer.starts_at && (
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>Starts: {formatDateTime(offer.starts_at)}</span>
+                                    </div>
+                                )}
+                                {offer.ends_at && (
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4" />
+                                        <span>Ends: {formatDateTime(offer.ends_at)}</span>
+                                    </div>
+                                )}
+                                {offer.expires_at && (
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4" />
+                                        <span>Expires: {formatDateTime(offer.expires_at)}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
     );

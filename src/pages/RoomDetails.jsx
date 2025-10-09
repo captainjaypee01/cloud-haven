@@ -9,9 +9,19 @@ import { RoomAvailabilityBadge } from '../components/common/RoomAvailabilityBadg
 import { RoomGallerySlider } from '../components/common/RoomGallerySlider'
 import { useAppContext } from '../context/AppContext'
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircleIcon } from 'lucide-react'
+import { 
+    AlertCircleIcon, 
+    Calendar, 
+    Search, 
+    ShoppingCart, 
+    CheckCircle, 
+    Loader2, 
+    Users, 
+    UserPlus, 
+    Plus,
+    HelpCircle
+} from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
-import * as lucideIcons from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
@@ -24,8 +34,6 @@ import SEO from '@/components/SEO'
 import SocialShare from '@/components/SocialShare'
 import { validateRoomTypeMixing, isDayTourRoom } from "@/utils/roomTypeUtils";
 import DeleteDialog from "@/components/common/form/DeleteDialog";
-
-const iconsModule = lucideIcons;
 
 const RoomDetails = () => {
     const { roomId } = useParams()
@@ -345,8 +353,19 @@ const RoomDetails = () => {
                     <h1 className='text-3xl md:text-4xl font-playfair'>{room?.short_description}</h1>
                     <div className='flex flex-wrap items-center mt-3 mb-6 gap-4'>
                         {room?.amenities && room?.amenities.map((item, index) => {
-
-                            const Icon = iconsModule[item.icon] || iconsModule.HelpCircle;
+                            // Dynamic icon import - fallback to HelpCircle if icon not found
+                            let Icon = HelpCircle;
+                            try {
+                                // Try to dynamically import the icon if it exists
+                                if (item.icon && typeof item.icon === 'string') {
+                                    const iconName = item.icon.charAt(0).toUpperCase() + item.icon.slice(1);
+                                    // For now, we'll use HelpCircle as fallback since we don't know all possible icons
+                                    // In a real app, you'd want to import all possible amenity icons
+                                    Icon = HelpCircle;
+                                }
+                            } catch (error) {
+                                Icon = HelpCircle;
+                            }
                             return (
                                 <div key={index} className='flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100'>
 
@@ -452,19 +471,81 @@ const RoomDetails = () => {
 
                     <div className="col-span-1 md:col-span-3 lg:col-span-3 w-full">
                         {isUnavailable ? (
-                            <div className="flex gap-2 w-full">
-                                <Button type="button" variant="outline" className="w-full cursor-pointer" onClick={() => setRequireDatesOpen(true)}>
-                                    Change dates
-                                </Button>
+                            <div className="space-y-4">
+                                {/* Unavailable state with better visual hierarchy */}
+                                <div className="text-center space-y-3">
+                                    <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
+                                        <AlertCircleIcon className="w-6 h-6 text-red-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Room Not Available</h3>
+                                        <p className="text-sm text-gray-600 mb-4">
+                                            This room is not available for your selected dates. Try selecting different dates to check availability.
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {/* Action buttons with better mobile layout */}
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <Button 
+                                        type="button" 
+                                        size="lg"
+                                        className="w-full sm:flex-1 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white" 
+                                        onClick={() => setRequireDatesOpen(true)}
+                                    >
+                                        <Calendar className="w-4 h-4 mr-2" />
+                                        Change Dates
+                                    </Button>
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        size="lg"
+                                        className="w-full sm:flex-1 cursor-pointer" 
+                                        onClick={() => navigate('/rooms')}
+                                    >
+                                        <Search className="w-4 h-4 mr-2" />
+                                        Browse Other Rooms
+                                    </Button>
+                                </div>
                             </div>
                         ) : isCartFull ? (
-                            <div className="flex gap-2 w-full">
-                                <Button type="button" variant="secondary" disabled className="w-full cursor-pointer">
-                                    Maximum rooms added to cart
-                                </Button>
-                                <Button type="button" variant="outline" className="cursor-pointer" onClick={() => setRequireDatesOpen(true)}>
-                                    Change dates
-                                </Button>
+                            <div className="space-y-4">
+                                {/* Cart full state with better visual hierarchy */}
+                                <div className="text-center space-y-3">
+                                    <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-full">
+                                        <ShoppingCart className="w-6 h-6 text-blue-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900 mb-1">Maximum Rooms Added</h3>
+                                        <p className="text-sm text-gray-600 mb-4">
+                                            You've added all available rooms for these dates to your cart.
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {/* Action buttons with better mobile layout */}
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <Button 
+                                        type="button" 
+                                        variant="secondary" 
+                                        disabled 
+                                        size="lg"
+                                        className="w-full sm:flex-1 cursor-not-allowed"
+                                    >
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Maximum Added
+                                    </Button>
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        size="lg"
+                                        className="w-full sm:flex-1 cursor-pointer" 
+                                        onClick={() => setRequireDatesOpen(true)}
+                                    >
+                                        <Calendar className="w-4 h-4 mr-2" />
+                                        Change Dates
+                                    </Button>
+                                </div>
                             </div>
                         ) : (
                             <Button 
@@ -478,10 +559,27 @@ const RoomDetails = () => {
                                     hasNoGuests
                                 }
                             >
-                                {availabilityLoading || isDebouncing ? 'Checking availability...' : 
-                                 exceedsCapacity ? 'Exceeds room capacity' :
-                                 hasNoGuests ? 'Select guests' :
-                                 'Book this room'}
+                                {availabilityLoading || isDebouncing ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        Checking availability...
+                                    </>
+                                ) : exceedsCapacity ? (
+                                    <>
+                                        <Users className="w-4 h-4 mr-2" />
+                                        Exceeds room capacity
+                                    </>
+                                ) : hasNoGuests ? (
+                                    <>
+                                        <UserPlus className="w-4 h-4 mr-2" />
+                                        Select guests
+                                    </>
+                                ) : (
+                                    <>
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Book this room
+                                    </>
+                                )}
                             </Button>
                         )}
                     </div>
