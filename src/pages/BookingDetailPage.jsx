@@ -341,9 +341,9 @@ const UnifiedBookingResultPage = () => {
                             </div>
                         )}
                         {booking.status === "completed" && (
-                            <Link to={`/booking/${refNo}/review`} onClick={() => { window.scrollTo(0, 0); }}>
-                                <Button variant="secondary" size="lg" className="w-full mb-4 cursor-pointer">Leave a Review</Button>
-                            </Link>
+                            <div className="mb-6 text-blue-700 font-semibold text-center">
+                                A review request will be sent to your email after your stay.
+                            </div>
                         )}
                         {/* Claim/Add to My Bookings if not attached */}
                         {user && !booking.user && (
