@@ -21,7 +21,7 @@ const RoomsPage = React.lazy(() => import('./pages/RoomsPage'));
 const DayTour = React.lazy(() => import('./pages/DayTour'));
 const PaymentPage = React.lazy(() => import('./pages/PaymentPage'));
 const BookingDetailsPage = React.lazy(() => import('./pages/BookingDetailPage'));
-const LeaveReview = React.lazy(() => import('./pages/LeaveReview'));
+const PublicReview = React.lazy(() => import('./pages/PublicReview'));
 const ContactUsPage = React.lazy(() => import('./pages/ContactUs'));
 // const AboutUs = React.lazy(() => import('./pages/AboutUs'));
 const Policies = React.lazy(() => import('./pages/Policies'));
@@ -133,8 +133,8 @@ const App = () => {
                   element={<BookingDetailsPage />}
                 />
                 <Route
-                  path='/booking/:refNo/review'
-                  element={<LeaveReview />}
+                  path='/review/:token'
+                  element={<PublicReview />}
                 />
                 <Route
                   path='/booking/:refNo/payment'
