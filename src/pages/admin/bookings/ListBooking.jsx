@@ -44,7 +44,14 @@ const ListBooking = () => {
             id: "guest_name",
             header: "Guest Name",
             accessorKey: "guest_name",
-            cell: ({ row }) => row.original.guest_name,
+            cell: ({ row }) => (
+                <div className="text-sm">
+                    <div className="font-medium">{row.original.guest_name}</div>
+                    {row.original.guest_email && (
+                        <div className="text-gray-500 text-xs">{row.original.guest_email}</div>
+                    )}
+                </div>
+            ),
         },
         {
             id: "booking_type",

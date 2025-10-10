@@ -156,16 +156,29 @@ const ListPayment = () => {
             id: "reference_number",
             header: "Reference #",
             accessorKey: "booking.reference_number",
-            cell: ({ row }) => (
-                <Button
-                    variant="link"
-                    size="sm"
-                    onClick={() => navigate(`/admin/bookings/${row.original.booking?.id}`)}
-                    className="text-blue-700 p-0 h-auto cursor-pointer font-medium"
-                >
-                    {row.original.booking?.reference_number || '-'}
-                </Button>
-            ),
+            cell: ({ row }) => {
+                const booking = row.original.booking;
+                const referenceNumber = booking?.reference_number || '-';
+                
+                if (booking?.id) {
+                    return (
+                        <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => navigate(`/admin/bookings/${booking.id}`)}
+                            className="text-blue-700 p-0 h-auto cursor-pointer font-medium"
+                        >
+                            {referenceNumber}
+                        </Button>
+                    );
+                }
+                
+                return (
+                    <span className="text-gray-500 font-medium">
+                        {referenceNumber}
+                    </span>
+                );
+            },
         },
         {
             id: "created_at",
@@ -280,14 +293,16 @@ const ListPayment = () => {
                         >
                             Edit
                         </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="cursor-pointer text-xs"
-                            onClick={() => navigate(`/admin/bookings/${row.original.booking?.id}`)}
-                        >
-                            View Booking
-                        </Button>
+                        {row.original.booking?.id && (
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="cursor-pointer text-xs"
+                                onClick={() => navigate(`/admin/bookings/${row.original.booking.id}`)}
+                            >
+                                View Booking
+                            </Button>
+                        )}
                     </div>
                     
                     <div className="flex gap-1">
