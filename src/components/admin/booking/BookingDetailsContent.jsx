@@ -14,8 +14,9 @@ import ChangeRoomUnitDialog from './ChangeRoomUnitDialog';
 import PwdSeniorDiscountDialog from './PwdSeniorDiscountDialog';
 import SpecialDiscountDialog from './SpecialDiscountDialog';
 import BookingPrintButton from './BookingPrintButton';
+import BookingRoomModificationDialog from './BookingRoomModificationDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3 } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3, Settings } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -48,6 +49,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
     const [showPwdSeniorDiscount, setShowPwdSeniorDiscount] = useState(false);
     const [showSpecialDiscount, setShowSpecialDiscount] = useState(false);
+    const [showRoomModification, setShowRoomModification] = useState(false);
     const api = useApi();
     const navigate = useNavigate();
     const { userRole } = useAppContext();
@@ -58,6 +60,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const canAddPayments = ['staff', 'admin', 'superadmin'].includes(userRole);
     const canAddCharges = ['staff', 'admin', 'superadmin'].includes(userRole);
     const canChangeRoomUnit = ['staff', 'admin', 'superadmin'].includes(userRole);
+    const canModifyBooking = ['staff', 'admin', 'superadmin'].includes(userRole);
 
     const resetForm = useForm({
         defaultValues: { reason: '' }
@@ -528,7 +531,22 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             {/* Rooms Table */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="text-lg font-semibold mb-3">Rooms</div>
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="text-lg font-semibold">Rooms</div>
+                        {/* Room Modification Button - Only show if user can modify and booking can be modified */}
+                        {canModifyBooking && ['pending', 'downpayment'].includes(booking.status) && (
+                            <Button
+                                className="cursor-pointer"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowRoomModification(true)}
+                            >
+                                <Settings className="h-4 w-4 mr-2" />
+                                <span className="hidden sm:inline">Modify Rooms</span>
+                                <span className="sm:hidden">Modify</span>
+                            </Button>
+                        )}
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full text-left text-sm">
                             <thead className="border-b">
@@ -1206,6 +1224,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 booking={booking}
                 onSuccess={() => {
                     setShowSpecialDiscount(false);
+                    if (fetchBooking) fetchBooking();
+                }}
+            />
+
+            {/* Room Modification Dialog */}
+            <BookingRoomModificationDialog
+                open={showRoomModification}
+                onOpenChange={setShowRoomModification}
+                booking={booking}
+                onSuccess={() => {
+                    setShowRoomModification(false);
                     if (fetchBooking) fetchBooking();
                 }}
             />
