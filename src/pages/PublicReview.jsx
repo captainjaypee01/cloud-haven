@@ -37,7 +37,6 @@ const PublicReview = () => {
         show();
         api.get(`${API_PREFIX}/reviews/booking`, { params: { token } })
             .then(res => {
-                console.log('API Response:', res.data); // Debug log
                 setBooking(res.data.data.booking);
                 setRooms(res.data.data.rooms);
                 

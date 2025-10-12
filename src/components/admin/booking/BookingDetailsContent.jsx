@@ -534,7 +534,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     <div className="flex items-center justify-between mb-3">
                         <div className="text-lg font-semibold">Rooms</div>
                         {/* Room Modification Button - Only show if user can modify and booking can be modified */}
-                        {canModifyBooking && ['pending', 'downpayment'].includes(booking.status) && (
+                        {canModifyBooking && ['pending', 'downpayment', 'paid'].includes(booking.status) && (
                             <Button
                                 className="cursor-pointer"
                                 variant="outline"

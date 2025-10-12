@@ -612,7 +612,6 @@ const getMealInfoPerRoom = (booking, room) => {
 
     groupedBookings.forEach(booking => {
       const { typeDisplay, breakfastInfo } = getBookingTypeInfo(booking);
-      console.log('total payable', booking.total_payable)
       // Add booking header row
       csvRows.push([
         booking.reference_number,

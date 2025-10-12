@@ -7,13 +7,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { Plus, Trash2, Users, User, Baby, Loader2, Home, Calendar } from 'lucide-react';
+import { Plus, Trash2, Users, User, Baby, Loader2, Home, Calendar, AlertTriangle } from 'lucide-react';
 import { useBookingModification } from '@/hooks/useBookingModification';
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { formatCurrency } from '@/lib/format';
 import { toast } from 'sonner';
+import { GuestSelector } from '@/components/GuestSelector';
 
 const BookingRoomModificationDialog = ({ 
     open, 
@@ -32,7 +34,8 @@ const BookingRoomModificationDialog = ({
     const form = useForm({
         defaultValues: {
             rooms: [],
-            modification_reason: ''
+            modification_reason: '',
+            send_email: false
         }
     });
 
@@ -55,11 +58,11 @@ const BookingRoomModificationDialog = ({
                 room_unit_number: br.room_unit?.unit_number || ''
             })) || [];
             
-            console.log('Initializing form with rooms:', initialRooms);
             
             form.reset({
                 rooms: initialRooms,
-                modification_reason: ''
+                modification_reason: '',
+                send_email: false
             });
             
             // Store initial rooms data for reference
@@ -107,7 +110,6 @@ const BookingRoomModificationDialog = ({
                 return initialRoom;
             });
             
-            console.log('Re-initializing form with updated rooms:', updatedRooms);
             
             // Only reset if the data has actually changed
             const currentRooms = form.getValues('rooms');
@@ -121,7 +123,8 @@ const BookingRoomModificationDialog = ({
             if (hasChanges) {
                 form.reset({
                     rooms: updatedRooms,
-                    modification_reason: ''
+                    modification_reason: '',
+                    send_email: false
                 });
             }
         }
@@ -131,7 +134,6 @@ const BookingRoomModificationDialog = ({
         setIsLoadingRooms(true);
         try {
             const response = await api.get(`${API_PREFIX}/rooms`, { requiresAuth: true });
-            console.log('Available rooms response:', response.data);
             
             // Transform the data to match expected structure
             const rooms = (response.data.data || []).map(room => ({
@@ -140,7 +142,6 @@ const BookingRoomModificationDialog = ({
                 // Keep the original structure but add price_per_night for consistency
             }));
             
-            console.log('Transformed rooms:', rooms);
             setAvailableRooms(rooms);
         } catch (error) {
             console.error('Failed to load rooms:', error);
@@ -181,15 +182,18 @@ const BookingRoomModificationDialog = ({
             form.setValue(`rooms.${index}.room_unit_number`, '');
             
             // Load available units for this room type
+            // For existing rooms, use the booking room's ID
+            // For new rooms, use the selected room's ID from availableRooms
             const bookingRoom = booking.booking_rooms?.find(br => br.room?.slug === roomSlug);
-            if (bookingRoom?.room?.id) {
-                loadAvailableUnits(bookingRoom.room.id, roomSlug, index);
+            const roomId = bookingRoom?.room?.id || selectedRoom.id;
+            
+            if (roomId) {
+                loadAvailableUnits(roomId, roomSlug, index);
             }
         }
     };
 
     const loadAvailableUnits = async (roomId, roomSlug, currentRoomIndex) => {
-        console.log('Loading units for room:', roomSlug, 'ID:', roomId, 'Index:', currentRoomIndex);
         
         if (!booking || !roomId) {
             return;
@@ -247,7 +251,6 @@ const BookingRoomModificationDialog = ({
                 );
             }
             
-            console.log('Final units for', roomSlug, 'index', currentRoomIndex, ':', finalUnits);
             setAvailableUnits(prev => ({ ...prev, [`${roomSlug}_${currentRoomIndex}`]: finalUnits }));
             
         } catch (error) {
@@ -288,6 +291,7 @@ const BookingRoomModificationDialog = ({
 
     const onSubmit = async (data) => {
         try {
+            
             // Clear any previous validation errors
             form.clearErrors();
 
@@ -295,6 +299,35 @@ const BookingRoomModificationDialog = ({
             const hasEmptyRooms = data.rooms.some(room => !room.room_id);
             if (hasEmptyRooms) {
                 toast.error('Please select a room for all entries');
+                return;
+            }
+
+            // Validate room capacity
+            const hasCapacityExceeded = data.rooms.some((room, index) => {
+                const availableRoom = availableRooms.find(ar => ar.slug === room.room_id);
+                if (availableRoom) {
+                    const maxCapacity = availableRoom.max_guests + (availableRoom.extra_guests || 0);
+                    return room.total_guests > maxCapacity;
+                }
+                return false;
+            });
+
+            if (hasCapacityExceeded) {
+                // Find which rooms exceed capacity and set form errors
+                data.rooms.forEach((room, index) => {
+                    const availableRoom = availableRooms.find(ar => ar.slug === room.room_id);
+                    if (availableRoom) {
+                        const maxCapacity = availableRoom.max_guests + (availableRoom.extra_guests || 0);
+                        if (room.total_guests > maxCapacity) {
+                            form.setError(`rooms.${index}.total_guests`, {
+                                type: 'capacity_exceeded',
+                                message: `Room '${availableRoom.name}' can accommodate maximum ${maxCapacity} guests (Max: ${availableRoom.max_guests}, Extra: ${availableRoom.extra_guests || 0}). You have ${room.total_guests} guests.`
+                            });
+                        }
+                    }
+                });
+                
+                toast.error('Some rooms exceed their maximum guest capacity');
                 return;
             }
 
@@ -350,7 +383,8 @@ const BookingRoomModificationDialog = ({
                     total_guests: room.total_guests,
                     room_unit_id: room.room_unit_id || null
                 })),
-                modification_reason: data.modification_reason || null
+                modification_reason: data.modification_reason || null,
+                send_email: data.send_email || false
             };
 
             await modifyBooking(booking.id, modificationData);
@@ -392,7 +426,8 @@ const BookingRoomModificationDialog = ({
                 </DialogHeader>
 
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                    })} className="space-y-6">
                         {/* Booking Summary */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                             <div className="flex items-center gap-2 mb-3">
@@ -509,57 +544,102 @@ const BookingRoomModificationDialog = ({
                                                 <FormField
                                                     control={form.control}
                                                     name={`rooms.${index}.adults`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel className="text-sm font-medium flex items-center gap-2">
-                                                                <User className="h-4 w-4" />
-                                                                Adults
-                                                            </FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type="number"
-                                                                    min="1"
-                                                                    max="10"
-                                                                    className="w-full"
-                                                                    {...field}
-                                                                    onChange={(e) => {
-                                                                        field.onChange(e);
-                                                                        handleGuestCountChange(index, 'adults', e.target.value);
-                                                                    }}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
+                                                    render={({ field }) => {
+                                                        const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                        const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
+                                                        const maxCapacity = availableRoom ? (availableRoom.max_guests + (availableRoom.extra_guests || 0)) : 10;
+                                                        
+                                                        return (
+                                                            <FormItem>
+                                                                <FormLabel className="text-sm font-medium flex items-center gap-2">
+                                                                    <User className="h-4 w-4" />
+                                                                    Adults
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <GuestSelector
+                                                                        name={`rooms.${index}.adults`}
+                                                                        maxGuests={maxCapacity}
+                                                                        minGuests={1}
+                                                                        value={field.value?.toString()}
+                                                                        defaultValue="1"
+                                                                        onChange={(value) => {
+                                                                            const numValue = parseInt(value);
+                                                                            field.onChange(numValue);
+                                                                            handleGuestCountChange(index, 'adults', numValue);
+                                                                        }}
+                                                                        isDialog={true}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        );
+                                                    }}
                                                 />
 
                                                 <FormField
                                                     control={form.control}
                                                     name={`rooms.${index}.children`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel className="text-sm font-medium flex items-center gap-2">
-                                                                <Baby className="h-4 w-4" />
-                                                                Children
-                                                            </FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    type="number"
-                                                                    min="0"
-                                                                    max="10"
-                                                                    className="w-full"
-                                                                    {...field}
-                                                                    onChange={(e) => {
-                                                                        field.onChange(e);
-                                                                        handleGuestCountChange(index, 'children', e.target.value);
-                                                                    }}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
+                                                    render={({ field }) => {
+                                                        const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                        const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
+                                                        const maxCapacity = availableRoom ? (availableRoom.max_guests + (availableRoom.extra_guests || 0)) : 10;
+                                                        
+                                                        return (
+                                                            <FormItem>
+                                                                <FormLabel className="text-sm font-medium flex items-center gap-2">
+                                                                    <Baby className="h-4 w-4" />
+                                                                    Children
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <GuestSelector
+                                                                        name={`rooms.${index}.children`}
+                                                                        maxGuests={maxCapacity}
+                                                                        minGuests={0}
+                                                                        value={field.value?.toString()}
+                                                                        defaultValue="0"
+                                                                        onChange={(value) => {
+                                                                            const numValue = parseInt(value);
+                                                                            field.onChange(numValue);
+                                                                            handleGuestCountChange(index, 'children', numValue);
+                                                                        }}
+                                                                        isDialog={true}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        );
+                                                    }}
                                                 />
                                             </div>
+
+                                            {/* Capacity Warning */}
+                                            {(() => {
+                                                const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                const totalGuests = form.watch(`rooms.${index}.total_guests`);
+                                                const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
+                                                
+                                                if (availableRoom && totalGuests) {
+                                                    const maxCapacity = availableRoom.max_guests + (availableRoom.extra_guests || 0);
+                                                    if (totalGuests > maxCapacity) {
+                                                        return (
+                                                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                                                <div className="flex items-center gap-2 text-red-700">
+                                                                    <AlertTriangle className="h-4 w-4" />
+                                                                    <span className="text-sm font-medium">
+                                                                        Capacity Exceeded
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-sm text-red-600 mt-1">
+                                                                    This room can accommodate maximum {maxCapacity} guests 
+                                                                    (Max: {availableRoom.max_guests}, Extra: {availableRoom.extra_guests || 0}). 
+                                                                    You have {totalGuests} guests.
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }
+                                                }
+                                                return null;
+                                            })()}
 
                                             {/* Room Unit Selection */}
                                             <FormField
@@ -597,13 +677,6 @@ const BookingRoomModificationDialog = ({
                                                                         const units = availableUnits[`${roomSlug}_${index}`] || [];
                                                                         const currentUnitId = field.value;
                                                                         
-                                                                        console.log('Room unit dropdown for', roomSlug, ':', {
-                                                                            units,
-                                                                            currentUnitId,
-                                                                            fieldValue: field.value,
-                                                                            availableUnits
-                                                                        });
-                                                                        
                                                                         if (units.length === 0) {
                                                                             return (
                                                                                 <div className="p-4 text-center text-gray-500">
@@ -637,7 +710,33 @@ const BookingRoomModificationDialog = ({
                                                         <div className="flex items-center gap-2">
                                                             <Users className="h-4 w-4 text-gray-600" />
                                                             <span className="text-gray-600">Total Guests:</span>
-                                                            <span className="font-medium">{form.watch(`rooms.${index}.total_guests`)}</span>
+                                                            <span className={`font-medium ${
+                                                                (() => {
+                                                                    const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                                    const totalGuests = form.watch(`rooms.${index}.total_guests`);
+                                                                    const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
+                                                                    if (availableRoom) {
+                                                                        const maxCapacity = availableRoom.max_guests + (availableRoom.extra_guests || 0);
+                                                                        return totalGuests > maxCapacity ? 'text-red-600' : 'text-gray-900';
+                                                                    }
+                                                                    return 'text-gray-900';
+                                                                })()
+                                                            }`}>
+                                                                {form.watch(`rooms.${index}.total_guests`)}
+                                                            </span>
+                                                            {(() => {
+                                                                const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                                const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
+                                                                if (availableRoom) {
+                                                                    const maxCapacity = availableRoom.max_guests + (availableRoom.extra_guests || 0);
+                                                                    return (
+                                                                        <span className="text-xs text-gray-500">
+                                                                            / {maxCapacity} max
+                                                                        </span>
+                                                                    );
+                                                                }
+                                                                return null;
+                                                            })()}
                                                         </div>
                                                         <div className="text-right">
                                                             {form.watch(`rooms.${index}.room_name`) && (
@@ -698,6 +797,30 @@ const BookingRoomModificationDialog = ({
                                         />
                                     </FormControl>
                                     <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Email Notification Toggle */}
+                        <FormField
+                            control={form.control}
+                            name="send_email"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-sm font-medium">
+                                            Send Email Notification
+                                        </FormLabel>
+                                        <div className="text-sm text-gray-600">
+                                            Notify the guest about this booking modification via email
+                                        </div>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
                                 </FormItem>
                             )}
                         />
