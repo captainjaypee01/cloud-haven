@@ -53,6 +53,18 @@ const DayTourRoomModificationDialog = ({
         }
     }, [open, booking]);
 
+    // Load room units for existing rooms after available rooms are loaded
+    useEffect(() => {
+        if (availableRooms.length > 0 && booking && open) {
+            const currentRooms = form.getValues('rooms');
+            currentRooms.forEach((room, index) => {
+                if (room.room_id) {
+                    loadAvailableUnits(room.room_id, index);
+                }
+            });
+        }
+    }, [availableRooms, booking, open]);
+
     const loadDayTourData = async () => {
         setIsLoading(true);
         try {
@@ -100,12 +112,7 @@ const DayTourRoomModificationDialog = ({
             send_email: false
         });
 
-        // Load units for existing rooms
-        initialRooms.forEach((room, index) => {
-            if (room.room_id) {
-                loadAvailableUnits(room.room_id, index);
-            }
-        });
+        // Note: Room units will be loaded in a separate useEffect after availableRooms is set
     };
 
     const loadAvailableUnits = async (roomSlug, roomIndex) => {
@@ -266,6 +273,8 @@ const DayTourRoomModificationDialog = ({
                 if (availableRoom) {
                     const totalGuests = room.adults + room.children;
                     const maxCapacity = availableRoom.max_guests + (availableRoom.extra_guests || 0);
+                    
+                    
                     return totalGuests > maxCapacity;
                 }
                 return false;
@@ -565,26 +574,37 @@ const DayTourRoomModificationDialog = ({
 
                                     {/* Guest Counts Row */}
                                     <div className="grid grid-cols-2 gap-4 mb-4">
-                                        <div>
-                                            <FormLabel className="text-sm">Adults</FormLabel>
-                                            <GuestSelector
-                                                name={`rooms.${index}.adults`}
-                                                minGuests={1}
-                                                maxGuests={availableRooms.find(r => r.slug === form.watch(`rooms.${index}.room_id`))?.max_guests + (availableRooms.find(r => r.slug === form.watch(`rooms.${index}.room_id`))?.extra_guests || 0) || 10}
-                                                value={form.watch(`rooms.${index}.adults`)?.toString() || '1'}
-                                                onChange={(value) => handleGuestCountChange(index, 'adults', value)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <FormLabel className="text-sm">Children</FormLabel>
-                                            <GuestSelector
-                                                name={`rooms.${index}.children`}
-                                                minGuests={0}
-                                                maxGuests={availableRooms.find(r => r.slug === form.watch(`rooms.${index}.room_id`))?.max_guests + (availableRooms.find(r => r.slug === form.watch(`rooms.${index}.room_id`))?.extra_guests || 0) || 10}
-                                                value={form.watch(`rooms.${index}.children`)?.toString() || '0'}
-                                                onChange={(value) => handleGuestCountChange(index, 'children', value)}
-                                            />
-                                        </div>
+                                        {(() => {
+                                            const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                            const availableRoom = availableRooms.find(r => r.slug === roomSlug);
+                                            const maxCapacity = availableRoom ? (availableRoom.max_guests + (availableRoom.extra_guests || 0)) : 10;
+                                            
+                                            
+                                            return (
+                                                <>
+                                                    <div>
+                                                        <FormLabel className="text-sm">Adults</FormLabel>
+                                                        <GuestSelector
+                                                            name={`rooms.${index}.adults`}
+                                                            minGuests={1}
+                                                            maxGuests={maxCapacity}
+                                                            value={form.watch(`rooms.${index}.adults`)?.toString() || '1'}
+                                                            onChange={(value) => handleGuestCountChange(index, 'adults', value)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <FormLabel className="text-sm">Children</FormLabel>
+                                                        <GuestSelector
+                                                            name={`rooms.${index}.children`}
+                                                            minGuests={0}
+                                                            maxGuests={maxCapacity}
+                                                            value={form.watch(`rooms.${index}.children`)?.toString() || '0'}
+                                                            onChange={(value) => handleGuestCountChange(index, 'children', value)}
+                                                        />
+                                                    </div>
+                                                </>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Meal Options Row */}
