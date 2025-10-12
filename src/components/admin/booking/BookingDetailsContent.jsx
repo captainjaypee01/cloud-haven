@@ -15,6 +15,7 @@ import PwdSeniorDiscountDialog from './PwdSeniorDiscountDialog';
 import SpecialDiscountDialog from './SpecialDiscountDialog';
 import BookingPrintButton from './BookingPrintButton';
 import BookingRoomModificationDialog from './BookingRoomModificationDialog';
+import DayTourRoomModificationDialog from './DayTourRoomModificationDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3, Settings } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
@@ -50,6 +51,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showPwdSeniorDiscount, setShowPwdSeniorDiscount] = useState(false);
     const [showSpecialDiscount, setShowSpecialDiscount] = useState(false);
     const [showRoomModification, setShowRoomModification] = useState(false);
+    const [showDayTourModification, setShowDayTourModification] = useState(false);
     const api = useApi();
     const navigate = useNavigate();
     const { userRole } = useAppContext();
@@ -539,7 +541,13 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                 className="cursor-pointer"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setShowRoomModification(true)}
+                                onClick={() => {
+                                    if (booking.booking_type === 'day_tour') {
+                                        setShowDayTourModification(true);
+                                    } else {
+                                        setShowRoomModification(true);
+                                    }
+                                }}
                             >
                                 <Settings className="h-4 w-4 mr-2" />
                                 <span className="hidden sm:inline">Modify Rooms</span>
@@ -1235,6 +1243,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 booking={booking}
                 onSuccess={() => {
                     setShowRoomModification(false);
+                    if (fetchBooking) fetchBooking();
+                }}
+            />
+
+            {/* Day Tour Room Modification Dialog */}
+            <DayTourRoomModificationDialog
+                open={showDayTourModification}
+                onOpenChange={setShowDayTourModification}
+                booking={booking}
+                onSuccess={() => {
+                    setShowDayTourModification(false);
                     if (fetchBooking) fetchBooking();
                 }}
             />

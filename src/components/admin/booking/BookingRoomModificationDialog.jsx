@@ -68,7 +68,7 @@ const BookingRoomModificationDialog = ({
             // Store initial rooms data for reference
             setInitialRoomsData(initialRooms);
         }
-    }, [booking, open, form]);
+    }, [booking, open]);
 
     // Load available rooms and units when dialog opens
     useEffect(() => {
@@ -104,7 +104,10 @@ const BookingRoomModificationDialog = ({
                     return {
                         ...initialRoom,
                         room_name: availableRoom.name,
-                        price_per_night: availableRoom.price_per_night // Use current room price from API
+                        price_per_night: availableRoom.price_per_night, // Use current room price from API
+                        // Preserve room unit data
+                        room_unit_id: initialRoom.room_unit_id,
+                        room_unit_number: initialRoom.room_unit_number
                     };
                 }
                 return initialRoom;
@@ -128,12 +131,18 @@ const BookingRoomModificationDialog = ({
                 });
             }
         }
-    }, [availableRooms, initialRoomsData, booking, open, form]);
+    }, [availableRooms, initialRoomsData, booking, open]);
 
     const loadAvailableRooms = async () => {
         setIsLoadingRooms(true);
         try {
-            const response = await api.get(`${API_PREFIX}/rooms`, { requiresAuth: true });
+            // Determine room type based on booking type
+            const roomType = booking?.booking_type === 'day_tour' ? 'day_tour' : 'overnight';
+            
+            const response = await api.get(`${API_PREFIX}/rooms`, { 
+                requiresAuth: true,
+                params: { room_type: roomType }
+            });
             
             // Transform the data to match expected structure
             const rooms = (response.data.data || []).map(room => ({
@@ -180,6 +189,12 @@ const BookingRoomModificationDialog = ({
             // Clear room unit when room changes
             form.setValue(`rooms.${index}.room_unit_id`, null);
             form.setValue(`rooms.${index}.room_unit_number`, '');
+            
+            // Clear validation errors when room changes
+            form.clearErrors(`rooms.${index}.total_guests`);
+            form.clearErrors(`rooms.${index}.adults`);
+            form.clearErrors(`rooms.${index}.children`);
+            form.clearErrors(`rooms.${index}.room_unit_id`);
             
             // Load available units for this room type
             // For existing rooms, use the booking room's ID
@@ -285,7 +300,13 @@ const BookingRoomModificationDialog = ({
         if (field === 'adults' || field === 'children') {
             const adults = field === 'adults' ? newValue : currentRoom.adults;
             const children = field === 'children' ? newValue : currentRoom.children;
-            form.setValue(`rooms.${index}.total_guests`, adults + children);
+            const totalGuests = adults + children;
+            form.setValue(`rooms.${index}.total_guests`, totalGuests);
+            
+            // Clear capacity error when guest count changes
+            form.clearErrors(`rooms.${index}.total_guests`);
+            form.clearErrors(`rooms.${index}.adults`);
+            form.clearErrors(`rooms.${index}.children`);
         }
     };
 
@@ -371,6 +392,16 @@ const BookingRoomModificationDialog = ({
                 });
                 
                 toast.error(`Duplicate room unit selections found. Please select different units.`);
+                return;
+            }
+
+            // Validate modification reason is provided
+            if (!data.modification_reason || data.modification_reason.trim() === '') {
+                form.setError('modification_reason', {
+                    type: 'required',
+                    message: 'Modification reason is required'
+                });
+                toast.error('Please provide a reason for this modification');
                 return;
             }
 
@@ -786,17 +817,29 @@ const BookingRoomModificationDialog = ({
                         <FormField
                             control={form.control}
                             name="modification_reason"
-                            render={({ field }) => (
+                            render={({ field, fieldState }) => (
                                 <FormItem>
-                                    <FormLabel className="text-sm font-medium">Modification Reason (Optional)</FormLabel>
+                                    <FormLabel className="text-sm font-medium">
+                                        Modification Reason 
+                                        <span className="text-red-500 ml-1">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Enter reason for modification..."
-                                            className="min-h-[80px]"
+                                            placeholder="Please provide a reason for this modification..."
+                                            className={`min-h-[80px] ${
+                                                fieldState.error 
+                                                    ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-500' 
+                                                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                                            }`}
                                             {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
+                                    {!fieldState.error && (
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            This information will be recorded for audit purposes
+                                        </p>
+                                    )}
                                 </FormItem>
                             )}
                         />
