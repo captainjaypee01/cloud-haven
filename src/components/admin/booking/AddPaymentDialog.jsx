@@ -307,7 +307,8 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                     const optimizedFile = await resizeImageFile(proofFile);
                     
                     const formData = new FormData();
-                    formData.append('amount', values.amount);
+                    formData.append('_method', 'PUT');
+                    formData.append('amount', values.amount.toString());
                     formData.append('provider', values.provider);
                     formData.append('status', values.status);
                     formData.append('downpayment_status', values.downpayment_status || 'none');
@@ -316,11 +317,8 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                     formData.append('notify_guest', values.notify_guest ? '1' : '0');
                     formData.append('proof_file', optimizedFile);
                     
-                    await api.put(`${API_PREFIX}/admin/payments/${payment.id}`, formData, { 
-                        requiresAuth: true,
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        }
+                    await api.post(`${API_PREFIX}/admin/payments/${payment.id}`, formData, { 
+                        requiresAuth: true
                     });
                 } else {
                     await api.put(`${API_PREFIX}/admin/payments/${payment.id}`, values, { requiresAuth: true });
@@ -355,10 +353,7 @@ const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSucces
                 }
                 
                 await api.post(`${API_PREFIX}/admin/payments/pay`, formData, { 
-                    requiresAuth: true,
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    }
+                    requiresAuth: true
                 });
                 // Check if proof was auto-accepted (staff uploads are always auto-accepted)
                 const isStaffUploadWithProof = requiresProof && 
