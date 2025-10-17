@@ -13,17 +13,23 @@ const Policies = () => {
 
     // Enhanced SEO data with complete policy information
     const seoData = useMemo(() => ({
-        title: "Resort Policies - House Rules & Guest Guidelines",
-        description: "Official house rules of Netania De Laiya: check-in/out, booking, occupancy, security, facilities hours, and proper conduct.",
+        title: "Resort Policies | Netania De Laiya",
+        description: "Official house rules of Netania De Laiya: check-in/out, booking, occupancy, security, facilities hours, and proper conduct. Located in the heart of Laiya, San Juan, Batangas with excellent service and warm hospitality.",
         canonical: typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://www.netaniadelaiya.com/policy',
         og: { 
-            url: 'https://www.netaniadelaiya.com/policy',
+            title: 'Resort Policies | Netania De Laiya',
+            description: 'Official house rules of Netania De Laiya: check-in/out, booking, occupancy, security, facilities hours, and proper conduct. Located in the heart of Laiya, San Juan, Batangas with excellent service and warm hospitality.',
             image: HERO_IMAGE,
-            type: 'website'
+            url: 'https://www.netaniadelaiya.com/policy',
+            type: 'website',
+            locale: 'en_PH',
+            siteName: 'Netania De Laiya'
         },
         jsonLd: {
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
+            name: 'Netania De Laiya Resort Policies',
+            url: 'https://www.netaniadelaiya.com/policy',
             mainEntity: [
                 {
                     '@type': 'Question',

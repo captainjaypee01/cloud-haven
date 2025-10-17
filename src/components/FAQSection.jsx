@@ -30,7 +30,7 @@ const FAQSection = () => {
         },
         {
             question: "How do I make a reservation?",
-            answer: "Reservations can be made through our official website. A 50% down payment is required to confirm and secure your booking. \nFor corporate inquiries and bookings, please send your details to netaniadelaiya@gmail.com. "
+            answer: "Reservations can be made through our official website. A 50% down payment is required to confirm and secure your booking. \nFor corporate inquiries and bookings, please send your details to our contact email below. "
         },
         {
             question: "What is your cancellation policy?",
@@ -104,8 +104,13 @@ const FAQSection = () => {
                             📞 Call Us: +63 949 798 9831
                         </a>
                         <a 
-                            href="mailto:netaniadelaiya@gmail.com" 
+                            href="#" 
                             className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const email = 'netaniadelaiya' + '@' + 'gmail.com';
+                                window.location.href = 'mailto:' + email;
+                            }}
                         >
                             ✉️ Email Us
                         </a>

@@ -271,7 +271,21 @@ const CheckoutPage = () => {
     };
     return (
         <div className="relative min-h-screen pb-[200px] py-16 px-2 md:px-8 lg:px-32 mt-10 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
-            <SEO title="Checkout" description="Confirm your booking and guest details." noindex={true} />
+            <SEO 
+                title="Checkout | Netania De Laiya" 
+                description="Confirm your booking and guest details at Netania De Laiya. Complete your premium beachfront resort reservation with direct beach access and exceptional service in Laiya, Batangas." 
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/checkout' : 'https://www.netaniadelaiya.com/checkout'}
+                noindex={true}
+                og={{
+                    title: 'Checkout | Netania De Laiya',
+                    description: 'Confirm your booking and guest details at Netania De Laiya. Complete your premium beachfront resort reservation with direct beach access and exceptional service in Laiya, Batangas.',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                    url: 'https://www.netaniadelaiya.com/checkout',
+                    type: 'website',
+                    locale: 'en_PH',
+                    siteName: 'Netania De Laiya'
+                }}
+            />
             <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
                 {/* -- Summary Section -- */}
                 <aside className="md:col-span-1 bg-gray-50 rounded-xl shadow-lg p-6 flex flex-col gap-6 static top-auto h-auto md:sticky md:top-24 md:h-fit">

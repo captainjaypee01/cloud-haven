@@ -19,13 +19,17 @@ export default function RoomsPage() {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Rooms & Accommodations - Laiya Beach Resort"
-                description="Discover our beachfront rooms in Laiya, Batangas. From family suites to barkada rooms, enjoy pool views and oceanfront accommodations at Netania De Laiya. Perfect for your beach getaway."
+                title="Premium Rooms & Accommodations | Netania De Laiya"
+                description="Discover our premium accommodations in Laiya, Batangas. Three spacious room types with refined amenities - Beach View, Pool Access, and Garden View. Hotel-quality rooms with direct beach access and stunning ocean views at Netania De Laiya."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/rooms' : 'https://www.netaniadelaiya.com/rooms'}
                 og={{
-                  title: 'Rooms & Accommodations - Laiya Beach Resort',
-                  description: 'Discover our beachfront rooms in Laiya, Batangas. From family suites to barkada rooms, enjoy pool views and oceanfront accommodations at Netania De Laiya.',
+                  title: 'Premium Rooms & Accommodations | Netania De Laiya',
+                  description: 'Discover our premium accommodations in Laiya, Batangas. Three spacious room types with refined amenities - Beach View, Pool Access, and Garden View. Hotel-quality rooms with direct beach access and stunning ocean views.',
+                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
                   url: 'https://www.netaniadelaiya.com/rooms',
+                  type: 'website',
+                  locale: 'en_PH',
+                  siteName: 'Netania De Laiya'
                 }}
                 jsonLd={(function(){
                   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.netaniadelaiya.com';

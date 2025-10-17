@@ -64,7 +64,19 @@ const PaymentPage = () => {
     if (!booking) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
-                <SEO title="Loading..." description="Loading payment page..." noindex={true} />
+                <SEO 
+                    title="Loading Payment | Netania De Laiya" 
+                    description="Loading payment page for your Netania De Laiya booking." 
+                    noindex={true}
+                    og={{
+                        title: 'Loading Payment | Netania De Laiya',
+                        description: 'Loading payment page for your Netania De Laiya booking.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <div className="relative z-10 w-full max-w-xl mt-20 text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
@@ -94,7 +106,19 @@ const PaymentPage = () => {
     if (fullyPaid) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
-                <SEO title="Booking Payment" description="Pay for your Netania De Laiya booking." noindex={true} />
+                <SEO 
+                    title="Booking Payment | Netania De Laiya" 
+                    description="Complete your payment for Netania De Laiya booking. Secure your premium beachfront resort reservation with direct beach access and exceptional service in Laiya, Batangas." 
+                    noindex={true}
+                    og={{
+                        title: 'Booking Payment - Netania De Laiya Resort',
+                        description: 'Complete your payment for Netania De Laiya booking. Secure your beachfront resort reservation in Laiya, Batangas.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <div className="relative z-10 w-full max-w-xl bg-white rounded-xl shadow-lg p-8 mt-20 text-center">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -113,7 +137,19 @@ const PaymentPage = () => {
     if (["cancelled", "expired"].includes(booking.status)) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
-                <SEO title="Booking Payment" description="Pay for your Netania De Laiya booking." noindex={true} />
+                <SEO 
+                    title="Booking Payment | Netania De Laiya" 
+                    description="Complete your payment for Netania De Laiya booking. Secure your premium beachfront resort reservation with direct beach access and exceptional service in Laiya, Batangas." 
+                    noindex={true}
+                    og={{
+                        title: 'Booking Payment - Netania De Laiya Resort',
+                        description: 'Complete your payment for Netania De Laiya booking. Secure your beachfront resort reservation in Laiya, Batangas.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <div className="relative z-10 w-full max-w-xl bg-white rounded-xl shadow-lg p-8 mt-20 text-center">
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
