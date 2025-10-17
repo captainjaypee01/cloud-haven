@@ -20,17 +20,17 @@ export default function SEO({
   const location = useLocation();
   
   // Default SEO values
-  const defaultTitle = 'Netania De Laiya - Beachfront Resort in Laiya, Batangas';
-  const defaultDescription = 'Luxury beachfront resort in Laiya, San Juan, Batangas with pool and hotel rooms. Book your perfect beach getaway today.';
+  const defaultTitle = 'Beachfront Resort Laiya Batangas | Netania De Laiya';
+  const defaultDescription = 'Discover paradise at Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas. Premium accommodations with direct beach access, stunning infinity pool, and exceptional service.';
   const defaultImage = `${SITE_URL}/logo.jpg`;
-  const defaultKeywords = 'Netania De Laiya, Laiya resort, Batangas resort, beachfront resort, beach hotel, Philippines resort, San Juan Batangas, pool resort, luxury accommodation, family vacation, romantic getaway';
+  const defaultKeywords = 'Netania De Laiya, Laiya resort, Batangas resort, beachfront resort, beach hotel, Philippines resort, San Juan Batangas, pool resort, premium accommodation, family vacation, romantic getaway';
   
   const siteName = 'Netania De Laiya';
   const locale = 'en_PH';
   
   // Construct full URLs
   const canonical = `${SITE_URL}${location.pathname}`;
-  const finalTitle = title ? `${title} | ${siteName}` : defaultTitle;
+  const finalTitle = title || defaultTitle;
   const finalDescription = description || defaultDescription;
   const finalImage = image || defaultImage;
   const finalKeywords = keywords || defaultKeywords;
