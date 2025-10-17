@@ -225,13 +225,41 @@ export default function DayTour() {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Day Tour - Laiya Beach Resort"
-                description="Experience our Day Tour packages at Laiya Beach Resort. Enjoy beachfront facilities, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM."
+                title="Day Tour Packages | Netania De Laiya"
+                description="Experience our Day Tour packages at Netania De Laiya. Enjoy beachfront facilities, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM. Perfect for families and groups seeking a refined and exhilarating escape."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/day-tour' : 'https://www.netaniadelaiya.com/day-tour'}
                 og={{
-                    title: 'Day Tour - Laiya Beach Resort',
-                    description: 'Experience our Day Tour packages at Laiya Beach Resort. Enjoy beachfront facilities, optional buffet meals, and recreation activities.',
+                    title: 'Day Tour Packages | Netania De Laiya',
+                    description: 'Experience our Day Tour packages at Netania De Laiya. Enjoy beachfront facilities, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM. Perfect for families and groups seeking a refined and exhilarating escape.',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
                     url: 'https://www.netaniadelaiya.com/day-tour',
+                    type: 'website',
+                    locale: 'en_PH',
+                    siteName: 'Netania De Laiya'
+                }}
+                jsonLd={{
+                  '@context': 'https://schema.org',
+                  '@type': 'Resort',
+                  name: 'Netania De Laiya',
+                  url: 'https://www.netaniadelaiya.com/day-tour',
+                  image: 'https://www.netaniadelaiya.com/logo.jpg',
+                  telephone: '+63 949 798 9831',
+                  address: {
+                    '@type': 'PostalAddress',
+                    streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                    addressLocality: 'San Juan',
+                    addressRegion: 'Batangas',
+                    addressCountry: 'PH'
+                  },
+                  sameAs: [
+                    'https://www.facebook.com/profile.php?id=100064182843841',
+                    'https://www.instagram.com/netaniadelaiya/'
+                  ],
+                  amenityFeature: [
+                    { '@type': 'LocationFeatureSpecification', name: 'Beachfront' },
+                    { '@type': 'LocationFeatureSpecification', name: 'Swimming Pool' },
+                    { '@type': 'LocationFeatureSpecification', name: 'Day Tour Facilities' }
+                  ]
                 }}
             />
 

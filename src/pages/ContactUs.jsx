@@ -83,15 +83,24 @@ const ContactUsPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Contact Us - Netania De Laiya Resort"
-                description="Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Contact our beachfront resort in Laiya, Batangas at +63 949 798 9831 or +63 945 663 0848. We're here to help plan your perfect beach getaway."
+                title="Contact & Reservations | Netania De Laiya"
+                description="Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Located in the heart of Laiya, San Juan, Batangas, we offer excellent service and warm hospitality. Contact us at +63 949 798 9831 or +63 945 663 0848."
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://www.netaniadelaiya.com/contact-us'}
-                og={{ url: 'https://www.netaniadelaiya.com/contact-us' }}
+                og={{
+                  title: 'Contact & Reservations | Netania De Laiya',
+                  description: 'Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Located in the heart of Laiya, San Juan, Batangas, we offer excellent service and warm hospitality. Contact us at +63 949 798 9831 or +63 945 663 0848.',
+                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                  url: 'https://www.netaniadelaiya.com/contact-us',
+                  type: 'website',
+                  locale: 'en_PH',
+                  siteName: 'Netania De Laiya'
+                }}
                 jsonLd={{
                   '@context': 'https://schema.org',
                   '@type': 'LodgingBusiness',
                   name: 'Netania De Laiya',
                   url: 'https://www.netaniadelaiya.com/contact-us',
+                  image: 'https://www.netaniadelaiya.com/logo.jpg',
                   telephone: '+63 949 798 9831, +63 945 663 0848',
                   email: SUPPORT_EMAIL,
                   address: {
@@ -104,6 +113,11 @@ const ContactUsPage = () => {
                   sameAs: [
                     'https://www.facebook.com/profile.php?id=100064182843841',
                     'https://www.instagram.com/netaniadelaiya/'
+                  ],
+                  amenityFeature: [
+                    { '@type': 'LocationFeatureSpecification', name: 'Beachfront' },
+                    { '@type': 'LocationFeatureSpecification', name: 'Swimming Pool' },
+                    { '@type': 'LocationFeatureSpecification', name: 'Hotel Rooms' }
                   ]
                 }}
             />

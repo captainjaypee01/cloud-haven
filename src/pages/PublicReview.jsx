@@ -149,7 +149,19 @@ const PublicReview = () => {
     if (loading) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
-                <SEO title="Leave a Review" description="Share your experience at Netania De Laiya." noindex={true} />
+                <SEO 
+                    title="Leave a Review | Netania De Laiya" 
+                    description="Share your experience at Netania De Laiya. Help other guests by leaving a review of your premium beachfront resort stay with direct beach access and exceptional service in Laiya, Batangas." 
+                    noindex={true}
+                    og={{
+                        title: 'Leave a Review - Netania De Laiya Resort',
+                        description: 'Share your experience at Netania De Laiya. Help other guests by leaving a review of your beachfront resort stay in Laiya, Batangas.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -162,7 +174,19 @@ const PublicReview = () => {
     if (!token) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
-                <SEO title="Leave a Review" description="Share your experience at Netania De Laiya." noindex={true} />
+                <SEO 
+                    title="Leave a Review | Netania De Laiya" 
+                    description="Share your experience at Netania De Laiya. Help other guests by leaving a review of your premium beachfront resort stay with direct beach access and exceptional service in Laiya, Batangas." 
+                    noindex={true}
+                    og={{
+                        title: 'Leave a Review - Netania De Laiya Resort',
+                        description: 'Share your experience at Netania De Laiya. Help other guests by leaving a review of your beachfront resort stay in Laiya, Batangas.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <AlertCircleIcon className="h-8 w-8 text-red-500 mb-4" />
                 <p className="text-red-600 text-lg font-medium mb-4">
@@ -181,7 +205,19 @@ const PublicReview = () => {
     if (!booking) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
-                <SEO title="Leave a Review" description="Share your experience at Netania De Laiya." noindex={true} />
+                <SEO 
+                    title="Leave a Review | Netania De Laiya" 
+                    description="Share your experience at Netania De Laiya. Help other guests by leaving a review of your premium beachfront resort stay with direct beach access and exceptional service in Laiya, Batangas." 
+                    noindex={true}
+                    og={{
+                        title: 'Leave a Review - Netania De Laiya Resort',
+                        description: 'Share your experience at Netania De Laiya. Help other guests by leaving a review of your beachfront resort stay in Laiya, Batangas.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <AlertCircleIcon className="h-8 w-8 text-red-500 mb-4" />
                 <p className="text-red-600 text-lg font-medium mb-4">
@@ -200,7 +236,19 @@ const PublicReview = () => {
     if (submitted) {
         return (
             <div className="relative min-h-screen pb-[200px] flex flex-col items-center justify-center py-16 px-2 md:px-8 lg:px-32 bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200 overflow-x-hidden">
-                <SEO title="Review Submitted" description="Thank you for your review." noindex={true} />
+                <SEO 
+                    title="Review Submitted | Netania De Laiya" 
+                    description="Thank you for your review. Your feedback helps us improve our premium beachfront resort services with exceptional hospitality in Laiya, Batangas." 
+                    noindex={true}
+                    og={{
+                        title: 'Review Submitted | Netania De Laiya',
+                        description: 'Thank you for your review. Your feedback helps us improve our premium beachfront resort services with exceptional hospitality in Laiya, Batangas.',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        type: 'website',
+                        locale: 'en_PH',
+                        siteName: 'Netania De Laiya'
+                    }}
+                />
                 <SeaWaveBg />
                 <div className="text-center max-w-md">
                     <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-6" />

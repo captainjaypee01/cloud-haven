@@ -42,9 +42,19 @@ const NotFound = () => {
     return (
         <>
             <SEO
-                title="Page Not Found - 404"
-                description="The page you're looking for doesn't exist. Find rooms, make bookings, or contact Netania De Laiya resort."
+                title="Page Not Found | Netania De Laiya"
+                description="The page you're looking for doesn't exist. Find premium accommodations, make bookings, or contact Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas with exceptional service."
+                canonical={typeof window !== 'undefined' ? window.location.origin + '/404' : 'https://www.netaniadelaiya.com/404'}
                 noindex={true}
+                og={{
+                    title: 'Page Not Found | Netania De Laiya',
+                    description: 'The page you\'re looking for doesn\'t exist. Find premium accommodations, make bookings, or contact Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas with exceptional service.',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                    url: 'https://www.netaniadelaiya.com/404',
+                    type: 'website',
+                    locale: 'en_PH',
+                    siteName: 'Netania De Laiya'
+                }}
             />
 
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 mt-16">

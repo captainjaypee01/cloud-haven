@@ -184,11 +184,13 @@ const RoomDetails = () => {
                 description={room.short_description || room.description}
                 canonical={typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : undefined}
                 og={{
-                    title: room.name,
+                    title: `${room.name} in Laiya, Batangas`,
                     description: room.short_description || room.description,
                     image: room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0],
                     type: 'product',
-                    url: typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`
+                    url: typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`,
+                    locale: 'en_PH',
+                    siteName: 'Netania De Laiya'
                 }}
                 jsonLd={[
                     {
@@ -216,13 +218,18 @@ const RoomDetails = () => {
                         containedInPlace: {
                             '@type': 'Resort',
                             name: 'Netania De Laiya',
+                            telephone: '+63 949 798 9831',
                             address: {
                                 '@type': 'PostalAddress',
                                 streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
                                 addressLocality: 'San Juan',
                                 addressRegion: 'Batangas',
                                 addressCountry: 'PH'
-                            }
+                            },
+                            sameAs: [
+                                'https://www.facebook.com/profile.php?id=100064182843841',
+                                'https://www.instagram.com/netaniadelaiya/'
+                            ]
                         }
                     }
                 ]}
