@@ -28,7 +28,7 @@ const Home = () => {
         og={{
           title: 'Beachfront Resort Laiya Batangas | Netania De Laiya',
           description: 'Discover paradise at Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas. Premium accommodations with direct beach access, stunning infinity pool, and exceptional service.',
-          image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+          image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
           url: 'https://www.netaniadelaiya.com/',
           type: 'website',
           locale: 'en_PH',

@@ -231,7 +231,7 @@ export default function DayTour() {
                 og={{
                     title: 'Day Tour Packages | Netania De Laiya',
                     description: 'Experience our Day Tour packages at Netania De Laiya. Enjoy beachfront facilities, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM. Perfect for families and groups seeking a refined and exhilarating escape.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
                     url: 'https://www.netaniadelaiya.com/day-tour',
                     type: 'website',
                     locale: 'en_PH',

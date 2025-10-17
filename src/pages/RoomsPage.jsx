@@ -25,7 +25,7 @@ export default function RoomsPage() {
                 og={{
                   title: 'Premium Rooms & Accommodations | Netania De Laiya',
                   description: 'Discover our premium accommodations in Laiya, Batangas. Three spacious room types with refined amenities - Beach View, Pool Access, and Garden View. Hotel-quality rooms with direct beach access and stunning ocean views.',
-                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757269133/pv-1.jpg',
                   url: 'https://www.netaniadelaiya.com/rooms',
                   type: 'website',
                   locale: 'en_PH',

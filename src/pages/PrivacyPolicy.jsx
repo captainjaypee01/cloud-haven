@@ -13,7 +13,7 @@ const PrivacyPolicy = () => {
 		og: {
 			title: "Privacy Policy | Netania De Laiya",
 			description: "Learn how Netania De Laiya collects, uses, stores, and protects your personal data, including bookings, inquiries, and marketing preferences. Located in the heart of Laiya, San Juan, Batangas with excellent service and warm hospitality.",
-			image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+			image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
 			url: "https://www.netaniadelaiya.com/privacy-policy",
 			type: "website",
 			locale: 'en_PH',
