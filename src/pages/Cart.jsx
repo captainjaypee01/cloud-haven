@@ -276,7 +276,7 @@ const Cart = () => {
                 og={{
                     title: 'Cart | Netania De Laiya',
                     description: 'Review your selected premium accommodations and booking details at Netania De Laiya. Complete your beachfront resort reservation with direct beach access and stunning ocean views in Laiya, Batangas.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
                     url: 'https://www.netaniadelaiya.com/cart',
                     type: 'website',
                     locale: 'en_PH',

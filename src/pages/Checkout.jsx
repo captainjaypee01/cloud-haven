@@ -279,7 +279,7 @@ const CheckoutPage = () => {
                 og={{
                     title: 'Checkout | Netania De Laiya',
                     description: 'Confirm your booking and guest details at Netania De Laiya. Complete your premium beachfront resort reservation with direct beach access and exceptional service in Laiya, Batangas.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
                     url: 'https://www.netaniadelaiya.com/checkout',
                     type: 'website',
                     locale: 'en_PH',

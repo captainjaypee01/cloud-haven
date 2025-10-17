@@ -71,7 +71,7 @@ const PaymentPage = () => {
                     og={{
                         title: 'Loading Payment | Netania De Laiya',
                         description: 'Loading payment page for your Netania De Laiya booking.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -113,7 +113,7 @@ const PaymentPage = () => {
                     og={{
                         title: 'Booking Payment - Netania De Laiya Resort',
                         description: 'Complete your payment for Netania De Laiya booking. Secure your beachfront resort reservation in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -144,7 +144,7 @@ const PaymentPage = () => {
                     og={{
                         title: 'Booking Payment - Netania De Laiya Resort',
                         description: 'Complete your payment for Netania De Laiya booking. Secure your beachfront resort reservation in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'

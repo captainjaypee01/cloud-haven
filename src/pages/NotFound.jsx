@@ -49,7 +49,7 @@ const NotFound = () => {
                 og={{
                     title: 'Page Not Found | Netania De Laiya',
                     description: 'The page you\'re looking for doesn\'t exist. Find premium accommodations, make bookings, or contact Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas with exceptional service.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
                     url: 'https://www.netaniadelaiya.com/404',
                     type: 'website',
                     locale: 'en_PH',

@@ -14,7 +14,7 @@ const SocialShare = ({
   url, 
   title, 
   description,
-  // image,
+  image,
   hashtags = ['NetaniaDeLayia', 'LayiaResort', 'BeachResort', 'Batangas']
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +23,7 @@ const SocialShare = ({
   const shareUrl = url?.startsWith('http') ? url : `https://www.netaniadelaiya.com${url || ''}`;
   const shareTitle = title || 'Netania De Laiya - Beachfront Resort in Laiya, Batangas';
   const shareDescription = description || 'Experience paradise at Netania De Laiya resort. Book your beachfront getaway today!';
-  // const shareImage = image?.startsWith('http') ? image : `https://www.netaniadelaiya.com${image || '/og-home.jpg'}`;
+  const shareImage = image?.startsWith('http') ? image : `https://www.netaniadelaiya.com${image || '/og-home.jpg'}`;
 
   // Social share URLs
   const socialPlatforms = {

@@ -184,7 +184,7 @@ const RoomDetails = () => {
                 description={room.short_description || room.description}
                 canonical={typeof window !== 'undefined' ? `${window.location.origin}/rooms/${room.slug || roomId}` : undefined}
                 og={{
-                    title: `${room.name} in Laiya, Batangas`,
+                    title: `${room.name} | Netania De Laiya`,
                     description: room.short_description || room.description,
                     image: room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0],
                     type: 'product',
@@ -301,7 +301,7 @@ const RoomDetails = () => {
             <div className='mt-2'>
                 <SocialShare
                     url={typeof window !== 'undefined' ? window.location.href : `https://www.netaniadelaiya.com/rooms/${room.slug || roomId}`}
-                    title={room.name}
+                    title={`${room.name} | Netania De Laiya`}
                     description={room.short_description || room.description}
                     image={room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0]}
                 />
