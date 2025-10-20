@@ -378,13 +378,25 @@ const getMealInfoPerRoom = (booking, room) => {
   // Print functionality
   const handlePrint = () => {
     const targetDate = formatDate(view === 'day' ? selectedDate : currentDate);
+    const getDateOnly = (value) => {
+      if (!value) return '';
+      if (typeof value === 'string') return value.slice(0, 10);
+      try {
+        return formatDate(new Date(value));
+      } catch (_) {
+        return '';
+      }
+    };
+
     const selectedDateEvents = events.filter(ev => {
+      const startDate = getDateOnly(ev.start);
+      const endDate = getDateOnly(ev.end);
       // For Day Tours, start and end are the same date
       if (ev.booking_type === 'day_tour') {
-        return ev.start === targetDate;
+        return startDate === targetDate;
       }
       // For overnight bookings, use the standard logic (exclude checkout day)
-      return ev.start <= targetDate && targetDate < ev.end;
+      return startDate <= targetDate && targetDate < endDate;
     });
 
     // Group events by booking_id
@@ -537,13 +549,25 @@ const getMealInfoPerRoom = (booking, room) => {
   // Export functionality
   const handleExport = () => {
     const targetDate = formatDate(view === 'day' ? selectedDate : currentDate);
+    const getDateOnly = (value) => {
+      if (!value) return '';
+      if (typeof value === 'string') return value.slice(0, 10);
+      try {
+        return formatDate(new Date(value));
+      } catch (_) {
+        return '';
+      }
+    };
+
     const selectedDateEvents = events.filter(ev => {
+      const startDate = getDateOnly(ev.start);
+      const endDate = getDateOnly(ev.end);
       // For Day Tours, start and end are the same date
       if (ev.booking_type === 'day_tour') {
-        return ev.start === targetDate;
+        return startDate === targetDate;
       }
       // For overnight bookings, use the standard logic (exclude checkout day)
-      return ev.start <= targetDate && targetDate < ev.end;
+      return startDate <= targetDate && targetDate < endDate;
     });
 
     // Group events by booking_id

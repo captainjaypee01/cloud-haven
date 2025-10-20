@@ -21,12 +21,25 @@ const statusVariant = (status) => {
 };
 
 const isBookingOnDay = (booking, dayStr) => {
+  const getDateOnly = (value) => {
+    if (!value) return '';
+    if (typeof value === 'string') return value.slice(0, 10);
+    try {
+      return formatDate(new Date(value));
+    } catch (_) {
+      return '';
+    }
+  };
+
+  const startDate = getDateOnly(booking.start);
+  const endDate = getDateOnly(booking.end);
+
   // For Day Tours, start and end are the same date
   if (booking.booking_type === 'day_tour') {
-    return booking.start === dayStr;
+    return startDate === dayStr;
   }
   // For overnight bookings, use the standard logic (exclude checkout day)
-  return booking.start <= dayStr && dayStr < booking.end;
+  return startDate <= dayStr && dayStr < endDate;
 };
 
 const formatDate = (date) => {
