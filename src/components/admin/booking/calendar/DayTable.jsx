@@ -360,7 +360,10 @@ export default function DayTable({ date, events }) {
                       {booking.guest_name}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {booking.start} → {booking.end}
+                      {booking.booking_type === 'day_tour' 
+                        ? booking.start?.slice(0, 10)
+                        : `${booking.start?.slice(0, 10)} → ${booking.end?.slice(0, 10)}`
+                      }
                     </div>
                   </TableCell>
                   

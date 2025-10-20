@@ -511,8 +511,8 @@ const getMealInfoPerRoom = (booking, room) => {
                     <td>${booking.status}</td>
                     <td>${typeDisplay}</td>
                     <td>${booking.rooms.length} room(s)</td>
-                    <td>${booking.start}</td>
-                    <td>${booking.end}</td>
+                    <td>${booking.booking_type === 'day_tour' ? booking.start?.slice(0, 10) : booking.start?.slice(0, 10)}</td>
+                    <td>${booking.booking_type === 'day_tour' ? '-' : booking.end?.slice(0, 10)}</td>
                     <td>${booking.nights}</td>
                     <td>${formatCurrency(Number(booking.total_payable) || Number(booking.final_price) || 0).replace('₱', 'PHP ')}</td>
                     <td>${formatCurrency(Number(booking.remaining_balance) || 0).replace('₱', 'PHP ')}</td>
@@ -643,8 +643,8 @@ const getMealInfoPerRoom = (booking, room) => {
         booking.status,
         typeDisplay,
         `${booking.rooms.length} room(s)`,
-        booking.start,
-        booking.end,
+        booking.booking_type === 'day_tour' ? booking.start?.slice(0, 10) : booking.start?.slice(0, 10),
+        booking.booking_type === 'day_tour' ? '-' : booking.end?.slice(0, 10),
         booking.nights,
         formatCurrency(Number(booking.total_payable) || Number(booking.final_price) || 0).replace('₱', 'PHP '),
         formatCurrency(Number(booking.remaining_balance) || 0).replace('₱', 'PHP '),
