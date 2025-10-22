@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useApi } from "@/hooks/useApi";
 import { formatCurrency } from "../utils/currency";
+import { formatDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLoader } from "@/context/LoaderContext";
@@ -148,13 +149,13 @@ const UnifiedBookingResultPage = () => {
                     <div className="flex justify-between"><span>Guest</span><span>{booking.guest_name}</span></div>
                     {booking.booking_type === 'day_tour' ? (
                         <>
-                            <div className="flex justify-between"><span>Day Tour Date</span><span>{booking.check_in_date}</span></div>
+                            <div className="flex justify-between"><span>Day Tour Date</span><span>{formatDate(booking.check_in_date)}</span></div>
                             <div className="flex justify-between"><span>Tour Hours</span><span>8:00 AM - 5:00 PM</span></div>
                         </>
                     ) : (
                         <>
-                            <div className="flex justify-between"><span>Check-in</span><span>{booking.check_in_date}</span></div>
-                            <div className="flex justify-between"><span>Check-out</span><span>{booking.check_out_date}</span></div>
+                            <div className="flex justify-between"><span>Check-in</span><span>{formatDate(booking.check_in_date)}</span></div>
+                            <div className="flex justify-between"><span>Check-out</span><span>{formatDate(booking.check_out_date)}</span></div>
                         </>
                     )}
                     <div className="flex justify-between"><span>Total guests</span><span>{booking.total_guests}</span></div>
