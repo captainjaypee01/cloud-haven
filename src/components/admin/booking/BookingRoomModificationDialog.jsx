@@ -13,7 +13,7 @@ import { Plus, Trash2, Users, User, Baby, Loader2, Home, Calendar, AlertTriangle
 import { useBookingModification } from '@/hooks/useBookingModification';
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
 import { GuestSelector } from '@/components/GuestSelector';
 
@@ -176,9 +176,26 @@ const BookingRoomModificationDialog = ({
     const removeRoom = (index) => {
         if (fields.length > 1) {
             remove(index);
+            // Reload units for all remaining rooms after removal
+            setTimeout(() => {
+                reloadAllUnits();
+            }, 100);
         } else {
             toast.error('At least one room is required');
         }
+    };
+
+    const reloadAllUnits = () => {
+        const currentRooms = form.getValues('rooms');
+        currentRooms.forEach((room, index) => {
+            if (room.room_id) {
+                const bookingRoom = booking.booking_rooms?.find(br => br.room?.slug === room.room_id);
+                const roomId = bookingRoom?.room?.id;
+                if (roomId) {
+                    loadAvailableUnits(roomId, room.room_id, index);
+                }
+            }
+        });
     };
 
     const handleRoomChange = (index, roomSlug) => {
@@ -217,8 +234,11 @@ const BookingRoomModificationDialog = ({
         setLoadingUnits(prev => ({ ...prev, [roomSlug]: true }));
         
         try {
-            const checkInDate = booking.check_in_date;
-            const checkOutDate = booking.booking_type === 'day_tour' ? booking.check_in_date : booking.check_out_date;
+            // Format dates to Y-m-d format for API
+            const checkInDate = new Date(booking.check_in_date).toISOString().split('T')[0];
+            const checkOutDate = booking.booking_type === 'day_tour' 
+                ? new Date(booking.check_in_date).toISOString().split('T')[0]
+                : new Date(booking.check_out_date).toISOString().split('T')[0];
             
             const response = await api.get(
                 `${API_PREFIX}/admin/bookings/${booking.id}/available-room-units`,
@@ -232,38 +252,52 @@ const BookingRoomModificationDialog = ({
                 unit && unit.id && unit.unit_number
             );
             
-            // Get units already assigned in the original booking
-            const assignedUnitIds = booking.booking_rooms
-                ?.filter(br => br.room_unit)
-                ?.map(br => br.room_unit.id) || [];
-            
             // Get the current room's assigned unit from the form data
             const currentFormRoom = form.getValues(`rooms.${currentRoomIndex}`);
             const currentRoomUnitId = currentFormRoom?.room_unit_id;
             const currentRoomUnitNumber = currentFormRoom?.room_unit_number;
             
+            // Get units assigned to OTHER rooms of the SAME TYPE in the current form
+            const currentFormRooms = form.getValues('rooms');
+            const currentRoomSlug = form.getValues(`rooms.${currentRoomIndex}.room_id`);
+            const sameTypeUnits = currentFormRooms
+                .filter((room, index) => 
+                    index !== currentRoomIndex && 
+                    room.room_id === currentRoomSlug && 
+                    room.room_unit_id
+                )
+                .map(room => ({
+                    id: room.room_unit_id,
+                    unit_number: room.room_unit_number,
+                    status: 'assigned_to_other',
+                    notes: 'Assigned to another room'
+                }));
+            
             let finalUnits = [];
             
+            // Start with API available units
+            finalUnits = [...apiUnits];
+            
+            // Add units assigned to other rooms of the same type (if not already in API results)
+            sameTypeUnits.forEach(sameTypeUnit => {
+                const existsInApi = apiUnits.some(apiUnit => apiUnit.id === sameTypeUnit.id);
+                if (!existsInApi) {
+                    finalUnits.push(sameTypeUnit);
+                }
+            });
+            
+            // Add current room's unit if it exists and is not already in the list
             if (currentRoomUnitId && currentRoomUnitNumber) {
-                // For existing rooms: include their current unit + available units
-                const currentUnit = {
-                    id: currentRoomUnitId,
-                    unit_number: currentRoomUnitNumber,
-                    status: 'assigned',
-                    notes: 'Currently assigned'
-                };
-                
-                // Add available units that are not assigned to other rooms
-                const availableUnits = apiUnits.filter(unit => 
-                    !assignedUnitIds.includes(unit.id)
-                );
-                
-                finalUnits = [currentUnit, ...availableUnits];
-            } else {
-                // For new rooms: only show truly available units
-                finalUnits = apiUnits.filter(unit => 
-                    !assignedUnitIds.includes(unit.id)
-                );
+                const currentUnitExists = finalUnits.some(unit => unit.id === currentRoomUnitId);
+                if (!currentUnitExists) {
+                    const currentUnit = {
+                        id: currentRoomUnitId,
+                        unit_number: currentRoomUnitNumber,
+                        status: 'assigned',
+                        notes: 'Currently assigned'
+                    };
+                    finalUnits.unshift(currentUnit); // Add to beginning
+                }
             }
             
             setAvailableUnits(prev => ({ ...prev, [`${roomSlug}_${currentRoomIndex}`]: finalUnits }));
@@ -479,17 +513,17 @@ const BookingRoomModificationDialog = ({
                                 {booking.booking_type === 'day_tour' ? (
                                     <div className="sm:col-span-2">
                                         <span className="text-gray-600">Tour Date:</span>
-                                        <span className="ml-2 font-medium">{new Date(booking.check_in_date).toLocaleDateString()}</span>
+                                        <span className="ml-2 font-medium">{formatDate(booking.check_in_date)}</span>
                                     </div>
                                 ) : (
                                     <>
                                         <div>
                                             <span className="text-gray-600">Check-in:</span>
-                                            <span className="ml-2 font-medium">{new Date(booking.check_in_date).toLocaleDateString()}</span>
+                                            <span className="ml-2 font-medium">{formatDate(booking.check_in_date)}</span>
                                         </div>
                                         <div>
                                             <span className="text-gray-600">Check-out:</span>
-                                            <span className="ml-2 font-medium">{new Date(booking.check_out_date).toLocaleDateString()}</span>
+                                            <span className="ml-2 font-medium">{formatDate(booking.check_out_date)}</span>
                                         </div>
                                     </>
                                 )}
@@ -718,13 +752,22 @@ const BookingRoomModificationDialog = ({
                                                                         
                                                                         return units
                                                                             .filter(unit => unit && unit.id && unit.unit_number)
-                                                                            .map((unit) => (
-                                                                                <SelectItem key={unit.id} value={unit.id.toString()}>
-                                                                                    Unit {unit.unit_number}
-                                                                                    {unit.notes && ` (${unit.notes})`}
-                                                                                    {currentUnitId === unit.id && ' (Current)'}
-                                                                                </SelectItem>
-                                                                            ));
+                                                                            .map((unit) => {
+                                                                                let displayText = `Unit ${unit.unit_number}`;
+                                                                                
+                                                                                // Show status based on unit properties
+                                                                                if (unit.status === 'assigned' || currentUnitId === unit.id) {
+                                                                                    displayText += ' (Currently assigned)';
+                                                                                } else if (unit.status === 'assigned_to_other') {
+                                                                                    displayText += ' (Assigned to another room)';
+                                                                                }
+                                                                                
+                                                                                return (
+                                                                                    <SelectItem key={unit.id} value={unit.id.toString()}>
+                                                                                        {displayText}
+                                                                                    </SelectItem>
+                                                                                );
+                                                                            });
                                                                     })()}
                                                                 </SelectContent>
                                                             </Select>

@@ -6,6 +6,7 @@ import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { formatDate } from '@/lib/format';
 
 const ChangeRoomUnitDialog = ({ 
     open, 
@@ -34,9 +35,11 @@ const ChangeRoomUnitDialog = ({
         
         setLoadingUnits(true);
         try {
-            // For Day Tour bookings, check_in_date and check_out_date are the same
-            const checkInDate = booking.check_in_date;
-            const checkOutDate = booking.booking_type === 'day_tour' ? booking.check_in_date : booking.check_out_date;
+            // Format dates to Y-m-d format for API
+            const checkInDate = new Date(booking.check_in_date).toISOString().split('T')[0];
+            const checkOutDate = booking.booking_type === 'day_tour' 
+                ? new Date(booking.check_in_date).toISOString().split('T')[0]
+                : new Date(booking.check_out_date).toISOString().split('T')[0];
             
             const response = await api.get(
                 `${API_PREFIX}/admin/bookings/${booking.id}/available-room-units`,
@@ -114,8 +117,8 @@ const ChangeRoomUnitDialog = ({
                             <strong>Current Unit:</strong> {bookingRoom.room_unit?.unit_number || 'Not assigned'}
                         </p>
                         <p className="text-sm text-gray-600">
-                            <strong>Dates:</strong> {booking.check_in_date} 
-                            {booking.booking_type === 'day_tour' ? ' (Day Tour)' : ` to ${booking.check_out_date}`}
+                            <strong>Dates:</strong> {formatDate(booking.check_in_date)} 
+                            {booking.booking_type === 'day_tour' ? ' (Day Tour)' : ` to ${formatDate(booking.check_out_date)}`}
                         </p>
                     </div>
 
