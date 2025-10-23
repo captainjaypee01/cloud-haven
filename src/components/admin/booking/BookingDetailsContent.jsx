@@ -366,12 +366,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             {/* Price Breakdown Section (improved layout) */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                         <div className="text-lg font-semibold">Price Breakdown</div>
                         {canAddCharges && (
                             <Button
                                 size="sm"
-                                className="cursor-pointer"
+                                className="cursor-pointer w-full sm:w-auto"
                                 variant="secondary"
                                 onClick={() => setShowAddOtherCharge(true)}
                             >
@@ -475,13 +475,13 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             {/* Other Discounts Management */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col gap-3 mb-3">
                         <div className="text-lg font-semibold">Other Discounts</div>
                         {canAddCharges && (
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <Button
                                     size="sm"
-                                    className="cursor-pointer"
+                                    className="cursor-pointer w-full sm:w-auto"
                                     variant="secondary"
                                     onClick={() => setShowPwdSeniorDiscount(true)}
                                 >
@@ -489,7 +489,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                 </Button>
                                 <Button
                                     size="sm"
-                                    className="cursor-pointer"
+                                    className="cursor-pointer w-full sm:w-auto"
                                     variant="secondary"
                                     onClick={() => setShowSpecialDiscount(true)}
                                 >
@@ -533,12 +533,12 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             {/* Rooms Table */}
             <Card>
                 <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                         <div className="text-lg font-semibold">Rooms</div>
                         {/* Room Modification Button - Only show if user can modify and booking can be modified */}
                         {canModifyBooking && ['pending', 'downpayment', 'paid'].includes(booking.status) && (
                             <Button
-                                className="cursor-pointer"
+                                className="cursor-pointer w-full sm:w-auto"
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
@@ -997,7 +997,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     {canAddPayments && (
                         <div className="mt-4 flex justify-end">
                             <Button
-                                className="cursor-pointer"
+                                className="cursor-pointer w-full sm:w-auto"
                                 onClick={() => {
                                     setEditPayment(null);
                                     setShowAddPayment(true);

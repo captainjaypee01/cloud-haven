@@ -124,14 +124,18 @@ const DayTourRoomModificationDialog = ({
             const room = availableRooms.find(r => r.slug === roomSlug);
             if (!room) return;
 
+            // Format dates to Y-m-d format for API
+            const checkInDate = new Date(booking.check_in_date).toISOString().split('T')[0];
+            const checkOutDate = new Date(booking.check_in_date).toISOString().split('T')[0]; // Same date for Day Tour
+            
             const response = await api.get(
                 `${API_PREFIX}/admin/bookings/${booking.id}/available-room-units`,
                 {
                     requiresAuth: true,
                     params: { 
                         room_id: room.id, 
-                        check_in_date: booking.check_in_date, 
-                        check_out_date: booking.check_in_date // Same date for Day Tour
+                        check_in_date: checkInDate, 
+                        check_out_date: checkOutDate
                     }
                 }
             );
@@ -140,31 +144,57 @@ const DayTourRoomModificationDialog = ({
                 unit && unit.id && unit.unit_number
             );
             
-            // Get units already assigned in the original booking
-            const assignedUnitIds = booking.booking_rooms
-                ?.filter(br => br.room_unit)
-                ?.map(br => br.room_unit.id) || [];
+            // Get the current room's assigned unit from the form data
+            const currentFormRoom = form.getValues(`rooms.${roomIndex}`);
+            const currentRoomUnitId = currentFormRoom?.room_unit_id;
+            const currentRoomUnitNumber = currentFormRoom?.unit_number;
             
-            // Include currently assigned units for this room (only if not already in available units)
-            const currentRoomUnits = booking.booking_rooms
-                ?.filter(br => br.room?.slug === roomSlug && br.room_unit)
-                ?.map(br => ({
-                    id: br.room_unit.id,
-                    unit_number: br.room_unit.unit_number,
-                    status: 'occupied',
-                    notes: 'Currently assigned'
-                })) || [];
+            // Get units assigned to OTHER rooms of the SAME TYPE in the current form
+            const currentFormRooms = form.getValues('rooms');
+            const currentRoomSlug = form.getValues(`rooms.${roomIndex}.room_id`);
+            const sameTypeUnits = currentFormRooms
+                .filter((room, index) => 
+                    index !== roomIndex && 
+                    room.room_id === currentRoomSlug && 
+                    room.room_unit_id
+                )
+                .map(room => ({
+                    id: room.room_unit_id,
+                    unit_number: room.unit_number,
+                    status: 'assigned_to_other',
+                    notes: 'Assigned to another room'
+                }));
             
-            // Filter out duplicates - if a unit is already in apiUnits, don't add it again
-            const existingUnitIds = apiUnits.map(unit => unit.id);
-            const uniqueCurrentUnits = currentRoomUnits.filter(unit => !existingUnitIds.includes(unit.id));
+            let finalUnits = [];
             
-            // Combine available units with unique currently assigned units
-            const allUnits = [...apiUnits, ...uniqueCurrentUnits];
+            // Start with API available units
+            finalUnits = [...apiUnits];
+            
+            // Add units assigned to other rooms of the same type (if not already in API results)
+            sameTypeUnits.forEach(sameTypeUnit => {
+                const existsInApi = apiUnits.some(apiUnit => apiUnit.id === sameTypeUnit.id);
+                if (!existsInApi) {
+                    finalUnits.push(sameTypeUnit);
+                }
+            });
+            
+            // Add current room's unit if it exists and is not already in the list
+            if (currentRoomUnitId && currentRoomUnitNumber) {
+                const currentUnitExists = finalUnits.some(unit => unit.id === currentRoomUnitId);
+                if (!currentUnitExists) {
+                    const currentUnit = {
+                        id: currentRoomUnitId,
+                        unit_number: currentRoomUnitNumber,
+                        status: 'occupied',
+                        notes: 'Currently assigned'
+                    };
+                    finalUnits.unshift(currentUnit); // Add to beginning
+                }
+            }
             
             setRoomUnits(prev => ({
                 ...prev,
-                [roomSlug]: allUnits
+                [roomSlug]: finalUnits
             }));
         } catch (error) {
             console.error('Failed to load room units:', error);
@@ -189,6 +219,19 @@ const DayTourRoomModificationDialog = ({
 
     const removeRoom = (index) => {
         remove(index);
+        // Reload units for all remaining rooms after removal
+        setTimeout(() => {
+            reloadAllUnits();
+        }, 100);
+    };
+
+    const reloadAllUnits = () => {
+        const currentRooms = form.getValues('rooms');
+        currentRooms.forEach((room, index) => {
+            if (room.room_id) {
+                loadAvailableUnits(room.room_id, index);
+            }
+        });
     };
 
     const handleRoomChange = (index, roomSlug) => {
@@ -554,16 +597,22 @@ const DayTourRoomModificationDialog = ({
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
-                                                            {roomUnits[form.watch(`rooms.${index}.room_id`)]?.map((unit) => (
-                                                                <SelectItem key={unit.id} value={unit.id.toString()}>
-                                                                    <div className="flex justify-between items-center w-full">
-                                                                        <span>Unit {unit.unit_number}</span>
-                                                                        {unit.status === 'occupied' && (
-                                                                            <Badge variant="secondary" className="ml-2 text-xs">Currently Assigned</Badge>
-                                                                        )}
-                                                                    </div>
-                                                                </SelectItem>
-                                                            ))}
+                                                            {roomUnits[form.watch(`rooms.${index}.room_id`)]?.map((unit) => {
+                                                                let displayText = `Unit ${unit.unit_number}`;
+                                                                
+                                                                // Show status based on unit properties
+                                                                if (unit.status === 'occupied' || unit.notes === 'Currently assigned') {
+                                                                    displayText += ' (Currently assigned)';
+                                                                } else if (unit.status === 'assigned_to_other') {
+                                                                    displayText += ' (Assigned to another room)';
+                                                                }
+                                                                
+                                                                return (
+                                                                    <SelectItem key={unit.id} value={unit.id.toString()}>
+                                                                        {displayText}
+                                                                    </SelectItem>
+                                                                );
+                                                            })}
                                                         </SelectContent>
                                                     </Select>
                                                     <FormMessage />
