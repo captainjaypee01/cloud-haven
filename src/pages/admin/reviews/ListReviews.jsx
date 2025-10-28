@@ -111,7 +111,7 @@ const ListReviews = () => {
     }, [debouncedSearch, sorting, typeFilter, ratingFilter, pagination]);
 
     return (
-        <div>
+        <div className="w-full min-w-0">
             <Title
                 align='left'
                 font='outfit'

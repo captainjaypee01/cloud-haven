@@ -12,11 +12,13 @@ import DataTable from '@/components/admin/Table/DataTable';
 import { roomUnitColumns as baseRoomUnitColumns } from '@/components/admin/Table/roomUnitColumns';
 import GenerateUnitsDialog from '@/components/admin/forms/GenerateUnitsDialog';
 import RoomUnitFormDialog from '@/components/admin/forms/RoomUnitFormDialog';
-import DeleteDialog from '@/components/common/form/DeleteDialog';
+import BlockedDateFormDialog from '@/components/admin/forms/BlockedDateFormDialog';
 import { toast } from "sonner";
 import { useDebounce } from '@/hooks/useDebounce';
-import { ArrowLeft, Plus, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Plus, BarChart3, Calendar, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import DeleteDialog from '@/components/common/form/DeleteDialog';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const ListRoomUnits = () => {
     const { roomId } = useParams();
@@ -35,6 +37,14 @@ const ListRoomUnits = () => {
     const [editUnit, setEditUnit] = useState(null);
     const [deleteUnit, setDeleteUnit] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [selectedRoomUnitIds, setSelectedRoomUnitIds] = useState([]);
+    const [rowSelection, setRowSelection] = useState({});
+    
+    // Debug: Log when selectedRoomUnitIds changes
+    useEffect(() => {
+        console.log('selectedRoomUnitIds state changed:', selectedRoomUnitIds);
+    }, [selectedRoomUnitIds]);
+    const [bulkBlockedDateDialogOpen, setBulkBlockedDateDialogOpen] = useState(false);
     const api = useApi();
     const isRequestInProgress = useRef(false);
 
@@ -47,6 +57,38 @@ const ListRoomUnits = () => {
     const handleDeletePrompt = (unit) => {
         setDeleteUnit(unit);
         setDeleteDialogOpen(true);
+    };
+
+    const handleRowSelectionChange = useCallback((updaterOrValue) => {
+        console.log('handleRowSelectionChange called with:', updaterOrValue);
+        
+        // Handle both function and direct value updates
+        const newRowSelection = typeof updaterOrValue === 'function' 
+            ? updaterOrValue(rowSelection) 
+            : updaterOrValue;
+            
+        console.log('newRowSelection:', newRowSelection);
+        setRowSelection(newRowSelection);
+        
+        const selectedIds = Object.keys(newRowSelection).filter(key => newRowSelection[key]);
+        console.log('selectedIds:', selectedIds);
+        
+        const parsedIds = selectedIds.map(id => parseInt(id));
+        console.log('parsedIds:', parsedIds);
+        
+        setSelectedRoomUnitIds(parsedIds);
+        console.log('selectedRoomUnitIds state will be:', parsedIds);
+    }, [rowSelection]);
+
+    const handleBulkBlockedDates = () => {
+        console.log('handleBulkBlockedDates called, selectedRoomUnitIds:', selectedRoomUnitIds);
+        console.log('selectedRoomUnitIds.length:', selectedRoomUnitIds.length);
+        
+        if (selectedRoomUnitIds.length === 0) {
+            toast.error("Please select at least one room unit");
+            return;
+        }
+        setBulkBlockedDateDialogOpen(true);
     };
 
     const handleDeleteConfirmed = async () => {
@@ -73,12 +115,43 @@ const ListRoomUnits = () => {
 
     // Actions column
     const roomUnitColumns = useMemo(() => [
+        {
+            id: "select",
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && "indeterminate")
+                    }
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
         ...baseRoomUnitColumns.filter(col => col.id !== "actions"),
         {
             id: "actions",
             header: "Actions",
             cell: ({ row }) => (
                 <div className="flex gap-2">
+                    <Link to={`/admin/room-units/${row.original.id}/blocked-dates`}>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            className="cursor-pointer"
+                        >
+                            <CalendarDays className="w-4 h-4" />
+                        </Button>
+                    </Link>
                     <Button
                         size="sm"
                         variant="secondary"
@@ -239,10 +312,28 @@ const ListRoomUnits = () => {
 
             {/* Action buttons */}
             <div className="flex justify-between items-center mb-4">
-                <Button onClick={handleGenerate} className="cursor-pointer">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Generate Units
-                </Button>
+                <div className="flex gap-2">
+                    <Button onClick={handleGenerate} className="cursor-pointer">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Generate Units
+                    </Button>
+                    <Link to={`/admin/room-units/${roomId}/calendar`}>
+                        <Button variant="outline" className="cursor-pointer">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            Calendar View
+                        </Button>
+                    </Link>
+                    <Button onClick={handleBulkBlockedDates} variant="outline" className="cursor-pointer">
+                        <CalendarDays className="w-4 h-4 mr-2" />
+                        Bulk Blocked Dates ({selectedRoomUnitIds.length})
+                    </Button>
+                </div>
+                <Link to="/admin/room-units/blocked-dates">
+                    <Button variant="outline" className="cursor-pointer">
+                        <CalendarDays className="w-4 h-4 mr-2" />
+                        All Blocked Dates
+                    </Button>
+                </Link>
             </div>
 
             {/* Controls and filters */}
@@ -256,11 +347,13 @@ const ListRoomUnits = () => {
             />
 
             {/* Data table */}
+            {console.log('DataTable data:', data)}
+            {console.log('DataTable selectedRoomUnitIds:', selectedRoomUnitIds)}
             <DataTable
                 columns={roomUnitColumns}
                 data={data}
                 pageCount={Math.ceil(total / pagination.pageSize)}
-                state={{ pagination, sorting }}
+                state={{ pagination, sorting, rowSelection }}
                 onPaginationChange={setPagination}
                 onSortingChange={setSorting}
                 onPageSizeChange={size =>
@@ -268,6 +361,9 @@ const ListRoomUnits = () => {
                 }
                 manualPagination={true} // Server-side pagination
                 loading={loading}
+                enableRowSelection={true}
+                onRowSelectionChange={handleRowSelectionChange}
+                getRowId={(row) => row.id.toString()}
             />
 
             {/* Dialogs */}
@@ -291,6 +387,20 @@ const ListRoomUnits = () => {
                     fetchRoomUnits();
                     fetchRoomStats();
                     setEditUnit(null);
+                }}
+            />
+
+            <BlockedDateFormDialog
+                open={bulkBlockedDateDialogOpen}
+                onOpenChange={setBulkBlockedDateDialogOpen}
+                roomUnits={data}
+                selectedRoomUnitIds={selectedRoomUnitIds}
+                isBulk={true}
+                onSuccess={() => {
+                    setBulkBlockedDateDialogOpen(false);
+                    fetchRoomUnits();
+                    fetchRoomStats();
+                    setSelectedRoomUnitIds([]);
                 }}
             />
 

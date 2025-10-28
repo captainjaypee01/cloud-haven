@@ -12,6 +12,7 @@ import DeleteDialog from '@/components/common/form/DeleteDialog';
 import { toast } from "sonner";
 import { useDebounce } from '@/hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
+import { CalendarDays } from 'lucide-react';
 
 const ListRoom = () => {
   const navigate = useNavigate()
@@ -127,7 +128,17 @@ const ListRoom = () => {
         subTitle='View, edit, or manage all listed rooms.'
       />
       <div className="flex justify-between items-center mb-4 mt-4">
-        <Button onClick={handleAdd} className="cursor-pointer">+ Add Room</Button>
+        <div className="flex gap-2">
+          <Button onClick={handleAdd} className="cursor-pointer">+ Add Room</Button>
+          <Button 
+            onClick={() => navigate('/admin/room-units/blocked-dates')} 
+            variant="outline" 
+            className="cursor-pointer"
+          >
+            <CalendarDays className="w-4 h-4 mr-2" />
+            Blocked Dates
+          </Button>
+        </div>
       </div>
       <ControlsToolbar
         search={search}

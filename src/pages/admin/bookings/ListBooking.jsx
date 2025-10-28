@@ -229,7 +229,7 @@ const ListBooking = () => {
     }, [debouncedSearch, sorting, status, bookingType, bookingSource, bookingDate, bookingFromDate, bookingToDate, checkinCheckoutDate, checkinCheckoutFromDate, checkinCheckoutToDate, pagination]);
 
     return (
-        <div>
+        <div className="w-full min-w-0">
             <Title
                 align='left'
                 font='outfit'
@@ -237,11 +237,11 @@ const ListBooking = () => {
                 subTitle='View and manage all resort bookings.'
             />
             <p className='text-gray-500 mt-8'>All Bookings</p>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                 <h2 className="text-xl font-semibold">Bookings</h2>
                 <Button
                     onClick={() => navigate('/admin/bookings/walk-in')}
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                 >
                     Create Walk-In Booking
                 </Button>
