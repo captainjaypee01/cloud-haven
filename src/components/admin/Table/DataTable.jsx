@@ -29,11 +29,15 @@ const DataTable = ({
     loading = false,
     onSortingChange,
     onPageSizeChange,
+    enableRowSelection = false,
+    onRowSelectionChange,
+    getRowId,
 }) => {
     // Ensure sorting state is always an array (important for TanStack Table)
     const safeState = {
         ...state,
         sorting: Array.isArray(state?.sorting) ? state.sorting : [],
+        rowSelection: state?.rowSelection || {},
     };
     const table = useReactTable({
         data,
@@ -47,6 +51,9 @@ const DataTable = ({
         onPaginationChange,
         onSortingChange,
         enableSorting: true,
+        enableRowSelection,
+        onRowSelectionChange,
+        getRowId,
     });
 
     return (
@@ -54,7 +61,9 @@ const DataTable = ({
             {/* Table and footer as a single card */}
             <div className="rounded-md border bg-white dark:bg-gray-950 relative flex flex-col">
                 {loading && <LoaderTable />}
-                <Table className={loading ? "opacity-60 pointer-events-none" : ""}>
+                {/* Horizontal scrollable container for table */}
+                <div className="overflow-x-auto">
+                    <Table className={loading ? "opacity-60 pointer-events-none" : ""}>
                     <TableHeader>
                         {table.getHeaderGroups().map(headerGroup => (
                             <TableRow key={headerGroup.id}>
@@ -95,9 +104,10 @@ const DataTable = ({
                             </TableRow>
                         )}
                     </TableBody>
-                </Table>
+                    </Table>
+                </div>
                 {/* Footer controls */}
-                <div className="border-t px-4 py-2 flex items-center justify-between text-sm">
+                <div className="border-t px-4 py-2 flex flex-col sm:flex-row items-center justify-between text-sm gap-4">
                     {/* Left side: Rows per page selector */}
                     <div className="flex items-center gap-2">
                         <span>Rows per page:</span>
@@ -115,8 +125,8 @@ const DataTable = ({
                         </select>
                     </div>
                     {/* Right side: Page numbers and navigation */}
-                    <div className="flex items-center gap-6">
-                        <span>
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6">
+                        <span className="text-center sm:text-left">
                             Page {table.getState().pagination.pageIndex + 1}{" "}
                             of {manualPagination ? pageCount : table.getPageCount()}
                         </span>

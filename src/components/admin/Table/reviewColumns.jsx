@@ -69,7 +69,7 @@ export const reviewColumns = [
         header: "Comment",
         cell: info => {
             const comment = info.getValue();
-            return comment.length > 100 ? comment.substring(0, 100) + "..." : comment;
+            return comment.length > 60 ? comment.substring(0, 60) + "..." : comment;
         },
     },
     {

@@ -35,6 +35,8 @@ const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const ListRoom = React.lazy(() => import('./pages/admin/rooms/ListRoom'));
 const ListRoomUnits = React.lazy(() => import('./pages/admin/room-units/ListRoomUnits'));
 const RoomUnitCalendarPage = React.lazy(() => import('./pages/admin/room-units/RoomUnitCalendarPage'));
+const BlockedDatesListPage = React.lazy(() => import('./pages/admin/room-units/BlockedDatesListPage'));
+const AllBlockedDatesPage = React.lazy(() => import('./pages/admin/room-units/AllBlockedDatesPage'));
 const ListBooking = React.lazy(() => import('./pages/admin/bookings/ListBooking'));
 const BookingsCalendarPage = React.lazy(() => import('./pages/admin/bookings/BookingsCalendarPage'));
 const BookingDetails = React.lazy(() => import('./pages/admin/bookings/BookingDetails'));
@@ -189,6 +191,16 @@ const App = () => {
                   <Route path="room-units/:roomId" element={
                     <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
                       <ListRoomUnits />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="room-units/:roomUnitId/blocked-dates" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <BlockedDatesListPage />
+                    </RoleBasedRoute>
+                  } />
+                  <Route path="room-units/blocked-dates" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <AllBlockedDatesPage />
                     </RoleBasedRoute>
                   } />
                   <Route path="payments" element={
