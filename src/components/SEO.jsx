@@ -35,36 +35,102 @@ export default function SEO({
   const finalImage = image || defaultImage;
   const finalKeywords = keywords || defaultKeywords;
   
-  // Generate structured data for resort
-  const defaultJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "LodgingBusiness",
-    "name": "Netania De Laiya",
-    "description": finalDescription,
-    "url": SITE_URL,
-    "logo": `${SITE_URL}/logo.jpg`,
-    "image": finalImage,
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "San Juan",
-      "addressRegion": "Batangas",
-      "addressCountry": "Philippines"
+  // Generate comprehensive structured data for sitelinks
+  const defaultJsonLd = [
+    // Website schema for sitelinks
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Netania De Laiya",
+      "url": SITE_URL,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": `${SITE_URL}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Netania De Laiya",
+        "logo": `${SITE_URL}/logo.jpg`
+      }
     },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": "13.7565",
-      "longitude": "121.3972"
+    // Hotel/LodgingBusiness schema
+    {
+      "@context": "https://schema.org",
+      "@type": "Hotel",
+      "name": "Netania De Laiya",
+      "description": finalDescription,
+      "url": SITE_URL,
+      "logo": `${SITE_URL}/logo.jpg`,
+      "image": finalImage,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Laiya, San Juan",
+        "addressLocality": "San Juan",
+        "addressRegion": "Batangas",
+        "addressCountry": "Philippines",
+        "postalCode": "4226"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "13.7565",
+        "longitude": "121.3972"
+      },
+      "telephone": "+63 949 798 9831",
+      "priceRange": "$$",
+      "starRating": {
+        "@type": "Rating",
+        "ratingValue": "4.5",
+        "bestRating": "5"
+      },
+      "amenityFeature": [
+        {"@type": "LocationFeatureSpecification", "name": "Swimming Pool"},
+        {"@type": "LocationFeatureSpecification", "name": "Beach Access"},
+        {"@type": "LocationFeatureSpecification", "name": "Restaurant"},
+        {"@type": "LocationFeatureSpecification", "name": "Free WiFi"},
+        {"@type": "LocationFeatureSpecification", "name": "Parking"},
+        {"@type": "LocationFeatureSpecification", "name": "Air Conditioning"}
+      ],
+      "sameAs": [FACEBOOK_URL, INSTAGRAM_URL],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Accommodations and Day Tours",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Accommodations",
+              "url": `${SITE_URL}/rooms`
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Day Tour",
+              "url": `${SITE_URL}/day-tour`
+            }
+          }
+        ]
+      }
     },
-    "telephone": "+63 949 798 9831",
-    "priceRange": "$$",
-    "amenityFeature": [
-      {"@type": "LocationFeatureSpecification", "name": "Swimming Pool"},
-      {"@type": "LocationFeatureSpecification", "name": "Beach Access"},
-      {"@type": "LocationFeatureSpecification", "name": "Restaurant"},
-      {"@type": "LocationFeatureSpecification", "name": "Free WiFi"}
-    ],
-    "sameAs": [FACEBOOK_URL, INSTAGRAM_URL]
-  };
+    // Organization schema
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Netania De Laiya",
+      "url": SITE_URL,
+      "logo": `${SITE_URL}/logo.jpg`,
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+63 949 798 9831",
+        "contactType": "customer service",
+        "availableLanguage": ["English", "Filipino"]
+      },
+      "sameAs": [FACEBOOK_URL, INSTAGRAM_URL]
+    }
+  ];
 
   return (
     <>

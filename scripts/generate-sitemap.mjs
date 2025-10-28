@@ -2,9 +2,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Basic public routes
+// Basic public routes with SEO priorities for sitelinks
 const ORIGIN = process.env.SITE_ORIGIN || 'https://www.netaniadelaiya.com';
-const staticPaths = ['/', '/rooms', '/day-tour', '/contact-us', '/policy', '/privacy', '/terms'];
+const staticPaths = [
+  { path: '/', priority: '1.0', changefreq: 'weekly' },
+  { path: '/rooms', priority: '0.9', changefreq: 'weekly' },
+  { path: '/day-tour', priority: '0.9', changefreq: 'weekly' },
+  { path: '/contact-us', priority: '0.8', changefreq: 'monthly' },
+  { path: '/policy', priority: '0.7', changefreq: 'monthly' },
+  { path: '/privacy', priority: '0.5', changefreq: 'yearly' },
+  { path: '/terms', priority: '0.5', changefreq: 'yearly' }
+];
 
 // Attempt to pull dynamic room slugs from backend if env provided
 async function fetchRoomSlugs() {
@@ -60,13 +68,33 @@ function xmlEscape(str) {
 async function main() {
   const roomSlugs = await fetchRoomSlugs();
   const dayTourRoomSlugs = await fetchDayTourRoomSlugs();
-  const dynamicPaths = roomSlugs.map((slug) => `/rooms/${slug}`);
-  const dayTourDynamicPaths = dayTourRoomSlugs.map((slug) => `/day-tour/${slug}`);
-  const urls = [...staticPaths, ...dynamicPaths, ...dayTourDynamicPaths];
+  
+  // Convert static paths to URL objects
+  const staticUrls = staticPaths.map(route => ({
+    path: route.path,
+    priority: route.priority,
+    changefreq: route.changefreq
+  }));
+  
+  // Add dynamic room paths
+  const dynamicUrls = roomSlugs.map((slug) => ({
+    path: `/rooms/${slug}`,
+    priority: '0.8',
+    changefreq: 'weekly'
+  }));
+  
+  // Add dynamic day tour room paths
+  const dayTourDynamicUrls = dayTourRoomSlugs.map((slug) => ({
+    path: `/day-tour/${slug}`,
+    priority: '0.8',
+    changefreq: 'weekly'
+  }));
+  
+  const allUrls = [...staticUrls, ...dynamicUrls, ...dayTourDynamicUrls];
 
   const today = new Date().toISOString();
-  const body = urls
-    .map((u) => `  <url>\n    <loc>${xmlEscape(ORIGIN + u)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${u === '/' ? 'daily' : 'weekly'}</changefreq>\n    <priority>${u === '/' ? '1.0' : '0.8'}</priority>\n  </url>`)
+  const body = allUrls
+    .map((url) => `  <url>\n    <loc>${xmlEscape(ORIGIN + url.path)}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${url.changefreq}</changefreq>\n    <priority>${url.priority}</priority>\n  </url>`)
     .join('\n');
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
