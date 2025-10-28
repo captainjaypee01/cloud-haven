@@ -63,7 +63,13 @@ const Navbar = () => {
             {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-4 lg:gap-8">
                 {navLinks.map((link, i) => (
-                    <Link to={link.path} key={i} className={`group flex flex-col gap-0.5 ${isScrolled ? "text-gray-700" : "text-white"}`} onClick={() => {window.scrollTo(0, 0);}}>
+                    <Link 
+                        to={link.path} 
+                        key={i} 
+                        className={`group flex flex-col gap-0.5 ${isScrolled ? "text-gray-700" : "text-white"}`} 
+                        onClick={() => {window.scrollTo(0, 0);}}
+                        title={`${link.name} - Netania De Laiya`}
+                    >
                         {link.name}
                         <div className={`${isScrolled ? "bg-gray-700" : "bg-gray-700"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
                     </Link>

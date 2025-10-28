@@ -34,13 +34,13 @@ const Footer = () => {
                             <Link to={`/about-us`}>About</Link>
                         </li> */}
                         <li>
-                            <Link to={`/rooms`}>Accommodations</Link>
+                            <Link to={`/rooms`} title="View our premium accommodations and room types">Accommodations</Link>
                         </li>
                         <li>
-                            <Link to={`/day-tour`}>Day Tour</Link>
+                            <Link to={`/day-tour`} title="Book a day tour experience at Netania De Laiya">Day Tour</Link>
                         </li>
                         <li>
-                            <Link to={`/policy`}>Resort Policy</Link>
+                            <Link to={`/policy`} title="Read our resort policies and guidelines">Resort Policy</Link>
                         </li>
                     </ul>
                 </div>
@@ -49,7 +49,7 @@ const Footer = () => {
                     <p className='font-playfair text-lg text-gray-800'>SUPPORT</p>
                     <ul className='mt-3 flex flex-col gap-2 text-sm'>
                         <li>
-                            <Link to={`/contact-us`}>Contact Us</Link>
+                            <Link to={`/contact-us`} title="Get in touch with Netania De Laiya for bookings and inquiries">Contact Us</Link>
                         </li>
                     </ul>
                 </div>

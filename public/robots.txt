@@ -15,10 +15,13 @@ Disallow: /checkout
 Disallow: /booking/
 Disallow: /user/
 Disallow: /my-bookings
+Disallow: /review/
 
-# Allow important pages (based on actual routes)
+# Allow important pages for sitelinks
 Allow: /
 Allow: /rooms
 Allow: /day-tour
-Allow: /policy
 Allow: /contact-us
+Allow: /policy
+Allow: /privacy
+Allow: /terms
