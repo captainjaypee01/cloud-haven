@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRightIcon, ImageOff, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 const ExclusiveOfferCard = ({ offer, onClick }) => {
     const discountLabel =
@@ -77,13 +78,19 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
 
     return (
         <div className={cardClass}
-            style={hasImage ? { backgroundImage: `url(${offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'})` } : { backgroundImage: `url(https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg)` }}
             onClick={onClick}
             tabIndex={0}
             aria-label={`View details for ${offer.title}`}
             role="button"
             onKeyDown={e => { if (e.key === 'Enter') onClick(); }}
         >
+            <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden">
+                <OptimizedImage
+                    src={offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'}
+                    alt={offer.title}
+                    className="w-full h-full object-cover"
+                />
+            </div>
             {hasImage && <div className={overlayClass} />}
             {discountLabel && (
                 <div className="absolute top-4 right-4 flex flex-col gap-1 z-10">

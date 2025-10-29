@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { ABOUT_US_CAROUSEL_IMAGES } from "@/constants/about-us";
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 const AboutUs = () => {
     const images = ABOUT_US_CAROUSEL_IMAGES;  // using existing room images for the hero carousel
@@ -58,7 +59,11 @@ const AboutUs = () => {
                     <CarouselContent>
                         {images.map((url, idx) => (
                             <CarouselItem key={idx}>
-                                <div className="h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url('${url}')` }} />
+                                <div className="h-screen w-full relative">
+                                    <div className="absolute inset-0 -z-10">
+                                        <OptimizedImage src={url} alt={`About hero ${idx+1}`} className="w-full h-full object-cover" />
+                                    </div>
+                                </div>
                             </CarouselItem>
                         ))}
                     </CarouselContent>

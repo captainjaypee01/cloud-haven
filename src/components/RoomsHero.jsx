@@ -4,6 +4,7 @@ import {
     CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay"
+import OptimizedImage from '@/components/common/OptimizedImage'
 
 const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
     return (
@@ -21,10 +22,11 @@ const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
                 <CarouselContent>
                     {imageUrls.map((url, idx) => (
                         <CarouselItem key={idx}>
-                            <div
-                                className="h-screen w-full bg-cover bg-center"
-                                style={{ backgroundImage: `url('${url}')` }}
-                            />
+                            <div className="h-screen w-full relative">
+                                <div className="absolute inset-0 -z-10">
+                                    <OptimizedImage src={url} alt={`Rooms hero ${idx+1}`} className="w-full h-full object-cover" />
+                                </div>
+                            </div>
                         </CarouselItem>
                     ))}
                 </CarouselContent>

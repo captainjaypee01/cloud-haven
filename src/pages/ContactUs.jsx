@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { HERO_CAROUSEL_IMAGES } from "@/constants/contact-us";
+import OptimizedImage from '@/components/common/OptimizedImage';
 import { SUPPORT_EMAIL, SUPPORT_LANDLINE, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from "@/constants/AppConstant";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -127,7 +128,11 @@ const ContactUsPage = () => {
                     <CarouselContent>
                         {images.map((url, idx) => (
                             <CarouselItem key={idx}>
-                                <div className="h-screen w-full bg-cover bg-center" style={{ backgroundImage: `url('${url}')` }} />
+                                <div className="h-screen w-full relative">
+                                    <div className="absolute inset-0 -z-10">
+                                        <OptimizedImage src={url} alt={`Contact hero ${idx+1}`} className="w-full h-full object-cover" />
+                                    </div>
+                                </div>
                             </CarouselItem>
                         ))}
                     </CarouselContent>

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useRoom } from "../queries/rooms";
 import { formatCurrency } from "../utils/currency";
 import { roomPhotos } from "../data/rooms";
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 
 export function RoomDetailModal({ roomId, open, onOpenChange }) {
@@ -49,13 +50,12 @@ export function RoomDetailModal({ roomId, open, onOpenChange }) {
 
                         <Carousel opts={{ loop: true, align: "center" }} className="my-4 h-64">
                             <CarouselContent>
-                                {(room?.images?.length ? room.images.map((img) => img?.secure_image_url || img?.url || img) : roomPhotos).map((src, i) => (
+                                {(room?.images?.length ? room.images.map((img) => img?.secure_image_url || img?.image_url || img?.url || img) : roomPhotos).map((src, i) => (
                                     <CarouselItem key={i} className="h-64">
-                                        <img
+                                        <OptimizedImage
                                             src={src}
                                             alt={`${room.name} photo ${i + 1}`}
                                             className="w-full h-full object-cover rounded-md"
-                                            loading="lazy"
                                         />
                                     </CarouselItem>
                                 ))}

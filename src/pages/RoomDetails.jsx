@@ -7,6 +7,7 @@ import { useRoom } from '../queries/rooms'
 import { useRoomAvailability } from '../hooks/useRoomAvailability'
 import { RoomAvailabilityBadge } from '../components/common/RoomAvailabilityBadge'
 import { RoomGallerySlider } from '../components/common/RoomGallerySlider'
+import { getOptimizedImageUrl } from '../utils/imageOptimization'
 import { useAppContext } from '../context/AppContext'
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
@@ -45,6 +46,12 @@ const RoomDetails = () => {
     });
 
     const mainImage = room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || roomPhotos[0];
+    const optimizedMainImage = mainImage ? getOptimizedImageUrl(mainImage, {
+        width: 'w_800',
+        height: 'h_auto',
+        quality: 'auto',
+        format: 'auto'
+    }) : roomPhotos[0];
     const [requireDatesOpen, setRequireDatesOpen] = useState(false);
     const [showMixingDialog, setShowMixingDialog] = useState(false);
 
