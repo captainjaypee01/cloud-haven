@@ -1,11 +1,15 @@
 import React from 'react'
 import SearchForm from './SearchForm'
 import { NETANIA_COVER_IMAGE } from '@/constants/AppConstant'
+import OptimizedImage from '@/components/common/OptimizedImage'
 
 const Hero = () => {
     
     return (
-        <div className="relative h-screen bg-cover bg-center" style={{ backgroundImage: `url(${NETANIA_COVER_IMAGE})` }}>
+        <div className="relative h-screen bg-cover bg-center">
+            <div className="absolute inset-0 -z-10">
+                <OptimizedImage src={NETANIA_COVER_IMAGE} alt="Netania hero" className="w-full h-full object-cover" />
+            </div>
             <div className="absolute inset-0 bg-black/40"></div>
             <div className="relative flex flex-col items-start justify-center px-6 md:px-16 lg:px-24 xl:px-32 h-full">
                 <p className='bg-[#deb028]/50 px-3.5 py-1 rounded-full text-white '>The Ultimate Beach Experience</p>

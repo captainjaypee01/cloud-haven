@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppContext } from "@/context/AppContext";
 import { RoomAvailabilityBadge } from "@/components/common/RoomAvailabilityBadge";
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 export function DayTourRoomCard({ room, onAddToCart, selectedDate, currentPricing, availability }) {
     const { navigate } = useAppContext();
@@ -26,7 +27,7 @@ export function DayTourRoomCard({ room, onAddToCart, selectedDate, currentPricin
 
     // Get photos for this room (use room images if available, otherwise use random room photos)
     const photos = room.images?.length ?
-        room.images.map(img => img.secure_image_url || img.url) :
+        room.images.map(img => img.secure_image_url || img.image_url || img.url) :
         (room?.name?.toLowerCase().includes('cabana') ? cabanaRoomPhotos.sort(() => Math.random() - 0.5) : umbrellaRoomPhotos.sort(() => Math.random() - 0.5));
 
     return (
@@ -40,12 +41,10 @@ export function DayTourRoomCard({ room, onAddToCart, selectedDate, currentPricin
                     <CarouselContent>
                         {photos.slice(0, 5).map((src, i) => (
                             <CarouselItem key={i} className="h-64">
-                                <img
+                                <OptimizedImage
                                     src={src}
                                     alt={`${room.name} photo ${i + 1}`}
                                     className="w-full h-full object-cover"
-                                    loading="lazy"
-                                    decoding="async"
                                 />
                             </CarouselItem>
                         ))}

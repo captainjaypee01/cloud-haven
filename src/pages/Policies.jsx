@@ -4,6 +4,7 @@ import SEO from "@/components/SEO";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RESORT_POLICIES, POLICY_ICONS, HERO_IMAGE } from "@/constants/policies";
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 const Policies = () => {
     const [activeTab, setActiveTab] = useState('checkin');
@@ -95,16 +96,12 @@ const Policies = () => {
             
             {/* Hero Section with optimized image loading */}
             <div className="relative w-full">
-                <div 
-                    className="h-screen w-full bg-cover bg-center bg-no-repeat" 
-                    style={{ 
-                        backgroundImage: `url('${HERO_IMAGE}')`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center'
-                    }}
-                    role="img"
-                    aria-label="Resort policies hero image"
-                />
+                <div className="h-screen w-full relative" role="img" aria-label="Resort policies hero image">
+                    <div className="absolute inset-0">
+                        <OptimizedImage src={HERO_IMAGE} alt="Resort policies hero" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="absolute inset-0 bg-black/40" />
+                </div>
                 {/* Hero Title Overlay */}
                 <div className="absolute top-1/2 w-full text-center px-4 -translate-y-1/2">
                     <h1 className="text-4xl md:text-7xl font-bold text-white drop-shadow-lg">

@@ -126,12 +126,15 @@ export const POLICY_ICONS = {
 
 export const HERO_IMAGE = "https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg";
 
+// Base Cloudinary URL for optimization
+const CLOUDINARY_BASE_URL = "https://res.cloudinary.com/dm3gsotk5/image/upload";
+
 // Optimized Cloudinary images with transformations for better performance
 export const OPTIMIZED_IMAGES = {
   hero: {
-    mobile: "https://res.cloudinary.com/dm3gsotk5/image/upload/f_auto,q_auto,w_768,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg",
-    tablet: "https://res.cloudinary.com/dm3gsotk5/image/upload/f_auto,q_auto,w_1024,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg",
-    desktop: "https://res.cloudinary.com/dm3gsotk5/image/upload/f_auto,q_auto,w_1920,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg",
-    webp: "https://res.cloudinary.com/dm3gsotk5/image/upload/f_webp,q_auto,w_1920,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg"
+    mobile: `${CLOUDINARY_BASE_URL}/f_auto,q_auto,w_768,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`,
+    tablet: `${CLOUDINARY_BASE_URL}/f_auto,q_auto,w_1024,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`,
+    desktop: `${CLOUDINARY_BASE_URL}/f_auto,q_auto,w_1920,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`,
+    webp: `${CLOUDINARY_BASE_URL}/f_webp,q_auto,w_1920,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`
   }
 };

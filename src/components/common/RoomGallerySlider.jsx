@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { getRoomImageUrl, getThumbnailUrl, getOptimizedImage } from '@/utils/imageOptimization';
 
 /**
  * Room Gallery Slider Component using Embla Carousel
@@ -136,21 +137,34 @@ export const RoomGallerySlider = ({
             <div className="relative">
                 <div className="overflow-hidden rounded-lg" ref={emblaRef}>
                     <div className="flex">
-                        {images.map((src, index) => (
-                            <div 
-                                key={index} 
-                                className="flex-[0_0_100%] min-w-0"
-                                style={{ aspectRatio }}
-                            >
-                                <img
-                                    src={src}
-                                    alt={`${roomName} image ${index + 1}`}
-                                    className="w-full h-full object-cover"
-                                    loading={index === 0 ? "eager" : "lazy"}
-                                    decoding="async"
-                                />
-                            </div>
-                        ))}
+                        {images.map((src, index) => {
+                            const optimizedImage = getOptimizedImage(src, {
+                                sizes: [
+                                    { width: 'w_400', descriptor: '400w' },
+                                    { width: 'w_800', descriptor: '800w' },
+                                    { width: 'w_1200', descriptor: '1200w' },
+                                    { width: 'w_1920', descriptor: '1920w' }
+                                ]
+                            });
+                            
+                            return (
+                                <div 
+                                    key={index} 
+                                    className="flex-[0_0_100%] min-w-0"
+                                    style={{ aspectRatio }}
+                                >
+                                    <img
+                                        src={optimizedImage.src}
+                                        srcSet={optimizedImage.srcSet}
+                                        sizes={optimizedImage.sizes}
+                                        alt={`${roomName} image ${index + 1}`}
+                                        className="w-full h-full object-cover"
+                                        loading={index === 0 ? "eager" : "lazy"}
+                                        decoding="async"
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -212,7 +226,7 @@ export const RoomGallerySlider = ({
                                     onClick={() => onThumbClick(index)}
                                 >
                                     <img
-                                        src={src}
+                                        src={getThumbnailUrl(src, 80)}
                                         alt={`${roomName} thumbnail ${index + 1}`}
                                         className="w-full h-full object-cover rounded"
                                         loading="lazy"

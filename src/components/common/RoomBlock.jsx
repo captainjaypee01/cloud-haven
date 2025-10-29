@@ -20,6 +20,7 @@ import RequireDatesDialog from "@/components/common/RequireDatesDialog";
 import { useRoomAvailability } from "@/hooks/useRoomAvailability";
 import { RoomAvailabilityBadge } from "@/components/common/RoomAvailabilityBadge";
 import { QuickBookingDialog } from "@/components/common/QuickBookingDialog";
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 export default function RoomBlock({ room, index, reverse, iconsModule }) {
     const photos = roomPhotos.sort(() => Math.random() - 0.5);
@@ -86,8 +87,8 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                                 <>
                                     {room?.images?.map((img, idx) => (
                                         <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
-                                            <img
-                                                src={img?.secure_image_url}
+                                            <OptimizedImage
+                                                src={img?.secure_image_url || img?.image_url}
                                                 alt={`${img?.name}-${idx + 1}`}
                                                 className="w-full h-full object-cover"
                                             />
@@ -98,7 +99,7 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
                                 <>
                                     {photos.map((src, idx) => (
                                         <CarouselItem key={idx} className="w-full h-100 lg:h-[400px]">
-                                            <img
+                                            <OptimizedImage
                                                 src={src}
                                                 alt={`${room.name} image ${idx + 1}`}
                                                 className="w-full h-full object-cover"

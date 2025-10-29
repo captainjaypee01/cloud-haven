@@ -1,5 +1,6 @@
 // src/components/SEO.jsx
 import React from 'react';
+import { getOptimizedImageUrl } from '@/utils/imageOptimization';
 import { useLocation } from 'react-router-dom';
 
 // Social profiles
@@ -11,6 +12,7 @@ export default function SEO({
   title,
   description,
   image,
+  og,
   type = 'website',
   noindex = false,
   jsonLd,
@@ -32,7 +34,13 @@ export default function SEO({
   const canonical = `${SITE_URL}${location.pathname}`;
   const finalTitle = title || defaultTitle;
   const finalDescription = description || defaultDescription;
-  const finalImage = image || defaultImage;
+  // Prefer explicit image prop, otherwise allow legacy og.image if provided
+  const providedImage = image || (og && og.image) || null;
+  const baseImage = providedImage || defaultImage;
+  // If Cloudinary, transform for OG/Twitter card size 1200x630
+  const finalImage = baseImage && baseImage.includes('res.cloudinary.com')
+    ? getOptimizedImageUrl(baseImage, { width: 'w_1200', height: 'h_630', crop: 'fill', gravity: 'auto', quality: 'auto', format: 'auto', responsive: false })
+    : baseImage;
   const finalKeywords = keywords || defaultKeywords;
   
   // Generate comprehensive structured data for sitelinks

@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Copy, CheckCircle2, X, ChevronLeft, ChevronRight, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
     const api = useApi();
@@ -141,12 +142,14 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
                         {/* Image Carousel */}
                         <div className="relative">
                             <div className="relative overflow-hidden rounded-lg bg-gray-100">
-                                <div 
-                                    className="h-36 sm:h-64 bg-cover bg-center bg-no-repeat"
-                                    style={{ 
-                                        backgroundImage: `url(${currentOffer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'})` 
-                                    }}
-                                >
+                                <div className="h-36 sm:h-64 relative">
+                                    <div className="absolute inset-0 -z-10">
+                                        <OptimizedImage
+                                            src={currentOffer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'}
+                                            alt={currentOffer.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                     <div className="absolute inset-0 bg-black/40" />
                                     
                                     {/* Discount Badge */}

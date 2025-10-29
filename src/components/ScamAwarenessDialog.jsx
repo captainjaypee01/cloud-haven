@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/carousel';
 import { AlertTriangle } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay";
+import OptimizedImage from '@/components/common/OptimizedImage';
 import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from '@/constants/AppConstant';
 
 const ScamAwarenessDialog = ({ open, onOpenChange }) => {
@@ -115,12 +116,13 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
                                     {scamImages.map((image) => (
                                         <CarouselItem key={image.id} className="h-80 sm:h-96 md:h-[500px] lg:h-[600px]">
                                             <div className="relative w-full h-full rounded-lg overflow-hidden bg-gray-100">
-                                                <img
+                                                <OptimizedImage
                                                     src={image.url}
                                                     alt={image.alt}
                                                     className="w-full h-full object-contain cursor-zoom-in"
                                                     loading="lazy"
                                                     onClick={() => window.open(image.url, '_blank')}
+                                                    fit="fit"
                                                 />
                                             </div>
                                         </CarouselItem>
