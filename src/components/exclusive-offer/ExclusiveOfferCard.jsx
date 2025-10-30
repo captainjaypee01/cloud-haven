@@ -84,7 +84,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
             role="button"
             onKeyDown={e => { if (e.key === 'Enter') onClick(); }}
         >
-            <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden">
+            <div className="absolute inset-0 rounded-xl overflow-hidden">
                 <OptimizedImage
                     src={offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'}
                     alt={offer.title}
