@@ -143,7 +143,7 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
                         <div className="relative">
                             <div className="relative overflow-hidden rounded-lg bg-gray-100">
                                 <div className="h-36 sm:h-64 relative">
-                                    <div className="absolute inset-0 -z-10">
+                                    <div className="absolute inset-0">
                                         <OptimizedImage
                                             src={currentOffer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'}
                                             alt={currentOffer.title}
