@@ -44,20 +44,43 @@ export function DayTourDatePicker({ date, onChange, disabledRanges = [] }) {
     };
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
             <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between text-left cursor-pointer">
                     {formatted}
                     <ChevronDownIcon />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-                <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={handleDateSelect}
-                    className="w-full"
-                    disabled={isDateDisabled}
+            <PopoverContent 
+                className="w-auto p-0" 
+                align="center"
+                onPointerDownOutside={(e) => {
+                    // Prevent popover from closing when clicking inside the dialog
+                    const target = e.target;
+                    if (target?.closest?.('[data-slot="dialog-content"]')) {
+                        e.preventDefault();
+                    }
+                }}
+                onInteractOutside={(e) => {
+                    // Prevent popover from closing when interacting with calendar inside dialog
+                    const target = e.target;
+                    if (target?.closest?.('[data-slot="dialog-content"]')) {
+                        e.preventDefault();
+                    }
+                }}
+            >
+                <div 
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="pointer-events-auto"
+                >
+                    <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={handleDateSelect}
+                        className="w-full"
+                        disabled={isDateDisabled}
                     footer={
                         date ? (
                             <Button
@@ -71,6 +94,7 @@ export function DayTourDatePicker({ date, onChange, disabledRanges = [] }) {
                         ) : null
                     }
                 />
+                </div>
             </PopoverContent>
         </Popover>
     );

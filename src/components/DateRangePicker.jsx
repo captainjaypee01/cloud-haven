@@ -82,21 +82,44 @@ export function DateRangePicker({ range, onChange, disabledRanges = [] }) {
     };
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={open} onOpenChange={setOpen} modal={false}>
             <PopoverTrigger asChild>
                 <Button variant="outline" className="w-[100%] justify-between text-left">
                     {formatted}
                     <ChevronDownIcon />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-                <Calendar
-                    mode="range"
-                    selected={range}
-                    onSelect={handleDateSelect}
-                    numberOfMonths={2}
-                    className="w-[100%]"
-                    disabled={isDateDisabled}
+            <PopoverContent 
+                className="w-auto p-0" 
+                align="center"
+                onPointerDownOutside={(e) => {
+                    // Prevent popover from closing when clicking inside the dialog
+                    const target = e.target;
+                    if (target?.closest?.('[data-slot="dialog-content"]')) {
+                        e.preventDefault();
+                    }
+                }}
+                onInteractOutside={(e) => {
+                    // Prevent popover from closing when interacting with calendar inside dialog
+                    const target = e.target;
+                    if (target?.closest?.('[data-slot="dialog-content"]')) {
+                        e.preventDefault();
+                    }
+                }}
+            >
+                <div 
+                    onClick={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="pointer-events-auto"
+                >
+                    <Calendar
+                        mode="range"
+                        selected={range}
+                        onSelect={handleDateSelect}
+                        numberOfMonths={2}
+                        className="w-[100%]"
+                        disabled={isDateDisabled}
                     footer={
                         <div className="flex gap-2 p-2 border-t">
                             {hasSelection && (
@@ -123,6 +146,7 @@ export function DateRangePicker({ range, onChange, disabledRanges = [] }) {
                         </div>
                     }
                 />
+                </div>
             </PopoverContent>
         </Popover>
     );

@@ -30,6 +30,19 @@ const RequireDatesDialog = ({
   const { navigate } = useAppContext();
   const { dateRanges, hasActivePrograms } = useMealDateRangesContext();
 
+  // Handle dialog open change - prevent closing if popover is open
+  const handleOpenChange = (newOpen) => {
+    if (!newOpen) {
+      // Check if any popover is currently open
+      const popoverContent = document.querySelector('[data-slot="popover-content"][data-state="open"]');
+      if (popoverContent) {
+        // Don't close dialog if popover is open
+        return;
+      }
+    }
+    onOpenChange(newOpen);
+  };
+
   // Prepare default dates
   const defaultFrom = state?.checkIn ? parseISO(state.checkIn) : null;
   const defaultTo = state?.checkOut ? parseISO(state.checkOut) : null;
@@ -77,8 +90,40 @@ const RequireDatesDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent
+        className="max-w-md max-h-[90vh] overflow-y-auto"
+        onPointerDownOutside={(e) => {
+          const target = e.target;
+          // Prevent dialog from closing when clicking on popover content (calendar)
+          // Check for any Radix popover content or calendar elements
+          const isPopoverClick = target && (
+            target.closest?.('[data-slot="popover-content"]') ||
+            target.closest?.('[data-radix-popover-content]') ||
+            target.closest?.('[data-radix-popper-content-wrapper]') ||
+            target.closest?.('[data-slot="calendar"]') ||
+            target.closest?.('.rdp') ||
+            target.closest?.('[role="gridcell"]')
+          );
+          
+          if (isPopoverClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          
+          // Also check if any popover is currently open
+          const popoverContent = document.querySelector('[data-slot="popover-content"][data-state="open"]');
+          if (popoverContent) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
+        onEscapeKeyDown={(e) => {
+          // Allow ESC to close dialog even when popover is open
+          // This is handled by default, but we can customize if needed
+        }}
+      >
         <DialogHeader>
           <DialogTitle>
             {title || (isDayTour ? "Select Day Tour Date" : "Select your dates")}
