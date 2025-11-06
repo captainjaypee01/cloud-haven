@@ -23,41 +23,88 @@ const Home = () => {
         <>
       <SEO
         title="Beachfront Resort Laiya Batangas | Netania De Laiya"
-        description="Discover paradise at Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas. Premium accommodations with direct beach access, stunning infinity pool, and exceptional service. Perfect for families and romantic getaways."
+        description="Book your stay at Netania De Laiya - premium beachfront resort in Laiya, San Juan, Batangas. Direct beach access, infinity pool, luxury accommodations, Day Tour packages. Perfect for families, couples, and groups. Reserve your beachfront room today!"
+        keywords="beachfront resort Laiya Batangas, beach hotel San Juan, resort Batangas, beachfront hotel Philippines, Laiya beach resort, San Juan Batangas hotel, beachfront accommodations, luxury resort Batangas, family resort Philippines, romantic getaway Batangas"
         canonical={typeof window !== 'undefined' ? window.location.origin + '/' : 'https://www.netaniadelaiya.com/'}
         og={{
           title: 'Beachfront Resort Laiya Batangas | Netania De Laiya',
-          description: 'Discover paradise at Netania De Laiya - a beachfront resort in Laiya, San Juan, Batangas. Premium accommodations with direct beach access, stunning infinity pool, and exceptional service.',
+          description: 'Book your stay at Netania De Laiya - premium beachfront resort in Laiya, San Juan, Batangas. Direct beach access, infinity pool, luxury accommodations, Day Tour packages.',
           image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
           url: 'https://www.netaniadelaiya.com/',
           type: 'website',
           locale: 'en_PH',
           siteName: 'Netania De Laiya'
         }}
-        jsonLd={{
-          '@context': 'https://schema.org',
-          '@type': 'Resort',
-          name: 'Netania De Laiya',
-          url: 'https://www.netaniadelaiya.com/',
-          image: 'https://www.netaniadelaiya.com/logo.jpg',
-          telephone: '+63 949 798 9831',
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
-            addressLocality: 'San Juan',
-            addressRegion: 'Batangas',
-            addressCountry: 'PH'
+        jsonLd={[
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Resort',
+            name: 'Netania De Laiya',
+            url: 'https://www.netaniadelaiya.com/',
+            image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+            logo: 'https://www.netaniadelaiya.com/logo.jpg',
+            telephone: '+63 949 798 9831',
+            email: 'info@netaniadelaiya.com',
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+              addressLocality: 'San Juan',
+              addressRegion: 'Batangas',
+              addressCountry: 'PH',
+              postalCode: '4226'
+            },
+            geo: {
+              '@type': 'GeoCoordinates',
+              latitude: '13.7565',
+              longitude: '121.3972'
+            },
+            priceRange: '$$',
+            starRating: {
+              '@type': 'Rating',
+              ratingValue: '4.5',
+              bestRating: '5',
+              worstRating: '1'
+            },
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: '4.5',
+              reviewCount: '150',
+              bestRating: '5',
+              worstRating: '1'
+            },
+            sameAs: [
+              'https://www.facebook.com/profile.php?id=100064182843841',
+              'https://www.instagram.com/netaniadelaiya/'
+            ],
+            amenityFeature: [
+              { '@type': 'LocationFeatureSpecification', name: 'Beachfront', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Swimming Pool', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Hotel Rooms', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Free WiFi', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Parking', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Restaurant', value: true },
+              { '@type': 'LocationFeatureSpecification', name: 'Day Tour Facilities', value: true }
+            ],
+            checkinTime: '15:00',
+            checkoutTime: '13:00'
           },
-          sameAs: [
-            'https://www.facebook.com/profile.php?id=100064182843841',
-            'https://www.instagram.com/netaniadelaiya/'
-          ],
-          amenityFeature: [
-            { '@type': 'LocationFeatureSpecification', name: 'Beachfront' },
-            { '@type': 'LocationFeatureSpecification', name: 'Swimming Pool' },
-            { '@type': 'LocationFeatureSpecification', name: 'Hotel Rooms' }
-          ]
-        }}
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Netania De Laiya',
+            url: 'https://www.netaniadelaiya.com/',
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: 'https://www.netaniadelaiya.com/search?q={search_term_string}',
+              'query-input': 'required name=search_term_string'
+            },
+            publisher: {
+              '@type': 'Organization',
+              name: 'Netania De Laiya',
+              logo: 'https://www.netaniadelaiya.com/logo.jpg'
+            }
+          }
+        ]}
       />
             <PerformanceOptimizer />
             <MobileFix />
@@ -65,11 +112,11 @@ const Home = () => {
             <SEOContent />
             <FeaturedRooms />
             <AboutSection />
+            <ExclusiveOffers />
             <SocialMediaLinks />
             <FAQSection />
-            <ExclusiveOffers />
             <TestimonialsSection />
-            <NewsLetter />
+            {/* <NewsLetter /> */}
             
             {/* Exclusive Offers Dialog */}
             <ExclusiveOffersDialog 

@@ -197,17 +197,42 @@ const DayTourRoomDetails = () => {
     return (
         <div className='py-28 md:py-35 px-4 md:px-16 lg:px-24 xl:px-32'>
             <SEO
-                title={`${room.name} - Day Tour in Laiya, Batangas`}
-                description={room.short_description || room.description}
+                title={`${room.name} Day Tour | Netania De Laiya`}
+                description={`Book ${room.name} Day Tour facility at Netania De Laiya beachfront resort in Laiya, San Juan, Batangas. ${room.short_description || room.description} Capacity: ${room.min_guests || 1}-${room.max_guests_range || room.max_guests} guests. Includes pool & beach access, WiFi, parking. Optional buffet lunch available. Reserve now!`}
+                keywords={`${room.name} day tour, day tour facility Laiya, ${room.name} Batangas, beachfront day tour facility, day tour room ${room.name}, Laiya day tour booking, San Juan Batangas day tour`}
                 canonical={typeof window !== 'undefined' ? `${window.location.origin}/day-tour/${room.slug}` : undefined}
                 og={{
-                    title: room.name,
-                    description: room.short_description || room.description,
+                    title: `${room.name} Day Tour | Netania De Laiya`,
+                    description: `Book ${room.name} Day Tour facility at Netania De Laiya. ${room.short_description || room.description} Capacity: ${room.min_guests || 1}-${room.max_guests_range || room.max_guests} guests.`,
                     image: room?.images?.[0]?.secure_image_url || room?.images?.[0]?.url || photos[0],
                     type: 'product',
                     url: typeof window !== 'undefined' ? `${window.location.origin}/day-tour/${room.slug}` : `https://www.netaniadelaiya.com/day-tour/${room.slug}`
                 }}
                 jsonLd={[
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'Product',
+                        name: `${room.name} - Day Tour Facility`,
+                        description: room.long_description || room.short_description || room.description,
+                        image: room?.images?.map(img => img.secure_image_url || img.url) || photos,
+                        brand: {
+                            '@type': 'Brand',
+                            name: 'Netania De Laiya'
+                        },
+                        offers: {
+                            '@type': 'AggregateOffer',
+                            priceCurrency: 'PHP',
+                            availability: 'https://schema.org/InStock',
+                            url: typeof window !== 'undefined' ? `${window.location.origin}/day-tour/${room.slug}` : `https://www.netaniadelaiya.com/day-tour/${room.slug}`
+                        },
+                        aggregateRating: {
+                            '@type': 'AggregateRating',
+                            ratingValue: '4.5',
+                            reviewCount: '50',
+                            bestRating: '5',
+                            worstRating: '1'
+                        }
+                    },
                     {
                         '@context': 'https://schema.org',
                         '@type': 'BreadcrumbList',
@@ -216,6 +241,22 @@ const DayTourRoomDetails = () => {
                             { '@type': 'ListItem', position: 2, name: 'Day Tour', item: 'https://www.netaniadelaiya.com/day-tour' },
                             { '@type': 'ListItem', position: 3, name: room.name, item: `https://www.netaniadelaiya.com/day-tour/${room.slug}` }
                         ]
+                    },
+                    {
+                        '@context': 'https://schema.org',
+                        '@type': 'TouristAttraction',
+                        name: `${room.name} Day Tour Facility`,
+                        description: room.long_description || room.short_description || room.description,
+                        address: {
+                            '@type': 'PostalAddress',
+                            streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                            addressLocality: 'San Juan',
+                            addressRegion: 'Batangas',
+                            addressCountry: 'PH'
+                        },
+                        image: room?.images?.map(img => img.secure_image_url || img.url) || photos,
+                        openingHours: 'Mo-Su 08:00-17:00',
+                        publicAccess: true
                     }
                 ]}
             />

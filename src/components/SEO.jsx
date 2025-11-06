@@ -153,6 +153,16 @@ export default function SEO({
           html, body {
             overflow-x: hidden;
             max-width: 100vw;
+            width: 100%;
+          }
+          body {
+            position: relative;
+          }
+          #root {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            overflow-y: visible;
           }
           * {
             box-sizing: border-box;

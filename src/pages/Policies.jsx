@@ -15,7 +15,8 @@ const Policies = () => {
     // Enhanced SEO data with complete policy information
     const seoData = useMemo(() => ({
         title: "Resort Policies | Netania De Laiya",
-        description: "Official house rules of Netania De Laiya: check-in/out, booking, occupancy, security, facilities hours, and proper conduct. Located in the heart of Laiya, San Juan, Batangas with excellent service and warm hospitality.",
+        description: "Review official policies and house rules at Netania De Laiya beachfront resort in Laiya, San Juan, Batangas. Check-in/out times, booking policies, occupancy rules, security guidelines, and facility hours. Plan your stay with our comprehensive resort policies.",
+        keywords: "resort policies, house rules, check-in check-out, booking policies, resort rules Batangas, Laiya resort policies, beachfront resort policies, hotel policies Philippines",
         canonical: typeof window !== 'undefined' ? window.location.origin + '/policy' : 'https://www.netaniadelaiya.com/policy',
         og: { 
             title: 'Resort Policies | Netania De Laiya',
@@ -96,9 +97,15 @@ const Policies = () => {
             
             {/* Hero Section with optimized image loading */}
             <div className="relative w-full">
-                <div className="h-screen w-full relative" role="img" aria-label="Resort policies hero image">
+                <div className="h-screen w-full relative" role="img" aria-label="Resort policies hero image" style={{ aspectRatio: '16/9' }}>
                     <div className="absolute inset-0">
-                        <OptimizedImage src={HERO_IMAGE} alt="Resort policies hero" className="w-full h-full object-cover" />
+                        <OptimizedImage 
+                            src={HERO_IMAGE} 
+                            alt="Netania De Laiya resort policies and house rules in Laiya, Batangas" 
+                            className="w-full h-full object-cover" 
+                            aspectRatio="16/9"
+                            loading="eager"
+                        />
                     </div>
                     <div className="absolute inset-0 bg-black/40" />
                 </div>
