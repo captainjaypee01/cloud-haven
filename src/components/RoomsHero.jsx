@@ -8,7 +8,7 @@ import OptimizedImage from '@/components/common/OptimizedImage'
 
 const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
     return (
-        <div className="relative w-full">
+        <div className="relative w-full h-screen overflow-hidden">
             <Carousel
                 className="h-screen w-full"
                 opts={{ loop: true, align: "center" }}
