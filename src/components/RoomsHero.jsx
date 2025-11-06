@@ -22,9 +22,15 @@ const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
                 <CarouselContent>
                     {imageUrls.map((url, idx) => (
                         <CarouselItem key={idx}>
-                            <div className="h-screen w-full relative">
+                            <div className="h-screen w-full relative" style={{ aspectRatio: '16/9' }}>
                                 <div className="absolute inset-0 -z-10">
-                                    <OptimizedImage src={url} alt={`Rooms hero ${idx+1}`} className="w-full h-full object-cover" />
+                                    <OptimizedImage 
+                                        src={url} 
+                                        alt={`Premium accommodations at Netania De Laiya resort in Laiya, Batangas - ${idx + 1}`} 
+                                        className="w-full h-full object-cover" 
+                                        aspectRatio="16/9"
+                                        loading={idx === 0 ? "eager" : "lazy"}
+                                    />
                                 </div>
                             </div>
                         </CarouselItem>

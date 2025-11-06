@@ -225,42 +225,121 @@ export default function DayTour() {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Day Tour Packages | Netania De Laiya"
-                description="Experience our Day Tour packages at Netania De Laiya. Enjoy beachfront facilities, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM. Perfect for families and groups seeking a refined and exhilarating escape."
+                title="Day Tour Packages Laiya Batangas | Netania De Laiya"
+                description="Book Day Tour packages at Netania De Laiya beachfront resort in Laiya, San Juan, Batangas. Enjoy premium beachfront facilities, optional buffet lunch, PM snacks, pool & beach access from 8 AM to 5 PM. Perfect for families, groups, and day trips. Reserve your Day Tour facility today!"
+                keywords="day tour Laiya Batangas, beachfront day tour, day tour packages Batangas, resort day tour, beach day tour Philippines, Laiya beach day tour, San Juan Batangas day tour, family day tour, group day tour, beachfront resort day tour"
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/day-tour' : 'https://www.netaniadelaiya.com/day-tour'}
                 og={{
-                    title: 'Day Tour Packages | Netania De Laiya',
-                    description: 'Experience our Day Tour packages at Netania De Laiya. Enjoy beachfront facilities, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM. Perfect for families and groups seeking a refined and exhilarating escape.',
+                    title: 'Day Tour Packages Laiya Batangas | Netania De Laiya',
+                    description: 'Book Day Tour packages at Netania De Laiya beachfront resort in Laiya, San Juan, Batangas. Enjoy premium beachfront facilities, optional buffet lunch, PM snacks, pool & beach access from 8 AM to 5 PM.',
                     image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
                     url: 'https://www.netaniadelaiya.com/day-tour',
                     type: 'website',
                     locale: 'en_PH',
                     siteName: 'Netania De Laiya'
                 }}
-                jsonLd={{
-                  '@context': 'https://schema.org',
-                  '@type': 'Resort',
-                  name: 'Netania De Laiya',
-                  url: 'https://www.netaniadelaiya.com/day-tour',
-                  image: 'https://www.netaniadelaiya.com/logo.jpg',
-                  telephone: '+63 949 798 9831',
-                  address: {
-                    '@type': 'PostalAddress',
-                    streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
-                    addressLocality: 'San Juan',
-                    addressRegion: 'Batangas',
-                    addressCountry: 'PH'
+                jsonLd={[
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'TouristTrip',
+                    name: 'Day Tour Packages at Netania De Laiya',
+                    description: 'Premium Day Tour packages at beachfront resort in Laiya, San Juan, Batangas. Includes beachfront facilities, pool access, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM.',
+                    url: 'https://www.netaniadelaiya.com/day-tour',
+                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
+                    provider: {
+                      '@type': 'Resort',
+                      name: 'Netania De Laiya',
+                      address: {
+                        '@type': 'PostalAddress',
+                        streetAddress: 'Laiya-Aplaya, San Juan, Batangas',
+                        addressLocality: 'San Juan',
+                        addressRegion: 'Batangas',
+                        addressCountry: 'PH'
+                      },
+                      telephone: '+63 949 798 9831'
+                    },
+                    itinerary: {
+                      '@type': 'ItemList',
+                      itemListElement: [
+                        {
+                          '@type': 'ListItem',
+                          position: 1,
+                          name: 'Check-in',
+                          description: 'Arrival at 8:00 AM'
+                        },
+                        {
+                          '@type': 'ListItem',
+                          position: 2,
+                          name: 'Beach & Pool Access',
+                          description: 'Full access to beachfront facilities and swimming pool'
+                        },
+                        {
+                          '@type': 'ListItem',
+                          position: 3,
+                          name: 'Optional Buffet Lunch',
+                          description: 'Available buffet lunch service'
+                        },
+                        {
+                          '@type': 'ListItem',
+                          position: 4,
+                          name: 'PM Snacks',
+                          description: 'Afternoon snack service'
+                        },
+                        {
+                          '@type': 'ListItem',
+                          position: 5,
+                          name: 'Check-out',
+                          description: 'Departure at 5:00 PM'
+                        }
+                      ]
+                    },
+                    duration: 'PT9H',
+                    offers: {
+                      '@type': 'Offer',
+                      priceCurrency: 'PHP',
+                      availability: 'https://schema.org/InStock',
+                      url: 'https://www.netaniadelaiya.com/day-tour'
+                    }
                   },
-                  sameAs: [
-                    'https://www.facebook.com/profile.php?id=100064182843841',
-                    'https://www.instagram.com/netaniadelaiya/'
-                  ],
-                  amenityFeature: [
-                    { '@type': 'LocationFeatureSpecification', name: 'Beachfront' },
-                    { '@type': 'LocationFeatureSpecification', name: 'Swimming Pool' },
-                    { '@type': 'LocationFeatureSpecification', name: 'Day Tour Facilities' }
-                  ]
-                }}
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'BreadcrumbList',
+                    itemListElement: [
+                      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.netaniadelaiya.com/' },
+                      { '@type': 'ListItem', position: 2, name: 'Day Tour', item: 'https://www.netaniadelaiya.com/day-tour' }
+                    ]
+                  },
+                  {
+                    '@context': 'https://schema.org',
+                    '@type': 'FAQPage',
+                    mainEntity: [
+                      {
+                        '@type': 'Question',
+                        name: 'What are the Day Tour hours at Netania De Laiya?',
+                        acceptedAnswer: {
+                          '@type': 'Answer',
+                          text: 'Day Tour hours are from 8:00 AM to 5:00 PM daily. Guests have full access to beachfront facilities, swimming pool, and resort amenities during these hours.'
+                        }
+                      },
+                      {
+                        '@type': 'Question',
+                        name: 'What is included in the Day Tour package?',
+                        acceptedAnswer: {
+                          '@type': 'Answer',
+                          text: 'Day Tour package includes entrance fee, parking, pool & beach access, WiFi, and plated lunch. Optional buffet lunch and PM snacks are available at additional cost.'
+                        }
+                      },
+                      {
+                        '@type': 'Question',
+                        name: 'Where is Netania De Laiya Day Tour located?',
+                        acceptedAnswer: {
+                          '@type': 'Answer',
+                          text: 'Netania De Laiya is located in Laiya-Aplaya, San Juan, Batangas, Philippines. It is a beachfront resort offering premium Day Tour facilities.'
+                        }
+                      }
+                    ]
+                  }
+                ]}
             />
 
             <RoomsHero imageUrls={heroImages} title="Day Tour" />

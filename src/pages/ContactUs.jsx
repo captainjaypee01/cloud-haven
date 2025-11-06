@@ -85,7 +85,8 @@ const ContactUsPage = () => {
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
                 title="Contact & Reservations | Netania De Laiya"
-                description="Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Located in the heart of Laiya, San Juan, Batangas, we offer excellent service and warm hospitality. Contact us at +63 949 798 9831 or +63 945 663 0848."
+                description="Contact Netania De Laiya beachfront resort in Laiya, San Juan, Batangas for bookings, inquiries, and reservations. Call +63 949 798 9831 or +63 945 663 0848. Book your beachfront room or Day Tour package today!"
+                keywords="contact Netania De Laiya, resort booking Laiya, Batangas resort contact, beachfront hotel reservation, Laiya resort phone number, San Juan Batangas resort booking"
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/contact-us' : 'https://www.netaniadelaiya.com/contact-us'}
                 og={{
                   title: 'Contact & Reservations | Netania De Laiya',
@@ -128,9 +129,15 @@ const ContactUsPage = () => {
                     <CarouselContent>
                         {images.map((url, idx) => (
                             <CarouselItem key={idx}>
-                                <div className="h-screen w-full relative">
+                                <div className="h-screen w-full relative" style={{ aspectRatio: '16/9' }}>
                                     <div className="absolute inset-0 -z-10">
-                                        <OptimizedImage src={url} alt={`Contact hero ${idx+1}`} className="w-full h-full object-cover" />
+                                        <OptimizedImage 
+                                            src={url} 
+                                            alt={`Contact Netania De Laiya resort in Laiya, Batangas - ${idx + 1}`} 
+                                            className="w-full h-full object-cover" 
+                                            aspectRatio="16/9"
+                                            loading={idx === 0 ? "eager" : "lazy"}
+                                        />
                                     </div>
                                 </div>
                             </CarouselItem>

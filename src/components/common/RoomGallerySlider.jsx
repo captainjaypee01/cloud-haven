@@ -157,10 +157,12 @@ export const RoomGallerySlider = ({
                                         src={optimizedImage.src}
                                         srcSet={optimizedImage.srcSet}
                                         sizes={optimizedImage.sizes}
-                                        alt={`${roomName} image ${index + 1}`}
+                                        alt={`${roomName} at Netania De Laiya beachfront resort in Laiya, Batangas - Photo ${index + 1}`}
                                         className="w-full h-full object-cover"
                                         loading={index === 0 ? "eager" : "lazy"}
                                         decoding="async"
+                                        width={typeof aspectRatio === 'number' ? Math.round(1200) : undefined}
+                                        height={typeof aspectRatio === 'number' ? Math.round(1200 / aspectRatio) : undefined}
                                     />
                                 </div>
                             );
@@ -231,6 +233,8 @@ export const RoomGallerySlider = ({
                                         className="w-full h-full object-cover rounded"
                                         loading="lazy"
                                         decoding="async"
+                                        width={80}
+                                        height={60}
                                     />
                                 </div>
                             ))}

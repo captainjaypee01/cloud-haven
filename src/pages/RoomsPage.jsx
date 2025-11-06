@@ -19,12 +19,13 @@ export default function RoomsPage() {
     return (
         <div className="min-h-screen bg-gray-50 bg-gradient-to-b from-amber-100 via-sky-50 to-blue-200">
             <SEO
-                title="Premium Rooms & Accommodations | Netania De Laiya"
-                description="Discover our premium accommodations in Laiya, Batangas. Three spacious room types with refined amenities - Beach View, Pool Access, and Garden View. Hotel-quality rooms with direct beach access and stunning ocean views at Netania De Laiya."
+                title="Premium Rooms Laiya Batangas | Netania De Laiya"
+                description="Browse premium beachfront accommodations at Netania De Laiya in Laiya, San Juan, Batangas. Beach View, Pool Access, and Garden View rooms with direct beach access, stunning ocean views, and luxury amenities. Book your stay today!"
+                keywords="beachfront rooms Laiya, hotel rooms Batangas, beach view rooms, pool access rooms, luxury accommodations Batangas, beachfront hotel rooms, San Juan Batangas rooms, resort accommodations Philippines, beach hotel rooms"
                 canonical={typeof window !== 'undefined' ? window.location.origin + '/rooms' : 'https://www.netaniadelaiya.com/rooms'}
                 og={{
-                  title: 'Premium Rooms & Accommodations | Netania De Laiya',
-                  description: 'Discover our premium accommodations in Laiya, Batangas. Three spacious room types with refined amenities - Beach View, Pool Access, and Garden View. Hotel-quality rooms with direct beach access and stunning ocean views.',
+                  title: 'Premium Rooms Laiya Batangas | Netania De Laiya',
+                  description: 'Browse premium beachfront accommodations at Netania De Laiya in Laiya, San Juan, Batangas. Beach View, Pool Access, and Garden View rooms with direct beach access and luxury amenities.',
                   image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757269133/pv-1.jpg',
                   url: 'https://www.netaniadelaiya.com/rooms',
                   type: 'website',
