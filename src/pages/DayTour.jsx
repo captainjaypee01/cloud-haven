@@ -345,7 +345,7 @@ export default function DayTour() {
             <RoomsHero imageUrls={heroImages} title="Day Tour" />
             
             {/* Date Selection Form */}
-            <div className="absolute inset-x-0 bottom-1 transform translate-y-8/12 px-4 z-10">
+            <div className="relative -mt-32 px-4 z-10 w-full">
                 <div className="w-full md:w-1/2 lg:w-1/3 mx-auto">
                     <Card className="bg-white shadow-lg">
                         <CardContent className="p-6">
