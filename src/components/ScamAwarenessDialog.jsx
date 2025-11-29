@@ -25,14 +25,9 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
     const scamImages = [
         {
             id: 1,
-            url: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1761462590/scam-fb-2.png',
+            url: 'https://res.cloudinary.com/dm3gsotk5/image/upload/w_1200,c_fill,g_auto,q_auto,f_auto/v1764406717/ScamFacebook.png',
             alt: 'Scam Facebook Page Warning 1'
         },
-        {
-            id: 2,
-            url: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1759040551/scam-fb-1.png',
-            alt: 'Scam Facebook Page Warning 2'
-        }
         // More images can be added here as they become available
     ];
 
