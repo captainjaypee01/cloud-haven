@@ -15,12 +15,12 @@ import MobileFix from '../components/MobileFix'
 import SEO from '@/components/SEO'
 
 const Home = () => {
-    const [showOffersDialog, setShowOffersDialog] = useState(true);
-    const [showScamAwarenessDialog, setShowScamAwarenessDialog] = useState(true);
+  const [showOffersDialog, setShowOffersDialog] = useState(true);
+  // const [showScamAwarenessDialog, setShowScamAwarenessDialog] = useState(true);
 
 
-    return (
-        <>
+  return (
+    <>
       <SEO
         title="Beachfront Resort Laiya Batangas | Netania De Laiya"
         description="Book your stay at Netania De Laiya - premium beachfront resort in Laiya, San Juan, Batangas. Direct beach access, infinity pool, luxury accommodations, Day Tour packages. Perfect for families, couples, and groups. Reserve your beachfront room today!"
@@ -106,31 +106,31 @@ const Home = () => {
           }
         ]}
       />
-            <PerformanceOptimizer />
-            <MobileFix />
-            <Hero />
-            <SEOContent />
-            <FeaturedRooms />
-            <AboutSection />
-            <ExclusiveOffers />
-            <SocialMediaLinks />
-            <FAQSection />
-            <TestimonialsSection />
-            {/* <NewsLetter /> */}
-            
-            {/* Exclusive Offers Dialog */}
-            <ExclusiveOffersDialog 
-                open={showOffersDialog} 
-                onOpenChange={setShowOffersDialog} 
-            />
-            
-            {/* Scam Awareness Dialog */}
-            <ScamAwarenessDialog 
+      <PerformanceOptimizer />
+      <MobileFix />
+      <Hero />
+      <SEOContent />
+      <FeaturedRooms />
+      <AboutSection />
+      <ExclusiveOffers />
+      <SocialMediaLinks />
+      <FAQSection />
+      <TestimonialsSection />
+      {/* <NewsLetter /> */}
+
+      {/* Exclusive Offers Dialog */}
+      <ExclusiveOffersDialog
+        open={showOffersDialog}
+        onOpenChange={setShowOffersDialog}
+      />
+
+      {/* Scam Awareness Dialog */}
+      {/* <ScamAwarenessDialog 
                 open={showScamAwarenessDialog} 
                 onOpenChange={setShowScamAwarenessDialog} 
-            />
-        </>
-    )
+            /> */}
+    </>
+  )
 }
 
 export default Home
