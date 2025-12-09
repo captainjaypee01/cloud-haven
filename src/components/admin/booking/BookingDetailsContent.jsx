@@ -13,6 +13,7 @@ import BookingDeletionDialog from './BookingDeletionDialog';
 import ChangeRoomUnitDialog from './ChangeRoomUnitDialog';
 import PwdSeniorDiscountDialog from './PwdSeniorDiscountDialog';
 import SpecialDiscountDialog from './SpecialDiscountDialog';
+import EditGuestDetailsDialog from './EditGuestDetailsDialog';
 import BookingPrintButton from './BookingPrintButton';
 import BookingRoomModificationDialog from './BookingRoomModificationDialog';
 import DayTourRoomModificationDialog from './DayTourRoomModificationDialog';
@@ -52,6 +53,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showSpecialDiscount, setShowSpecialDiscount] = useState(false);
     const [showRoomModification, setShowRoomModification] = useState(false);
     const [showDayTourModification, setShowDayTourModification] = useState(false);
+    const [showEditGuestDetails, setShowEditGuestDetails] = useState(false);
     const api = useApi();
     const navigate = useNavigate();
     const { userRole } = useAppContext();
@@ -288,6 +290,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             <Trash2 className="h-4 w-4 mr-2" />
                             <span className="hidden sm:inline">Delete Booking</span>
                             <span className="sm:hidden">Delete</span>
+                        </Button>
+                    )}
+                    {canModifyBooking && ['pending', 'downpayment', 'paid'].includes(booking.status) && (
+                        <Button
+                            className="cursor-pointer"
+                            variant="outline"
+                            onClick={() => setShowEditGuestDetails(true)}
+                        >
+                            <Edit3 className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Edit Guest Details</span>
+                            <span className="sm:hidden">Guest</span>
                         </Button>
                     )}
                     <Button
@@ -1057,6 +1070,15 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                 payment={editPayment}
                 isEdit={!!editPayment}
                 booking={booking}
+            />
+            <EditGuestDetailsDialog
+                open={showEditGuestDetails}
+                onOpenChange={setShowEditGuestDetails}
+                booking={booking}
+                onSuccess={() => {
+                    setShowEditGuestDetails(false);
+                    fetchBooking && fetchBooking();
+                }}
             />
             <DeleteDialog
                 open={deleteDialogOpen}
