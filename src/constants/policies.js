@@ -1,7 +1,7 @@
 export const RESORT_POLICIES = {
   checkin: {
     title: "Resort Policy",
-    description: "Arrival/departure times, rescheduling rules, headcount, pets, and ecological fees.",
+    description: "Arrival/departure times, rescheduling rules, headcount, and ecological fees.",
     policies: [
       {
         category: "Guidelines",
@@ -11,8 +11,7 @@ export const RESORT_POLICIES = {
           "1.3 Rescheduling: Inform the resort 1 week before schedule. Deposits are non-refundable; rescheduling valid for 30 days.",
           "1.4 Final rooms and headcount due 1 week before schedule. Reductions without notice are not refundable. Drivers are included. Children 3 and below are free of charge.",
           "1.5 Forfeited reservation if the client fails to arrive on the reserved date.",
-          "1.6 Pets allowed: Max two (2) pets per cabana or table for day tours; regardless of overnight rooms. Pets up to 18 kg only. Keep leashed or in carrier; diapers encouraged in public areas.",
-          "1.7 Ecological Fee: Present Booking Confirmation at Municipal Tourism Reception Area. Pay ₱50/person and claim tickets with Referral Slip; present slip upon arrival."
+          "1.6 Ecological Fee: Present Booking Confirmation at Municipal Tourism Reception Area. Pay ₱50/person and claim tickets with Referral Slip; present slip upon arrival."
         ]
       }
     ]
@@ -111,6 +110,31 @@ export const RESORT_POLICIES = {
         ]
       }
     ]
+  },
+
+  pet: {
+    title: "Pet Policy",
+    description: "Guidelines for bringing pets to the resort.",
+    policies: [
+      {
+        category: "Guidelines",
+        rules: [
+          "All pets are free of charge and must be strictly registered upon check-in. Guests are required to present a complete and up-to-date vaccination card at the time of registration.",
+          "Pets are allowed only in designated pet-friendly rooms—Sea View and Garden View—located in the old hotel building.",
+          "Pets are strictly not allowed in the Pool view room located at new hotel building.",
+          "Pets are not permitted in the restaurant, pool areas, or other restricted facilities.",
+          "Only domesticated pets, specifically dogs and cats, are allowed.",
+          "A maximum of two (2) pets is allowed per room, with each pet not exceeding 18 kg.",
+          "Pets must be kept on a leash or placed in a carrier at all times while in public areas.",
+          "Pets should not be left unattended in the room at any time.",
+          "Guests are responsible for ensuring that their pets do not disturb other guests. Excessive noise or aggressive behavior may result in the removal of the pet from the premises.",
+          "For hygiene purposes, towels, linens, and other hotel amenities are strictly for guest use only and must not be used for pets.",
+          "As a courtesy to other guests, pet owners are responsible for cleaning up after their pets at all times and in all areas of the property. Housekeeping must be notified should assistance be required.",
+          "Management reserves the right to refuse or discontinue pet accommodation should any of the above policies not be followed.",
+          "Pet owners are fully responsible for their pets at all times and shall be liable for any injury or damage caused by their pets to other guests, staff, or property. This includes medical expenses, property and equipment repairs, and personal damages."
+        ]
+      }
+    ]
   }
 };
 
@@ -121,7 +145,8 @@ export const POLICY_ICONS = {
   security: "🔐",
   facilities: "🏖️",
   conduct: "🤝",
-  childpolicy: "👶"
+  childpolicy: "👶",
+  pet: "🐕"
 };
 
 export const HERO_IMAGE = "https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg";

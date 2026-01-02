@@ -129,7 +129,7 @@ const Policies = () => {
                     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                         <div className="flex justify-center mb-8">
                             <TabsList 
-                                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 h-auto p-1 bg-gray-100 max-w-5xl w-full gap-2"
+                                className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 h-auto p-1 bg-gray-100 max-w-5xl w-full gap-2"
                                 role="tablist"
                                 aria-label="Resort policy categories"
                             >

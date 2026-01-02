@@ -4,6 +4,7 @@ import FeaturedRooms from '../components/FeaturedRooms'
 import ExclusiveOffers from '@/components/exclusive-offer/ExclusiveOffers'
 import ExclusiveOffersDialog from '@/components/exclusive-offer/ExclusiveOffersDialog'
 import ScamAwarenessDialog from '@/components/ScamAwarenessDialog'
+import NoticeDialog from '@/components/NoticeDialog'
 import NewsLetter from '../components/NewsLetter'
 import { TestimonialsSection } from '@/components/testimonials'
 import SEOContent from '../components/SEOContent'
@@ -17,6 +18,7 @@ import SEO from '@/components/SEO'
 const Home = () => {
   const [showOffersDialog, setShowOffersDialog] = useState(true);
   // const [showScamAwarenessDialog, setShowScamAwarenessDialog] = useState(true);
+  const [showNoticeDialog, setShowNoticeDialog] = useState(true);
 
 
   return (
@@ -128,6 +130,18 @@ const Home = () => {
       {/* <ScamAwarenessDialog 
                 open={showScamAwarenessDialog} 
                 onOpenChange={setShowScamAwarenessDialog} 
+            /> */}
+
+      {/* Notice Dialog */}
+      <NoticeDialog 
+        open={showNoticeDialog} 
+        onOpenChange={setShowNoticeDialog} 
+      />
+            
+      {/* Notice Dialog */}
+      {/* <NoticeDialog 
+                open={showNoticeDialog} 
+                onOpenChange={setShowNoticeDialog} 
             /> */}
     </>
   )
