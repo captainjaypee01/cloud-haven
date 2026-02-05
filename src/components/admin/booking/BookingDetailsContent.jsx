@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { getPaymentProviderLabel } from '@/utils/paymentUtils';
 import { useAppContext } from '@/context/AppContext';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 
 const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showAddPayment, setShowAddPayment] = useState(false);
@@ -54,6 +55,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showRoomModification, setShowRoomModification] = useState(false);
     const [showDayTourModification, setShowDayTourModification] = useState(false);
     const [showEditGuestDetails, setShowEditGuestDetails] = useState(false);
+    const [remarksDialog, setRemarksDialog] = useState(false);
     const api = useApi();
     const navigate = useNavigate();
     const { userRole } = useAppContext();
@@ -123,9 +125,14 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
         setStatusProofDialog(true);
     };
 
+    const handleRemarksAction = (payment) => {
+        setEditPayment(payment);
+        setRemarksDialog(true);
+    };
+
     const confirmResetProofUploads = async (data) => {
         if (!selectedProofPayment) return;
-        
+
         try {
             await api.patch(
                 `${API_PREFIX}/admin/payments/${selectedProofPayment.id}/proof-upload/reset`,
@@ -143,17 +150,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
 
     const confirmProofStatusUpdate = async (data) => {
         if (!selectedProofPayment || !proofAction) return;
-        
+
         // Additional validation for rejection reason
         if (proofAction === 'rejected' && (!data.reason || data.reason.trim() === '')) {
             toast.error('Rejection reason is required');
             return; // Don't close dialog, don't proceed
         }
-        
+
         try {
             await api.patch(
                 `${API_PREFIX}/admin/payments/${selectedProofPayment.id}/proof-status`,
-                { 
+                {
                     status: proofAction,
                     reason: proofAction === 'rejected' ? data.reason : undefined
                 },
@@ -199,7 +206,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
         if (!proofStatus || proofStatus === 'none') {
             return <span className="text-xs text-gray-500">{uploadCount}/3</span>;
         }
-        
+
         switch (proofStatus) {
             case 'pending':
                 return <Badge variant="warning" className="text-xs">Under Review ({uploadCount}/3)</Badge>;
@@ -228,32 +235,31 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
 
             {/* Header & Actions */}
             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                    <div className="space-y-2">
-                        <div className="flex flex-col gap-2">
-                            <div className="flex gap-2 flex-wrap">
-                                {booking.booking_type === 'day_tour' && (
-                                    <Badge variant="secondary" className="w-fit">Day Tour</Badge>
-                                )}
-                                <Badge 
-                                    variant={booking.booking_source === 'walkin' ? 'default' : 'outline'}
-                                    className={`w-fit ${
-                                        booking.booking_source === 'walkin' 
-                                            ? 'bg-orange-100 text-orange-800 border-orange-200' 
-                                            : 'bg-purple-100 text-purple-800 border-purple-200'
+                <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex gap-2 flex-wrap">
+                            {booking.booking_type === 'day_tour' && (
+                                <Badge variant="secondary" className="w-fit">Day Tour</Badge>
+                            )}
+                            <Badge
+                                variant={booking.booking_source === 'walkin' ? 'default' : 'outline'}
+                                className={`w-fit ${booking.booking_source === 'walkin'
+                                        ? 'bg-orange-100 text-orange-800 border-orange-200'
+                                        : 'bg-purple-100 text-purple-800 border-purple-200'
                                     }`}
-                                >
-                                    {booking.booking_source === 'walkin' ? 'Walk-in' : 'Online'}
-                                </Badge>
-                            </div>
-                            <h2 className="text-2xl font-bold">
-                                Booking #{booking.reference_number}
-                            </h2>
+                            >
+                                {booking.booking_source === 'walkin' ? 'Walk-in' : 'Online'}
+                            </Badge>
                         </div>
-                        <StatusBadge status={booking.status} />
+                        <h2 className="text-2xl font-bold">
+                            Booking #{booking.reference_number}
+                        </h2>
                     </div>
+                    <StatusBadge status={booking.status} />
+                </div>
                 <div className="flex flex-wrap gap-2">
                     {/* Print Receipt Button */}
-                    <BookingPrintButton 
+                    <BookingPrintButton
                         booking={booking}
                         className="cursor-pointer"
                         variant="outline"
@@ -324,14 +330,13 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                         <div><span className="font-semibold">Total Guests:</span> {booking.total_guests}</div>
                         <div><span className="font-semibold">Special Requests:</span> {booking.special_requests || '-'}</div>
                         <div><span className="font-semibold">User ID:</span> {booking.user_id || '-'}</div>
-                        <div><span className="font-semibold">Booking Source:</span> 
-                            <Badge 
+                        <div><span className="font-semibold">Booking Source:</span>
+                            <Badge
                                 variant={booking.booking_source === 'walkin' ? 'default' : 'outline'}
-                                className={`ml-2 ${
-                                    booking.booking_source === 'walkin' 
-                                        ? 'bg-orange-100 text-orange-800 border-orange-200' 
+                                className={`ml-2 ${booking.booking_source === 'walkin'
+                                        ? 'bg-orange-100 text-orange-800 border-orange-200'
                                         : 'bg-purple-100 text-purple-800 border-purple-200'
-                                }`}
+                                    }`}
                             >
                                 {booking.booking_source === 'walkin' ? 'Walk-in' : 'Online'}
                             </Badge>
@@ -342,8 +347,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     {booking.promo.code}
                                 </Badge>
                                 <span className="text-sm text-gray-600">
-                                    {booking.promo.discount_type === 'percentage' 
-                                        ? `${booking.promo.discount_value}% off` 
+                                    {booking.promo.discount_type === 'percentage'
+                                        ? `${booking.promo.discount_value}% off`
                                         : `${formatCurrency(booking.promo.discount_value)} off`
                                     }
                                 </span>
@@ -602,7 +607,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             )}
                                         </td>
                                         <td className="py-2 pr-4">
-                                            {booking.booking_type === 'day_tour' ? 
+                                            {booking.booking_type === 'day_tour' ?
                                                 formatCurrency((br.base_price || 0) / (br.total_guests || 1)) :
                                                 formatCurrency(br.price_per_night)
                                             }
@@ -672,7 +677,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
             {booking.booking_type === 'day_tour' ? (
                 // Day Tour Meal Breakdown - Only show if we have meal data
                 booking.meal_quote_data?.selections && (
-                    <MealDetailComponent 
+                    <MealDetailComponent
                         mealQuoteData={booking.meal_quote_data}
                         title="Day Tour Meal Breakdown"
                         showTitle={true}
@@ -739,11 +744,11 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             <tbody>
                                                 {booking.meal_quote_data.nights.map((night, idx) => {
                                                     const totalGuests = booking.total_guests;
-                                                    
+
                                                     // Calculate extra guests per room based on room capacity
                                                     let totalExtraGuests = 0;
                                                     let totalRoomCapacity = 0;
-                                                    
+
                                                     booking.booking_rooms?.forEach(br => {
                                                         const roomCapacity = br.room?.max_guests || 6;
                                                         const roomGuests = br.total_guests || 0;
@@ -751,14 +756,14 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                         totalExtraGuests += extraGuestsInRoom;
                                                         totalRoomCapacity += roomCapacity;
                                                     });
-                                                    
+
                                                     const totalBookedGuests = totalGuests - totalExtraGuests;
-                                                    
+
                                                     return (
                                                         <tr key={idx} className="border-b last:border-b-0">
                                                             <td className="py-2 pr-4">{formatDate(night.date)}</td>
                                                             <td className="py-2 pr-4">
-                                                                <Badge 
+                                                                <Badge
                                                                     variant={night.type === 'buffet' ? 'default' : 'secondary'}
                                                                     className={night.type === 'buffet' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}
                                                                 >
@@ -836,7 +841,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                 })}
                                             </tbody>
                                         </table>
-                                        
+
                                         {/* Extra Guest Fee Summary */}
                                         {booking.extra_guest_fee > 0 && (
                                             <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
@@ -865,8 +870,8 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                         <div>
                                             <div className="font-medium text-blue-900">Meal Information:</div>
                                             <div className="text-sm text-blue-700">
-                                                • Meals calculated using meal program pricing<br/>
-                                                • Based on booking dates and guest count<br/>
+                                                • Meals calculated using meal program pricing<br />
+                                                • Based on booking dates and guest count<br />
                                                 • Check meal program settings for details
                                             </div>
                                         </div>
@@ -898,6 +903,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <th className="py-2 pr-4 font-medium">Status</th>
                                     <th className="py-2 pr-4 font-medium">Downpayment Status</th>
                                     <th className="py-2 pr-4 font-medium">Transaction ID</th>
+                                    <th className="py-2 pr-4 font-medium">Remarks</th>
                                     <th className="py-2 pr-4 font-medium">Error Code</th>
                                     <th className="py-2 pr-4 font-medium">Error Message</th>
                                     <th className="py-2 pr-4 font-medium">Proof Status</th>
@@ -925,14 +931,25 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             )}
                                         </td>
                                         <td className="py-2 pr-4">{p.transaction_id || '-'}</td>
+                                        <td className="py-2 pr-4">
+                                            <Button
+                                                variant="link"
+                                                size="sm"
+                                                onClick={() => handleRemarksAction(p)}
+                                                className="text-cyan-700 p-0 h-auto cursor-pointer"
+                                            >
+                                                View
+                                            </Button>
+
+                                        </td>
                                         <td className="py-2 pr-4">{p.error_code || '-'}</td>
                                         <td className="py-2 pr-4">{p.error_message || '-'}</td>
                                         <td className="py-2 pr-4">
                                             {getProofStatusBadge(p.proof_status, p.proof_upload_count)}
                                             {p.proof_rejected_reason && (
                                                 <div className="text-xs text-red-600 mt-1" title={p.proof_rejected_reason}>
-                                                    Reason: {p.proof_rejected_reason.length > 30 ? 
-                                                        `${p.proof_rejected_reason.substring(0, 30)}...` : 
+                                                    Reason: {p.proof_rejected_reason.length > 30 ?
+                                                        `${p.proof_rejected_reason.substring(0, 30)}...` :
                                                         p.proof_rejected_reason
                                                     }
                                                 </div>
@@ -949,7 +966,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                     View
                                                 </Button>
                                             ) : (
-                                                '-' 
+                                                '-'
                                             )}
                                         </td>
                                         <td className="py-2 pr-4 text-center">
@@ -964,7 +981,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                         Edit
                                                     </Button>
                                                 )}
-                                                
+
                                                 {/* Proof management buttons */}
                                                 <Button
                                                     size="sm"
@@ -976,7 +993,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                                     <RotateCcw className="h-3 w-3 mr-1" />
                                                     Reset
                                                 </Button>
-                                                
+
                                                 {p.proof_status === 'pending' && (
                                                     <div className="flex gap-1">
                                                         <Button
@@ -1127,7 +1144,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Reset Proof Uploads</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will reset the proof upload count to 0/3 for this payment, allowing the guest to upload new proof files. 
+                            This will reset the proof upload count to 0/3 for this payment, allowing the guest to upload new proof files.
                             If there's a pending proof, it will be marked as rejected.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -1140,7 +1157,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <FormItem>
                                         <FormLabel>Reason (Optional)</FormLabel>
                                         <FormControl>
-                                            <Textarea 
+                                            <Textarea
                                                 placeholder="Enter reason for resetting proof uploads..."
                                                 {...field}
                                             />
@@ -1168,14 +1185,14 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             {proofAction === 'accepted' ? 'Accept' : 'Reject'} Proof of Payment
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            {proofAction === 'accepted' 
+                            {proofAction === 'accepted'
                                 ? 'Mark this proof of payment as accepted and verified.'
                                 : 'Reject this proof of payment. Please provide a reason for rejection. Note: Rejecting the proof will automatically cancel the booking.'
                             }
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                                         <Form {...statusForm}>
-                         <form onSubmit={(e) => e.preventDefault()}>
+                    <Form {...statusForm}>
+                        <form onSubmit={(e) => e.preventDefault()}>
                             {proofAction === 'rejected' && (
                                 <>
                                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
@@ -1184,7 +1201,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             <div>
                                                 <h4 className="text-sm font-medium text-red-900">Important Notice</h4>
                                                 <p className="text-sm text-red-700 mt-1">
-                                                    Rejecting this proof of payment will mark the payment as failed, automatically cancel the booking, 
+                                                    Rejecting this proof of payment will mark the payment as failed, automatically cancel the booking,
                                                     and send both a proof rejection email and a booking cancellation email to the guest.
                                                 </p>
                                             </div>
@@ -1193,7 +1210,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     <FormField
                                         control={statusForm.control}
                                         name="reason"
-                                        rules={{ 
+                                        rules={{
                                             required: 'Rejection reason is required',
                                             validate: (value) => value.trim() !== '' || 'Rejection reason cannot be empty'
                                         }}
@@ -1201,7 +1218,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             <FormItem>
                                                 <FormLabel>Rejection Reason *</FormLabel>
                                                 <FormControl>
-                                                    <Textarea 
+                                                    <Textarea
                                                         placeholder="Enter reason for rejecting this proof..."
                                                         {...field}
                                                     />
@@ -1212,16 +1229,16 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                     />
                                 </>
                             )}
-                                                         <AlertDialogFooter className="mt-4">
-                                 <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-                                 <AlertDialogAction 
-                                     type="button"
-                                     onClick={statusForm.handleSubmit(confirmProofStatusUpdate)}
-                                     className={`cursor-pointer ${proofAction === 'rejected' ? 'bg-red-600 hover:bg-red-700' : ''}`}
-                                 >
-                                     {proofAction === 'accepted' ? 'Accept Proof' : 'Reject Proof'}
-                                 </AlertDialogAction>
-                             </AlertDialogFooter>
+                            <AlertDialogFooter className="mt-4">
+                                <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    type="button"
+                                    onClick={statusForm.handleSubmit(confirmProofStatusUpdate)}
+                                    className={`cursor-pointer ${proofAction === 'rejected' ? 'bg-red-600 hover:bg-red-700' : ''}`}
+                                >
+                                    {proofAction === 'accepted' ? 'Accept Proof' : 'Reject Proof'}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
                         </form>
                     </Form>
                 </AlertDialogContent>
@@ -1279,6 +1296,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     if (fetchBooking) fetchBooking();
                 }}
             />
+
+            <Dialog open={remarksDialog} onOpenChange={() => setRemarksDialog(false)}>
+                <DialogContent className="max-h-[90vh] overflow-hidden flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
+                        <DialogTitle>Remarks</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-y-auto px-1">
+                        {editPayment?.remarks || '-'}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
