@@ -21,6 +21,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 
 const ListPayment = () => {
     const [data, setData] = useState([]);
@@ -35,7 +36,7 @@ const ListPayment = () => {
     const [toDate, setToDate] = useState("");
     const [loading, setLoading] = useState(false);
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-    
+
     // Dialog states
     const [showProofDialog, setShowProofDialog] = useState(false);
     const [selectedPaymentProof, setSelectedPaymentProof] = useState(null);
@@ -43,9 +44,10 @@ const ListPayment = () => {
     const [editPayment, setEditPayment] = useState(null);
     const [resetProofDialog, setResetProofDialog] = useState(false);
     const [statusProofDialog, setStatusProofDialog] = useState(false);
+    const [remarksDialog, setRemarksDialog] = useState(false);
     const [selectedProofPayment, setSelectedProofPayment] = useState(null);
     const [proofAction, setProofAction] = useState(null); // 'accepted' or 'rejected'
-    
+
     const api = useApi();
     const navigate = useNavigate();
 
@@ -68,7 +70,7 @@ const ListPayment = () => {
         if (!proofStatus || proofStatus === 'none') {
             return <span className="text-xs text-gray-500">{uploadCount}/3</span>;
         }
-        
+
         switch (proofStatus) {
             case 'pending':
                 return <Badge variant="warning" className="text-xs">Under Review ({uploadCount}/3)</Badge>;
@@ -104,9 +106,14 @@ const ListPayment = () => {
         setStatusProofDialog(true);
     };
 
+    const handleRemarksAction = (payment) => {
+        setEditPayment(payment);
+        setRemarksDialog(true);
+    };
+
     const confirmResetProofUploads = async (data) => {
         if (!selectedProofPayment) return;
-        
+
         try {
             await api.patch(
                 `${API_PREFIX}/admin/payments/${selectedProofPayment.id}/proof-upload/reset`,
@@ -124,17 +131,17 @@ const ListPayment = () => {
 
     const confirmProofStatusUpdate = async (data) => {
         if (!selectedProofPayment || !proofAction) return;
-        
+
         // Additional validation for rejection reason
         if (proofAction === 'rejected' && (!data.reason || data.reason.trim() === '')) {
             toast.error('Rejection reason is required');
             return;
         }
-        
+
         try {
             await api.patch(
                 `${API_PREFIX}/admin/payments/${selectedProofPayment.id}/proof-status`,
-                { 
+                {
                     status: proofAction,
                     reason: proofAction === 'rejected' ? data.reason : undefined
                 },
@@ -159,7 +166,7 @@ const ListPayment = () => {
             cell: ({ row }) => {
                 const booking = row.original.booking;
                 const referenceNumber = booking?.reference_number || '-';
-                
+
                 if (booking?.id) {
                     return (
                         <Button
@@ -172,7 +179,7 @@ const ListPayment = () => {
                         </Button>
                     );
                 }
-                
+
                 return (
                     <span className="text-gray-500 font-medium">
                         {referenceNumber}
@@ -215,15 +222,29 @@ const ListPayment = () => {
             ),
         },
         {
+            id: "remarks",
+            header: "Remarks",
+            accessorKey: "remarks",
+            cell: ({ row }) => (
+                <Button
+                    variant="link"
+                    size="sm"
+                    onClick={() => handleRemarksAction(row.original)}
+                    className="text-cyan-700 p-0 h-auto cursor-pointer"
+                >Remarks
+                </Button>
+            ),
+        },
+        {
             id: "error",
             header: "Error",
             accessorKey: "error_code",
             cell: ({ row }) => {
                 const errorCode = row.original.error_code;
                 const errorMessage = row.original.error_message;
-                
+
                 if (!errorCode && !errorMessage) return '-';
-                
+
                 return (
                     <div className="text-xs">
                         {errorCode && (
@@ -231,8 +252,8 @@ const ListPayment = () => {
                         )}
                         {errorMessage && (
                             <div className="text-red-600 text-wrap max-w-48" title={errorMessage}>
-                                {errorMessage.length > 50 ? 
-                                    `${errorMessage.substring(0, 50)}...` : 
+                                {errorMessage.length > 50 ?
+                                    `${errorMessage.substring(0, 50)}...` :
                                     errorMessage
                                 }
                             </div>
@@ -250,8 +271,8 @@ const ListPayment = () => {
                     {getProofStatusBadge(row.original.proof_status, row.original.proof_upload_count)}
                     {row.original.proof_rejected_reason && (
                         <div className="text-xs text-red-600" title={row.original.proof_rejected_reason}>
-                            Reason: {row.original.proof_rejected_reason.length > 30 ? 
-                                `${row.original.proof_rejected_reason.substring(0, 30)}...` : 
+                            Reason: {row.original.proof_rejected_reason.length > 30 ?
+                                `${row.original.proof_rejected_reason.substring(0, 30)}...` :
                                 row.original.proof_rejected_reason
                             }
                         </div>
@@ -275,7 +296,7 @@ const ListPayment = () => {
                         View
                     </Button>
                 ) : (
-                    '-' 
+                    '-'
                 )
             ),
         },
@@ -304,7 +325,7 @@ const ListPayment = () => {
                             </Button>
                         )}
                     </div>
-                    
+
                     <div className="flex gap-1">
                         <Button
                             size="sm"
@@ -316,7 +337,7 @@ const ListPayment = () => {
                             <RotateCcw className="h-3 w-3 mr-1" />
                             Reset
                         </Button>
-                        
+
                         {row.original.proof_status === 'pending' && (
                             <>
                                 <Button
@@ -349,17 +370,17 @@ const ListPayment = () => {
     // Fetch payments from API
     const fetchPayments = async (params = {}) => {
         setLoading(true);
-        
+
         // Validate date range
         let validFromDate = fromDate;
         let validToDate = toDate;
-        
+
         if (fromDate && toDate && fromDate > toDate) {
             // If from_date is after to_date, swap them
             validFromDate = toDate;
             validToDate = fromDate;
         }
-        
+
         const merged = {
             ...params,
             page: pagination.pageIndex + 1,
@@ -389,10 +410,10 @@ const ListPayment = () => {
     };
 
     useEffect(() => {
-        fetchPayments({ 
-            search: debouncedSearch, 
-            status, 
-            proof_status: proofStatus, 
+        fetchPayments({
+            search: debouncedSearch,
+            status,
+            proof_status: proofStatus,
             date: dateFilter,
             from_date: fromDate,
             to_date: toDate
@@ -418,9 +439,9 @@ const ListPayment = () => {
                 searchLabel="Search by Reference Number"
                 filters={[
                     {
-                        key: "status", 
-                        label: "Filter by Payment Status", 
-                        value: status, 
+                        key: "status",
+                        label: "Filter by Payment Status",
+                        value: status,
                         onChange: setStatus,
                         options: [
                             { value: "all", label: "All Payment Statuses" },
@@ -431,9 +452,9 @@ const ListPayment = () => {
                         ]
                     },
                     {
-                        key: "proof_status", 
-                        label: "Filter by Proof Status", 
-                        value: proofStatus, 
+                        key: "proof_status",
+                        label: "Filter by Proof Status",
+                        value: proofStatus,
                         onChange: setProofStatus,
                         options: [
                             { value: "all", label: "All Proof Statuses" },
@@ -485,7 +506,7 @@ const ListPayment = () => {
                         </Button>
                     )}
                 </div>
-                
+
                 <div className="flex gap-4 items-end">
                     <div className="flex flex-col">
                         <label className="text-sm font-medium mb-1">Or Filter by Specific Date</label>
@@ -549,7 +570,7 @@ const ListPayment = () => {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Reset Proof Uploads</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will reset the proof upload count to 0/3 for this payment, allowing the guest to upload new proof files. 
+                            This will reset the proof upload count to 0/3 for this payment, allowing the guest to upload new proof files.
                             If there's a pending proof, it will be marked as rejected.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -562,7 +583,7 @@ const ListPayment = () => {
                                     <FormItem>
                                         <FormLabel>Reason (Optional)</FormLabel>
                                         <FormControl>
-                                            <Textarea 
+                                            <Textarea
                                                 placeholder="Enter reason for resetting proof uploads..."
                                                 {...field}
                                             />
@@ -590,7 +611,7 @@ const ListPayment = () => {
                             {proofAction === 'accepted' ? 'Accept' : 'Reject'} Proof of Payment
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            {proofAction === 'accepted' 
+                            {proofAction === 'accepted'
                                 ? 'Mark this proof of payment as accepted and verified.'
                                 : 'Reject this proof of payment. Please provide a reason for rejection.'
                             }
@@ -602,7 +623,7 @@ const ListPayment = () => {
                                 <FormField
                                     control={statusForm.control}
                                     name="reason"
-                                    rules={{ 
+                                    rules={{
                                         required: 'Rejection reason is required',
                                         validate: (value) => value.trim() !== '' || 'Rejection reason cannot be empty'
                                     }}
@@ -610,7 +631,7 @@ const ListPayment = () => {
                                         <FormItem>
                                             <FormLabel>Rejection Reason *</FormLabel>
                                             <FormControl>
-                                                <Textarea 
+                                                <Textarea
                                                     placeholder="Enter reason for rejecting this proof..."
                                                     {...field}
                                                 />
@@ -622,7 +643,7 @@ const ListPayment = () => {
                             )}
                             <AlertDialogFooter className="mt-4">
                                 <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
+                                <AlertDialogAction
                                     type="button"
                                     onClick={statusForm.handleSubmit(confirmProofStatusUpdate)}
                                     className={`cursor-pointer ${proofAction === 'rejected' ? 'bg-red-600 hover:bg-red-700' : ''}`}
@@ -634,6 +655,17 @@ const ListPayment = () => {
                     </Form>
                 </AlertDialogContent>
             </AlertDialog>
+
+            <Dialog open={remarksDialog} onOpenChange={() => setRemarksDialog(false)}>
+                <DialogContent className="max-h-[90vh] overflow-hidden flex flex-col">
+                    <DialogHeader className="flex-shrink-0">
+                        <DialogTitle>Remarks</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 overflow-y-auto px-1">
+                        {editPayment?.remarks || '-'}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };
