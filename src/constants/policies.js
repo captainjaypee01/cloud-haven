@@ -121,7 +121,7 @@ export const RESORT_POLICIES = {
         rules: [
           "All pets are free of charge and must be strictly registered upon check-in. Guests are required to present a complete and up-to-date vaccination card at the time of registration.",
           "Pets are allowed only in designated pet-friendly rooms—Sea View and Garden View—located in the old hotel building.",
-          "Pets are strictly not allowed in the Pool view room located at new hotel building.",
+          "Pets are strictly not allowed in the new hotel building Pool view & Deluxe room.",
           "Pets are not permitted in the restaurant, pool areas, or other restricted facilities.",
           "Only domesticated pets, specifically dogs and cats, are allowed.",
           "A maximum of two (2) pets is allowed per room, with each pet not exceeding 18 kg.",
