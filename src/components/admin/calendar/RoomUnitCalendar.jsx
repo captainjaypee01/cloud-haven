@@ -59,6 +59,7 @@ const RoomUnitCalendar = () => {
     const colors = {
       available: 'bg-green-600 text-white hover:bg-green-700',
       booked: 'bg-blue-600 text-white hover:bg-blue-700',
+      paid: 'bg-blue-600 text-white hover:bg-blue-700',
       pending: 'bg-yellow-600 text-white hover:bg-yellow-700',
       maintenance: 'bg-orange-600 text-white hover:bg-orange-700',
       blocked: 'bg-red-600 text-white hover:bg-red-700',
@@ -141,7 +142,7 @@ const RoomUnitCalendar = () => {
   // Handle cell click to show booking details
   const handleCellClick = async (dayStatus, unit, room, isDayTour = false) => {
     // Only fetch booking details for booked or pending dates
-    if (!['booked', 'pending'].includes(dayStatus.status)) {
+    if (!['booked', 'pending', 'paid'].includes(dayStatus.status)) {
       return;
     }
 
