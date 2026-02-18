@@ -59,7 +59,7 @@ const RoomUnitCalendar = () => {
     const colors = {
       available: 'bg-green-600 text-white hover:bg-green-700',
       booked: 'bg-blue-600 text-white hover:bg-blue-700',
-      paid: 'bg-blue-600 text-white hover:bg-blue-700',
+      paid: 'bg-gray-600 text-white hover:bg-gray-700',
       pending: 'bg-yellow-600 text-white hover:bg-yellow-700',
       maintenance: 'bg-orange-600 text-white hover:bg-orange-700',
       blocked: 'bg-red-600 text-white hover:bg-red-700',
@@ -278,8 +278,6 @@ const RoomUnitCalendar = () => {
                               {dayStatus.day}
                               {dayStatus.booking_source === 'walkin' && ['booked', 'pending', 'paid'].includes(dayStatus.status) && (
                                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full border border-white"></div>
-                              )}{dayStatus.status === 'paid' && (
-                                <div className="absolute -top-1 -left-1 w-2 h-2 bg-green-400 rounded-full border border-white"></div>
                               )}
                             </>
                           )}
@@ -389,9 +387,7 @@ const RoomUnitCalendar = () => {
               <span className="text-xs sm:text-sm">Booked (Walk-in)</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-600 border border-green-300 rounded relative flex-shrink-0">
-                <div className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 bg-green-400 rounded-full"></div>
-              </div>
+            <div className="w-3 h-3 bg-gray-600 rounded flex-shrink-0"></div>
               <span className="text-xs sm:text-sm">Paid</span>
             </div>
             <div className="flex items-center gap-1">
