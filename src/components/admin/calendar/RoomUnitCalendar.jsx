@@ -258,13 +258,13 @@ const RoomUnitCalendar = () => {
                       <td 
                         key={dayStatus.day} 
                         className={`border border-gray-300 p-1 text-center transition-colors ${
-                          ['booked', 'pending'].includes(dayStatus.status) 
+                          ['booked', 'pending', 'paid'].includes(dayStatus.status) 
                             ? 'cursor-pointer hover:opacity-80' 
                             : 'cursor-default'
                         } ${getStatusColor(dayStatus.status, dayStatus.booking_source)}`}
                         onClick={() => handleCellClick(dayStatus, unit, room, isDayTour)}
                         title={
-                          ['booked', 'pending'].includes(dayStatus.status)
+                          ['booked', 'pending', 'paid'].includes(dayStatus.status)
                             ? `Click to view booking details - ${dayStatus.date}${dayStatus.booking_source === 'walkin' ? ' (Walk-in)' : ''}`
                             : `${dayStatus.date}: ${dayStatus.status.charAt(0).toUpperCase() + dayStatus.status.slice(1)}`
                         }
@@ -275,8 +275,10 @@ const RoomUnitCalendar = () => {
                           ) : (
                             <>
                               {dayStatus.day}
-                              {dayStatus.booking_source === 'walkin' && ['booked', 'pending'].includes(dayStatus.status) && (
+                              {dayStatus.booking_source === 'walkin' && ['booked', 'pending', 'paid'].includes(dayStatus.status) && (
                                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full border border-white"></div>
+                              )}{dayStatus.status === 'paid' && (
+                                <div className="absolute -top-1 -left-1 w-2 h-2 bg-green-400 rounded-full border border-white"></div>
                               )}
                             </>
                           )}
@@ -384,6 +386,12 @@ const RoomUnitCalendar = () => {
                 <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
               </div>
               <span className="text-xs sm:text-sm">Booked (Walk-in)</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-blue-600 border border-green-300 rounded relative flex-shrink-0">
+                <div className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+              </div>
+              <span className="text-xs sm:text-sm">Paid</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="w-3 h-3 bg-yellow-600 rounded flex-shrink-0"></div>
