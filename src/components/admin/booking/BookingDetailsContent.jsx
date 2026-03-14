@@ -37,6 +37,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showAddPayment, setShowAddPayment] = useState(false);
     const [editPayment, setEditPayment] = useState(null);
     const [showAddOtherCharge, setShowAddOtherCharge] = useState(false);
+    const [editOtherCharge, setEditOtherCharge] = useState(null);
     const [deleteOtherCharge, setDeleteOtherCharge] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [showReschedule, setShowReschedule] = useState(false);
@@ -463,29 +464,48 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             <div className="font-medium mb-1">Other Charges Details:</div>
                             <ul className="list-disc ml-6 space-y-1 text-sm">
                                 {booking.other_charges_list.map((c, idx) => (
-                                    <li key={idx} className="flex items-center gap-2">
+                                    <li key={c.id ?? idx} className="flex items-center gap-2">
                                         <span className="font-semibold">{formatCurrency(c.amount)}</span>
                                         {c.remarks ? ` – ${c.remarks}` : ''}
                                         <span className="ml-2 text-gray-400">{formatDateTime(c.created_at)}</span>
-                                        <Button
-                                            size="icon"
-                                            variant="ghost"
-                                            className="ml-2 cursor-pointer text-destructive"
-                                            title="Delete charge"
-                                            onClick={() => handleDeleteOtherChargePrompt(c)}
-                                        >
-                                            <X className="w-4 h-4" />
-                                        </Button>
+                                        {canAddCharges && (
+                                            <>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="ml-2 cursor-pointer"
+                                                    title="Edit charge"
+                                                    onClick={() => setEditOtherCharge(c)}
+                                                >
+                                                    <Edit3 className="w-4 h-4" />
+                                                </Button>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="cursor-pointer text-destructive"
+                                                    title="Delete charge"
+                                                    onClick={() => handleDeleteOtherChargePrompt(c)}
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </Button>
+                                            </>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
                         </div>
                     )}
                     <AddOtherChargeDialog
-                        open={showAddOtherCharge}
-                        onOpenChange={setShowAddOtherCharge}
+                        open={showAddOtherCharge || !!editOtherCharge}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                setShowAddOtherCharge(false);
+                                setEditOtherCharge(null);
+                            }
+                        }}
                         bookingId={booking.id}
                         onSuccess={() => fetchBooking && fetchBooking()}
+                        charge={editOtherCharge}
                     />
                 </CardContent>
             </Card>
