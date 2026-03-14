@@ -24,7 +24,8 @@ const formSchema = z.object({
     remarks: z.string().min(1, 'Remarks/description is required'),
 });
 
-const AddOtherChargeDialog = ({ open, onOpenChange, bookingId, onSuccess }) => {
+const AddOtherChargeDialog = ({ open, onOpenChange, bookingId, onSuccess, charge }) => {
+    const isEdit = Boolean(charge);
     const api = useApi();
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -32,12 +33,31 @@ const AddOtherChargeDialog = ({ open, onOpenChange, bookingId, onSuccess }) => {
     });
     const { setError, reset } = form;
 
-    useEffect(() => { if (!open) reset(); }, [open, reset]);
+    useEffect(() => {
+        if (!open) {
+            reset();
+            return;
+        }
+        if (charge) {
+            reset({ amount: Number(charge.amount), remarks: charge.remarks || '' });
+        } else {
+            reset({ amount: '', remarks: '' });
+        }
+    }, [open, charge, reset]);
 
     const handleSubmit = async (values) => {
         try {
-            await api.post(`${API_PREFIX}/admin/bookings/${bookingId}/other-charges`, values, { requiresAuth: true });
-            toast.success('Other charge added');
+            if (isEdit) {
+                await api.patch(
+                    `${API_PREFIX}/admin/bookings/${bookingId}/other-charges/${charge.id}`,
+                    values,
+                    { requiresAuth: true }
+                );
+                toast.success('Other charge updated');
+            } else {
+                await api.post(`${API_PREFIX}/admin/bookings/${bookingId}/other-charges`, values, { requiresAuth: true });
+                toast.success('Other charge added');
+            }
             if (onSuccess) onSuccess();
             onOpenChange(false);
             reset();
@@ -50,7 +70,7 @@ const AddOtherChargeDialog = ({ open, onOpenChange, bookingId, onSuccess }) => {
             } else if (err.response?.data?.message) {
                 toast.error(err.response.data.message);
             } else {
-                toast.error('Failed to add other charge');
+                toast.error(isEdit ? 'Failed to update other charge' : 'Failed to add other charge');
             }
         }
     };
@@ -59,7 +79,7 @@ const AddOtherChargeDialog = ({ open, onOpenChange, bookingId, onSuccess }) => {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add Other Charge</DialogTitle>
+                    <DialogTitle>{isEdit ? 'Edit Other Charge' : 'Add Other Charge'}</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-2">
@@ -85,7 +105,7 @@ const AddOtherChargeDialog = ({ open, onOpenChange, bookingId, onSuccess }) => {
                                 className="cursor-pointer"
                                 disabled={form.formState.isSubmitting}
                             >
-                                {form.formState.isSubmitting ? 'Saving...' : 'Add Charge'}
+                                {form.formState.isSubmitting ? 'Saving...' : isEdit ? 'Update Charge' : 'Add Charge'}
                             </Button>
                         </DialogFooter>
                     </form>
