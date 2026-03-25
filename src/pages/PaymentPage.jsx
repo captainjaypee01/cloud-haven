@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useLoader } from "@/context/LoaderContext";
 import { toast } from "sonner";
 import { API_PREFIX } from "@/constants/api";
+import { formatDate } from "@/lib/format";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import SEO from "@/components/SEO";
 import ProofOfPaymentDialog from "../components/payment/ProofOfPaymentDialog";
@@ -210,7 +211,7 @@ const PaymentPage = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-600 mb-1">Day Tour Date:</span>
-                                            <span className="font-medium text-gray-900">{booking.check_in_date}</span>
+                                            <span className="font-medium text-gray-900">{formatDate(booking.check_in_date)}</span>
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-600 mb-1">Tour Hours:</span>
@@ -221,11 +222,11 @@ const PaymentPage = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-600 mb-1">Check-in:</span>
-                                            <span className="font-medium text-gray-900">{booking.check_in_date}</span>
+                                            <span className="font-medium text-gray-900">{formatDate(booking.check_in_date)}</span>
                                         </div>
                                         <div className="flex flex-col">
                                             <span className="text-sm font-medium text-gray-600 mb-1">Check-out:</span>
-                                            <span className="font-medium text-gray-900">{booking.check_out_date}</span>
+                                            <span className="font-medium text-gray-900">{formatDate(booking.check_out_date)}</span>
                                         </div>
                                     </div>
                                 )}
