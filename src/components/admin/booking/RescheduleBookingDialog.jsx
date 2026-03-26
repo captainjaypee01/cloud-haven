@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useApi } from '@/hooks/useApi';
@@ -264,6 +264,9 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Reschedule {isDayTour ? 'Day Tour' : 'Booking'}</DialogTitle>
+                    <DialogDescription className="text-left">
+                        Totals and meal pricing are recalculated for the new dates (room rates, meal program / buffet vs breakfast nights for overnight stays, and day-tour meal lines).
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 mt-2">
