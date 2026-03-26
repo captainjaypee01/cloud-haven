@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Admin booking details: **Adjust nights** for overnight stays (change check-out; recalculates room, meal quote, extra guest fees, and promo discount). Available to staff, admin, and superadmin when status is pending, downpayment, or paid.
 - Versioning system implementation
 - Comprehensive README documentation
 
