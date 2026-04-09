@@ -98,7 +98,7 @@ export function DayTourAddToCartDialog({
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Children</label>
+                                <label className="block text-sm font-medium mb-1">Children (4-6 years old)</label>
                                 <GuestSelector
                                     name="children"
                                     minGuests={0}
@@ -108,6 +108,9 @@ export function DayTourAddToCartDialog({
                                     showChildPolicy={true}
                                 />
                             </div>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                            <span>3 years old and below are free of charge.</span>
                         </div>
                     </div>
 
