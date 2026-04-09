@@ -430,7 +430,7 @@ const RoomDetails = () => {
                         />
                     </div>
                     <div className="col-span-1">
-                        <label className="text-sm font-medium block mb-1">Children</label>
+                        <label className="text-sm font-medium block mb-1">Children (4-6 years old)</label>
                         <Controller
                             name="children"
                             control={control}
@@ -445,6 +445,9 @@ const RoomDetails = () => {
                         />
                     </div>
 
+                    <div className="col-span-2 text-sm text-gray-600">
+                        <span>3 years old and below are free of charge.</span>
+                    </div>
                     {/* Guest count feedback - similar to QuickBookingDialog */}
                     <div className="col-span-1 md:col-span-3 lg:col-span-3 w-full space-y-2">
                         <div className="text-sm text-gray-600">

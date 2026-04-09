@@ -355,7 +355,7 @@ export const QuickBookingDialog = ({
                             />
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Children</label>
+                            <label className="text-sm font-medium">Children (4-6 years old)</label>
                             <Controller
                                 name="children"
                                 control={control}
@@ -371,6 +371,9 @@ export const QuickBookingDialog = ({
                                     </div>
                                 )}
                             />
+                        </div>
+                        <div className="text-sm text-gray-600">
+                            <span>3 years old and below are free of charge.</span>
                         </div>
                     </div>
 

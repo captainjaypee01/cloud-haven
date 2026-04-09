@@ -162,7 +162,7 @@ const CartList = ({
                     />
                 </div>
                 <div>
-                    <label htmlFor={`children-${item.uniqueId}`} className="block text-sm font-medium mb-1">Children</label>
+                    <label htmlFor={`children-${item.uniqueId}`} className="block text-sm font-medium mb-1">Children (4-6 years old)</label>
                     <Controller
                         name={`children-${item.uniqueId}`}
                         control={control}
@@ -176,6 +176,9 @@ const CartList = ({
                             />
                         )}
                     />
+                    <div className="text-sm text-gray-600">
+                        <span>3 years old and below are free of charge.</span>
+                    </div>
                 </div>
             </div>
             <div className="flex justify-between text-sm mt-4">
