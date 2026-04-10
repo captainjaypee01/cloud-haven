@@ -27,7 +27,8 @@ export const getOptimizedImageUrl = (imageUrl, options = {}) => {
     const {
         width = 'w_auto',
         height = 'h_auto',
-        quality = 'auto',
+        // auto:eco = smaller files vs default q_auto; helps stay under Cloudinary quota
+        quality = 'auto:eco',
         format = 'auto',
         crop = 'fill',
         gravity = 'auto',
@@ -113,7 +114,7 @@ export const getThumbnailUrl = (imageUrl, size = 80) => {
         height: `h_${size}`,
         crop: 'fill',
         gravity: 'auto',
-        quality: 'auto',
+        quality: 'auto:eco',
         format: 'auto',
         responsive: false
     });
@@ -132,7 +133,7 @@ export const getHeroImageUrl = (imageUrl, aspectRatio = '16:9') => {
         height: 'h_auto',
         crop: 'fill',
         gravity: 'auto',
-        quality: 'auto',
+        quality: 'auto:eco',
         format: 'auto',
         responsive: true
     });
@@ -158,7 +159,7 @@ export const getRoomImageUrl = (imageUrl, size = 'medium') => {
         ...config,
         crop: 'fill',
         gravity: 'auto',
-        quality: 'auto',
+        quality: 'auto:eco',
         format: 'auto',
         responsive: true
     });
@@ -171,11 +172,11 @@ export const getRoomImageUrl = (imageUrl, size = 'medium') => {
  * @param {Array} sizes - Array of size objects with width and descriptor
  * @returns {string} srcset string
  */
+// Three breakpoints: fewer unique transforms + enough range for phones → desktops
 export const getSrcSet = (imageUrl, sizes = [
     { width: 'w_400', descriptor: '400w' },
     { width: 'w_800', descriptor: '800w' },
-    { width: 'w_1200', descriptor: '1200w' },
-    { width: 'w_1920', descriptor: '1920w' }
+    { width: 'w_1200', descriptor: '1200w' }
 ]) => {
     return sizes
         .map(({ width, descriptor }) => {
@@ -184,7 +185,7 @@ export const getSrcSet = (imageUrl, sizes = [
                 height: 'h_auto',
                 crop: 'fill',
                 gravity: 'auto',
-                quality: 'auto',
+                quality: 'auto:eco',
                 format: 'auto',
                 responsive: false
             });

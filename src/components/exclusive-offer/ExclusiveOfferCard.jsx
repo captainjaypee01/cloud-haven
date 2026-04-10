@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRightIcon, ImageOff, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { STATIC_IMG } from '@/constants/staticImages';
 
 const ExclusiveOfferCard = ({ offer, onClick }) => {
     const discountLabel =
@@ -68,7 +69,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
     const promoStatus = getPromoStatus();
     const isActive = isPromoActive();
 
-    const hasImage = offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg';
+    const hasImage = offer.image_url || STATIC_IMG.offerFallback;
     const cardClass = hasImage
         ? "group relative flex flex-col items-start justify-between gap-3 p-6 rounded-xl text-white bg-no-repeat bg-cover bg-center min-h-[260px] cursor-pointer"
         : "group relative flex flex-col items-start justify-between gap-3 p-6 rounded-xl text-gray-800 bg-gray-100 border min-h-[260px] cursor-pointer";
@@ -86,7 +87,7 @@ const ExclusiveOfferCard = ({ offer, onClick }) => {
         >
             <div className="absolute inset-0 rounded-xl overflow-hidden">
                 <OptimizedImage
-                    src={offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'}
+                    src={offer.image_url || STATIC_IMG.offerFallback}
                     alt={offer.title}
                     className="w-full h-full object-cover"
                 />

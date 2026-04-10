@@ -11,7 +11,7 @@ import {
     CarouselPrevious,
     CarouselNext,
 } from "@/components/ui/carousel";
-import { roomPhotos, cabanaRoomPhotos, umbrellaRoomPhotos } from "@/data/rooms";
+import { cabanaRoomPhotos, umbrellaRoomPhotos } from "@/data/rooms";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAppContext } from "@/context/AppContext";

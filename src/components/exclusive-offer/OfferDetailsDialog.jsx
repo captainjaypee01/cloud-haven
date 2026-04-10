@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Copy, CheckCircle2, Calendar, Clock, Tag, Percent, X } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
+import { STATIC_IMG } from '@/constants/staticImages';
 
 const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
     const [copied, setCopied] = useState(false);
@@ -73,7 +74,7 @@ const OfferDetailsDialog = ({ open, onOpenChange, offer }) => {
 
     const promoStatus = getPromoStatus();
     const isActive = isPromoActive();
-    const offerImage = offer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg';
+    const offerImage = offer.image_url || STATIC_IMG.offerFallback;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

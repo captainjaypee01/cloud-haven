@@ -21,6 +21,7 @@ import DeleteDialog from "@/components/common/form/DeleteDialog";
 import { hasOvernightItems } from "@/utils/roomTypeUtils";
 import { useAppContext } from "@/context/AppContext";
 import { useMealDateRangesContext } from "@/context/MealDateRangesContext";
+import { staticImgAbsolute } from '@/constants/staticImages';
 
 export default function DayTour() {
     const api = useApi();
@@ -232,7 +233,7 @@ export default function DayTour() {
                 og={{
                     title: 'Day Tour Packages Laiya Batangas | Netania De Laiya',
                     description: 'Book Day Tour packages at Netania De Laiya beachfront resort in Laiya, San Juan, Batangas. Enjoy premium beachfront facilities, optional buffet lunch, PM snacks, pool & beach access from 8 AM to 5 PM.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
+                    image: staticImgAbsolute('/images/day-tour-1.jpg'),
                     url: 'https://www.netaniadelaiya.com/day-tour',
                     type: 'website',
                     locale: 'en_PH',
@@ -245,7 +246,7 @@ export default function DayTour() {
                     name: 'Day Tour Packages at Netania De Laiya',
                     description: 'Premium Day Tour packages at beachfront resort in Laiya, San Juan, Batangas. Includes beachfront facilities, pool access, optional buffet meals, and recreation activities from 8:00 AM to 5:00 PM.',
                     url: 'https://www.netaniadelaiya.com/day-tour',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757255495/day-tour-1.jpg',
+                    image: staticImgAbsolute('/images/day-tour-1.jpg'),
                     provider: {
                       '@type': 'Resort',
                       name: 'Netania De Laiya',

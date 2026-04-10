@@ -1,3 +1,5 @@
+import { STATIC_IMG } from '@/constants/staticImages';
+
 export const RESORT_POLICIES = {
   checkin: {
     title: "Resort Policy",
@@ -149,17 +151,4 @@ export const POLICY_ICONS = {
   pet: "🐕"
 };
 
-export const HERO_IMAGE = "https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg";
-
-// Base Cloudinary URL for optimization
-const CLOUDINARY_BASE_URL = "https://res.cloudinary.com/dm3gsotk5/image/upload";
-
-// Optimized Cloudinary images with transformations for better performance
-export const OPTIMIZED_IMAGES = {
-  hero: {
-    mobile: `${CLOUDINARY_BASE_URL}/f_auto,q_auto,w_768,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`,
-    tablet: `${CLOUDINARY_BASE_URL}/f_auto,q_auto,w_1024,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`,
-    desktop: `${CLOUDINARY_BASE_URL}/f_auto,q_auto,w_1920,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`,
-    webp: `${CLOUDINARY_BASE_URL}/f_webp,q_auto,w_1920,c_fill,g_auto/v1756913943/policy-1_b6xkhg.jpg`
-  }
-};
+export const HERO_IMAGE = STATIC_IMG.policyHero;

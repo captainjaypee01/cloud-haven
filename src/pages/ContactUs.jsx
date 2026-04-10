@@ -9,6 +9,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { HERO_CAROUSEL_IMAGES } from "@/constants/contact-us";
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 import { SUPPORT_EMAIL, SUPPORT_LANDLINE, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from "@/constants/AppConstant";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,7 +92,7 @@ const ContactUsPage = () => {
                 og={{
                   title: 'Contact & Reservations | Netania De Laiya',
                   description: 'Get in touch with Netania De Laiya for bookings, inquiries, and reservations. Located in the heart of Laiya, San Juan, Batangas, we offer excellent service and warm hospitality. Contact us at +63 949 798 9831 or +63 945 663 0848.',
-                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756914333/contact-1.jpg',
+                  image: staticImgAbsolute(STATIC_IMG.contact1),
                   url: 'https://www.netaniadelaiya.com/contact-us',
                   type: 'website',
                   locale: 'en_PH',

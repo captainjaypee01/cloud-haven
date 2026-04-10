@@ -142,8 +142,7 @@ export const RoomGallerySlider = ({
                                 sizes: [
                                     { width: 'w_400', descriptor: '400w' },
                                     { width: 'w_800', descriptor: '800w' },
-                                    { width: 'w_1200', descriptor: '1200w' },
-                                    { width: 'w_1920', descriptor: '1920w' }
+                                    { width: 'w_1200', descriptor: '1200w' }
                                 ]
                             });
                             
