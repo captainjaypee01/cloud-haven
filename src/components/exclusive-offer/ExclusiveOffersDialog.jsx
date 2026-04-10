@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Copy, CheckCircle2, X, ChevronLeft, ChevronRight, Calendar, Clock } from 'lucide-react';
 import { formatCurrency } from '../../utils/currency';
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { STATIC_IMG } from '@/constants/staticImages';
 
 const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
     const api = useApi();
@@ -145,7 +146,7 @@ const ExclusiveOffersDialog = ({ open, onOpenChange }) => {
                                 <div className="h-36 sm:h-64 relative">
                                     <div className="absolute inset-0">
                                         <OptimizedImage
-                                            src={currentOffer.image_url || 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1753977374/background2.jpg'}
+                                            src={currentOffer.image_url || STATIC_IMG.offerFallback}
                                             alt={currentOffer.title}
                                             className="w-full h-full object-cover"
                                         />

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import SEO from "@/components/SEO";
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 
 const Terms = () => {
 	const seoData = useMemo(() => ({
@@ -13,7 +14,7 @@ const Terms = () => {
 		og: { 
 			title: "Terms & Conditions | Netania De Laiya",
 			description: "Read the official Terms & Conditions including payment terms, booking & rescheduling, occupancy, security, pool/beach hours, and proper conduct. Located in the heart of Laiya, San Juan, Batangas with excellent service and warm hospitality.",
-			image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+			image: staticImgAbsolute(STATIC_IMG.bgCover),
 			url: "https://www.netaniadelaiya.com/terms", 
 			type: "website",
 			locale: 'en_PH',

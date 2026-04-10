@@ -7,6 +7,7 @@ import { AlertCircle } from "lucide-react";
 import RoomBlock from "../components/common/RoomBlock";
 import * as lucideIcons from "lucide-react";
 import SEO from "@/components/SEO";
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 
 const iconsModule = lucideIcons;
 const ICON_OPTIONS = Object.keys(iconsModule).sort();
@@ -26,7 +27,7 @@ export default function RoomsPage() {
                 og={{
                   title: 'Premium Rooms Laiya Batangas | Netania De Laiya',
                   description: 'Browse premium beachfront accommodations at Netania De Laiya in Laiya, San Juan, Batangas. Beach View, Pool Access, and Garden View rooms with direct beach access and luxury amenities.',
-                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1757269133/pv-1.jpg',
+                  image: staticImgAbsolute(STATIC_IMG.roomsOg),
                   url: 'https://www.netaniadelaiya.com/rooms',
                   type: 'website',
                   locale: 'en_PH',

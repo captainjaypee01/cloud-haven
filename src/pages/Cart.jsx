@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import SEO from "@/components/SEO";
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 import { useCart } from "../context/CartContext";
 import { usePromoCode } from "../context/PromoCodeContext";
 import { GuestSelector } from "../components/GuestSelector";
@@ -276,7 +277,7 @@ const Cart = () => {
                 og={{
                     title: 'Cart | Netania De Laiya',
                     description: 'Review your selected premium accommodations and booking details at Netania De Laiya. Complete your beachfront resort reservation with direct beach access and stunning ocean views in Laiya, Batangas.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                    image: staticImgAbsolute(STATIC_IMG.bgCover),
                     url: 'https://www.netaniadelaiya.com/cart',
                     type: 'website',
                     locale: 'en_PH',

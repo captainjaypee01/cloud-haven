@@ -11,6 +11,7 @@ import SeaWaveBg from '../components/common/SeaWaveBg';
 import { useLoader } from "@/context/LoaderContext";
 import { AlertCircleIcon, StarIcon, CheckCircleIcon } from 'lucide-react';
 import SEO from '@/components/SEO'
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages'
 
 const PublicReview = () => {
     const { token } = useParams();
@@ -156,7 +157,7 @@ const PublicReview = () => {
                     og={{
                         title: 'Leave a Review - Netania De Laiya Resort',
                         description: 'Share your experience at Netania De Laiya. Help other guests by leaving a review of your beachfront resort stay in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -181,7 +182,7 @@ const PublicReview = () => {
                     og={{
                         title: 'Leave a Review - Netania De Laiya Resort',
                         description: 'Share your experience at Netania De Laiya. Help other guests by leaving a review of your beachfront resort stay in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -212,7 +213,7 @@ const PublicReview = () => {
                     og={{
                         title: 'Leave a Review - Netania De Laiya Resort',
                         description: 'Share your experience at Netania De Laiya. Help other guests by leaving a review of your beachfront resort stay in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -243,7 +244,7 @@ const PublicReview = () => {
                     og={{
                         title: 'Review Submitted | Netania De Laiya',
                         description: 'Thank you for your review. Your feedback helps us improve our premium beachfront resort services with exceptional hospitality in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'

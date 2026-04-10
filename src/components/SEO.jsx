@@ -38,9 +38,16 @@ export default function SEO({
   const providedImage = image || (og && og.image) || null;
   const baseImage = providedImage || defaultImage;
   // If Cloudinary, transform for OG/Twitter card size 1200x630
-  const finalImage = baseImage && baseImage.includes('res.cloudinary.com')
-    ? getOptimizedImageUrl(baseImage, { width: 'w_1200', height: 'h_630', crop: 'fill', gravity: 'auto', quality: 'auto', format: 'auto', responsive: false })
-    : baseImage;
+  const finalImage = (() => {
+    if (!baseImage) return baseImage;
+    if (baseImage.includes('res.cloudinary.com')) {
+      return getOptimizedImageUrl(baseImage, { width: 'w_1200', height: 'h_630', crop: 'fill', gravity: 'auto', quality: 'auto:eco', format: 'auto', responsive: false });
+    }
+    if (baseImage.startsWith('/')) {
+      return `${SITE_URL}${baseImage}`;
+    }
+    return baseImage;
+  })();
   const finalKeywords = keywords || defaultKeywords;
   
   // Generate comprehensive structured data for sitelinks

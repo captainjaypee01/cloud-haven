@@ -3,16 +3,16 @@ import { getOptimizedImageUrl, getSrcSet } from '@/utils/imageOptimization';
 
 /**
  * OptimizedImage renders a Cloudinary image with sensible defaults:
- * - f_auto,q_auto,dpr_auto
- * - responsive srcset
- * Falls back to original src if not a Cloudinary URL.
+ * - f_auto, q_auto:eco, dpr_auto (lighter files vs default q_auto)
+ * - responsive srcset (400 / 800 / 1200)
+ * Falls back to plain <img> if not a Cloudinary URL (e.g. /images/* on your host).
  */
 export const OptimizedImage = ({
     src,
     alt = '',
     className = '',
     sizes = '(max-width: 768px) 400px, (max-width: 1024px) 800px, 1200px',
-    widthPreset = ['w_400', 'w_800', 'w_1200', 'w_1920'],
+    widthPreset = ['w_400', 'w_800', 'w_1200'],
     fit = 'fill',
     gravity = 'auto',
     loading = 'lazy',
@@ -51,7 +51,7 @@ export const OptimizedImage = ({
     const optimizedSrc = getOptimizedImageUrl(src, {
         crop: fit,
         gravity,
-        quality: 'auto',
+        quality: 'auto:eco',
         format: 'auto',
         responsive: true,
     });

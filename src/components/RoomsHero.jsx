@@ -3,7 +3,6 @@ import {
     CarouselContent,
     CarouselItem,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay"
 import OptimizedImage from '@/components/common/OptimizedImage'
 
 const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
@@ -12,12 +11,6 @@ const RoomsHero = ({ imageUrls, title = "Accommodations" }) => {
             <Carousel
                 className="h-screen w-full"
                 opts={{ loop: true, align: "center" }}
-                plugins={[
-                    Autoplay({
-                        playOnInit: true,
-                        delay: 3000,
-                    }),
-                ]}
             >
                 <CarouselContent>
                     {imageUrls.map((url, idx) => (

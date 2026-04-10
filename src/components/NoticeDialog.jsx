@@ -17,13 +17,14 @@ import {
 import { Info } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay";
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { STATIC_IMG } from '@/constants/staticImages';
 
 const NoticeDialog = ({ open, onOpenChange }) => {
     // Array of notice images - can be easily expanded
     const noticeImages = [
         {
             id: 1,
-            url: 'https://res.cloudinary.com/dm3gsotk5/image/upload/w_1200,c_fill,g_auto,q_auto,f_auto/v1767373941/notice-1.jpg', // Add your speaker notice image URL here
+            url: STATIC_IMG.notice,
             alt: 'Speaker Policy Notice'
         },
         // More images can be added here as they become available

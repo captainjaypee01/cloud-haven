@@ -9,6 +9,7 @@ import { API_PREFIX } from "@/constants/api";
 import { formatDate } from "@/lib/format";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import SEO from "@/components/SEO";
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 import ProofOfPaymentDialog from "../components/payment/ProofOfPaymentDialog";
 import { CreditCard, Calendar, Users, Building, ArrowLeft, CheckCircle, Clock } from "lucide-react";
 
@@ -72,7 +73,7 @@ const PaymentPage = () => {
                     og={{
                         title: 'Loading Payment | Netania De Laiya',
                         description: 'Loading payment page for your Netania De Laiya booking.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -114,7 +115,7 @@ const PaymentPage = () => {
                     og={{
                         title: 'Booking Payment - Netania De Laiya Resort',
                         description: 'Complete your payment for Netania De Laiya booking. Secure your beachfront resort reservation in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'
@@ -145,7 +146,7 @@ const PaymentPage = () => {
                     og={{
                         title: 'Booking Payment - Netania De Laiya Resort',
                         description: 'Complete your payment for Netania De Laiya booking. Secure your beachfront resort reservation in Laiya, Batangas.',
-                        image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                        image: staticImgAbsolute(STATIC_IMG.bgCover),
                         type: 'website',
                         locale: 'en_PH',
                         siteName: 'Netania De Laiya'

@@ -49,7 +49,7 @@ const RoomDetails = () => {
     const optimizedMainImage = mainImage ? getOptimizedImageUrl(mainImage, {
         width: 'w_800',
         height: 'h_auto',
-        quality: 'auto',
+        quality: 'auto:eco',
         format: 'auto'
     }) : roomPhotos[0];
     const [requireDatesOpen, setRequireDatesOpen] = useState(false);

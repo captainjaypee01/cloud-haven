@@ -26,6 +26,7 @@ import { API_PREFIX } from "@/constants/api";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import { useState, useEffect } from "react";
 import SEO from "@/components/SEO";
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
 
@@ -279,7 +280,7 @@ const CheckoutPage = () => {
                 og={{
                     title: 'Checkout | Netania De Laiya',
                     description: 'Confirm your booking and guest details at Netania De Laiya. Complete your premium beachfront resort reservation with direct beach access and exceptional service in Laiya, Batangas.',
-                    image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+                    image: staticImgAbsolute(STATIC_IMG.bgCover),
                     url: 'https://www.netaniadelaiya.com/checkout',
                     type: 'website',
                     locale: 'en_PH',

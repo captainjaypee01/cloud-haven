@@ -18,6 +18,7 @@ import {
 import { AlertTriangle } from 'lucide-react';
 import Autoplay from "embla-carousel-autoplay";
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { STATIC_IMG } from '@/constants/staticImages';
 import { SUPPORT_EMAIL, SUPPORT_PHONE, SUPPORT_PHONE_ALT } from '@/constants/AppConstant';
 
 const ScamAwarenessDialog = ({ open, onOpenChange }) => {
@@ -25,7 +26,7 @@ const ScamAwarenessDialog = ({ open, onOpenChange }) => {
     const scamImages = [
         {
             id: 1,
-            url: 'https://res.cloudinary.com/dm3gsotk5/image/upload/w_1200,c_fill,g_auto,q_auto,f_auto/v1764406717/ScamFacebook.png',
+            url: STATIC_IMG.scamFacebook,
             alt: 'Scam Facebook Page Warning 1'
         },
         // More images can be added here as they become available

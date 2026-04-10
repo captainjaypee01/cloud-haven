@@ -14,6 +14,7 @@ import FAQSection from '../components/FAQSection'
 import PerformanceOptimizer from '../components/PerformanceOptimizer'
 import MobileFix from '../components/MobileFix'
 import SEO from '@/components/SEO'
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages'
 
 const Home = () => {
   const [showOffersDialog, setShowOffersDialog] = useState(true);
@@ -31,7 +32,7 @@ const Home = () => {
         og={{
           title: 'Beachfront Resort Laiya Batangas | Netania De Laiya',
           description: 'Book your stay at Netania De Laiya - premium beachfront resort in Laiya, San Juan, Batangas. Direct beach access, infinity pool, luxury accommodations, Day Tour packages.',
-          image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+          image: staticImgAbsolute(STATIC_IMG.bgCover),
           url: 'https://www.netaniadelaiya.com/',
           type: 'website',
           locale: 'en_PH',
@@ -43,7 +44,7 @@ const Home = () => {
             '@type': 'Resort',
             name: 'Netania De Laiya',
             url: 'https://www.netaniadelaiya.com/',
-            image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1754846908/bg-cover.jpg',
+            image: staticImgAbsolute(STATIC_IMG.bgCover),
             logo: 'https://www.netaniadelaiya.com/logo.jpg',
             telephone: '+63 949 798 9831',
             email: 'info@netaniadelaiya.com',

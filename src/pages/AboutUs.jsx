@@ -9,6 +9,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { ABOUT_US_CAROUSEL_IMAGES } from "@/constants/about-us";
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { STATIC_IMG, staticImgAbsolute } from '@/constants/staticImages';
 
 const AboutUs = () => {
     const images = ABOUT_US_CAROUSEL_IMAGES;  // using existing room images for the hero carousel
@@ -22,7 +23,7 @@ const AboutUs = () => {
                 og={{
                   title: 'About Netania De Laiya - Laiya Beach Resort',
                   description: 'Discover the story behind Netania De Laiya, a family-friendly beachfront resort in Laiya, San Juan, Batangas. Experience our commitment to providing exceptional value with beach access, swimming pool, and hotel-quality accommodations.',
-                  image: 'https://res.cloudinary.com/dm3gsotk5/image/upload/v1756913943/policy-1_b6xkhg.jpg',
+                  image: staticImgAbsolute(STATIC_IMG.policyHero),
                   url: 'https://www.netaniadelaiya.com/about-us',
                   type: 'website',
                   locale: 'en_PH',
