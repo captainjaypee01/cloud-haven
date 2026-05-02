@@ -9,7 +9,7 @@ export const RESORT_POLICIES = {
         category: "Guidelines",
         rules: [
           "1.1 Check-in time: 3:00 PM / Check-out time: 1:00 PM. Extended hours depend on availability; rate adjustment applies; requires at least 16 hours advance notice.",
-          "1.2 You may enter the resort gate 15 minutes before check-in to settle the balance. Wait in parking or seating areas until 3:00 PM.",
+          "1.2 You may enter the resort gate 5 minutes before check-in to settle the balance. Wait in parking or seating areas until 3:00 PM.",
           "1.3 Rescheduling: Inform the resort 1 week before schedule. Deposits are non-refundable; rescheduling valid for 30 days.",
           "1.4 Final rooms and headcount due 1 week before schedule. Reductions without notice are not refundable. Drivers are included. Children 3 and below are free of charge.",
           "1.5 Forfeited reservation if the client fails to arrive on the reserved date.",
@@ -28,7 +28,8 @@ export const RESORT_POLICIES = {
         rules: [
           "2.1 Room capacity shall be strictly observed.",
           "2.2 Bringing food is not allowed inside rooms. Order via resort restaurant an hour in advance. Snacks, chips, bread, pizza, fruits, fast food, liquor and drinks are allowed — no corkage.",
-          "2.3 Bringing lechon (corkage fee ₱2,500)."
+          "2.3 Bringing lechon (corkage fee ₱2,500).",
+          "2.4 Mobile Bar: with corkage fee ₱2,500"
         ]
       }
     ]

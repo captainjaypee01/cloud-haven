@@ -70,7 +70,7 @@ const Terms = () => {
 									<strong>1.1</strong> Check-in time: 3:00 PM / Check-out time: 1:00 PM. Extended hours may be allowed depending on room availability; rate adjustment applies; requires at least 16 hours advance notice.
 								</li>
 								<li>
-									<strong>1.2</strong> You may enter the resort gate 15 minutes before check-in to settle the balance. Please wait in the parking area or at available seating while waiting for check-in at 3:00 PM.
+									<strong>1.2</strong> You may enter the resort gate 5 minutes before check-in to settle the balance. Please wait in the parking area or at available seating while waiting for check-in at 3:00 PM.
 								</li>
 								<li>
 									<strong>1.3</strong> Rescheduling: Inform the resort 1 week before the schedule. Deposits are non-refundable but we allow rescheduling (valid for 30 days).
@@ -94,6 +94,7 @@ const Terms = () => {
 									<strong>2.2</strong> Bringing food is not allowed inside the rooms. You can order through the resort restaurant menu an hour in advance. You may bring snacks, chips, bread, pizza, fruits, fast food, liquor and drinks — no corkage.
 								</li>
 								<li><strong>2.3</strong> Bringing lechon (with corkage fee ₱2,500).</li>
+								<li><strong>2.4</strong> Mobile Bar: with corkage fee ₱2,500</li>
 							</ul>
 
 							<h3 className="text-lg font-medium mt-6 mb-2">3. Damages and Losses of Resort's Property</h3>
