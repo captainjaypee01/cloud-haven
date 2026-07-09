@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useApi } from '@/hooks/useApi';
+import { useBookingChangePreview } from '@/hooks/useBookingChangePreview';
+import BookingChangeBalancePreview from '@/components/admin/booking/BookingChangeBalancePreview';
 import { API_PREFIX } from '@/constants/api';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -59,6 +61,7 @@ const buildSchema = (checkInDate) =>
 const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) => {
     const api = useApi();
     const [submitting, setSubmitting] = useState(false);
+    const [acknowledgeShortfall, setAcknowledgeShortfall] = useState(false);
 
     const checkIn = booking?.check_in_date;
     /**
@@ -85,8 +88,26 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
                 new_check_out_date: booking.check_out_date || '',
                 modification_reason: '',
             });
+            setAcknowledgeShortfall(false);
         }
     }, [open, booking, form]);
+
+    const watchedOut = form.watch('new_check_out_date');
+    const datesChanged = watchedOut && booking?.check_out_date && watchedOut !== booking.check_out_date;
+
+    const previewParams = useMemo(() => {
+        if (!datesChanged || !watchedOut) return null;
+        return { new_check_out_date: watchedOut };
+    }, [datesChanged, watchedOut]);
+
+    const { preview, loading: previewLoading } = useBookingChangePreview(
+        booking?.id,
+        'adjust_nights',
+        previewParams,
+        open && !!datesChanged
+    );
+
+    const requiresAcknowledgement = preview?.downpayment_shortfall === true;
 
     const originalNights = useMemo(() => {
         if (!booking?.check_in_date || !booking?.check_out_date) return 0;
@@ -96,7 +117,6 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
         return differenceInDays(out, inn);
     }, [booking]);
 
-    const watchedOut = form.watch('new_check_out_date');
     const newNights = useMemo(() => {
         if (!checkIn || !watchedOut) return 0;
         const out = parseDateOnlyLocal(watchedOut);
@@ -106,6 +126,11 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
     }, [checkIn, watchedOut]);
 
     const handleSubmit = async (values) => {
+        if (requiresAcknowledgement && !acknowledgeShortfall) {
+            toast.error('Please acknowledge the downpayment shortfall before saving.');
+            return;
+        }
+
         setSubmitting(true);
         try {
             await api.patch(
@@ -115,6 +140,7 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
                     ...(values.modification_reason?.trim()
                         ? { modification_reason: values.modification_reason.trim() }
                         : {}),
+                    ...(acknowledgeShortfall ? { acknowledge_downpayment_shortfall: true } : {}),
                 },
                 { requiresAuth: true }
             );
@@ -122,11 +148,15 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (err) {
-            const msg =
-                err.response?.data?.error ||
-                err.response?.data?.message ||
-                'Failed to adjust stay length';
-            toast.error(msg);
+            if (err.response?.data?.downpayment_shortfall) {
+                toast.error(err.response.data.error || 'Downpayment shortfall must be acknowledged.');
+            } else {
+                const msg =
+                    err.response?.data?.error ||
+                    err.response?.data?.message ||
+                    'Failed to adjust stay length';
+                toast.error(msg);
+            }
         } finally {
             setSubmitting(false);
         }
@@ -206,6 +236,13 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
                             )}
                         />
 
+                        <BookingChangeBalancePreview
+                            preview={preview}
+                            loading={previewLoading}
+                            acknowledgeChecked={acknowledgeShortfall}
+                            onAcknowledgeChange={setAcknowledgeShortfall}
+                        />
+
                         <DialogFooter className="gap-2 sm:gap-0">
                             <Button
                                 type="button"
@@ -215,7 +252,10 @@ const AdjustBookingNightsDialog = ({ open, onOpenChange, booking, onSuccess }) =
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={submitting}>
+                            <Button
+                                type="submit"
+                                disabled={submitting || !datesChanged || (requiresAcknowledgement && !acknowledgeShortfall)}
+                            >
                                 {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                                 Save
                             </Button>

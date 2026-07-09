@@ -25,7 +25,10 @@ import { useLoader } from "@/context/LoaderContext";
 import SeaWaveBg from "../components/common/SeaWaveBg";
 import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
-import { formatBuffetDate, formatBuffetSummaryDates, formatBuffetExtraGuestDates, formatMealDate, formatBuffetDateRange, formatBuffetDateRangeWithLabels, getBuffetMealLabels } from "../utils/dateUtils";
+import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange, formatBuffetDateRangeWithLabels, getBuffetMealLabels } from "../utils/dateUtils";
+import { ExtraGuestFeeSummary } from "../components/cart/ExtraGuestFeeBreakdown";
+import CartListViewToggle from "../components/cart/CartListViewToggle";
+import { CART_LIST_VIEW_STORAGE_KEY } from "../components/cart/cartRoomUtils";
 
 const Cart = () => {
     const api = useApi();
@@ -37,11 +40,20 @@ const Cart = () => {
     const [checking, setChecking] = useState(false);
     const [unavailable, setUnavailable] = useState([]);
     const [dayTourMealData, setDayTourMealData] = useState(null);
+    const [cartListView, setCartListView] = useState(() => {
+        if (typeof window === 'undefined') return 'detailed';
+        return localStorage.getItem(CART_LIST_VIEW_STORAGE_KEY) || 'detailed';
+    });
     const { navigate } = useAppContext();
+
+    const handleCartListViewChange = (view) => {
+        setCartListView(view);
+        localStorage.setItem(CART_LIST_VIEW_STORAGE_KEY, view);
+    };
     
     // Ref to prevent infinite loops during promo recalculation
     const isRecalculating = useRef(false);
-    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
+    const { summary, grandTotal, totalGuests, numNights, totalAdults, totalChildren, mealCost, extraGuestFeeTotal, roomTotalPrice, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo, recalculatePromo } = usePromoCode();
     // Keep form in sync with cart summary
     useSyncCartForm(items, reset);
@@ -296,7 +308,8 @@ const Cart = () => {
                             </Button>
                         </div>
                     ) : (
-                        <div className="space-y-8 mb-8">
+                        <div className="mb-8">
+                            <CartListViewToggle value={cartListView} onChange={handleCartListViewChange} />
                             <CartList
                                 summary={summary}
                                 removeItem={removeItem}
@@ -307,6 +320,7 @@ const Cart = () => {
                                 isDayTourCart={isDayTourCart}
                                 dayTourMealData={dayTourMealData}
                                 mealQuote={mealQuote}
+                                viewMode={cartListView}
                             />
                             <RoomDetailModal
                                 open={modalOpen}
@@ -471,58 +485,20 @@ const Cart = () => {
                                         </div>
                                     )}
                                     
-                                    {/* Extra Guest Breakfast Fees - separate line */}
-                                    {mealQuote.nights.some(night => night.breakfast_total > 0) && (
+                                    {/* Additional guest fees — separate from meals */}
+                                    {extraGuestFeeTotal > 0 && (
                                         <div className="flex justify-between text-sm font-medium">
                                             <div className="flex flex-col">
-                                                <span>
-                                                    Extra Guest ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
-                                                </span>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {mealQuote.nights
-                                                            .filter(night => night.breakfast_total > 0)
-                                                            .map(night => formatMealDate(night.end_date))
-                                                            .join(', ')
-                                                        }
-                                                    </div>
+                                                <span>Additional Guest Fees</span>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Entrance, amenities &amp; related services
+                                                </p>
                                             </div>
-                                            <span className="text-orange-600">
-                                                {formatCurrency(mealQuote.nights
-                                                    .reduce((total, night) => total + (night.breakfast_total || 0), 0)
-                                                )}
+                                            <span className="text-amber-700">
+                                                {formatCurrency(extraGuestFeeTotal)}
                                             </span>
                                         </div>
                                     )}
-
-                                    {/* Extra Guest Fees (Buffet Days) - separate line */}
-                                    {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (() => {
-                                        // Calculate total extra guests across all rooms
-                                        const totalExtraGuests = summary.reduce((roomTotal, item) => {
-                                            const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
-                                            return roomTotal + extraGuestsInRoom;
-                                        }, 0);
-                                        
-                                        return (
-                                            <div className="flex justify-between text-sm font-medium">
-                                                <div className="flex flex-col">
-                                                    <span>
-                                                        Extra Guest ({totalExtraGuests}) (Buffet Days)
-                                                    </span>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {formatBuffetExtraGuestDates(mealQuote.nights.filter(night => night.type === 'buffet' && night.extra_guest_fee > 0))}
-                                                    </div>
-                                                </div>
-                                                <span className="text-purple-600">
-                                                    {formatCurrency(mealQuote.nights
-                                                        .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                        .reduce((total, night) => {
-                                                            return total + (totalExtraGuests * night.extra_guest_fee);
-                                                        }, 0)
-                                                    )}
-                                                </span>
-                                            </div>
-                                        );
-                                    })()}
                                 </>
                             )}
                             
@@ -537,13 +513,12 @@ const Cart = () => {
                             {/* Professional Meal Breakdown */}
                             {mealQuote && mealQuote.nights && !mealLoading && (
                                 <div className="mt-3 p-4 bg-gray-50 rounded-lg">
-                                    {/* <h4 className="text-sm font-semibold text-gray-800 mb-3">Meal Breakdown</h4> */}
+                                    <h4 className="text-sm font-semibold text-gray-800 mb-3">Meal Breakdown</h4>
                                     <div className="space-y-4">
                                         {mealQuote.nights.map((night, index) => (
                                             <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
                                                 {night.type === 'buffet' ? (
                                                     <>
-                                                        {/* Date Header for Buffet */}
                                                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 gap-1">
                                                             <div className="flex flex-col">
                                                                 <span className="text-sm font-medium text-gray-700">
@@ -557,25 +532,8 @@ const Cart = () => {
                                                                 {formatCurrency(night.night_total)}
                                                             </span>
                                                         </div>
-                                                        
-                                                        {/* Buffet Breakdown Details */}
-                                                        {/* <div className="ml-4 space-y-1 text-xs text-gray-600">
-                                                            {totalAdults > 0 && (
-                                                                <div className="flex justify-between">
-                                                                    <span>{totalAdults} Adult{totalAdults > 1 ? 's' : ''} - {formatCurrency(night.adult_price || 0)} each</span>
-                                                                    <span className="font-medium">{formatCurrency(totalAdults * (night.adult_price || 0))}</span>
-                                                                </div>
-                                                            )}
-                                                            {totalChildren > 0 && (
-                                                                <div className="flex justify-between">
-                                                                    <span>{totalChildren} Child{totalChildren > 1 ? 'ren' : ''} - {formatCurrency(night.child_price || 0)} each</span>
-                                                                    <span className="font-medium">{formatCurrency(totalChildren * (night.child_price || 0))}</span>
-                                                                </div>
-                                                            )}
-                                                        </div> */}
                                                     </>
                                                 ) : (
-                                                    /* Simplified Free Breakfast Display */
                                                     <div className="text-sm font-medium text-gray-700">
                                                         <div>
                                                             {formatMealDate(night.end_date)} - Free Breakfast
@@ -587,64 +545,12 @@ const Cart = () => {
                                                 )}
                                             </div>
                                         ))}
-                                        
-                                        {/* Extra Guest Fees (Buffet Days) */}
-                                        {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (() => {
-                                            // Calculate total extra guests across all rooms
-                                            const totalExtraGuests = summary.reduce((roomTotal, item) => {
-                                                const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
-                                                return roomTotal + extraGuestsInRoom;
-                                            }, 0);
-                                            
-                                            return (
-                                                <div className="space-y-3">
-                                                    {mealQuote.nights
-                                                        .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                        .map((night, index) => {
-                                                            const extraGuestFeeTotal = totalExtraGuests * night.extra_guest_fee;
-                                                            
-                                                            return (
-                                                                <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
-                                                                    {/* Date Header for Extra Guest Fee */}
-                                                                    <div className="flex justify-between items-center mb-2">
-                                                                        <span className="text-sm font-medium text-gray-700">
-                                                                            {formatBuffetDate(night.date)} - Extra Guest ({totalExtraGuests})
-                                                                        </span>
-                                                                        <span className="text-sm font-semibold text-gray-900">
-                                                                            {formatCurrency(extraGuestFeeTotal)}
-                                                                        </span>
-                                                                    </div>
-                                                                    
-                                                                    {/* Extra Guest Fee Breakdown Details */}
-                                                                    {/* <div className="ml-4 space-y-1 text-xs text-gray-600">
-                                                                        <div className="flex justify-between">
-                                                                            <span>{totalExtraGuests} Extra Guest{totalExtraGuests > 1 ? 's' : ''} - {formatCurrency(night.extra_guest_fee)} each</span>
-                                                                            <span className="font-medium">{formatCurrency(extraGuestFeeTotal)}</span>
-                                                                        </div>
-                                                                    </div> */}
-                                                                </div>
-                                                            );
-                                                        })}
-                                                </div>
-                                            );
-                                        })()}
-                                        
-                                        {/* Total */}
-                                        {/* <div className="pt-2">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-sm font-semibold text-gray-800">Total Meal Cost</span>
-                                                <span className="text-sm font-bold text-green-600">{formatCurrency(mealCost)}</span>
-                                            </div>
-                                        </div> */}
-                                        
-                                        {/* Extra Guest Note */}
-                                        {/* {mealQuote.nights.some(night => night.breakfast_total > 0) && (
-                                            <div className="text-xs text-orange-700 bg-orange-50 p-2 rounded">
-                                                <i>* Extra guest breakfast fees apply to guests beyond room capacity</i>
-                                            </div>
-                                        )} */}
                                     </div>
                                 </div>
+                            )}
+
+                            {mealQuote && mealQuote.nights && !mealLoading && extraGuestFeeTotal > 0 && (
+                                <ExtraGuestFeeSummary nights={mealQuote.nights} summary={summary} />
                             )}
                         </>
                     )}

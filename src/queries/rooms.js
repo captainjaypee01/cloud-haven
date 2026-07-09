@@ -19,12 +19,15 @@ export const useRooms = () => {
 
 export const useRoom = (id) => {
     const api = useApi();
+    const { state } = useCart();
+    const { checkIn, checkOut } = state;
+    const params = createGetParameters({ check_in: checkIn, check_out: checkOut });
     return useQuery({
-        queryKey: ["rooms", id],
+        queryKey: ["rooms", id, checkIn, checkOut],
         enabled: !!id,
         queryFn: async () => {
             try {
-                return await roomsSvc.showRoom(api, id);
+                return await roomsSvc.showRoom(api, id, params);
             } catch (err) {
                 if (err.response?.status === 404) {
                     const custom = new Error(err.response.data.error);

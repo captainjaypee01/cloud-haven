@@ -148,7 +148,19 @@ export default function RoomBlock({ room, index, reverse, iconsModule }) {
 
                     {/* Price (new line) */}
                     <p className="text-gray-800 font-medium mb-2">
-                        Starting from: <span className="text-xl font-bold text-sky-700">{formatCurrency(room.price)}</span> / night
+                        {state.checkIn && state.checkOut && room.stay_total != null ? (
+                            <>
+                                <span className="text-xl font-bold text-sky-700">{formatCurrency(room.stay_total)}</span>
+                                <span className="text-gray-600"> total for stay</span>
+                                <span className="block text-sm text-gray-500">
+                                    {formatCurrency(room.price_per_night_avg ?? room.price)} avg / night
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                Starting from: <span className="text-xl font-bold text-sky-700">{formatCurrency(room.price)}</span> / night
+                            </>
+                        )}
                     </p>
                     {/* Max guests (separate line) */}
                     <p className="text-gray-600 mb-4">

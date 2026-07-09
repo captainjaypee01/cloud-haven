@@ -7,7 +7,9 @@ export function useApi() {
     const { getToken, signOut } = useAuth();             // ← now legal
     
     return useMemo(() => {
-        const baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+        // In dev, use same-origin /api (Vite proxy). Override with VITE_BACKEND_URL when needed.
+        const baseURL = import.meta.env.VITE_BACKEND_URL
+            ?? (import.meta.env.DEV ? '' : 'http://localhost:8000');
         const instance = axios.create({ baseURL });
 
         instance.interceptors.request.use(async (config) => {

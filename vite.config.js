@@ -14,4 +14,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      // Same-origin API in dev — avoids CORS between localhost:5173 and cloud-haven-api.test
+      '/api': {
+        target: 'http://cloud-haven-api.test',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

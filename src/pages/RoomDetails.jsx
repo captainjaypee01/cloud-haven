@@ -300,8 +300,27 @@ const RoomDetails = () => {
             )}
 
             {/* Room Price */}
-            <div className='flex items-center gap-1 mt-2'>
-                <p className='text-lg font-bold'>{formatCurrency(room.price)} /night</p>
+            <div className='flex flex-col gap-0.5 mt-2'>
+                {state?.checkIn && state?.checkOut && room.stay_total != null ? (
+                    <>
+                        <p className='text-lg font-bold'>{formatCurrency(room.stay_total)} total for stay</p>
+                        <p className='text-sm text-muted-foreground'>
+                            {formatCurrency(room.price_per_night_avg ?? room.price)} avg / night
+                        </p>
+                        {room.nightly_rates?.length > 0 && (
+                            <div className="mt-2 text-sm text-muted-foreground space-y-0.5">
+                                {room.nightly_rates.map((n) => (
+                                    <div key={n.date} className="flex justify-between max-w-xs">
+                                        <span>{n.date}</span>
+                                        <span>{formatCurrency(n.rate)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <p className='text-lg font-bold'>{formatCurrency(room.price)} /night</p>
+                )}
             </div>
 
             {/* Share */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -11,6 +11,8 @@ import { Switch } from '@/components/ui/switch';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { Plus, Trash2, Users, User, Baby, Loader2, Home, Calendar, AlertTriangle } from 'lucide-react';
 import { useBookingModification } from '@/hooks/useBookingModification';
+import { useBookingChangePreview } from '@/hooks/useBookingChangePreview';
+import BookingChangeBalancePreview from '@/components/admin/booking/BookingChangeBalancePreview';
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -28,6 +30,7 @@ const BookingRoomModificationDialog = ({
     const [availableUnits, setAvailableUnits] = useState({}); // room_slug -> units array
     const [loadingUnits, setLoadingUnits] = useState({}); // room_slug -> loading state
     const [initialRoomsData, setInitialRoomsData] = useState([]); // Store initial room data
+    const [acknowledgeShortfall, setAcknowledgeShortfall] = useState(false);
     const { modifyBooking, isLoading } = useBookingModification();
     const api = useApi();
 
@@ -67,8 +70,48 @@ const BookingRoomModificationDialog = ({
             
             // Store initial rooms data for reference
             setInitialRoomsData(initialRooms);
+            setAcknowledgeShortfall(false);
         }
     }, [booking, open]);
+
+    const watchedRooms = form.watch('rooms');
+
+    const normalizeRoomsForCompare = (rooms) => (rooms || []).map((room) => ({
+        room_id: room.room_id,
+        adults: room.adults,
+        children: room.children,
+        total_guests: room.total_guests,
+        room_unit_id: room.room_unit_id || null,
+    }));
+
+    const roomsChanged = useMemo(() => {
+        if (!initialRoomsData.length || !watchedRooms?.length) return false;
+        return JSON.stringify(normalizeRoomsForCompare(watchedRooms))
+            !== JSON.stringify(normalizeRoomsForCompare(initialRoomsData));
+    }, [watchedRooms, initialRoomsData]);
+
+    const previewParams = useMemo(() => {
+        if (!roomsChanged || !watchedRooms?.length) return null;
+        const validRooms = watchedRooms.filter((room) => room.room_id && room.total_guests >= 1);
+        if (!validRooms.length) return null;
+        return {
+            rooms: validRooms.map((room) => ({
+                room_id: room.room_id,
+                adults: room.adults,
+                children: room.children,
+                total_guests: room.total_guests,
+            })),
+        };
+    }, [roomsChanged, watchedRooms]);
+
+    const { preview, loading: previewLoading } = useBookingChangePreview(
+        booking?.id,
+        'modify',
+        previewParams,
+        open && !!previewParams
+    );
+
+    const requiresAcknowledgement = preview?.downpayment_shortfall === true;
 
     // Load available rooms and units when dialog opens
     useEffect(() => {
@@ -449,8 +492,14 @@ const BookingRoomModificationDialog = ({
                     room_unit_id: room.room_unit_id || null
                 })),
                 modification_reason: data.modification_reason || null,
-                send_email: data.send_email || false
+                send_email: data.send_email || false,
+                ...(acknowledgeShortfall ? { acknowledge_downpayment_shortfall: true } : {}),
             };
+
+            if (requiresAcknowledgement && !acknowledgeShortfall) {
+                toast.error('Please acknowledge the downpayment shortfall before saving.');
+                return;
+            }
 
             await modifyBooking(booking.id, modificationData);
             onSuccess();
@@ -911,6 +960,13 @@ const BookingRoomModificationDialog = ({
                             )}
                         />
 
+                        <BookingChangeBalancePreview
+                            preview={preview}
+                            loading={previewLoading}
+                            acknowledgeChecked={acknowledgeShortfall}
+                            onAcknowledgeChange={setAcknowledgeShortfall}
+                        />
+
                         <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
                             <Button
                                 type="button"
@@ -923,7 +979,7 @@ const BookingRoomModificationDialog = ({
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading || isLoadingRooms}
+                                disabled={isLoading || isLoadingRooms || !roomsChanged || (requiresAcknowledgement && !acknowledgeShortfall)}
                                 className="w-full sm:w-auto"
                             >
                                 {isLoading ? (

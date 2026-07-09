@@ -33,6 +33,7 @@ const NotFound = React.lazy(() => import('./pages/NotFound'));
 const Layout = React.lazy(() => import('./pages/admin/Layout'));
 const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
 const ListRoom = React.lazy(() => import('./pages/admin/rooms/ListRoom'));
+const RoomPricingCalendar = React.lazy(() => import('./pages/admin/rooms/RoomPricingCalendar'));
 const ListRoomUnits = React.lazy(() => import('./pages/admin/room-units/ListRoomUnits'));
 const RoomUnitCalendarPage = React.lazy(() => import('./pages/admin/room-units/RoomUnitCalendarPage'));
 const BlockedDatesListPage = React.lazy(() => import('./pages/admin/room-units/BlockedDatesListPage'));
@@ -46,6 +47,7 @@ const ListPromos = React.lazy(() => import('./pages/admin/promos/ListPromos'));
 const ListUsers = React.lazy(() => import('./pages/admin/users/ListUsers'));
 const ManageImages = React.lazy(() => import('./pages/admin/images/ManageImages'));
 const ListDayTourPricing = React.lazy(() => import('./pages/admin/day-tour-pricing/ListDayTourPricing'));
+const RoomRevenueReport = React.lazy(() => import('./pages/admin/reports/RoomRevenueReport'));
 const ListPayment = React.lazy(() => import('./pages/admin/payments/ListPayment'));
 const ListReviews = React.lazy(() => import('./pages/admin/reviews/ListReviews'));
 
@@ -188,6 +190,11 @@ const App = () => {
                       <ListRoom />
                     </RoleBasedRoute>
                   } />
+                  <Route path="rooms/:roomId/pricing" element={
+                    <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
+                      <RoomPricingCalendar />
+                    </RoleBasedRoute>
+                  } />
                   <Route path="room-units/:roomId" element={
                     <RoleBasedRoute allowedRoles={['admin', 'superadmin']}>
                       <ListRoomUnits />
@@ -259,7 +266,7 @@ const App = () => {
                   } />
                   <Route path="reports" element={
                     <RoleBasedRoute allowedRoles={['superadmin']}>
-                      <ListRoom />
+                      <RoomRevenueReport />
                     </RoleBasedRoute>
                   } />
                   <Route path="images" element={

@@ -19,7 +19,12 @@ export const useBookingModification = () => {
             toast.success('Booking modified successfully');
             return response.data;
         } catch (error) {
-            const errorMessage = error.response?.data?.message || 'Failed to modify booking';
+            if (error.response?.data?.downpayment_shortfall) {
+                toast.error(error.response.data.error || 'Downpayment shortfall must be acknowledged.');
+            }
+            const errorMessage = error.response?.data?.error
+                || error.response?.data?.message
+                || 'Failed to modify booking';
             toast.error(errorMessage);
             throw error;
         } finally {

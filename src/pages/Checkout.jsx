@@ -500,31 +500,17 @@ const CheckoutPage = () => {
                                         </div>
                                     )}
                                     
-                                    {/* Extra Guest Breakfast Fees - separate line */}
-                                    {mealQuote.nights.some(night => night.breakfast_total > 0) && (
+                                    {/* Additional guest fees — separate from meals */}
+                                    {extraGuestFeeTotal > 0 && (
                                         <div className="flex justify-between text-sm font-medium">
-                                            <span>
-                                                Extra Guest ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
-                                            </span>
-                                            <span className="text-orange-600">
-                                                {formatCurrency(mealQuote.nights
-                                                    .reduce((total, night) => total + (night.breakfast_total || 0), 0)
-                                                )}
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {/* Extra Guest Fees (Buffet Days) - separate line */}
-                                    {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (
-                                        <div className="flex justify-between text-sm font-medium">
-                                            <span>
-                                                Extra Guest Fees (Buffet Days)
-                                            </span>
-                                            <span className="text-purple-600">
-                                                {formatCurrency(mealQuote.nights
-                                                    .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                    .reduce((total, night) => total + (night.extra_guest_fee_total || 0), 0)
-                                                )}
+                                            <div className="flex flex-col">
+                                                <span>Additional Guest Fees</span>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Entrance, amenities &amp; related services
+                                                </p>
+                                            </div>
+                                            <span className="text-amber-700">
+                                                {formatCurrency(extraGuestFeeTotal)}
                                             </span>
                                         </div>
                                     )}

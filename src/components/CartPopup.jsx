@@ -24,6 +24,7 @@ import { hasDayTourItems } from "@/utils/roomTypeUtils";
 import { fetchDayTourAvailability } from "@/services/dayTour";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange, getBuffetMealLabels } from "../utils/dateUtils";
+import { ExtraGuestFeeBreakdown } from "./cart/ExtraGuestFeeBreakdown";
 
 export function CartPopup() {
     const [open, setOpen] = useState(false);
@@ -77,7 +78,7 @@ export function CartPopup() {
         updateItem(item.uniqueId, updatedItem);
     };
     const { control, clearErrors, reset } = useForm();
-    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, roomTotalPrice, totalGuests, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
+    const { summary, grandTotal, numNights, totalAdults, totalChildren, mealCost, extraGuestFeeTotal, roomTotalPrice, totalGuests, mealQuote, mealLoading, isDayTourCart } = useCartSummaryWithMealPrograms();
     const { promoCode, promoInfo, promoError, setPromoCode, clearPromo, applyPromo, recalculatePromo } = usePromoCode();
     const api = useApi();
     useSyncCartForm(items, reset);
@@ -473,18 +474,14 @@ export function CartPopup() {
                                                         </div>
                                                     ) : (
                                                         <div className="ml-3 space-y-0.5 text-xs text-blue-600">
-                                                            {/* Always show complimentary breakfast for guests within room capacity */}
                                                             <div className="flex justify-between">
-                                                                <span className="text-green-600">{Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest{Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''} - Complimentary Breakfast (Plated)</span>
+                                                                <span className="text-green-600">
+                                                                    {Math.max(0, item.adults + item.children - mealNight.extraGuests)} Guest
+                                                                    {Math.max(0, item.adults + item.children - mealNight.extraGuests) > 1 ? 's' : ''}
+                                                                    {' '}— Complimentary Breakfast (Plated)
+                                                                </span>
                                                                 <span className="font-medium text-green-600">Free</span>
                                                             </div>
-                                                            {/* Show extra guest breakfast fee if there are extra guests */}
-                                                            {mealNight.extraGuests > 0 && (
-                                                                <div className="flex justify-between">
-                                                                    <span className="text-orange-600">{mealNight.extraGuests} Extra Guest{mealNight.extraGuests > 1 ? 's' : ''} at {formatCurrency(mealNight.adultBreakfastPrice || 0)} each</span>
-                                                                    <span className="font-medium text-orange-600">{formatCurrency(mealNight.extraGuests * (mealNight.adultBreakfastPrice || 0))}</span>
-                                                                </div>
-                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -501,80 +498,27 @@ export function CartPopup() {
                                     </div>
                                 )}
 
-                                {/* Extra Guest Fee Breakdown - Only for buffet days */}
-                                {!isDayTourCart && item.totalGuests > parseInt(item.maxGuests) && mealQuote?.nights?.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (
-                                    <div className="mt-2 p-2 bg-purple-50 rounded-lg">
-                                        <h6 className="text-xs font-medium text-purple-700 mb-1">Extra Guest Fees (Buffet Days)</h6>
-                                        <div className="space-y-1">
-                                            {mealQuote.nights
-                                                .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                .map((night, index) => {
-                                                    const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
-                                                    const extraGuestFeeForThisRoom = extraGuestsInRoom * night.extra_guest_fee;
-                                                    
-                                                    return (
-                                                        <div key={index} className="border-b border-purple-200 pb-1 last:border-b-0 last:pb-0">
-                                                            <div className="flex justify-between items-center mb-0.5">
-                                                                <span className="text-xs font-medium text-purple-700">
-                                                                    {formatBuffetDate(night.date)} - Extra Guest Fee
-                                                                </span>
-                                                                <span className="text-xs font-semibold text-purple-900">
-                                                                    {formatCurrency(extraGuestFeeForThisRoom)}
-                                                                </span>
-                                                            </div>
-                                                            <div className="ml-3 text-xs text-purple-600">
-                                                                <div className="flex justify-between">
-                                                                    <span>{extraGuestsInRoom} Extra Guest{extraGuestsInRoom > 1 ? 's' : ''} at {formatCurrency(night.extra_guest_fee)} each</span>
-                                                                    <span className="font-medium">{formatCurrency(extraGuestFeeForThisRoom)}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            
-                                            {/* Total Extra Guest Fees */}
-                                            <div className="pt-1">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-xs font-semibold text-purple-800">Total Extra Guest Fees:</span>
-                                                    <span className="text-xs font-bold text-purple-600">
-                                                        {formatCurrency(
-                                                            mealQuote.nights
-                                                                .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                                .reduce((total, night) => {
-                                                                    const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
-                                                                    return total + (extraGuestsInRoom * night.extra_guest_fee);
-                                                                }, 0)
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                {!isDayTourCart && item.hasExtraGuestBreakdown && (
+                                    <ExtraGuestFeeBreakdown items={item.extraGuestBreakdown} compact />
                                 )}
-                                
+
                                 {/* Subtotal after meal breakdown */}
                                 {!isDayTourCart && (
                                     <div className="flex justify-between font-medium mt-2">
                                         <span>Subtotal:</span>
                                         <span>
                                             {formatCurrency(
-                                                item.subtotal + 
-                                                (item.roomMealTotal || 0) + 
-                                                (mealQuote?.nights
-                                                    ?.filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                    ?.reduce((total, night) => {
-                                                        const extraGuestsInRoom = Math.max(0, item.totalGuests - parseInt(item.maxGuests));
-                                                        return total + (extraGuestsInRoom * night.extra_guest_fee);
-                                                    }, 0) || 0)
+                                                item.subtotal +
+                                                (item.roomMealTotal || 0) +
+                                                (item.roomExtraGuestFeeTotal || 0)
                                             )}
                                         </span>
                                     </div>
                                 )}
-                                
-                                {/* Extra Guest Warning for Overnight Bookings in Popup - Only show on free breakfast days */}
-                                {!isDayTourCart && item.totalGuests > parseInt(item.maxGuests) && mealQuote?.nights?.some(night => night.type === 'free_breakfast') && (
-                                    <div className="mt-1 p-1.5 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
-                                        ⚠️ {item.totalGuests - parseInt(item.maxGuests)} extra guest{item.totalGuests - parseInt(item.maxGuests) > 1 ? 's' : ''} may incur breakfast fees
+
+                                {!isDayTourCart && item.totalGuests > parseInt(item.maxGuests) && (
+                                    <div className="mt-1 p-1.5 bg-amber-50 border border-amber-200 rounded text-xs text-amber-800">
+                                        ⚠️ {item.totalGuests - parseInt(item.maxGuests)} extra guest{item.totalGuests - parseInt(item.maxGuests) > 1 ? 's' : ''} — additional guest fees apply (see breakdown below)
                                     </div>
                                 )}
                             </div>
@@ -646,25 +590,17 @@ export function CartPopup() {
                                             </div>
                                         )}
                                         
-                                        {/* Extra Guest Breakfast Fees - separate line */}
-                                        {mealQuote.nights.some(night => night.breakfast_total > 0) && (
+                                        {/* Additional guest fees — separate from meals */}
+                                        {extraGuestFeeTotal > 0 && (
                                             <div className="flex justify-between text-xs font-medium">
                                                 <div className="flex flex-col">
-                                                    <span>
-                                                        Extra Guest ({mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0} guest{(mealQuote.nights.find(night => night.type === 'free_breakfast')?.extra_adults || 0) > 1 ? 's' : ''})
-                                                    </span>
-                                                    <div className="text-xs text-gray-500 mt-1">
-                                                        {mealQuote.nights
-                                                            .filter(night => night.breakfast_total > 0)
-                                                            .map(night => formatMealDate(night.start_date))
-                                                            .join(', ')
-                                                        }
-                                                    </div>
+                                                    <span>Additional Guest Fees</span>
+                                                    <p className="text-[10px] text-gray-500 mt-0.5">
+                                                        Entrance, amenities &amp; related services
+                                                    </p>
                                                 </div>
-                                                <span className="text-orange-600 text-xs">
-                                                    {formatCurrency(mealQuote.nights
-                                                        .reduce((total, night) => total + (night.breakfast_total || 0), 0)
-                                                    )}
+                                                <span className="text-amber-700 text-xs">
+                                                    {formatCurrency(extraGuestFeeTotal)}
                                                 </span>
                                             </div>
                                         )}
