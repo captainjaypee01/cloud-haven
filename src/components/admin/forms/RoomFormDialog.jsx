@@ -473,24 +473,13 @@ const RoomFormDialog = ({ open, onOpenChange, initialData, loading, isEdit, onSu
                                         <FormMessage />
                                     </FormItem>
                                 )} />
-                                <FormField name="base_weekday_rate" control={form.control} render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Base Weekday Rate</FormLabel>
-                                        <FormControl><Input type="number" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
-                                <FormField name="base_weekend_rate" control={form.control} render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Base Weekend Rate</FormLabel>
-                                        <FormControl><Input type="number" {...field} /></FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )} />
                                 <FormField name="price_per_night" control={form.control} render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Price per Night</FormLabel>
+                                        <FormLabel>Default fallback rate (per night)</FormLabel>
                                         <FormControl><Input type="number" {...field} /></FormControl>
+                                        <p className="text-xs text-muted-foreground">
+                                            Used when a calendar date has no price. Manage dated rates from the room Pricing calendar after saving.
+                                        </p>
                                         <FormMessage />
                                     </FormItem>
                                 )} />

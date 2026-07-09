@@ -419,6 +419,21 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                 <span className="font-semibold">Room Price:</span>
                                 <span>{formatCurrency(booking.total_price)}</span>
                             </div>
+                            {booking.booking_type !== 'day_tour' && booking.room_quote_data?.nights?.length > 0 && (
+                                <div className="md:col-span-2 rounded-md border p-3 text-sm">
+                                    <div className="font-medium mb-2">Nightly room rates (locked at booking)</div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        {booking.room_quote_data.nights.map((night) => (
+                                            <div key={night.date} className="flex justify-between gap-2">
+                                                <span className="text-muted-foreground">{night.date}</span>
+                                                <span>{formatCurrency(
+                                                    (night.rooms || []).reduce((sum, r) => sum + (r.rate || 0), 0)
+                                                )}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                             <div className="flex justify-between py-2">
                                 <span className="font-semibold">Meal Price:</span>
                                 <span>{formatCurrency(booking.meal_price || 0)}</span>

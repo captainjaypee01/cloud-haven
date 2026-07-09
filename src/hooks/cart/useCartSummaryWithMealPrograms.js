@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCart } from "../../context/CartContext";
 import { differenceInDays, parseISO, addDays, format } from "date-fns";
 import { useApi } from "../useApi";
 import { API_PREFIX } from "../../constants/api";
 import { hasDayTourItems } from "../../utils/roomTypeUtils";
 
+import { fetchOvernightQuote } from "../../services/roomPricing";
+
 export function useCartSummaryWithMealPrograms() {
     const { state: { items, checkIn, checkOut } } = useCart();
     const [mealQuote, setMealQuote] = useState(null);
+    const [roomQuote, setRoomQuote] = useState(null);
     const [loading, setLoading] = useState(false);
     const api = useApi();
 
@@ -37,36 +40,66 @@ export function useCartSummaryWithMealPrograms() {
         };
     });
 
-    const totalGuests = summary.reduce((acc, item) => acc + item.totalGuests, 0);
-    const totalAdults = summary.reduce((acc, item) => acc + item.adults, 0);
-    const totalChildren = summary.reduce((acc, item) => acc + item.children, 0);
-    const roomTotalPrice = summary.reduce((acc, item) => acc + item.subtotal, 0);
+    const summaryWithRoomPricing = useMemo(() => {
+        if (!roomQuote?.nights || isDayTourCart) {
+            return summary;
+        }
+        const lineTotals = {};
+        roomQuote.nights.forEach((night) => {
+            (night.rooms || []).forEach((room) => {
+                lineTotals[room.slug] = (lineTotals[room.slug] || 0) + room.rate;
+            });
+        });
+        return summary.map((item) => ({
+            ...item,
+            subtotal: lineTotals[item.roomId] ?? item.subtotal,
+            roomNightlyBreakdown: roomQuote.nights.map((night) => ({
+                date: night.date,
+                rate: (night.rooms || []).find((r) => r.slug === item.roomId)?.rate,
+            })).filter((n) => n.rate != null),
+        }));
+    }, [summary, roomQuote, isDayTourCart]);
+
+    const totalGuests = summaryWithRoomPricing.reduce((acc, item) => acc + item.totalGuests, 0);
+    const totalAdults = summaryWithRoomPricing.reduce((acc, item) => acc + item.adults, 0);
+    const totalChildren = summaryWithRoomPricing.reduce((acc, item) => acc + item.children, 0);
+    const roomTotalPrice = roomQuote?.total_room ?? summaryWithRoomPricing.reduce((acc, item) => acc + item.subtotal, 0);
 
     useEffect(() => {
-        // Only fetch meal quotes for overnight bookings, not Day Tour, and only if there are items in cart
         if (!isDayTourCart && checkIn && checkOut && items.length > 0) {
-            fetchMealQuote();
+            fetchQuotes();
         } else {
             setMealQuote(null);
+            setRoomQuote(null);
         }
-    }, [isDayTourCart, checkIn, checkOut, items.length]);
+    }, [isDayTourCart, checkIn, checkOut, items.length, JSON.stringify(items.map(i => ({ id: i.roomId, a: i.adults, c: i.children })))]);
 
-    const fetchMealQuote = async () => {
+    const fetchQuotes = async () => {
         try {
             setLoading(true);
-            
-            const response = await api.post(`${API_PREFIX}/meals/quote`, {
-                check_in: checkIn,
-                check_out: checkOut
-            });
-            
-            // The API returns data directly without success wrapper
-            if (response.data) {
-                setMealQuote(response.data);
+            const roomsPayload = items.map(item => ({
+                room_id: item.roomId,
+                adults: item.adults,
+                children: item.children,
+            }));
+
+            const [mealResponse, roomData] = await Promise.all([
+                api.post(`${API_PREFIX}/meals/quote`, { check_in: checkIn, check_out: checkOut }),
+                fetchOvernightQuote(api, {
+                    check_in_date: checkIn,
+                    check_out_date: checkOut,
+                    rooms: roomsPayload,
+                }).catch(() => null),
+            ]);
+
+            if (mealResponse.data) {
+                setMealQuote(mealResponse.data);
             }
+            setRoomQuote(roomData);
         } catch (error) {
-            console.error("Error fetching meal quote:", error);
+            console.error("Error fetching quotes:", error);
             setMealQuote(null);
+            setRoomQuote(null);
         } finally {
             setLoading(false);
         }
@@ -83,8 +116,9 @@ export function useCartSummaryWithMealPrograms() {
         const detailedBreakdown = [];
 
         // Add meal breakdown to each cart item
-        const summaryWithMealBreakdown = summary.map(item => {
+        const summaryWithMealBreakdown = summaryWithRoomPricing.map(item => {
             const roomMealBreakdown = [];
+            const roomExtraGuestBreakdown = [];
             let roomMealTotal = 0;
 
             mealQuote.nights.forEach(night => {
@@ -99,21 +133,39 @@ export function useCartSummaryWithMealPrograms() {
                 hasExtraGuests = extraGuestsInRoom > 0;
 
                 if (night.type === 'buffet') {
-                    // Buffet: charge all guests in this room
                     roomNightCost = (item.adults * (night.adult_price || 0)) + (item.children * (night.child_price || 0));
-                    showBreakdown = true; // Always show breakdown for buffet
+                    showBreakdown = true;
                 } else if (night.type === 'free_breakfast') {
-                    // Free breakfast: charge extra guests if any, but always show breakdown
-                    if (hasExtraGuests) {
-                        roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
-                        roomNightCost = roomBreakfastCost;
-                    } else {
-                        roomNightCost = 0; // No cost for complimentary breakfast
-                    }
-                    showBreakdown = true; // Always show breakdown for free breakfast days
+                    // Complimentary breakfast is free; extra-guest charges are shown separately
+                    roomNightCost = 0;
+                    showBreakdown = true;
                 }
 
                 roomMealTotal += roomNightCost;
+
+                if (hasExtraGuests) {
+                    if (night.type === 'free_breakfast' && (night.adult_breakfast_price || 0) > 0) {
+                        const feeTotal = extraGuestsInRoom * (night.adult_breakfast_price || 0);
+                        roomExtraGuestBreakdown.push({
+                            date: night.date,
+                            endDate: night.end_date,
+                            type: 'free_breakfast',
+                            extraGuests: extraGuestsInRoom,
+                            feePerGuest: night.adult_breakfast_price || 0,
+                            total: feeTotal,
+                        });
+                    } else if (night.type === 'buffet' && (night.extra_guest_fee || 0) > 0) {
+                        const feeTotal = extraGuestsInRoom * night.extra_guest_fee;
+                        roomExtraGuestBreakdown.push({
+                            date: night.date,
+                            endDate: night.end_date,
+                            type: 'buffet',
+                            extraGuests: extraGuestsInRoom,
+                            feePerGuest: night.extra_guest_fee,
+                            total: feeTotal,
+                        });
+                    }
+                }
 
                 if (showBreakdown) {
                     // Use start_date from API (represents when the meal is actually consumed)
@@ -158,8 +210,11 @@ export function useCartSummaryWithMealPrograms() {
             return {
                 ...item,
                 mealBreakdown: roomMealBreakdown,
-                roomMealTotal: roomMealTotal,
-                hasRoomMealBreakdown: roomMealBreakdown.length > 0
+                extraGuestBreakdown: roomExtraGuestBreakdown,
+                roomMealTotal,
+                roomExtraGuestFeeTotal: roomExtraGuestBreakdown.reduce((sum, row) => sum + row.total, 0),
+                hasRoomMealBreakdown: roomMealBreakdown.length > 0,
+                hasExtraGuestBreakdown: roomExtraGuestBreakdown.length > 0,
             };
         });
 
@@ -187,29 +242,28 @@ export function useCartSummaryWithMealPrograms() {
                     extraGuestFeeTotal = totalExtraGuests * night.extra_guest_fee;
                 }
             } else if (night.type === 'free_breakfast') {
-                // Calculate breakfast costs for extra guests only
                 summary.forEach(item => {
                     const totalGuestsInRoom = item.adults + item.children;
                     const maxGuests = parseInt(item.maxGuests) || 2;
                     const extraGuestsInRoom = Math.max(0, totalGuestsInRoom - maxGuests);
-                    
+
                     if (extraGuestsInRoom > 0) {
-                        // Use adult breakfast price for all extra guests (simplified)
-                        const roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
-                        breakfastTotal += roomBreakfastCost;
+                        const roomFee = extraGuestsInRoom * (night.adult_breakfast_price || 0);
+                        breakfastTotal += roomFee;
                         extraAdults += extraGuestsInRoom;
                     }
                 });
-                nightTotal = breakfastTotal;
+                extraGuestFeeTotal = breakfastTotal;
+                nightTotal = 0;
             }
 
             totalMealCost += nightTotal;
             totalExtraGuestFees += extraGuestFeeTotal;
-            
+
             detailedBreakdown.push({
                 ...night,
                 night_total: nightTotal,
-                breakfast_total: breakfastTotal,
+                breakfast_total: 0,
                 extra_guest_fee_total: extraGuestFeeTotal,
                 extra_adults: extraAdults,
                 extra_children: extraChildren,
@@ -255,6 +309,7 @@ export function useCartSummaryWithMealPrograms() {
         mealCost: finalMealCost,
         extraGuestFeeTotal: finalExtraGuestFeeTotal,
         roomTotalPrice,
+        roomQuote,
         mealQuote: calculatedMealQuote,
         mealLoading: loading,
         isDayTourCart,

@@ -18,6 +18,7 @@ import { formatCurrency } from '@/lib/format';
 import { Plus, Minus, X, Users, Bed, Calendar, Clock, Trash } from 'lucide-react';
 import Title from '@/components/Title';
 import { fetchDayTourAvailability } from '@/services/dayTour';
+import { fetchOvernightQuote } from '@/services/roomPricing';
 import { useWalkInMealCalculation } from '@/hooks/walkin/useWalkInMealCalculation';
 import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from '@/utils/dateUtils';
 import { addDays, format } from 'date-fns';
@@ -65,6 +66,7 @@ const WalkInBooking = () => {
     const [selectedRooms, setSelectedRooms] = useState([]);
     const [dayTourMealData, setDayTourMealData] = useState(null);
     const [dayTourPricing, setDayTourPricing] = useState(null);
+    const [roomQuote, setRoomQuote] = useState(null);
     const [mealLoading, setMealLoading] = useState(false);
     const [availabilityLoading, setAvailabilityLoading] = useState(false);
     
@@ -224,8 +226,17 @@ const WalkInBooking = () => {
         } else {
             setDayTourMealData(null);
             setDayTourPricing(null);
+            setRoomQuote(null);
         }
     }, [bookingType, nights, selectedDayTourDate, selectedDateRange, formNights]);
+
+    useEffect(() => {
+        if (bookingType === 'overnight' && nights > 0 && selectedRooms.length > 0) {
+            fetchOvernightRoomQuote();
+        } else if (bookingType !== 'overnight' || selectedRooms.length === 0) {
+            setRoomQuote(null);
+        }
+    }, [selectedRooms, bookingType, nights, selectedDayTourDate, selectedDateRange, formNights]);
 
     // Fetch available rooms when booking type, dates, or nights change
     useEffect(() => {
@@ -311,6 +322,28 @@ const WalkInBooking = () => {
         }
     };
 
+    const fetchOvernightRoomQuote = async () => {
+        if (selectedRooms.length === 0) {
+            setRoomQuote(null);
+            return;
+        }
+        try {
+            const quote = await fetchOvernightQuote(api, {
+                check_in_date: getCurrentDate(),
+                check_out_date: getCheckOutDate(),
+                rooms: selectedRooms.map((r) => ({
+                    room_id: r.room_id,
+                    adults: r.adults,
+                    children: r.children,
+                })),
+            });
+            setRoomQuote(quote);
+        } catch (error) {
+            console.error('Failed to fetch overnight room quote:', error);
+            setRoomQuote(null);
+        }
+    };
+
     const addRoom = (room) => {
         // Check availability before adding room
         const availableUnits = bookingType === 'day_tour' 
@@ -337,7 +370,7 @@ const WalkInBooking = () => {
         const roomName = room.name;
         const roomPrice = bookingType === 'day_tour' 
             ? (dayTourPricing?.price_per_pax || room.price_per_pax || room.base_price) 
-            : (room.price || room.price_per_night);
+            : (room.price_per_night_avg || room.price || room.price_per_night);
         
         // Use correct guest limits based on booking type
         const defaultAdults = bookingType === 'day_tour' 
@@ -395,16 +428,18 @@ const WalkInBooking = () => {
         const numNights = bookingType === 'overnight' ? nights : 0;
         let roomTotal = 0;
 
-        selectedRooms.forEach(roomItem => {
-            if (bookingType === 'day_tour') {
-                // For day tours, calculate: pricePerPax * totalGuests
-                const totalGuests = roomItem.adults + roomItem.children;
-                roomTotal += roomItem.room_price * totalGuests;
-            } else {
-                // For overnight bookings, use per night pricing
-                roomTotal += roomItem.room_price * numNights;
-            }
-        });
+        if (bookingType === 'overnight' && roomQuote?.total_room != null) {
+            roomTotal = roomQuote.total_room;
+        } else {
+            selectedRooms.forEach(roomItem => {
+                if (bookingType === 'day_tour') {
+                    const totalGuests = roomItem.adults + roomItem.children;
+                    roomTotal += roomItem.room_price * totalGuests;
+                } else {
+                    roomTotal += roomItem.room_price * numNights;
+                }
+            });
+        }
 
         let mealTotal = 0;
         if (bookingType === 'day_tour' && dayTourMealData && selectedRooms.length > 0) {
@@ -769,7 +804,9 @@ const WalkInBooking = () => {
                                                                 <Badge variant="secondary">
                                                                     {bookingType === 'day_tour' 
                                                                         ? formatCurrency(dayTourPricing?.price_per_pax || room.price_per_pax || room.base_price)
-                                                                        : `${formatCurrency(room.price || room.price_per_night)}/night`
+                                                                        : room.stay_total != null
+                                                                            ? `${formatCurrency(room.stay_total)} stay`
+                                                                            : `${formatCurrency(room.price_per_night_avg || room.price || room.price_per_night)}/night`
                                                                     }
                                                                 </Badge>
                                                             </div>
@@ -1154,6 +1191,20 @@ const WalkInBooking = () => {
                                         {formatCurrency(totals.roomTotal)}
                                     </span>
                                 </div>
+
+                                {bookingType === 'overnight' && roomQuote?.nights?.length > 0 && (
+                                    <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs space-y-1">
+                                        <div className="font-medium text-gray-700">Nightly room rates</div>
+                                        {roomQuote.nights.map((night) => (
+                                            <div key={night.date} className="flex justify-between">
+                                                <span>{night.date}</span>
+                                                <span>{formatCurrency(
+                                                    (night.rooms || []).reduce((s, r) => s + (r.rate || 0), 0)
+                                                )}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                                 {totals.mealTotal > 0 && (
                                     <div className="flex justify-between">

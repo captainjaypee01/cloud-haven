@@ -77,6 +77,14 @@ const ListRoom = () => {
           </Button>
           <Button
             size="sm"
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => navigate(`/admin/rooms/${row.original.id}/pricing`)}
+          >
+            Pricing
+          </Button>
+          <Button
+            size="sm"
             variant="secondary"
             className="cursor-pointer"
             onClick={() => handleEdit(row.original)}
