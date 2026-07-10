@@ -44,40 +44,7 @@ const downpaymentStatusOptions = [
     { value: 'downpayment', label: 'Downpayment' },
 ];
 
-// Resize image file if too large (same as ProofOfPaymentDialog)
-const resizeImageFile = (file) => {
-    return new Promise(resolve => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-            let { width, height } = img;
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-                width = Math.floor(width * scale);
-                height = Math.floor(height * scale);
-            }
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-            canvas.toBlob(blob => {
-                if (blob) {
-                    const ext = file.type.includes("png") ? "png" : "jpg";
-                    const resizedFile = new File([blob], file.name, { type: `image/${ext}` });
-                    resolve(resizedFile);
-                } else {
-                    resolve(file);
-                }
-                URL.revokeObjectURL(url);
-            }, file.type.includes("png") ? "image/png" : "image/jpeg", QUALITY);
-        };
-        img.onerror = () => {
-            URL.revokeObjectURL(url);
-            resolve(file);
-        };
-        img.src = url;
-    });
-};
+import { resizeImageFile } from '@/utils/resizeImageFile';
 
 const AddPaymentDialog = ({ open, onOpenChange, bookingReferenceNumber, onSuccess, payment, isEdit, booking }) => {
     const api = useApi();

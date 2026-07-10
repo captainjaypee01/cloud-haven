@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -19,7 +19,18 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { toast } from 'sonner';
 import { GuestSelector } from '@/components/GuestSelector';
 
-const BookingRoomModificationDialog = ({ 
+const mapBookingRoomToForm = (br) => ({
+    room_id: br.room?.slug || '',
+    adults: br.adults || 1,
+    children: br.children || 0,
+    total_guests: br.total_guests || 1,
+    room_name: br.room?.name || '',
+    price_per_night: br.price_per_night || 0,
+    room_unit_id: br.room_unit_id || br.room_unit?.id || null,
+    room_unit_number: br.room_unit?.unit_number || br.room_unit_number || '',
+});
+
+const BookingRoomModificationDialog = ({
     open, 
     onOpenChange, 
     booking, 
@@ -29,10 +40,21 @@ const BookingRoomModificationDialog = ({
     const [isLoadingRooms, setIsLoadingRooms] = useState(false);
     const [availableUnits, setAvailableUnits] = useState({}); // room_slug -> units array
     const [loadingUnits, setLoadingUnits] = useState({}); // room_slug -> loading state
-    const [initialRoomsData, setInitialRoomsData] = useState([]); // Store initial room data
+    const [initialRoomsData, setInitialRoomsData] = useState([]); // Snapshot when dialog opens
     const [acknowledgeShortfall, setAcknowledgeShortfall] = useState(false);
+    const initialSnapshotRef = useRef([]);
     const { modifyBooking, isLoading } = useBookingModification();
     const api = useApi();
+
+    const resolveRoomUnitId = (room, index) => {
+        if (room.room_unit_id) return room.room_unit_id;
+        const byIndex = booking?.booking_rooms?.[index];
+        if (byIndex?.room?.slug === room.room_id) {
+            return byIndex.room_unit_id ?? byIndex.room_unit?.id ?? null;
+        }
+        const match = booking?.booking_rooms?.find((br) => br.room?.slug === room.room_id);
+        return match?.room_unit_id ?? match?.room_unit?.id ?? null;
+    };
 
     const form = useForm({
         defaultValues: {
@@ -47,48 +69,43 @@ const BookingRoomModificationDialog = ({
         name: 'rooms'
     });
 
-    // Initialize form with current booking rooms
-    useEffect(() => {
-        if (booking && open) {
-            const initialRooms = booking.booking_rooms?.map(br => ({
-                room_id: br.room?.slug || '',
-                adults: br.adults || 1,
-                children: br.children || 0,
-                total_guests: br.total_guests || 1,
-                room_name: br.room?.name || '',
-                price_per_night: br.price_per_night || 0,
-                room_unit_id: br.room_unit_id || null, // Use room_unit_id directly
-                room_unit_number: br.room_unit?.unit_number || ''
-            })) || [];
-            
-            
-            form.reset({
-                rooms: initialRooms,
-                modification_reason: '',
-                send_email: false
-            });
-            
-            // Store initial rooms data for reference
-            setInitialRoomsData(initialRooms);
-            setAcknowledgeShortfall(false);
-        }
-    }, [booking, open]);
-
-    const watchedRooms = form.watch('rooms');
-
     const normalizeRoomsForCompare = (rooms) => (rooms || []).map((room) => ({
         room_id: room.room_id,
-        adults: room.adults,
-        children: room.children,
-        total_guests: room.total_guests,
+        adults: Number(room.adults ?? 0),
+        children: Number(room.children ?? 0),
+        total_guests: Number(room.total_guests ?? 0),
         room_unit_id: room.room_unit_id || null,
     }));
 
+    const roomsDifferFromSnapshot = (rooms, snapshot = initialSnapshotRef.current) => (
+        JSON.stringify(normalizeRoomsForCompare(rooms))
+        !== JSON.stringify(normalizeRoomsForCompare(snapshot))
+    );
+
+    // Initialize only when dialog opens or booking id changes — not on every booking object refresh
+    useEffect(() => {
+        if (!open || !booking) {
+            return;
+        }
+
+        const initialRooms = booking.booking_rooms?.map(mapBookingRoomToForm) || [];
+
+        form.reset({
+            rooms: initialRooms,
+            modification_reason: '',
+            send_email: false,
+        });
+
+        initialSnapshotRef.current = initialRooms;
+        setInitialRoomsData(initialRooms);
+        setAcknowledgeShortfall(false);
+    }, [open, booking?.id, form]);
+    const watchedRooms = form.watch('rooms');
+
     const roomsChanged = useMemo(() => {
-        if (!initialRoomsData.length || !watchedRooms?.length) return false;
-        return JSON.stringify(normalizeRoomsForCompare(watchedRooms))
-            !== JSON.stringify(normalizeRoomsForCompare(initialRoomsData));
-    }, [watchedRooms, initialRoomsData]);
+        if (!initialSnapshotRef.current.length || !watchedRooms?.length) return false;
+        return roomsDifferFromSnapshot(watchedRooms);
+    }, [watchedRooms]);
 
     const previewParams = useMemo(() => {
         if (!roomsChanged || !watchedRooms?.length) return null;
@@ -128,7 +145,7 @@ const BookingRoomModificationDialog = ({
             // Load units for each room type
             currentRooms.forEach((room, index) => {
                 if (room.room_id) {
-                    const bookingRoom = booking.booking_rooms?.find(br => br.room?.slug === room.room_id);
+                    const bookingRoom = booking.booking_rooms?.[index];
                     if (bookingRoom?.room?.id) {
                         loadAvailableUnits(bookingRoom.room.id, room.room_id, index);
                     }
@@ -167,11 +184,20 @@ const BookingRoomModificationDialog = ({
             });
             
             if (hasChanges) {
-                form.reset({
-                    rooms: updatedRooms,
-                    modification_reason: '',
-                    send_email: false
-                });
+                const currentRooms = form.getValues('rooms') || [];
+                const mergedRooms = updatedRooms.map((updatedRoom, index) => ({
+                    ...updatedRoom,
+                    ...(currentRooms[index] || {}),
+                    room_name: updatedRoom.room_name,
+                    price_per_night: updatedRoom.price_per_night,
+                    room_id: currentRooms[index]?.room_id ?? updatedRoom.room_id,
+                    adults: currentRooms[index]?.adults ?? updatedRoom.adults,
+                    children: currentRooms[index]?.children ?? updatedRoom.children,
+                    total_guests: currentRooms[index]?.total_guests ?? updatedRoom.total_guests,
+                    room_unit_id: currentRooms[index]?.room_unit_id ?? updatedRoom.room_unit_id,
+                    room_unit_number: currentRooms[index]?.room_unit_number ?? updatedRoom.room_unit_number,
+                }));
+                form.setValue('rooms', mergedRooms, { shouldDirty: true });
             }
         }
     }, [availableRooms, initialRoomsData, booking, open]);
@@ -232,8 +258,9 @@ const BookingRoomModificationDialog = ({
         const currentRooms = form.getValues('rooms');
         currentRooms.forEach((room, index) => {
             if (room.room_id) {
-                const bookingRoom = booking.booking_rooms?.find(br => br.room?.slug === room.room_id);
-                const roomId = bookingRoom?.room?.id;
+                const bookingRoom = booking.booking_rooms?.[index];
+                const roomId = bookingRoom?.room?.id
+                    ?? availableRooms.find((ar) => ar.slug === room.room_id)?.id;
                 if (roomId) {
                     loadAvailableUnits(roomId, room.room_id, index);
                 }
@@ -295,10 +322,20 @@ const BookingRoomModificationDialog = ({
                 unit && unit.id && unit.unit_number
             );
             
-            // Get the current room's assigned unit from the form data
+            // Get the current room's assigned unit from the form data (or existing booking)
             const currentFormRoom = form.getValues(`rooms.${currentRoomIndex}`);
-            const currentRoomUnitId = currentFormRoom?.room_unit_id;
-            const currentRoomUnitNumber = currentFormRoom?.room_unit_number;
+            const bookingRoom = booking.booking_rooms?.[currentRoomIndex];
+            const bookingUnitId = bookingRoom?.room_unit_id ?? bookingRoom?.room_unit?.id ?? null;
+            const bookingUnitNumber = bookingRoom?.room_unit?.unit_number ?? '';
+            const currentRoomUnitId = currentFormRoom?.room_unit_id || bookingUnitId;
+            const currentRoomUnitNumber = currentFormRoom?.room_unit_number || bookingUnitNumber;
+
+            if (currentRoomUnitId && !currentFormRoom?.room_unit_id) {
+                form.setValue(`rooms.${currentRoomIndex}.room_unit_id`, currentRoomUnitId);
+                if (currentRoomUnitNumber) {
+                    form.setValue(`rooms.${currentRoomIndex}.room_unit_number`, currentRoomUnitNumber);
+                }
+            }
             
             // Get units assigned to OTHER rooms of the SAME TYPE in the current form
             const currentFormRooms = form.getValues('rooms');
@@ -369,17 +406,18 @@ const BookingRoomModificationDialog = ({
 
     const handleGuestCountChange = (index, field, value) => {
         const currentRoom = form.getValues(`rooms.${index}`);
-        const newValue = parseInt(value) || 0;
-        
-        form.setValue(`rooms.${index}.${field}`, newValue);
-        
+        const newValue = parseInt(value, 10) || 0;
+        const setOpts = { shouldDirty: true, shouldValidate: true };
+
+        form.setValue(`rooms.${index}.${field}`, newValue, setOpts);
+
         // Update total guests
         if (field === 'adults' || field === 'children') {
-            const adults = field === 'adults' ? newValue : currentRoom.adults;
-            const children = field === 'children' ? newValue : currentRoom.children;
+            const adults = field === 'adults' ? newValue : Number(currentRoom.adults ?? 0);
+            const children = field === 'children' ? newValue : Number(currentRoom.children ?? 0);
             const totalGuests = adults + children;
-            form.setValue(`rooms.${index}.total_guests`, totalGuests);
-            
+            form.setValue(`rooms.${index}.total_guests`, totalGuests, setOpts);
+
             // Clear capacity error when guest count changes
             form.clearErrors(`rooms.${index}.total_guests`);
             form.clearErrors(`rooms.${index}.adults`);
@@ -392,6 +430,16 @@ const BookingRoomModificationDialog = ({
             
             // Clear any previous validation errors
             form.clearErrors();
+
+            if (!roomsDifferFromSnapshot(data.rooms)) {
+                toast.error('No changes detected. Update rooms or guests before saving.');
+                return;
+            }
+
+            if (requiresAcknowledgement && !acknowledgeShortfall) {
+                toast.error('Please acknowledge the downpayment shortfall before saving.');
+                return;
+            }
 
             // Validate that all rooms have room_id selected
             const hasEmptyRooms = data.rooms.some(room => !room.room_id);
@@ -429,12 +477,11 @@ const BookingRoomModificationDialog = ({
                 return;
             }
 
-            // Validate that all rooms have room_unit_id selected (required)
-            const hasEmptyUnits = data.rooms.some(room => !room.room_unit_id);
+            // Validate that all rooms have room_unit_id (keep existing assignment for pax-only edits)
+            const hasEmptyUnits = data.rooms.some((room, index) => !resolveRoomUnitId(room, index));
             if (hasEmptyUnits) {
-                // Find which rooms don't have units selected and set form errors
                 data.rooms.forEach((room, index) => {
-                    if (!room.room_unit_id) {
+                    if (!resolveRoomUnitId(room, index)) {
                         form.setError(`rooms.${index}.room_unit_id`, {
                             type: 'required',
                             message: 'Please select a room unit for this room'
@@ -484,22 +531,17 @@ const BookingRoomModificationDialog = ({
 
             // Prepare data for API
             const modificationData = {
-                rooms: data.rooms.map(room => ({
+                rooms: data.rooms.map((room, index) => ({
                     room_id: room.room_id,
                     adults: room.adults,
                     children: room.children,
                     total_guests: room.total_guests,
-                    room_unit_id: room.room_unit_id || null
+                    room_unit_id: resolveRoomUnitId(room, index),
                 })),
                 modification_reason: data.modification_reason || null,
                 send_email: data.send_email || false,
                 ...(acknowledgeShortfall ? { acknowledge_downpayment_shortfall: true } : {}),
             };
-
-            if (requiresAcknowledgement && !acknowledgeShortfall) {
-                toast.error('Please acknowledge the downpayment shortfall before saving.');
-                return;
-            }
 
             await modifyBooking(booking.id, modificationData);
             onSuccess();
@@ -660,8 +702,10 @@ const BookingRoomModificationDialog = ({
                                                     name={`rooms.${index}.adults`}
                                                     render={({ field }) => {
                                                         const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                        const children = form.watch(`rooms.${index}.children`) || 0;
                                                         const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
                                                         const maxCapacity = availableRoom ? (availableRoom.max_guests + (availableRoom.extra_guests || 0)) : 10;
+                                                        const maxAdults = Math.max(1, maxCapacity - children);
                                                         
                                                         return (
                                                             <FormItem>
@@ -672,12 +716,11 @@ const BookingRoomModificationDialog = ({
                                                                 <FormControl>
                                                                     <GuestSelector
                                                                         name={`rooms.${index}.adults`}
-                                                                        maxGuests={maxCapacity}
+                                                                        maxGuests={maxAdults}
                                                                         minGuests={1}
                                                                         value={field.value?.toString()}
-                                                                        defaultValue="1"
                                                                         onChange={(value) => {
-                                                                            const numValue = parseInt(value);
+                                                                            const numValue = parseInt(value, 10);
                                                                             field.onChange(numValue);
                                                                             handleGuestCountChange(index, 'adults', numValue);
                                                                         }}
@@ -695,8 +738,10 @@ const BookingRoomModificationDialog = ({
                                                     name={`rooms.${index}.children`}
                                                     render={({ field }) => {
                                                         const roomSlug = form.watch(`rooms.${index}.room_id`);
+                                                        const adults = form.watch(`rooms.${index}.adults`) || 1;
                                                         const availableRoom = availableRooms.find(ar => ar.slug === roomSlug);
                                                         const maxCapacity = availableRoom ? (availableRoom.max_guests + (availableRoom.extra_guests || 0)) : 10;
+                                                        const maxChildren = Math.max(0, maxCapacity - adults);
                                                         
                                                         return (
                                                             <FormItem>
@@ -707,12 +752,11 @@ const BookingRoomModificationDialog = ({
                                                                 <FormControl>
                                                                     <GuestSelector
                                                                         name={`rooms.${index}.children`}
-                                                                        maxGuests={maxCapacity}
+                                                                        maxGuests={maxChildren}
                                                                         minGuests={0}
                                                                         value={field.value?.toString()}
-                                                                        defaultValue="0"
                                                                         onChange={(value) => {
-                                                                            const numValue = parseInt(value);
+                                                                            const numValue = parseInt(value, 10);
                                                                             field.onChange(numValue);
                                                                             handleGuestCountChange(index, 'children', numValue);
                                                                         }}
@@ -761,7 +805,12 @@ const BookingRoomModificationDialog = ({
                                                 name={`rooms.${index}.room_unit_id`}
                                                 render={({ field, fieldState }) => (
                                                     <FormItem>
-                                                        <FormLabel className="text-sm font-medium">Room Unit <span className="text-red-500">*</span></FormLabel>
+                                                        <FormLabel className="text-sm font-medium">
+                                                            Room Unit
+                                                            {!resolveRoomUnitId(form.watch(`rooms.${index}`), index) && (
+                                                                <span className="text-red-500"> *</span>
+                                                            )}
+                                                        </FormLabel>
                                                         {loadingUnits[form.watch(`rooms.${index}.room_id`)] ? (
                                                             <div className="flex items-center justify-center p-3 border rounded-md bg-gray-50">
                                                                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -769,7 +818,10 @@ const BookingRoomModificationDialog = ({
                                                             </div>
                                                         ) : (
                                                             <Select
-                                                                value={field.value ? field.value.toString() : ''}
+                                                                value={(() => {
+                                                                    const unitId = field.value || resolveRoomUnitId(form.watch(`rooms.${index}`), index);
+                                                                    return unitId ? unitId.toString() : '';
+                                                                })()}
                                                                 onValueChange={(value) => {
                                                                     field.onChange(parseInt(value));
                                                                     handleRoomUnitChange(index, value);
@@ -979,7 +1031,7 @@ const BookingRoomModificationDialog = ({
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading || isLoadingRooms || !roomsChanged || (requiresAcknowledgement && !acknowledgeShortfall)}
+                                disabled={isLoading || isLoadingRooms || (requiresAcknowledgement && !acknowledgeShortfall)}
                                 className="w-full sm:w-auto"
                             >
                                 {isLoading ? (
