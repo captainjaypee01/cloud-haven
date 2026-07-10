@@ -23,6 +23,7 @@ import { formatCurrency } from "@/utils/currency";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileText, X, Image as ImageIcon, XCircle } from "lucide-react";
+import { resizeImageFile } from "@/utils/resizeImageFile";
 
 const paymentProviders = [
     { value: 'bank_bdo', label: 'Bank Transfer (BDO)' },
@@ -117,41 +118,6 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
         };
     }, [previewUrl]);
 
-    // Resize image file if too large (similar to ManageImages)
-    const resizeImageFile = (file) => {
-        return new Promise(resolve => {
-            const img = new Image();
-            const url = URL.createObjectURL(file);
-            img.onload = () => {
-                let { width, height } = img;
-                if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                    const scale = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-                    width = Math.floor(width * scale);
-                    height = Math.floor(height * scale);
-                }
-                const canvas = document.createElement("canvas");
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-                canvas.toBlob(blob => {
-                    if (blob) {
-                        const ext = file.type.includes("png") ? "png" : "jpg";
-                        const resizedFile = new File([blob], file.name, { type: `image/${ext}` });
-                        resolve(resizedFile);
-                    } else {
-                        resolve(file);
-                    }
-                    URL.revokeObjectURL(url);
-                }, file.type.includes("png") ? "image/png" : "image/jpeg", QUALITY);
-            };
-            img.onerror = () => {
-                URL.revokeObjectURL(url);
-                resolve(file);
-            };
-            img.src = url;
-        });
-    };
-
     const handleFileChange = async (e) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -234,7 +200,10 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
             }, 100);
             
             // Optimize the image before upload
-            const optimizedFile = await resizeImageFile(values.proof_file);
+            const optimizedFile = await resizeImageFile(values.proof_file, {
+                maxDimension: MAX_DIMENSION,
+                quality: QUALITY,
+            });
             
             const formData = new FormData();
             
@@ -245,7 +214,6 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                 const res = await api.post(
                     `${API_PREFIX}/bookings/ref/${booking.reference_number || booking.reference_no}/payments/${existingPayment.id}/proof`,
                     formData,
-                    { headers: { "Content-Type": "multipart/form-data" } }
                 );
 
                 clearInterval(progressInterval);
@@ -271,7 +239,6 @@ const ProofOfPaymentDialog = ({ open, onOpenChange, booking, paymentOption, onSu
                 const res = await api.post(
                     `${API_PREFIX}/bookings/ref/${booking.reference_number || booking.reference_no}/pay/upload-proof`,
                     formData,
-                    { headers: { "Content-Type": "multipart/form-data" } }
                 );
 
                 clearInterval(progressInterval);

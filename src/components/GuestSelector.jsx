@@ -36,7 +36,6 @@ export function GuestSelector({
         <div className="space-y-2">
             <div className="flex items-center gap-2">
                 <Select name={name}
-                    defaultValue={defaultValue}
                     value={value ?? ""}
                     onValueChange={onChange}>
                     <SelectTrigger className={

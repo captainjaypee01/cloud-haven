@@ -10,7 +10,6 @@ export const useImagesApi = () => {
         create: (formData) =>
             api.post(`${API_PREFIX}/admin/images`, formData, {
                 requiresAuth: true,
-                headers: { "Content-Type": "multipart/form-data" },
             }),
         remove: (id) =>
             api.delete(`${API_PREFIX}/admin/images/${id}`, { requiresAuth: true }),

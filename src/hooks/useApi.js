@@ -13,6 +13,10 @@ export function useApi() {
         const instance = axios.create({ baseURL });
 
         instance.interceptors.request.use(async (config) => {
+            // Let axios/browser set multipart boundary — manual Content-Type breaks file uploads (especially via Vite proxy)
+            if (config.data instanceof FormData) {
+                delete config.headers['Content-Type'];
+            }
 
             if (config?.requiresAuth) {
                 const token = await getToken();

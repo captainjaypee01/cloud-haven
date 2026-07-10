@@ -138,10 +138,7 @@ const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
                 response = await api.post(
                     `${API_PREFIX}/user/payments/${payment.id}/proof`,
                     formData,
-                    {
-                        requiresAuth: true,
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    }
+                    { requiresAuth: true }
                 );
             } catch (authError) {
                 // If auth fails or user doesn't own payment, try guest route
@@ -151,9 +148,6 @@ const PaymentCard = ({ payment, onPaymentUpdate, booking }) => {
                         response = await api.post(
                             `${API_PREFIX}/bookings/ref/${payment.booking.reference_number}/payments/${payment.id}/proof`,
                             formData,
-                            {
-                                headers: { 'Content-Type': 'multipart/form-data' }
-                            }
                         );
                     } else {
                         // If no booking reference, provide helpful error message
