@@ -102,7 +102,6 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     const [checking, setChecking] = useState(false);
     const [unavailable, setUnavailable] = useState([]);
     const [availabilityModalOpen, setAvailabilityModalOpen] = useState(false);
-    const [acknowledgeShortfall, setAcknowledgeShortfall] = useState(false);
 
     const originalNights = useMemo(() => {
         if (!booking?.check_in_date || !booking?.check_out_date) return 0;
@@ -180,9 +179,6 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
         open && !!previewParams
     );
 
-    const requiresAcknowledgement = preview?.downpayment_shortfall === true;
-
-    const isSubmitDisabledWithDownpayment = isSubmitDisabled || (requiresAcknowledgement && !acknowledgeShortfall);
     useEffect(() => {
         if (open && booking) {
             if (isDayTour) {
@@ -195,7 +191,6 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
                     check_out_date: booking.check_out_date,
                 });
             }
-            setAcknowledgeShortfall(false);
         }
     }, [open, booking, reset, isDayTour]);
 
@@ -250,11 +245,6 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
     };
 
     const handleSubmit = async (values) => {
-        if (requiresAcknowledgement && !acknowledgeShortfall) {
-            toast.error('Please acknowledge the downpayment shortfall before rescheduling.');
-            return;
-        }
-
         let checkInDate, checkOutDate;
         
         if (isDayTour) {
@@ -269,18 +259,12 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
         if (!ok) return;
         
         try {
-            const payload = {
-                ...values,
-                ...(acknowledgeShortfall ? { acknowledge_downpayment_shortfall: true } : {}),
-            };
-            await api.patch(`${API_PREFIX}/admin/bookings/${booking.id}/reschedule`, payload, { requiresAuth: true });
+            await api.patch(`${API_PREFIX}/admin/bookings/${booking.id}/reschedule`, values, { requiresAuth: true });
             toast.success(`${isDayTour ? 'Day Tour' : 'Booking'} rescheduled successfully!`);
             onOpenChange(false);
             if (onSuccess) onSuccess();
         } catch (err) {
-            if (err.response?.data?.downpayment_shortfall) {
-                toast.error(err.response.data.error || 'Downpayment shortfall must be acknowledged.');
-            } else if (err.response?.status === 422 && err.response.data?.errors) {
+            if (err.response?.status === 422 && err.response.data?.errors) {
                 Object.entries(err.response.data.errors).forEach(([field, messages]) => {
                     setError(field, { type: "manual", message: messages.join(", ") });
                 });
@@ -405,24 +389,21 @@ const RescheduleBookingDialog = ({ open, onOpenChange, booking, onSuccess }) => 
                         <BookingChangeBalancePreview
                             preview={preview}
                             loading={previewLoading}
-                            acknowledgeChecked={acknowledgeShortfall}
-                            onAcknowledgeChange={setAcknowledgeShortfall}
                         />
 
                         <DialogFooter>
                             <div className="flex flex-col gap-2 w-full">
                                 {/* Show helpful message when button is disabled */}
-                                {isSubmitDisabledWithDownpayment && !form.formState.isSubmitting && !checking && (
+                                {isSubmitDisabled && !form.formState.isSubmitting && !checking && (
                                     <div className="text-sm text-gray-600">
                                         {!datesChanged && "Please change the dates to reschedule"}
                                         {datesChanged && hasValidationErrors && "Please fix the validation errors above"}
-                                        {datesChanged && !hasValidationErrors && requiresAcknowledgement && !acknowledgeShortfall && "Please acknowledge the downpayment shortfall"}
                                     </div>
                                 )}
                                 <Button
                                     type="submit"
                                     className="cursor-pointer"
-                                    disabled={isSubmitDisabledWithDownpayment}
+                                    disabled={isSubmitDisabled}
                                 >
                                     {form.formState.isSubmitting || checking ? 'Saving...' : 'Reschedule'}
                                 </Button>

@@ -41,7 +41,6 @@ const BookingRoomModificationDialog = ({
     const [availableUnits, setAvailableUnits] = useState({}); // room_slug -> units array
     const [loadingUnits, setLoadingUnits] = useState({}); // room_slug -> loading state
     const [initialRoomsData, setInitialRoomsData] = useState([]); // Snapshot when dialog opens
-    const [acknowledgeShortfall, setAcknowledgeShortfall] = useState(false);
     const initialSnapshotRef = useRef([]);
     const { modifyBooking, isLoading } = useBookingModification();
     const api = useApi();
@@ -98,7 +97,6 @@ const BookingRoomModificationDialog = ({
 
         initialSnapshotRef.current = initialRooms;
         setInitialRoomsData(initialRooms);
-        setAcknowledgeShortfall(false);
     }, [open, booking?.id, form]);
     const watchedRooms = form.watch('rooms');
 
@@ -127,8 +125,6 @@ const BookingRoomModificationDialog = ({
         previewParams,
         open && !!previewParams
     );
-
-    const requiresAcknowledgement = preview?.downpayment_shortfall === true;
 
     // Load available rooms and units when dialog opens
     useEffect(() => {
@@ -436,11 +432,6 @@ const BookingRoomModificationDialog = ({
                 return;
             }
 
-            if (requiresAcknowledgement && !acknowledgeShortfall) {
-                toast.error('Please acknowledge the downpayment shortfall before saving.');
-                return;
-            }
-
             // Validate that all rooms have room_id selected
             const hasEmptyRooms = data.rooms.some(room => !room.room_id);
             if (hasEmptyRooms) {
@@ -540,7 +531,6 @@ const BookingRoomModificationDialog = ({
                 })),
                 modification_reason: data.modification_reason || null,
                 send_email: data.send_email || false,
-                ...(acknowledgeShortfall ? { acknowledge_downpayment_shortfall: true } : {}),
             };
 
             await modifyBooking(booking.id, modificationData);
@@ -1015,8 +1005,6 @@ const BookingRoomModificationDialog = ({
                         <BookingChangeBalancePreview
                             preview={preview}
                             loading={previewLoading}
-                            acknowledgeChecked={acknowledgeShortfall}
-                            onAcknowledgeChange={setAcknowledgeShortfall}
                         />
 
                         <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
@@ -1031,7 +1019,7 @@ const BookingRoomModificationDialog = ({
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isLoading || isLoadingRooms || (requiresAcknowledgement && !acknowledgeShortfall)}
+                                disabled={isLoading || isLoadingRooms}
                                 className="w-full sm:w-auto"
                             >
                                 {isLoading ? (
