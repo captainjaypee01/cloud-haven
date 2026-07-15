@@ -1,9 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { formatCurrency } from '@/utils/currency';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 function BalanceRow({ label, current, proposed, emphasize = false }) {
     const delta = proposed != null && current != null ? proposed - current : null;
@@ -26,8 +23,6 @@ function BalanceRow({ label, current, proposed, emphasize = false }) {
 const BookingChangeBalancePreview = ({
     preview,
     loading,
-    acknowledgeChecked,
-    onAcknowledgeChange,
 }) => {
     if (loading) {
         return (
@@ -42,7 +37,7 @@ const BookingChangeBalancePreview = ({
         return null;
     }
 
-    const { current, proposed, downpayment_shortfall, shortfall_amount, requires_downpayment_check } = preview;
+    const { current, proposed } = preview;
 
     return (
         <div className="space-y-3 rounded-md border p-3 bg-muted/30">
@@ -55,7 +50,7 @@ const BookingChangeBalancePreview = ({
                     proposed={proposed.net_stay_total}
                 />
                 <BalanceRow
-                    label="Required downpayment (50%)"
+                    label="Suggested downpayment (50%)"
                     current={current.downpayment_required}
                     proposed={proposed.downpayment_required}
                 />
@@ -67,33 +62,6 @@ const BookingChangeBalancePreview = ({
                     emphasize
                 />
             </div>
-
-            {requires_downpayment_check && downpayment_shortfall && (
-                <Alert variant="destructive" className="border-amber-300 bg-amber-50 text-amber-950">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertTitle>Downpayment shortfall</AlertTitle>
-                    <AlertDescription className="space-y-3">
-                        <p>
-                            The guest has paid {formatCurrency(current.amount_paid)}, but the new stay
-                            requires {formatCurrency(proposed.downpayment_required)} downpayment.
-                            Shortfall: {formatCurrency(shortfall_amount)}.
-                        </p>
-                        <div className="flex items-start gap-2">
-                            <Checkbox
-                                id="acknowledge-downpayment-shortfall"
-                                checked={acknowledgeChecked}
-                                onCheckedChange={(checked) => onAcknowledgeChange?.(!!checked)}
-                            />
-                            <Label
-                                htmlFor="acknowledge-downpayment-shortfall"
-                                className="text-sm font-normal leading-snug cursor-pointer"
-                            >
-                                I acknowledge the downpayment shortfall and will collect payment or proceed anyway.
-                            </Label>
-                        </div>
-                    </AlertDescription>
-                </Alert>
-            )}
         </div>
     );
 };

@@ -18,8 +18,9 @@ import BookingPrintButton from './BookingPrintButton';
 import BookingRoomModificationDialog from './BookingRoomModificationDialog';
 import DayTourRoomModificationDialog from './DayTourRoomModificationDialog';
 import AdjustBookingNightsDialog from './AdjustBookingNightsDialog';
+import ResendBookingEmailDialog from './ResendBookingEmailDialog';
 import DeleteDialog from '@/components/common/form/DeleteDialog';
-import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3, Settings, Moon } from 'lucide-react'; // Icon for delete
+import { X, RotateCcw, Check, XCircle, AlertTriangle, Calendar, Trash2, Edit3, Settings, Moon, Mail } from 'lucide-react'; // Icon for delete
 import { useApi } from '@/hooks/useApi';
 import { API_PREFIX } from '@/constants/api';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -58,6 +59,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [showDayTourModification, setShowDayTourModification] = useState(false);
     const [showAdjustNights, setShowAdjustNights] = useState(false);
     const [showEditGuestDetails, setShowEditGuestDetails] = useState(false);
+    const [showResendEmail, setShowResendEmail] = useState(false);
     const [remarksDialog, setRemarksDialog] = useState(false);
     const api = useApi();
     const navigate = useNavigate();
@@ -319,6 +321,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     >
                         Reschedule
                     </Button>
+                    {canModifyBooking && booking.status !== 'cancelled' && (
+                        <Button
+                            className="cursor-pointer"
+                            variant="outline"
+                            onClick={() => setShowResendEmail(true)}
+                        >
+                            <Mail className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Resend Email</span>
+                            <span className="sm:hidden">Email</span>
+                        </Button>
+                    )}
                     {canModifyBooking &&
                         booking.booking_type !== 'day_tour' &&
                         ['pending', 'downpayment', 'paid'].includes(booking.status) && (
@@ -1171,6 +1184,11 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     setShowAdjustNights(false);
                     fetchBooking && fetchBooking();
                 }}
+            />
+            <ResendBookingEmailDialog
+                open={showResendEmail}
+                onOpenChange={setShowResendEmail}
+                booking={booking}
             />
             <ProofImageDialog
                 open={showProofDialog}
