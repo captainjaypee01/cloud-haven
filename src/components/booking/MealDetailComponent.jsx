@@ -56,14 +56,14 @@ const MealDetailComponent = ({
                                         )}
                                     </span>
                                 </div>
-                            ) : (
+                            ) : (selection.includes_plated_lunch ?? true) ? (
                                 <div className="flex items-center gap-2 text-gray-400">
                                     <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
-                                    <span>Buffet Lunch: Not included</span>
+                                    <span>Plated Lunch</span>
                                 </div>
-                            )}
+                            ) : null}
                         </div>
-                        
+
                         {/* PM Snack */}
                         <div className="text-sm mb-2">
                             {selection.include_pm_snack ? (

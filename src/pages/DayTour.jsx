@@ -487,11 +487,11 @@ export default function DayTour() {
                                                         {currentPricing.name}: {formatCurrency(currentPricing.price_per_pax)}/pax
                                                     </div>
                                                     <div className="text-sm">
-                                                        {currentPricing.description || 'Includes entrance, parking, pool & beach access, WiFi, and plated lunch'}
+                                                        {currentPricing.description || `Includes entrance, parking, pool & beach access, WiFi${currentPricing.includes_plated_lunch ? ', and plated lunch' : ''}`}
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <div className="text-gray-600">Per person pricing - includes entrance, parking, pool & beach access, WiFi, and plated lunch</div>
+                                                <div className="text-gray-600">Per person pricing - includes entrance, parking, pool & beach access, WiFi</div>
                                             )}
                                         </div>
                                     </div>

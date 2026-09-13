@@ -54,6 +54,18 @@ export const dayTourPricingColumns = [
         },
     },
     {
+        accessorKey: "includes_plated_lunch",
+        header: "Plated Lunch",
+        cell: info => {
+            const includesPlatedLunch = info.getValue();
+            return (
+                <Badge variant={includesPlatedLunch ? "default" : "outline"}>
+                    {includesPlatedLunch ? "Included" : "Not Included"}
+                </Badge>
+            );
+        },
+    },
+    {
         accessorKey: "is_active",
         header: "Status",
         cell: info => {
