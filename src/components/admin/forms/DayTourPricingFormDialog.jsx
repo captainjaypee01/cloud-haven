@@ -30,6 +30,7 @@ const formSchema = z.object({
     effective_from: z.string().min(1, 'Effective from date is required'),
     effective_until: z.string().optional(),
     is_active: z.boolean().default(true),
+    includes_plated_lunch: z.boolean().default(true),
 }).refine((data) => {
     if (data.effective_until && data.effective_from) {
         return new Date(data.effective_until) > new Date(data.effective_from);
@@ -58,6 +59,7 @@ const DayTourPricingFormDialog = ({
             effective_from: '',
             effective_until: '',
             is_active: true,
+            includes_plated_lunch: true,
         },
     });
 
@@ -72,6 +74,7 @@ const DayTourPricingFormDialog = ({
                     effective_from: editingPricing.effective_from || '',
                     effective_until: editingPricing.effective_until || '',
                     is_active: editingPricing.is_active ?? true,
+                    includes_plated_lunch: editingPricing.includes_plated_lunch ?? true,
                 });
             } else {
                 form.reset({
@@ -81,6 +84,7 @@ const DayTourPricingFormDialog = ({
                     effective_from: '',
                     effective_until: '',
                     is_active: true,
+                    includes_plated_lunch: true,
                 });
             }
         }
@@ -218,6 +222,29 @@ const DayTourPricingFormDialog = ({
                                         </FormLabel>
                                         <div className="text-sm text-muted-foreground">
                                             Enable or disable this pricing
+                                        </div>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="includes_plated_lunch"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base">
+                                            Includes Plated Lunch
+                                        </FormLabel>
+                                        <div className="text-sm text-muted-foreground">
+                                            Guests booking under this pricing get a complimentary plated lunch. Turn off for packages that don't include it.
                                         </div>
                                     </div>
                                     <FormControl>
