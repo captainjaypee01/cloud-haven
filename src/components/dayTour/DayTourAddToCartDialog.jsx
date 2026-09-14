@@ -203,9 +203,13 @@ export function DayTourAddToCartDialog({
                             <span>Day Tour Price:</span>
                             <span>{formatCurrency(currentPricing?.price_per_pax || 0)} × {adults + children} guest{adults + children > 1 ? 's' : ''}</span>
                         </div>
-                        {currentPricing?.includes_plated_lunch && (
+                        {currentPricing?.includes_plated_lunch ? (
                             <div className="text-xs text-green-600">
                                 Includes Plated Lunch
+                            </div>
+                        ) : (
+                            <div className="text-xs text-red-500">
+                                ❌ Plated Lunch
                             </div>
                         )}
 

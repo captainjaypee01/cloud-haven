@@ -61,7 +61,12 @@ const MealDetailComponent = ({
                                     <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
                                     <span>Plated Lunch</span>
                                 </div>
-                            ) : null}
+                            ) : (
+                                <div className="flex items-center gap-2 text-red-500">
+                                    <span>❌</span>
+                                    <span>Plated Lunch</span>
+                                </div>
+                            )}
                         </div>
 
                         {/* PM Snack */}
