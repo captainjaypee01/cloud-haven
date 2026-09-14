@@ -99,9 +99,13 @@ export function DayTourRoomCard({ room, onAddToCart, selectedDate, currentPricin
                                 <div className="text-xs text-blue-600 mt-1">
                                     {currentPricing.name}
                                 </div>
-                                {currentPricing.includes_plated_lunch && (
+                                {currentPricing.includes_plated_lunch ? (
                                     <div className="text-xs text-green-600 mt-1">
                                         Includes Plated Lunch
+                                    </div>
+                                ) : (
+                                    <div className="text-xs text-red-500 mt-1">
+                                        ❌ Plated Lunch
                                     </div>
                                 )}
                             </>
