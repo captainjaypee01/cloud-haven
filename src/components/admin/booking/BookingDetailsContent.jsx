@@ -10,6 +10,7 @@ import RescheduleBookingDialog from './RescheduleBookingDialog';
 import ProofImageDialog from './ProofImageDialog';
 import BookingCancellationDialog from './BookingCancellationDialog';
 import BookingDeletionDialog from './BookingDeletionDialog';
+import ReactivateBookingDialog from './ReactivateBookingDialog';
 import ChangeRoomUnitDialog from './ChangeRoomUnitDialog';
 import PwdSeniorDiscountDialog from './PwdSeniorDiscountDialog';
 import SpecialDiscountDialog from './SpecialDiscountDialog';
@@ -50,6 +51,7 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
     const [selectedProofPayment, setSelectedProofPayment] = useState(null);
     const [showCancellation, setShowCancellation] = useState(false);
     const [showDeletion, setShowDeletion] = useState(false);
+    const [showReactivate, setShowReactivate] = useState(false);
     const [showChangeRoomUnit, setShowChangeRoomUnit] = useState(false);
     const [selectedBookingRoom, setSelectedBookingRoom] = useState(null);
     const [proofAction, setProofAction] = useState(null); // 'accept' or 'reject'
@@ -289,6 +291,27 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                             <AlertTriangle className="h-4 w-4 mr-2" />
                             <span className="hidden sm:inline">Cancel Booking</span>
                             <span className="sm:hidden">Cancel</span>
+                        </Button>
+                    )}
+                    {/* Reactivate / Extend Hold Button - expired (auto-cancelled) or pending bookings */}
+                    {canCancel && booking.can_reactivate && (
+                        <Button
+                            className="cursor-pointer"
+                            variant="outline"
+                            onClick={() => setShowReactivate(true)}
+                        >
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            {booking.status === 'cancelled' ? (
+                                <>
+                                    <span className="hidden sm:inline">Reactivate Booking</span>
+                                    <span className="sm:hidden">Reactivate</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="hidden sm:inline">Extend Hold</span>
+                                    <span className="sm:hidden">Extend</span>
+                                </>
+                            )}
                         </Button>
                     )}
                     {/* Delete Button - Show only for superadmin */}
@@ -1203,6 +1226,17 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                     onOpenChange={setShowCancellation}
                     booking={booking}
                     onSuccess={handleCancellationSuccess}
+                />
+            )}
+            {canCancel && (
+                <ReactivateBookingDialog
+                    open={showReactivate}
+                    onOpenChange={setShowReactivate}
+                    booking={booking}
+                    onSuccess={() => {
+                        setShowReactivate(false);
+                        fetchBooking && fetchBooking();
+                    }}
                 />
             )}
             {/* Only render deletion dialog if user is superadmin */}
