@@ -337,9 +337,9 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
               </div>
 
               <div>
-                <h4 className="text-sm font-medium mb-3">Breakfast Pricing (Extra Guests Only)</h4>
+                <h4 className="text-sm font-medium mb-3">Extra Guest Fee (Free Breakfast Days)</h4>
                 <p className="text-xs text-gray-600 mb-3">
-                  Charged to extra guests beyond room capacity on free breakfast days (when buffet is not active)
+                  Charged per extra guest (beyond room capacity) per night when buffet is not active. Covers breakfast, entrance, amenities and related services. Recorded as Extra Guest Fee, not Meal Price.
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
@@ -347,7 +347,7 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
                     name="adult_breakfast_price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Adult Breakfast Price</FormLabel>
+                        <FormLabel>Extra Guest Rate (per guest)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -389,7 +389,7 @@ export default function PricingTierDialog({ open, onOpenChange, onSave, tier }) 
               <div>
                 <h4 className="text-sm font-medium mb-3">Extra Guest Fee (Buffet Days)</h4>
                 <p className="text-xs text-gray-600 mb-3">
-                  Additional fees for extra guests beyond room capacity on buffet days (entrance fees, extra mattresses, etc.)
+                  Charged per extra guest (beyond room capacity) per night on buffet days, on top of the buffet price. Covers entrance, amenities and related services.
                 </p>
                 <FormField
                   control={form.control}

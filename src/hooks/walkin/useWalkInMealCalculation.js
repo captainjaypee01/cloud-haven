@@ -95,13 +95,12 @@ export function useWalkInMealCalculation(bookingType, nights, selectedRooms, che
                     roomNightCost = (item.adults * (night.adult_price || 0)) + (item.children * (night.child_price || 0));
                     showBreakdown = true; // Always show breakdown for buffet
                 } else if (night.type === 'free_breakfast') {
-                    // Free breakfast: charge extra guests if any, but always show breakdown
+                    // Free breakfast: no meal cost. Extra guests pay an extra guest fee
+                    // (breakfast, amenities and services), tracked separately from meals.
                     if (hasExtraGuests) {
                         roomBreakfastCost = extraGuestsInRoom * (night.adult_breakfast_price || 0);
-                        roomNightCost = roomBreakfastCost;
-                    } else {
-                        roomNightCost = 0; // No cost for complimentary breakfast
                     }
+                    roomNightCost = 0;
                     showBreakdown = true; // Always show breakdown for free breakfast days
                 }
 
@@ -179,7 +178,7 @@ export function useWalkInMealCalculation(bookingType, nights, selectedRooms, che
                     extraGuestFeeTotal = totalExtraGuests * night.extra_guest_fee;
                 }
             } else if (night.type === 'free_breakfast') {
-                // Calculate breakfast costs for extra guests only
+                // Extra guests pay an extra guest fee (breakfast, amenities and services); not a meal cost
                 summary.forEach(item => {
                     const totalGuestsInRoom = item.adults + item.children;
                     const maxGuests = parseInt(item.maxGuests) || 2;
@@ -192,7 +191,7 @@ export function useWalkInMealCalculation(bookingType, nights, selectedRooms, che
                         extraAdults += extraGuestsInRoom;
                     }
                 });
-                nightTotal = breakfastTotal;
+                extraGuestFeeTotal = breakfastTotal;
             }
 
             totalMealCost += nightTotal;

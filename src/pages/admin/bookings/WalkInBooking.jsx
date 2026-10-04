@@ -20,7 +20,8 @@ import Title from '@/components/Title';
 import { fetchDayTourAvailability } from '@/services/dayTour';
 import { fetchOvernightQuote } from '@/services/roomPricing';
 import { useWalkInMealCalculation } from '@/hooks/walkin/useWalkInMealCalculation';
-import { formatBuffetDate, formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from '@/utils/dateUtils';
+import { ExtraGuestFeeSummary } from '@/components/cart/ExtraGuestFeeBreakdown';
+import { formatBuffetSummaryDates, formatMealDate, formatBuffetDateRange } from '@/utils/dateUtils';
 import { addDays, format } from 'date-fns';
 import { usePromoCode } from '@/context/PromoCodeContext';
 import { useAppContext } from '@/context/AppContext';
@@ -456,15 +457,21 @@ const WalkInBooking = () => {
                                 dayTourMealData.pm_snack_prices.child * roomItem.children;
                 }
             });
-        } else if (bookingType === 'overnight') {
-            // For overnight bookings, use the meal calculation from the hook
-            mealTotal = mealCost + extraGuestFeeTotal;
+        }
+
+        let extraGuestTotal = 0;
+        if (bookingType === 'overnight') {
+            // For overnight bookings, use the meal calculation from the hook.
+            // Extra guest fees are kept separate from meals (not discounted by meal promos).
+            mealTotal = mealCost;
+            extraGuestTotal = extraGuestFeeTotal;
         }
 
         return {
             roomTotal,
             mealTotal,
-            total: roomTotal + mealTotal,
+            extraGuestTotal,
+            total: roomTotal + mealTotal + extraGuestTotal,
             numNights
         };
     };
@@ -1215,6 +1222,15 @@ const WalkInBooking = () => {
                                     </div>
                                 )}
 
+                                {totals.extraGuestTotal > 0 && (
+                                    <div className="flex justify-between">
+                                        <span className="text-sm text-gray-600">Extra Guest Fees:</span>
+                                        <span className="text-sm font-medium">
+                                            {formatCurrency(totals.extraGuestTotal)}
+                                        </span>
+                                    </div>
+                                )}
+
                                 {/* Detailed Meal Breakdown for Overnight Bookings */}
                                 {bookingType === 'overnight' && mealQuote && mealQuote.nights && !mealCalculationLoading && (
                                     <div className="mt-3 p-3 bg-gray-50 rounded-lg">
@@ -1248,38 +1264,10 @@ const WalkInBooking = () => {
                                                 </div>
                                             ))}
                                             
-                                            {/* Extra Guest Fees (Buffet Days) */}
-                                            {mealQuote.nights.some(night => night.type === 'buffet' && night.extra_guest_fee > 0) && (() => {
-                                                // Calculate total extra guests across all rooms
-                                                const totalExtraGuests = selectedRooms.reduce((roomTotal, item) => {
-                                                    const extraGuestsInRoom = Math.max(0, (item.adults + item.children) - parseInt(item.max_guests));
-                                                    return roomTotal + extraGuestsInRoom;
-                                                }, 0);
-                                                
-                                                return (
-                                                    <div className="space-y-3">
-                                                        {mealQuote.nights
-                                                            .filter(night => night.type === 'buffet' && night.extra_guest_fee > 0)
-                                                            .map((night, index) => {
-                                                                const extraGuestFeeTotal = totalExtraGuests * night.extra_guest_fee;
-                                                                
-                                                                return (
-                                                                    <div key={index} className="border-b border-gray-200 pb-3 last:border-b-0 last:pb-0">
-                                                                        {/* Date Header for Extra Guest Fee */}
-                                                                        <div className="flex justify-between items-center mb-2">
-                                                                            <span className="text-sm font-medium text-gray-700">
-                                                                                {formatBuffetDate(night.date)} - Extra Guest ({totalExtraGuests})
-                                                                            </span>
-                                                                            <span className="text-sm font-semibold text-gray-900">
-                                                                                {formatCurrency(extraGuestFeeTotal)}
-                                                                            </span>
-                                                                        </div>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                    </div>
-                                                );
-                                            })()}
+                                            <ExtraGuestFeeSummary
+                                                nights={mealQuote.nights}
+                                                summary={summaryWithMealBreakdown}
+                                            />
                                         </div>
                                     </div>
                                 )}
