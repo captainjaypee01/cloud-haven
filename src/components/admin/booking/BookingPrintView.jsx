@@ -714,7 +714,7 @@ const BookingPrintView = ({ booking, sections = {} }) => {
                         <div style="margin-top: 15px; padding: 15px; background-color: #fff3e0; border: 1px solid #ffb74d; border-radius: 4px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <div style="font-weight: bold; color: #e65100;">Extra Guest Fees (Buffet Days)</div>
+                                    <div style="font-weight: bold; color: #e65100;">Extra Guest Fees</div>
                                     <div style="font-size: 12px; color: #f57c00;">
                                         ${booking.extra_guest_count} extra guest${booking.extra_guest_count > 1 ? 's' : ''} - entrance fee, amenities, and additional services
                                     </div>

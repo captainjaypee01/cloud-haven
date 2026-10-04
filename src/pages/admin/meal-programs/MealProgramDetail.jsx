@@ -261,7 +261,7 @@ export default function MealProgramDetail() {
                       <TableHead className="min-w-[120px]">Lunch Price</TableHead>
                       <TableHead className="min-w-[120px]">PM Snack Price</TableHead>
                       <TableHead className="min-w-[120px]">Dinner Price</TableHead>
-                      <TableHead className="min-w-[160px]">Breakfast Price (Extra Guests)</TableHead>
+                      <TableHead className="min-w-[160px]">Extra Guest Fee (Free Breakfast Days)</TableHead>
                       <TableHead className="min-w-[180px]">Extra Guest Fee (Buffet Days)</TableHead>
                       <TableHead className="min-w-[120px]">Effective From</TableHead>
                       <TableHead className="min-w-[120px]">Effective To</TableHead>

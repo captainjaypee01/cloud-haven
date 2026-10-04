@@ -933,9 +933,9 @@ const BookingDetailsContent = ({ booking, fetchBooking }) => {
                                             <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
                                                 <div className="flex justify-between items-center">
                                                     <div>
-                                                        <div className="font-medium text-orange-800">Extra Guest Fees (Buffet Days)</div>
+                                                        <div className="font-medium text-orange-800">Extra Guest Fees</div>
                                                         <div className="text-sm text-orange-600">
-                                                            {booking.extra_guest_count} extra guest{booking.extra_guest_count > 1 ? 's' : ''} - entrance fee, amenities, and additional services
+                                                            {booking.extra_guest_count} extra guest{booking.extra_guest_count > 1 ? 's' : ''} - breakfast, entrance, amenities, and related services
                                                         </div>
                                                     </div>
                                                     <div className="font-bold text-orange-800">
